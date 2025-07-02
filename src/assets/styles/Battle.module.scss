@@ -1,0 +1,50 @@
+.battleContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.fighters {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.fighter {
+  flex: 1 1 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 0.5rem;
+}
+
+.hpText {
+  margin-top: 0.3rem;
+  font-weight: bold;
+}
+
+.progress {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 0.3rem;
+}
+
+.section {
+  display: flex;
+  background: red;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lootBag {
+  font-weight: bold;
+  color: #228B22;
+}
