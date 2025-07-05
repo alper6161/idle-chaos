@@ -16,7 +16,7 @@ export const INITIAL_SKILLS = {
     },
     prayer: {
         heal: 1,
-        protect: 1,
+        buff: 1,
         shadow: 1,
     },
     hitpool: {
@@ -40,5 +40,10 @@ export const INITIAL_SKILLS = {
         throwing: 1,
         shadow: 1,
     },
-    mert: 0
-}
+    utility: {
+        lifeSteal: 1,
+        counterAttack: 1,
+        doubleAttack: 1,
+        critChance: 1,
+    }
+};

@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import { getCombatStats, getLootDrop, saveLoot } from "../utils/combat.js";
 import enemies from "../utils/enemies.js";
+import {getEnemyIcon, getSkillIcon} from "../utils/common.js";
 
 const PLAYER_MAX_HP = 40;
 const PLAYER_ATTACK_SPEED = 2.0;
@@ -89,8 +90,8 @@ function Battle({ player }) {
             <div className={styles.fighters}>
                 {/* PLAYER */}
                 <div className={styles.fighter}>
-                    <Avatar src="/images/player.png" className={styles.avatar} />
-                    <Typography variant="h6">YOU</Typography>
+                    <Avatar src={getSkillIcon('slash')} className={styles.avatar} />
+                    <Typography variant="h6">SLASH</Typography>
                     <Typography className={styles.hpText}>
                         HP: {playerHp}/{PLAYER_MAX_HP}
                     </Typography>
@@ -108,7 +109,7 @@ function Battle({ player }) {
 
                 {/* ENEMY */}
                 <div className={styles.fighter}>
-                    <Avatar src={enemy.portrait} className={styles.avatar} />
+                    <Avatar src={getEnemyIcon('goblin')} className={styles.avatar} />
                     <Typography variant="h6">{enemy.name}</Typography>
                     <Typography className={styles.hpText}>
                         HP: {enemyHp}/{enemy.maxHp}
