@@ -6,3 +6,102 @@ export const saveGame = (game) => {
 export const getSkillIcon = (skill) => `/images/skills/${skill}.png`;
 
 export const getEnemyIcon = (enemy) => `/images/enemies/${enemy}.png`;
+
+// Düşman isminin ilk harfini al
+export const getEnemyInitial = (enemyName) => enemyName.charAt(0).toUpperCase();
+
+export const getCharacterIcon = (character) => `/images/characters/${character}.png`;
+
+// Karakter tipine göre isim
+export const getCharacterName = (character) => {
+    const names = {
+        warrior: 'WARRIOR',
+        ranger: 'RANGER',
+        wizard: 'WIZARD',
+        cleric: 'CLERIC'
+    };
+    return names[character] || 'WARRIOR';
+};
+
+// Sistem renkleri - Tüm renk tanımları burada toplanır
+export const SYSTEM_COLORS = {
+  // Arka plan renkleri
+  BACKGROUND: {
+    PRIMARY: '#2a2a4a',
+    SECONDARY: '#3a3a5a',
+    TERTIARY: '#4a4a6a',
+    CARD: '#3a3a5a',
+    CARD_DARK: '#2a2a4a'
+  },
+  
+  // Border renkleri
+  BORDER: {
+    PRIMARY: '#4a4a6a',
+    SECONDARY: '#6a6a8a',
+    DARK: '#000000'
+  },
+  
+  // HP Bar renkleri
+  HP_BAR: {
+    PLAYER: {
+      START: '#4ade80',
+      END: '#22c55e'
+    },
+    ENEMY: {
+      START: '#ef4444',
+      END: '#dc2626'
+    }
+  },
+  
+  // Attack Bar renkleri
+  ATTACK_BAR: {
+    START: '#f97316',
+    END: '#ea580c'
+  },
+  
+  // Damage Display renkleri
+  DAMAGE_DISPLAY: {
+    PLAYER: {
+      PRIMARY: '#22c55e',
+      SECONDARY: '#16a34a'
+    },
+    ENEMY: {
+      PRIMARY: '#ef4444',
+      SECONDARY: '#dc2626'
+    }
+  },
+  
+  // Text renkleri
+  TEXT: {
+    PRIMARY: '#e0e0e0',
+    SECONDARY: '#4ecdc4',
+    SUCCESS: '#96ceb4',
+    WARNING: '#ffa502',
+    ERROR: '#ff6b6b'
+  },
+  
+  // Combat Log renkleri
+  COMBAT_LOG: {
+    PLAYER_ATTACK: '#96ceb4',
+    ENEMY_ATTACK: '#ff6b6b',
+    MISS: '#ffa502',
+    DEFEAT: '#ff6b6b'
+  },
+  
+  // Button renkleri
+  BUTTON: {
+    PRIMARY: '#4a4a6a',
+    SECONDARY: '#3a3a5a',
+    HOVER: '#5a5a7a',
+    TEXT: '#e0e0e0'
+  },
+  
+  // Gradient renkleri
+  GRADIENT: {
+    PLAYER_HP: 'linear-gradient(90deg, #4ade80 0%, #22c55e 100%)',
+    ENEMY_HP: 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)',
+    ATTACK_BAR: 'linear-gradient(90deg, #f97316 0%, #ea580c 100%)',
+    BACKGROUND: 'linear-gradient(135deg, #2a2a4a 0%, #3a3a5a 50%, #4a4a6a 100%)',
+    CARD: 'linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%)'
+  }
+};
