@@ -24,7 +24,7 @@ export const INITIAL_SKILLS = {
         energy: 0,
     },
     defence: {
-        evasion: 1,
+        dodge: 1,
         block: 1,
         armor: 1,
     },
@@ -45,5 +45,6 @@ export const INITIAL_SKILLS = {
         counterAttack: 1,
         doubleAttack: 1,
         critChance: 1,
+        critDamage: 1
     }
 };

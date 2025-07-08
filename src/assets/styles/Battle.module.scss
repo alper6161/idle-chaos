@@ -6,26 +6,9 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  padding: 2rem;
-  background: linear-gradient(135deg, #2a2a4a 0%, #3a3a5a 50%, #4a4a6a 100%);
+  padding: 1rem;
   min-height: 100vh;
   font-family: 'Press Start 2P', monospace;
-  position: relative;
-  
-  // Pixel art background pattern
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-      radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px, 40px 40px;
-    pointer-events: none;
-  }
 }
 
 .fighters {
@@ -58,17 +41,19 @@
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(45deg, #ff6b6b, #f97316, #22c55e, #96ceb4);
+    background: linear-gradient(45deg, #4a4a6a, #5a5a7a, #6a6a8a, #7a7a9a);
     z-index: -1;
     border-radius: 0;
   }
   
   &:hover {
     transform: translateY(-2px);
+    background: linear-gradient(145deg, #4a4a6a 0%, #3a3a5a 100%);
+    border-color: #6a6a8a;
     box-shadow: 
       0 0 0 2px #000,
-      0 6px 0 0 #3a3a5a,
-      0 12px 0 0 #2a2a4a;
+      0 6px 0 0 #4a4a6a,
+      0 12px 0 0 #3a3a5a;
     transition: all 0.2s ease;
   }
 }
@@ -88,7 +73,11 @@
   
   &:hover {
     transform: scale(1.05);
-    transition: transform 0.2s ease;
+    border-color: #6a6a8a;
+    box-shadow: 
+      0 0 0 2px #000,
+      0 4px 0 0 #4a4a6a;
+    transition: all 0.2s ease;
   }
 }
 
@@ -112,7 +101,12 @@
   
   &:hover {
     transform: scale(1.05);
-    transition: transform 0.2s ease;
+    border-color: #6a6a8a;
+    background: #4a4a6a;
+    box-shadow: 
+      0 0 0 2px #000,
+      0 4px 0 0 #4a4a6a;
+    transition: all 0.2s ease;
   }
 }
 
@@ -343,6 +337,26 @@
     border-left: 3px solid #ff6b6b;
   }
   
+  &.playerCrit {
+    color: #ffd700;
+    background: rgba(255, 215, 0, 0.3);
+    border-left: 4px solid #ffd700;
+    font-weight: bold;
+    text-shadow: 0 0 8px #ffd700;
+    font-size: 0.7rem;
+    animation: critGlow 2s ease-in-out infinite;
+  }
+  
+  &.enemyCrit {
+    color: #ff4500;
+    background: rgba(255, 69, 0, 0.3);
+    border-left: 4px solid #ff4500;
+    font-weight: bold;
+    text-shadow: 0 0 8px #ff4500;
+    font-size: 0.7rem;
+    animation: critGlow 2s ease-in-out infinite;
+  }
+  
   &.miss {
     color: #ffa502;
     background: rgba(255, 165, 2, 0.1);
@@ -414,6 +428,24 @@
       0 6px 0 0 #ea580c,
       0 12px 0 0 #c2410c;
   }
+  
+  // Player crit damage (altın yıldız)
+  &.playerCritDamage::before {
+    background: #ffd700;
+    box-shadow: 
+      0 0 0 3px #000,
+      0 6px 0 0 #ffed4e,
+      0 12px 0 0 #ffdb4d;
+  }
+  
+  // Enemy crit damage (turuncu-kırmızı yıldız)
+  &.enemyCritDamage::before {
+    background: #ff4500;
+    box-shadow: 
+      0 0 0 3px #000,
+      0 6px 0 0 #ff6347,
+      0 12px 0 0 #ff4500;
+  }
 }
 
 @keyframes damageFloat {
@@ -428,5 +460,16 @@
   100% {
     opacity: 0;
     transform: translateY(-20px) scale(0.8);
+  }
+}
+
+@keyframes critGlow {
+  0%, 100% {
+    text-shadow: 0 0 8px currentColor;
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+    box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
   }
 }

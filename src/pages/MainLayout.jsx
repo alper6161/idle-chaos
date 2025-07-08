@@ -9,6 +9,19 @@ function MainLayout() {
         <div className={styles.layout}>
             {/* Sidebar */}
             <aside className={styles.sidebar}>
+                {/* Equipment Section */}
+                <div className={styles.group}>
+                    <div className={styles.groupTitle}>EQUIPMENT</div>
+                    <NavLink
+                        to="/equipment"
+                        className={styles.equipmentItem}
+                    >
+                        <span className={styles.equipmentIcon}>⚔️</span>
+                        <span className={styles.equipmentLabel}>Equipment</span>
+                    </NavLink>
+                </div>
+
+                {/* Skills Sections */}
                 {Object.entries(INITIAL_SKILLS).map(([category, subskills]) => (
                     <div key={category} className={styles.group}>
                         <div className={styles.groupTitle}>{category.toUpperCase()}</div>

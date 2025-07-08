@@ -54,7 +54,7 @@ export function saveLoot(loot) {
   localStorage.setItem("lootBag", JSON.stringify(updated));
 }
 
-// Yeni savaş fonksiyonu - ATK, DEF, HEALTH, ATTACK_SPEED değerlerine göre
+// Yeni savaş fonksiyonu - ATK, DEF, HEALTH, ATTACK_SPEED, CRIT_CHANCE, CRIT_DAMAGE değerlerine göre
 export function battle(player, enemy) {
   // Savaşçıların kopyalarını oluştur (orijinal değerleri korumak için)
   const playerFighter = {
@@ -62,7 +62,9 @@ export function battle(player, enemy) {
     DEF: player.DEF || 5,
     HEALTH: player.HEALTH || 100,
     maxHealth: player.HEALTH || 100,
-    ATTACK_SPEED: player.ATTACK_SPEED || 2.0
+    ATTACK_SPEED: player.ATTACK_SPEED || 2.0,
+    CRIT_CHANCE: player.CRIT_CHANCE || 5, // %5 temel crit chance
+    CRIT_DAMAGE: player.CRIT_DAMAGE || 150 // %150 temel crit damage
   };
   
   const enemyFighter = {
@@ -70,7 +72,9 @@ export function battle(player, enemy) {
     DEF: enemy.DEF || 3,
     HEALTH: enemy.HEALTH || 80,
     maxHealth: enemy.HEALTH || 80,
-    ATTACK_SPEED: enemy.ATTACK_SPEED || 1.5
+    ATTACK_SPEED: enemy.ATTACK_SPEED || 1.5,
+    CRIT_CHANCE: enemy.CRIT_CHANCE || 3, // %3 temel crit chance
+    CRIT_DAMAGE: enemy.CRIT_DAMAGE || 120 // %120 temel crit damage
   };
 
   const battleLog = [];
@@ -92,15 +96,32 @@ export function battle(player, enemy) {
       const playerHitRoll = Math.random() * 100;
       
       if (playerHitRoll <= playerHitChance) {
-        const damage = calculateDamage(playerFighter.ATK, enemyFighter.DEF);
+        // Crit hit kontrolü
+        const critRoll = Math.random() * 100;
+        const isCrit = critRoll <= playerFighter.CRIT_CHANCE;
+        
+        let damage = calculateDamage(playerFighter.ATK, enemyFighter.DEF);
+        
+        if (isCrit) {
+          damage = Math.floor(damage * (playerFighter.CRIT_DAMAGE / 100));
+          battleLog.push({
+            type: 'player_crit',
+            damage: damage,
+            enemyHealth: enemyFighter.HEALTH,
+            enemyMaxHealth: enemyFighter.maxHealth,
+            message: `Player CRITICAL HIT for ${damage} damage!`
+          });
+        } else {
+          battleLog.push({
+            type: 'player_attack',
+            damage: damage,
+            enemyHealth: enemyFighter.HEALTH,
+            enemyMaxHealth: enemyFighter.maxHealth,
+            message: `Player hits for ${damage} damage!`
+          });
+        }
+        
         enemyFighter.HEALTH = Math.max(0, enemyFighter.HEALTH - damage);
-        battleLog.push({
-          type: 'player_attack',
-          damage: damage,
-          enemyHealth: enemyFighter.HEALTH,
-          enemyMaxHealth: enemyFighter.maxHealth,
-          message: `Player hits for ${damage} damage!`
-        });
       } else {
         battleLog.push({
           type: 'player_miss',
@@ -128,15 +149,32 @@ export function battle(player, enemy) {
       const enemyHitRoll = Math.random() * 100;
       
       if (enemyHitRoll <= enemyHitChance) {
-        const damage = calculateDamage(enemyFighter.ATK, playerFighter.DEF);
+        // Crit hit kontrolü
+        const critRoll = Math.random() * 100;
+        const isCrit = critRoll <= enemyFighter.CRIT_CHANCE;
+        
+        let damage = calculateDamage(enemyFighter.ATK, playerFighter.DEF);
+        
+        if (isCrit) {
+          damage = Math.floor(damage * (enemyFighter.CRIT_DAMAGE / 100));
+          battleLog.push({
+            type: 'enemy_crit',
+            damage: damage,
+            playerHealth: playerFighter.HEALTH,
+            playerMaxHealth: playerFighter.maxHealth,
+            message: `Enemy CRITICAL HIT for ${damage} damage!`
+          });
+        } else {
+          battleLog.push({
+            type: 'enemy_attack',
+            damage: damage,
+            playerHealth: playerFighter.HEALTH,
+            playerMaxHealth: playerFighter.maxHealth,
+            message: `Enemy hits for ${damage} damage!`
+          });
+        }
+        
         playerFighter.HEALTH = Math.max(0, playerFighter.HEALTH - damage);
-        battleLog.push({
-          type: 'enemy_attack',
-          damage: damage,
-          playerHealth: playerFighter.HEALTH,
-          playerMaxHealth: playerFighter.maxHealth,
-          message: `Enemy hits for ${damage} damage!`
-        });
       } else {
         battleLog.push({
           type: 'enemy_miss',

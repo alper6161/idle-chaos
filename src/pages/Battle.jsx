@@ -175,7 +175,8 @@ function Battle({ player }) {
                         <Typography 
                             variant="h4" 
                             className={`${styles.damageDisplay} ${
-                                damageDisplay.player === 'MISS' ? styles.missDisplay : styles.enemyDamage
+                                damageDisplay.player === 'MISS' ? styles.missDisplay : 
+                                damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
                             }`}
                         >
                             {damageDisplay.player}
@@ -220,7 +221,8 @@ function Battle({ player }) {
                         <Typography 
                             variant="h4" 
                             className={`${styles.damageDisplay} ${
-                                damageDisplay.enemy === 'MISS' ? styles.missDisplay : styles.playerDamage
+                                damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
+                                damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
                             }`}
                         >
                             {damageDisplay.enemy}
@@ -263,50 +265,72 @@ function Battle({ player }) {
                 </div>
             </div>
 
-            {/* Battle Status */}
-            {isBattleActive && (
-                <div className={styles.section}>
-                    <Typography variant="h6" color="primary">
-                        ⚔️ Battle in Progress...
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Player ATK: {currentBattle?.player?.ATK} | DEF: {currentBattle?.player?.DEF} | SPD: {currentBattle?.player?.ATTACK_SPEED}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Enemy ATK: {currentBattle?.enemy?.ATK} | DEF: {currentBattle?.enemy?.DEF} | SPD: {currentBattle?.enemy?.ATTACK_SPEED}
-                    </Typography>
-                </div>
-            )}
+
 
             {/* Widget Container - Yan yana düzenleme */}
             <div className={styles.widgetContainer}>
-                {/* COMBAT STATS */}
+                {/* PLAYER STATS */}
                 <div className={styles.section}>
-                    <Typography variant="h6">Combat Stats</Typography>
+                    <Typography variant="h6">Player Stats</Typography>
                     <Divider />
                     {currentBattle ? (
                         <>
-                            <Typography>Player ATK: {currentBattle.player.ATK}</Typography>
-                            <Typography>Player DEF: {currentBattle.player.DEF}</Typography>
-                            <Typography>Player Hit Chance: {calculateHitChance(currentBattle.player.ATK, currentBattle.enemy.DEF)}%</Typography>
-                            <Typography>Player Damage: {calculateDamage(currentBattle.player.ATK, currentBattle.enemy.DEF)}</Typography>
+                            <Typography>⚔️ ATK: {currentBattle.player.ATK}</Typography>
+                            <Typography>🛡️ DEF: {currentBattle.player.DEF}</Typography>
+                            <Typography>❤️ HP: {currentBattle.player.currentHealth}/{currentBattle.player.HEALTH}</Typography>
+                            <Typography>⚡ Attack Speed: {currentBattle.player.ATTACK_SPEED}</Typography>
+                            <Typography>🎯 Crit Chance: {currentBattle.player.CRIT_CHANCE || 5}%</Typography>
+                            <Typography>💥 Crit Damage: {currentBattle.player.CRIT_DAMAGE || 150}%</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>Enemy ATK: {currentBattle.enemy.ATK}</Typography>
-                            <Typography>Enemy DEF: {currentBattle.enemy.DEF}</Typography>
-                            <Typography>Enemy Hit Chance: {calculateHitChance(currentBattle.enemy.ATK, currentBattle.player.DEF)}%</Typography>
-                            <Typography>Enemy Damage: {calculateDamage(currentBattle.enemy.ATK, currentBattle.player.DEF)}</Typography>
+                            <Typography>🎲 Hit Chance: {calculateHitChance(currentBattle.player.ATK, currentBattle.enemy.DEF)}%</Typography>
+                            <Typography>⚔️ Base Damage: {calculateDamage(currentBattle.player.ATK, currentBattle.enemy.DEF)}</Typography>
+                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(currentBattle.player.ATK, currentBattle.enemy.DEF) * ((currentBattle.player.CRIT_DAMAGE || 150) / 100))}</Typography>
                         </>
                     ) : (
                         <>
-                            <Typography>Player ATK: {PLAYER_STATS.ATK}</Typography>
-                            <Typography>Player DEF: {PLAYER_STATS.DEF}</Typography>
-                            <Typography>Player Hit Chance: {calculateHitChance(PLAYER_STATS.ATK, currentEnemy.DEF)}%</Typography>
-                            <Typography>Player Damage: {calculateDamage(PLAYER_STATS.ATK, currentEnemy.DEF)}</Typography>
+                            <Typography>⚔️ ATK: {PLAYER_STATS.ATK}</Typography>
+                            <Typography>🛡️ DEF: {PLAYER_STATS.DEF}</Typography>
+                            <Typography>❤️ HP: {playerHealth}/{PLAYER_STATS.HEALTH}</Typography>
+                            <Typography>⚡ Attack Speed: {PLAYER_STATS.ATTACK_SPEED}</Typography>
+                            <Typography>🎯 Crit Chance: {PLAYER_STATS.CRIT_CHANCE}%</Typography>
+                            <Typography>💥 Crit Damage: {PLAYER_STATS.CRIT_DAMAGE}%</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>Enemy ATK: {currentEnemy.ATK}</Typography>
-                            <Typography>Enemy DEF: {currentEnemy.DEF}</Typography>
-                            <Typography>Enemy Hit Chance: {calculateHitChance(currentEnemy.ATK, PLAYER_STATS.DEF)}%</Typography>
-                            <Typography>Enemy Damage: {calculateDamage(currentEnemy.ATK, PLAYER_STATS.DEF)}</Typography>
+                            <Typography>🎲 Hit Chance: {calculateHitChance(PLAYER_STATS.ATK, currentEnemy.DEF)}%</Typography>
+                            <Typography>⚔️ Base Damage: {calculateDamage(PLAYER_STATS.ATK, currentEnemy.DEF)}</Typography>
+                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(PLAYER_STATS.ATK, currentEnemy.DEF) * (PLAYER_STATS.CRIT_DAMAGE / 100))}</Typography>
+                        </>
+                    )}
+                </div>
+
+                {/* ENEMY STATS */}
+                <div className={styles.section}>
+                    <Typography variant="h6">Enemy Stats</Typography>
+                    <Divider />
+                    {currentBattle ? (
+                        <>
+                            <Typography>⚔️ ATK: {currentBattle.enemy.ATK}</Typography>
+                            <Typography>🛡️ DEF: {currentBattle.enemy.DEF}</Typography>
+                            <Typography>❤️ HP: {currentBattle.enemy.currentHealth}/{currentBattle.enemy.maxHp}</Typography>
+                            <Typography>⚡ Attack Speed: {currentBattle.enemy.ATTACK_SPEED}</Typography>
+                            <Typography>🎯 Crit Chance: {currentBattle.enemy.CRIT_CHANCE || 3}%</Typography>
+                            <Typography>💥 Crit Damage: {currentBattle.enemy.CRIT_DAMAGE || 120}%</Typography>
+                            <Divider sx={{ my: 1 }} />
+                            <Typography>🎲 Hit Chance: {calculateHitChance(currentBattle.enemy.ATK, currentBattle.player.DEF)}%</Typography>
+                            <Typography>⚔️ Base Damage: {calculateDamage(currentBattle.enemy.ATK, currentBattle.player.DEF)}</Typography>
+                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(currentBattle.enemy.ATK, currentBattle.player.DEF) * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100))}</Typography>
+                        </>
+                    ) : (
+                        <>
+                            <Typography>⚔️ ATK: {currentEnemy.ATK}</Typography>
+                            <Typography>🛡️ DEF: {currentEnemy.DEF}</Typography>
+                            <Typography>❤️ HP: {currentEnemy.maxHp}/{currentEnemy.maxHp}</Typography>
+                            <Typography>⚡ Attack Speed: {currentEnemy.ATTACK_SPEED || 1.5}</Typography>
+                            <Typography>🎯 Crit Chance: 3%</Typography>
+                            <Typography>💥 Crit Damage: 120%</Typography>
+                            <Divider sx={{ my: 1 }} />
+                            <Typography>🎲 Hit Chance: {calculateHitChance(currentEnemy.ATK, PLAYER_STATS.DEF)}%</Typography>
+                            <Typography>⚔️ Base Damage: {calculateDamage(currentEnemy.ATK, PLAYER_STATS.DEF)}</Typography>
+                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(currentEnemy.ATK, PLAYER_STATS.DEF) * 1.2)}</Typography>
                         </>
                     )}
                 </div>
@@ -340,6 +364,30 @@ function Battle({ player }) {
 
 
 
+            {/* Battle Log - Her zaman göster */}
+            <div className={styles.section}>
+                <Typography variant="h6">Battle Log</Typography>
+                <Divider />
+                <Box className={styles.battleLog}>
+                    {currentBattle?.battleLog?.map((log, idx) => (
+                        <Typography 
+                            key={idx} 
+                            variant="body2" 
+                            className={`${styles.battleLogItem} ${
+                                log.type === 'player_attack' ? styles.playerAttack :
+                                log.type === 'player_crit' ? styles.playerCrit :
+                                log.type === 'enemy_attack' ? styles.enemyAttack :
+                                log.type === 'enemy_crit' ? styles.enemyCrit :
+                                log.type?.includes('miss') ? styles.miss :
+                                log.type?.includes('defeated') ? styles.defeat : ''
+                            }`}
+                        >
+                            {log.message}
+                        </Typography>
+                    ))}
+                </Box>
+            </div>
+
             {/* Battle Result */}
             {battleResult && (
                 <div className={styles.section}>
@@ -350,23 +398,6 @@ function Battle({ player }) {
                         Player Final HP: {battleResult.playerFinalHealth} | 
                         Enemy Final HP: {battleResult.enemyFinalHealth}
                     </Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Box className={styles.battleLog}>
-                        {battleResult.battleLog.map((log, idx) => (
-                                                <Typography 
-                        key={idx} 
-                        variant="body2" 
-                        className={`${styles.battleLogItem} ${
-                            log.type === 'player_attack' ? styles.playerAttack :
-                            log.type === 'enemy_attack' ? styles.enemyAttack :
-                            log.type?.includes('miss') ? styles.miss :
-                            log.type?.includes('defeated') ? styles.defeat : ''
-                        }`}
-                    >
-                        {log.message}
-                    </Typography>
-                        ))}
-                    </Box>
                 </div>
             )}
         </div>

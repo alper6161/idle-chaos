@@ -5,7 +5,9 @@ export const PLAYER_STATS = {
     ATK: 15,
     DEF: 8,
     HEALTH: 100,
-    ATTACK_SPEED: 3
+    ATTACK_SPEED: 3,
+    CRIT_CHANCE: 5, // %5 temel crit chance
+    CRIT_DAMAGE: 150 // %150 temel crit damage
 };
 
 // Vurma ihtimali hesaplama
@@ -50,23 +52,48 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
-        const damage = calculateDamage(battle.player.ATK, battle.enemy.DEF);
-        const newEnemyHealth = Math.max(0, battle.enemy.currentHealth - damage);
+        // Crit hit kontrolü
+        const critRoll = Math.random() * 100;
+        const isCrit = critRoll <= (battle.player.CRIT_CHANCE || 5);
         
-        // Damage display
-        setDamageDisplay(prev => ({ ...prev, enemy: damage }));
-        setTimeout(() => setDamageDisplay(prev => ({ ...prev, enemy: null })), 1000);
+        let damage = calculateDamage(battle.player.ATK, battle.enemy.DEF);
         
-        return {
-            ...battle,
-            enemy: { ...battle.enemy, currentHealth: newEnemyHealth },
-            playerProgress: 0,
-            battleLog: [...battle.battleLog, {
-                type: 'player_attack',
-                damage: damage,
-                message: `Player hits for ${damage} damage!`
-            }]
-        };
+        if (isCrit) {
+            damage = Math.floor(damage * ((battle.player.CRIT_DAMAGE || 150) / 100));
+            const newEnemyHealth = Math.max(0, battle.enemy.currentHealth - damage);
+            
+            // Crit damage display
+            setDamageDisplay(prev => ({ ...prev, enemy: damage, enemyType: 'crit' }));
+            setTimeout(() => setDamageDisplay(prev => ({ ...prev, enemy: null, enemyType: null })), 1000);
+            
+            return {
+                ...battle,
+                enemy: { ...battle.enemy, currentHealth: newEnemyHealth },
+                playerProgress: 0,
+                battleLog: [...battle.battleLog, {
+                    type: 'player_crit',
+                    damage: damage,
+                    message: `⚡ CRITICAL HIT! Player deals ${damage} damage! ⚡`
+                }]
+            };
+        } else {
+            const newEnemyHealth = Math.max(0, battle.enemy.currentHealth - damage);
+            
+            // Normal damage display
+            setDamageDisplay(prev => ({ ...prev, enemy: damage, enemyType: 'normal' }));
+            setTimeout(() => setDamageDisplay(prev => ({ ...prev, enemy: null, enemyType: null })), 1000);
+            
+            return {
+                ...battle,
+                enemy: { ...battle.enemy, currentHealth: newEnemyHealth },
+                playerProgress: 0,
+                battleLog: [...battle.battleLog, {
+                    type: 'player_attack',
+                    damage: damage,
+                    message: `Player hits for ${damage} damage!`
+                }]
+            };
+        }
     } else {
         // Miss display
         setDamageDisplay(prev => ({ ...prev, enemy: 'MISS' }));
@@ -89,23 +116,48 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
-        const damage = calculateDamage(battle.enemy.ATK, battle.player.DEF);
-        const newPlayerHealth = Math.max(0, battle.player.currentHealth - damage);
+        // Crit hit kontrolü
+        const critRoll = Math.random() * 100;
+        const isCrit = critRoll <= (battle.enemy.CRIT_CHANCE || 3);
         
-        // Damage display
-        setDamageDisplay(prev => ({ ...prev, player: damage }));
-        setTimeout(() => setDamageDisplay(prev => ({ ...prev, player: null })), 1000);
+        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF);
         
-        return {
-            ...battle,
-            player: { ...battle.player, currentHealth: newPlayerHealth },
-            enemyProgress: 0,
-            battleLog: [...battle.battleLog, {
-                type: 'enemy_attack',
-                damage: damage,
-                message: `Enemy hits for ${damage} damage!`
-            }]
-        };
+        if (isCrit) {
+            damage = Math.floor(damage * ((battle.enemy.CRIT_DAMAGE || 120) / 100));
+            const newPlayerHealth = Math.max(0, battle.player.currentHealth - damage);
+            
+            // Crit damage display
+            setDamageDisplay(prev => ({ ...prev, player: damage, playerType: 'crit' }));
+            setTimeout(() => setDamageDisplay(prev => ({ ...prev, player: null, playerType: null })), 1000);
+            
+            return {
+                ...battle,
+                player: { ...battle.player, currentHealth: newPlayerHealth },
+                enemyProgress: 0,
+                battleLog: [...battle.battleLog, {
+                    type: 'enemy_crit',
+                    damage: damage,
+                    message: `💥 CRITICAL HIT! Enemy deals ${damage} damage! 💥`
+                }]
+            };
+        } else {
+            const newPlayerHealth = Math.max(0, battle.player.currentHealth - damage);
+            
+            // Normal damage display
+            setDamageDisplay(prev => ({ ...prev, player: damage, playerType: 'normal' }));
+            setTimeout(() => setDamageDisplay(prev => ({ ...prev, player: null, playerType: null })), 1000);
+            
+            return {
+                ...battle,
+                player: { ...battle.player, currentHealth: newPlayerHealth },
+                enemyProgress: 0,
+                battleLog: [...battle.battleLog, {
+                    type: 'enemy_attack',
+                    damage: damage,
+                    message: `Enemy hits for ${damage} damage!`
+                }]
+            };
+        }
     } else {
         // Miss display
         setDamageDisplay(prev => ({ ...prev, player: 'MISS' }));
