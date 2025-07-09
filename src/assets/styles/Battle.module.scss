@@ -148,6 +148,51 @@
       background: linear-gradient(90deg, #f97316 0%, #ea580c 100%) !important;
     }
   }
+
+.hpBarContainer {
+  position: relative;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.hpText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff !important;
+  font-size: 0.8rem !important;
+  font-weight: bold !important;
+  text-shadow: 2px 2px 0px #000;
+  z-index: 5;
+  font-family: 'Press Start 2P', monospace;
+  pointer-events: none;
+}
+
+.attackBarContainer {
+  position: relative;
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.attackBarLarge {
+  height: 15px !important;
+  border-radius: 8px !important;
+}
+
+.attackTimeText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ffffff !important;
+  font-size: 0.8rem !important;
+  font-weight: bold !important;
+  text-shadow: 2px 2px 0px #000;
+  z-index: 5;
+  font-family: 'Press Start 2P', monospace;
+  pointer-events: none;
+}
   
   // Enemy HP bar (kırmızı)
   .enemyHpBar {
@@ -471,5 +516,56 @@
   50% {
     text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
     box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+}
+
+// Death Dialog Styles
+.deathDialogTitle {
+  color: #ff6b6b !important;
+  text-shadow: 2px 2px 0px #000;
+  font-size: 1.5rem !important;
+  letter-spacing: 1px;
+  background: linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%) !important;
+  border-bottom: 2px solid #ff6b6b !important;
+  text-align: center !important;
+}
+
+.deathDialogContent {
+  background: linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%) !important;
+  padding: 2rem !important;
+}
+
+.deathMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.deathText {
+  color: #ff6b6b !important;
+  text-shadow: 2px 2px 0px #000;
+  font-weight: bold !important;
+}
+
+.respawnText {
+  color: #e0e0e0 !important;
+  text-shadow: 1px 1px 0px #000;
+  font-size: 1.2rem !important;
+}
+
+.respawnProgress {
+  width: 100%;
+  max-width: 300px;
+}
+
+.respawnBar {
+  height: 8px !important;
+  border-radius: 4px !important;
+  background: rgba(255, 107, 107, 0.3) !important;
+  
+  .MuiLinearProgress-bar {
+    background: linear-gradient(90deg, #ff6b6b 0%, #ff8e8e 100%) !important;
   }
 }

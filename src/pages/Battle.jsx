@@ -6,7 +6,11 @@ import {
     Avatar,
     Divider,
     Button,
-    Box
+    Box,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions
 } from "@mui/material";
 import { getLootDrop, saveLoot } from "../utils/combat.js";
 import enemies from "../utils/enemies.js";
@@ -41,8 +45,46 @@ function Battle({ player }) {
     const [damageDisplay, setDamageDisplay] = useState({ player: null, enemy: null });
     const [isWaitingForEnemy, setIsWaitingForEnemy] = useState(false);
     const [enemySpawnProgress, setEnemySpawnProgress] = useState(0);
+    
+    // Death popup state'leri
+    const [deathDialog, setDeathDialog] = useState({
+        open: false,
+        countdown: 15
+    });
 
 
+
+    // Ölüm popup'ını aç
+    const showDeathDialog = () => {
+        setDeathDialog({
+            open: true,
+            countdown: 15
+        });
+        
+        // 15 saniye countdown başlat
+        const countdownInterval = setInterval(() => {
+            setDeathDialog(prev => {
+                if (prev.countdown <= 1) {
+                    clearInterval(countdownInterval);
+                    // Oyuncuyu yeniden doğur
+                    respawnPlayer();
+                    return { open: false, countdown: 15 };
+                }
+                return { ...prev, countdown: prev.countdown - 1 };
+            });
+        }, 1000);
+    };
+
+    // Oyuncuyu yeniden doğur
+    const respawnPlayer = () => {
+        setPlayerHealth(PLAYER_STATS.HEALTH);
+        localStorage.setItem("playerHealth", PLAYER_STATS.HEALTH.toString());
+        
+        // Yeni düşman ile savaş başlat
+        const randomEnemy = getRandomEnemy();
+        setCurrentEnemy(randomEnemy);
+        startRealTimeBattle(randomEnemy, PLAYER_STATS.HEALTH);
+    };
 
     // Yeni düşman spawn timer'ı
     const startEnemySpawnTimer = () => {
@@ -149,6 +191,9 @@ function Battle({ player }) {
                         
                         // Yeni düşman bekleme süresini başlat
                         startEnemySpawnTimer();
+                    } else if (battleResult.winner === 'enemy') {
+                        // Oyuncu öldü, ölüm popup'ını göster
+                        showDeathDialog();
                     }
                     return prev;
                 }
@@ -183,19 +228,27 @@ function Battle({ player }) {
                         </Typography>
                     )}
                     
-                    <Typography className={styles.hpText}>
-                        HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || PLAYER_STATS.HEALTH}
-                    </Typography>
-                    <LinearProgress
-                        variant="determinate"
-                        value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : 100}
-                        className={`${styles.progress} ${styles.playerHpBar}`}
-                    />
-                    <LinearProgress
-                        variant="determinate"
-                        value={currentBattle?.playerProgress || 0}
-                        className={`${styles.progress} ${styles.attackBar}`}
-                    />
+                    <div className={styles.hpBarContainer}>
+                        <Typography className={styles.hpText}>
+                            HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || PLAYER_STATS.HEALTH}
+                        </Typography>
+                        <LinearProgress
+                            variant="determinate"
+                            value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : 100}
+                            className={`${styles.progress} ${styles.playerHpBar}`}
+                        />
+                    </div>
+                    <div className={styles.attackBarContainer}>
+                        <Typography className={styles.attackTimeText}>
+                            {Math.ceil(100 / (currentBattle?.player?.ATTACK_SPEED || PLAYER_STATS.ATTACK_SPEED) * 0.2)}s
+                        </Typography>
+                        <LinearProgress
+                            variant="determinate"
+                            value={currentBattle?.playerProgress || 0}
+                            className={`${styles.progress} ${styles.attackBar}`}
+                            sx={{ height: '15px', borderRadius: '8px' }}
+                        />
+                    </div>
                 </div>
 
                 {/* ENEMY */}
@@ -247,19 +300,27 @@ function Battle({ player }) {
                         </div>
                     ) : (
                         <>
-                                                <Typography className={styles.hpText}>
-                        HP: {currentBattle?.enemy?.currentHealth || currentEnemy.maxHp}/{currentBattle?.enemy?.maxHp || currentEnemy.maxHp}
-                    </Typography>
-                            <LinearProgress
-                                variant="determinate"
-                                value={currentBattle ? (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100 : 100}
-                                className={`${styles.progress} ${styles.enemyHpBar}`}
-                            />
-                            <LinearProgress
-                                variant="determinate"
-                                value={currentBattle?.enemyProgress || 0}
-                                className={`${styles.progress} ${styles.attackBar}`}
-                            />
+                                                                            <div className={styles.hpBarContainer}>
+                                <Typography className={styles.hpText}>
+                                    HP: {currentBattle?.enemy?.currentHealth || currentEnemy.maxHp}/{currentBattle?.enemy?.maxHp || currentEnemy.maxHp}
+                                </Typography>
+                                <LinearProgress
+                                    variant="determinate"
+                                    value={currentBattle ? (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100 : 100}
+                                    className={`${styles.progress} ${styles.enemyHpBar}`}
+                                />
+                            </div>
+                            <div className={styles.attackBarContainer}>
+                                <Typography className={styles.attackTimeText}>
+                                    {Math.ceil(100 / (currentBattle?.enemy?.ATTACK_SPEED || currentEnemy.ATTACK_SPEED || 1.5) * 0.2)}s
+                                </Typography>
+                                <LinearProgress
+                                    variant="determinate"
+                                    value={currentBattle?.enemyProgress || 0}
+                                    className={`${styles.progress} ${styles.attackBar}`}
+                                    sx={{ height: '15px', borderRadius: '8px' }}
+                                />
+                            </div>
                         </>
                     )}
                 </div>
@@ -400,6 +461,35 @@ function Battle({ player }) {
                     </Typography>
                 </div>
             )}
+
+            {/* Death Dialog */}
+            <Dialog 
+                open={deathDialog.open} 
+                maxWidth="sm"
+                fullWidth
+                disableEscapeKeyDown
+            >
+                <DialogTitle className={styles.deathDialogTitle}>
+                    💀 YOU DIED! 💀
+                </DialogTitle>
+                <DialogContent className={styles.deathDialogContent}>
+                    <div className={styles.deathMessage}>
+                        <Typography variant="h5" className={styles.deathText}>
+                            You have been defeated by {currentEnemy.name}!
+                        </Typography>
+                        <Typography variant="body1" className={styles.respawnText}>
+                            Respawning in {deathDialog.countdown} seconds...
+                        </Typography>
+                        <div className={styles.respawnProgress}>
+                            <LinearProgress 
+                                variant="determinate" 
+                                value={((15 - deathDialog.countdown) / 15) * 100}
+                                className={styles.respawnBar}
+                            />
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
