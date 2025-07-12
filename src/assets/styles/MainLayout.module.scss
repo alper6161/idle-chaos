@@ -5,6 +5,11 @@
   background: linear-gradient(135deg, #2a2a4a 0%, #3a3a5a 50%, #4a4a6a 100%);
   color: white;
   font-family: 'Press Start 2P', monospace;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
   position: relative;
   
   // Pixel art background pattern
@@ -43,6 +48,12 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        font-smooth: never;
+        -webkit-font-smoothing: none;
+        -moz-osx-font-smoothing: unset;
+        image-rendering: pixelated;
+        text-rendering: optimizeSpeed;
+        text-shadow: 1px 1px 0px #000;
       }
 
       .skillItem {
@@ -75,12 +86,24 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          font-smooth: never;
+          -webkit-font-smoothing: none;
+          -moz-osx-font-smoothing: unset;
+          image-rendering: pixelated;
+          text-rendering: optimizeSpeed;
+          text-shadow: 1px 1px 0px #000;
         }
 
         .skillLevel {
           font-size: 0.7rem;
           color: #aaa;
           flex-shrink: 0;
+          font-smooth: never;
+          -webkit-font-smoothing: none;
+          -moz-osx-font-smoothing: unset;
+          image-rendering: pixelated;
+          text-rendering: optimizeSpeed;
+          text-shadow: 1px 1px 0px #000;
         }
       }
 
@@ -114,6 +137,11 @@
           font-size: 0.8rem;
           font-weight: bold;
           text-shadow: 1px 1px 0px #000;
+          font-smooth: never;
+          -webkit-font-smoothing: none;
+          -moz-osx-font-smoothing: unset;
+          image-rendering: pixelated;
+          text-rendering: optimizeSpeed;
         }
       }
 
@@ -147,6 +175,11 @@
           font-size: 0.8rem;
           font-weight: bold;
           text-shadow: 1px 1px 0px #000;
+          font-smooth: never;
+          -webkit-font-smoothing: none;
+          -moz-osx-font-smoothing: unset;
+          image-rendering: pixelated;
+          text-rendering: optimizeSpeed;
         }
       }
     }

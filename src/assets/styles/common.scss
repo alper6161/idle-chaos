@@ -202,12 +202,18 @@ button {
   }
 }
 
-// Global Link Styles
+// Global Link Styles - Enhanced Pixel Art
 a {
   color: var(--accent-color);
   text-decoration: none;
   text-shadow: 1px 1px 0px var(--shadow-dark);
   transition: all 0.2s ease;
+  font-family: 'Press Start 2P', monospace;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
   
   &:hover {
     color: var(--gold-color);
@@ -348,4 +354,43 @@ input, textarea, select {
 .warning {
   color: var(--gold-color);
   text-shadow: 1px 1px 0px var(--shadow-dark);
+}
+
+// Pixel Art Text Utility Classes
+.pixel-text {
+  font-family: 'Press Start 2P', monospace !important;
+  font-smooth: never !important;
+  -webkit-font-smoothing: none !important;
+  -moz-osx-font-smoothing: unset !important;
+  image-rendering: pixelated !important;
+  text-rendering: optimizeSpeed !important;
+  text-shadow: 1px 1px 0px var(--shadow-dark) !important;
+}
+
+.pixel-text-large {
+  @extend .pixel-text;
+  font-size: 1.2rem !important;
+  text-shadow: 2px 2px 0px var(--shadow-dark) !important;
+}
+
+.pixel-text-small {
+  @extend .pixel-text;
+  font-size: 0.8rem !important;
+  text-shadow: 0.5px 0.5px 0px var(--shadow-dark) !important;
+}
+
+.pixel-text-glow {
+  @extend .pixel-text;
+  text-shadow: 
+    1px 1px 0px var(--shadow-dark),
+    0 0 5px var(--accent-color),
+    0 0 10px var(--accent-color) !important;
+}
+
+.pixel-text-gold {
+  @extend .pixel-text;
+  color: var(--gold-color) !important;
+  text-shadow: 
+    1px 1px 0px var(--shadow-dark),
+    0 0 5px var(--gold-color) !important;
 } 
