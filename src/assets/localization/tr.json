@@ -29,6 +29,7 @@
     "profile": "Profil",
     "equipment": "Ekipman",
     "settings": "Ayarlar",
+    "store": "Mağaza",
     "level": "Sv.",
     "gameLogo": "Oyun Logosu",
     "selected": "Seçilen:",
@@ -129,15 +130,41 @@
     "critChance": "Kritik Şans",
     "critDamage": "Kritik Hasar"
   },
-  "enemies": {
-    "goblin": "Goblin",
-    "rat": "Dev Sıçan",
-    "slime": "Yeşil Balçık",
-    "skeleton": "İskelet Savaşçı",
-    "orc": "Ork Savaşçı",
-    "troll": "Trol Savaşçı",
-    "dragon": "Ejderha",
-    "ghost": "Hayalet",
-    "spider": "Dev Örümcek"
-  }
+      "enemies": {
+        "goblin": "Goblin",
+        "rat": "Dev Sıçan",
+        "slime": "Yeşil Balçık",
+        "skeleton": "İskelet Savaşçı",
+        "orc": "Ork Savaşçı",
+        "troll": "Trol Savaşçı",
+        "dragon": "Ejderha",
+        "ghost": "Hayalet",
+        "spider": "Dev Örümcek"
+    },
+    "store": {
+        "magicShop": "Sihirli Mağaza",
+        "enhanceYourJourney": "Sihirli eşyalarla yolculuğunu güçlendir",
+        "activeBuffs": "Aktif Güçlendirmeler",
+        "rareDropBoost": "Nadir Düşüş Artışı",
+        "rareDropBoostDesc": "Nadir eşya düşüş şansını %50 artırır",
+        "expBoost": "Deneyim Artışı",
+        "expBoostDesc": "Tüm beceri deneyimi kazanımını %100 artırır",
+        "goldRush": "Altın Fırtınası",
+        "goldRushDesc": "Altın düşüşlerini %200 artırır",
+        "powerSurge": "Güç Patlaması",
+        "powerSurgeDesc": "Hasarı %50 artırır",
+        "luckyStrike": "Şanslı Vuruş",
+        "luckyStrikeDesc": "Kritik vuruş şansını %25 artırır",
+        "lightningSpeed": "Şimşek Hızı",
+        "lightningSpeedDesc": "Saldırı hızını %30 artırır",
+        "purchase": "Satın Al",
+        "active": "Aktif",
+        "notEnoughGold": "Yeterli altın yok!",
+        "buffAlreadyActive": "Bu güçlendirme zaten aktif!",
+        "purchaseSuccess": "Satın alma başarılı!",
+        "confirmPurchase": "Satın Almayı Onayla",
+        "purchaseConfirmation": "{{item}} öğesini {{price}} altına satın almak istediğinizden emin misiniz?",
+        "remainingGold": "Kalan altın: {{gold}}",
+        "confirm": "Onayla"
+    }
 } 

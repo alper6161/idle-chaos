@@ -61,6 +61,18 @@ function MainLayout() {
                     </NavLink>
                 </div>
 
+                {/* Store Section */}
+                <div className={styles.group}>
+                    <div className={styles.groupTitle}>{t('common.store').toUpperCase()}</div>
+                    <NavLink
+                        to="/store"
+                        className={styles.storeItem}
+                    >
+                        <span className={styles.storeIcon}>🏪</span>
+                        <span className={styles.storeLabel}>{t('common.store')}</span>
+                    </NavLink>
+                </div>
+
                 {/* Skills Sections */}
                 {Object.entries(INITIAL_SKILLS).map(([category, subskills]) => (
                     <div key={category} className={styles.group}>

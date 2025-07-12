@@ -29,6 +29,7 @@
     "profile": "Profile",
     "equipment": "Equipment",
     "settings": "Settings",
+    "store": "Store",
     "level": "Lv.",
     "gameLogo": "Game Logo",
     "selected": "Selected:",
@@ -129,15 +130,41 @@
     "critChance": "Crit Chance",
     "critDamage": "Crit Damage"
   },
-  "enemies": {
-    "goblin": "Goblin",
-    "rat": "Giant Rat",
-    "slime": "Green Slime",
-    "skeleton": "Skeleton Warrior",
-    "orc": "Orc Warrior",
-    "troll": "Troll Warrior",
-    "dragon": "Dragon",
-    "ghost": "Ghost",
-    "spider": "Giant Spider"
-  }
+      "enemies": {
+        "goblin": "Goblin",
+        "rat": "Giant Rat",
+        "slime": "Green Slime",
+        "skeleton": "Skeleton Warrior",
+        "orc": "Orc Warrior",
+        "troll": "Troll Warrior",
+        "dragon": "Dragon",
+        "ghost": "Ghost",
+        "spider": "Giant Spider"
+    },
+    "store": {
+        "magicShop": "Magic Shop",
+        "enhanceYourJourney": "Enhance your journey with magical items",
+        "activeBuffs": "Active Buffs",
+        "rareDropBoost": "Rare Drop Boost",
+        "rareDropBoostDesc": "Increases rare item drop chance by 50%",
+        "expBoost": "Experience Boost",
+        "expBoostDesc": "Increases all skill experience gain by 100%",
+        "goldRush": "Gold Rush",
+        "goldRushDesc": "Increases gold drops by 200%",
+        "powerSurge": "Power Surge",
+        "powerSurgeDesc": "Increases damage by 50%",
+        "luckyStrike": "Lucky Strike",
+        "luckyStrikeDesc": "Increases critical hit chance by 25%",
+        "lightningSpeed": "Lightning Speed",
+        "lightningSpeedDesc": "Increases attack speed by 30%",
+        "purchase": "Purchase",
+        "active": "Active",
+        "notEnoughGold": "Not enough gold!",
+        "buffAlreadyActive": "This buff is already active!",
+        "purchaseSuccess": "Purchase successful!",
+        "confirmPurchase": "Confirm Purchase",
+        "purchaseConfirmation": "Are you sure you want to purchase {{item}} for {{price}} gold?",
+        "remainingGold": "Remaining gold: {{gold}}",
+        "confirm": "Confirm"
+    }
 } 

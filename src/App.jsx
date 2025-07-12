@@ -4,6 +4,7 @@ import Home from "./pages/Home.jsx";
 import Profile from "./pages/Profile.jsx";
 import Battle from "./pages/Battle.jsx";
 import Equipment from "./pages/Equipment.jsx";
+import Store from "./pages/Store.jsx";
 import MainLayout from "./pages/MainLayout.jsx";
 
 function App() {
@@ -12,13 +13,13 @@ function App() {
         <>
             <Routes>
                 <Route path="/" element={<Home/>}/>
-                <Route path="/" element={<MainLayout />}>
+                <Route element={<MainLayout />}>
                     <Route path="/profile" element={<Profile/>}/>
                     <Route path="/battle" element={<Battle/>}/>
                     <Route path="/equipment" element={<Equipment/>}/>
-
-                    <Route path="*" element={<Navigate to="/profile" replace />} />
+                    <Route path="/store" element={<Store/>}/>
                 </Route>
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         </>
     )

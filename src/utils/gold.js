@@ -29,4 +29,9 @@ export const hasEnoughGold = (amount) => {
 
 export const formatGold = (amount) => {
     return new Intl.NumberFormat().format(amount);
+};
+
+export const setGold = (amount) => {
+    saveGold(amount);
+    return amount;
 }; 
