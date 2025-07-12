@@ -151,7 +151,7 @@ function Settings({ open, onClose }) {
                             fontSize: '0.9rem',
                             textShadow: '1px 1px 0px #000'
                         }}>
-                            GAME OPTIONS
+                            {t('common.gameOptions')}
                         </Typography>
                         
                         <Box sx={{ mt: 3 }}>
@@ -185,7 +185,7 @@ function Settings({ open, onClose }) {
                                 color: '#888',
                                 fontSize: '0.6rem'
                             }}>
-                                This will clear all saved data and return to the main menu.
+                                {t('common.clearDataDescription')}
                             </Typography>
                         </Box>
                     </Box>
