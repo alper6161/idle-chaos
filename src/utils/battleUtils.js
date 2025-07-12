@@ -1,14 +1,5 @@
 // Battle Utilities - Savaş ile ilgili yardımcı fonksiyonlar
-
-// Sabit oyuncu statları
-export const PLAYER_STATS = {
-    ATK: 15,
-    DEF: 8,
-    HEALTH: 100,
-    ATTACK_SPEED: 3,
-    CRIT_CHANCE: 5, // %5 temel crit chance
-    CRIT_DAMAGE: 150 // %150 temel crit damage
-};
+// Note: Player stats are now handled by playerStats.js utility
 
 // Vurma ihtimali hesaplama
 export const calculateHitChance = (attackerATK, defenderDEF) => {

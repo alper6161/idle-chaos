@@ -16,7 +16,6 @@ import { getLootDrop, saveLoot } from "../utils/combat.js";
 import enemies from "../utils/enemies.js";
 import { getEnemyIcon, getSkillIcon, getCharacterIcon, getEnemyInitial, getCharacterName } from "../utils/common.js";
 import { 
-    PLAYER_STATS,
     calculateHitChance, 
     calculateDamage, 
     updateBattleState, 
@@ -25,6 +24,7 @@ import {
     checkBattleResult, 
     createSpawnTimer 
 } from "../utils/battleUtils.js";
+import { getPlayerStats, getEquipmentBonuses } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
 
@@ -33,7 +33,8 @@ import { getGold, addGold, formatGold } from "../utils/gold.js";
 function Battle({ player }) {
     const [currentEnemy, setCurrentEnemy] = useState(enemies.GOBLIN);
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
-    const [playerHealth, setPlayerHealth] = useState(PLAYER_STATS.HEALTH);
+    const [playerStats, setPlayerStats] = useState(getPlayerStats());
+    const [playerHealth, setPlayerHealth] = useState(playerStats.HEALTH);
 
     // Savaş sistemi state'leri
     const [lootBag, setLootBag] = useState([]);
@@ -79,13 +80,15 @@ function Battle({ player }) {
 
     // Oyuncuyu yeniden doğur
     const respawnPlayer = () => {
-        setPlayerHealth(PLAYER_STATS.HEALTH);
-        localStorage.setItem("playerHealth", PLAYER_STATS.HEALTH.toString());
+        const currentPlayerStats = getPlayerStats();
+        setPlayerStats(currentPlayerStats);
+        setPlayerHealth(currentPlayerStats.HEALTH);
+        localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
         
         // Yeni düşman ile savaş başlat
         const randomEnemy = getRandomEnemy();
         setCurrentEnemy(randomEnemy);
-        startRealTimeBattle(randomEnemy, PLAYER_STATS.HEALTH);
+        startRealTimeBattle(randomEnemy, currentPlayerStats.HEALTH);
     };
 
     // Yeni düşman spawn timer'ı
@@ -107,7 +110,7 @@ function Battle({ player }) {
         
         // localStorage'dan güncel can değerini al
         const savedHealth = localStorage.getItem("playerHealth");
-        const currentHealth = savedHealth ? parseInt(savedHealth) : PLAYER_STATS.HEALTH;
+        const currentHealth = savedHealth ? parseInt(savedHealth) : playerStats.HEALTH;
         
         // Yeni savaş başlat
         setTimeout(() => {
@@ -117,8 +120,10 @@ function Battle({ player }) {
 
     // Gerçek zamanlı savaş başlat
     const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
+        const currentPlayerStats = getPlayerStats();
+        setPlayerStats(currentPlayerStats);
         setCurrentBattle({
-            player: { ...PLAYER_STATS, currentHealth: health },
+            player: { ...currentPlayerStats, currentHealth: health },
             enemy: { ...enemy, currentHealth: enemy.maxHp },
             playerProgress: 0,
             enemyProgress: 0,
@@ -136,9 +141,23 @@ function Battle({ player }) {
             setSelectedCharacter(savedCharacter);
         }
         
+        // Equipment'tan güncel player stats'ını al
+        const currentPlayerStats = getPlayerStats();
+        setPlayerStats(currentPlayerStats);
+        
         const savedHealth = localStorage.getItem("playerHealth");
         if (savedHealth) {
-            setPlayerHealth(parseInt(savedHealth));
+            const healthValue = parseInt(savedHealth);
+            // Eğer maksimum health artmışsa, current health'i de arttır
+            if (healthValue < currentPlayerStats.HEALTH) {
+                setPlayerHealth(currentPlayerStats.HEALTH);
+                localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
+            } else {
+                setPlayerHealth(healthValue);
+            }
+        } else {
+            setPlayerHealth(currentPlayerStats.HEALTH);
+            localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
         }
     }, []);
 
@@ -151,6 +170,39 @@ function Battle({ player }) {
             startRealTimeBattle(randomEnemy);
         }
     }, []); // Sadece component mount olduğunda çalışır
+
+    // Equipment değişikliği algıla
+    useEffect(() => {
+        const checkEquipmentChanges = () => {
+            const currentPlayerStats = getPlayerStats();
+            // Stats değişti mi kontrol et
+            if (JSON.stringify(currentPlayerStats) !== JSON.stringify(playerStats)) {
+                setPlayerStats(currentPlayerStats);
+                // Eğer current battle varsa, stats'ı güncelle
+                if (currentBattle) {
+                    setCurrentBattle(prev => ({
+                        ...prev,
+                        player: { ...currentPlayerStats, currentHealth: prev.player.currentHealth }
+                    }));
+                }
+            }
+        };
+
+        // Her 2 saniyede bir kontrol et
+        const interval = setInterval(checkEquipmentChanges, 2000);
+        
+        // Sayfa focus olduğunda da kontrol et
+        const handleFocus = () => {
+            checkEquipmentChanges();
+        };
+        
+        window.addEventListener('focus', handleFocus);
+        
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('focus', handleFocus);
+        };
+    }, [playerStats, currentBattle]);
 
     // Yeni attack bar sistemi
     useEffect(() => {
@@ -245,7 +297,7 @@ function Battle({ player }) {
                     
                     <div className={styles.hpBarContainer}>
                         <Typography className={styles.hpText}>
-                            HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || PLAYER_STATS.HEALTH}
+                            HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || playerStats.HEALTH}
                         </Typography>
                         <LinearProgress
                             variant="determinate"
@@ -255,7 +307,7 @@ function Battle({ player }) {
                     </div>
                     <div className={styles.attackBarContainer}>
                         <Typography className={styles.attackTimeText}>
-                            {Math.ceil(100 / (currentBattle?.player?.ATTACK_SPEED || PLAYER_STATS.ATTACK_SPEED) * 0.2)}s
+                            {Math.ceil(100 / (currentBattle?.player?.ATTACK_SPEED || playerStats.ATTACK_SPEED) * 0.2)}s
                         </Typography>
                         <LinearProgress
                             variant="determinate"
@@ -364,16 +416,16 @@ function Battle({ player }) {
                         </>
                     ) : (
                         <>
-                            <Typography>⚔️ ATK: {PLAYER_STATS.ATK}</Typography>
-                            <Typography>🛡️ DEF: {PLAYER_STATS.DEF}</Typography>
-                            <Typography>❤️ HP: {playerHealth}/{PLAYER_STATS.HEALTH}</Typography>
-                            <Typography>⚡ Attack Speed: {PLAYER_STATS.ATTACK_SPEED}</Typography>
-                            <Typography>🎯 Crit Chance: {PLAYER_STATS.CRIT_CHANCE}%</Typography>
-                            <Typography>💥 Crit Damage: {PLAYER_STATS.CRIT_DAMAGE}%</Typography>
+                            <Typography>⚔️ ATK: {playerStats.ATK} {getEquipmentBonuses().ATK ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span> : ''}</Typography>
+                            <Typography>🛡️ DEF: {playerStats.DEF} {getEquipmentBonuses().DEF ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span> : ''}</Typography>
+                            <Typography>❤️ HP: {playerHealth}/{playerStats.HEALTH} {getEquipmentBonuses().HEALTH ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span> : ''}</Typography>
+                            <Typography>⚡ Attack Speed: {playerStats.ATTACK_SPEED} {getEquipmentBonuses().ATTACK_SPEED ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span> : ''}</Typography>
+                            <Typography>🎯 Crit Chance: {playerStats.CRIT_CHANCE}% {getEquipmentBonuses().CRIT_CHANCE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span> : ''}</Typography>
+                            <Typography>💥 Crit Damage: {playerStats.CRIT_DAMAGE}% {getEquipmentBonuses().CRIT_DAMAGE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span> : ''}</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 Hit Chance: {calculateHitChance(PLAYER_STATS.ATK, currentEnemy.DEF)}%</Typography>
-                            <Typography>⚔️ Base Damage: {calculateDamage(PLAYER_STATS.ATK, currentEnemy.DEF)}</Typography>
-                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(PLAYER_STATS.ATK, currentEnemy.DEF) * (PLAYER_STATS.CRIT_DAMAGE / 100))}</Typography>
+                            <Typography>🎲 Hit Chance: {calculateHitChance(playerStats.ATK, currentEnemy.DEF)}%</Typography>
+                            <Typography>⚔️ Base Damage: {calculateDamage(playerStats.ATK, currentEnemy.DEF)}</Typography>
+                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(playerStats.ATK, currentEnemy.DEF) * (playerStats.CRIT_DAMAGE / 100))}</Typography>
                         </>
                     )}
                 </div>
@@ -404,9 +456,9 @@ function Battle({ player }) {
                             <Typography>🎯 Crit Chance: 3%</Typography>
                             <Typography>💥 Crit Damage: 120%</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 Hit Chance: {calculateHitChance(currentEnemy.ATK, PLAYER_STATS.DEF)}%</Typography>
-                            <Typography>⚔️ Base Damage: {calculateDamage(currentEnemy.ATK, PLAYER_STATS.DEF)}</Typography>
-                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(currentEnemy.ATK, PLAYER_STATS.DEF) * 1.2)}</Typography>
+                            <Typography>🎲 Hit Chance: {calculateHitChance(currentEnemy.ATK, playerStats.DEF)}%</Typography>
+                            <Typography>⚔️ Base Damage: {calculateDamage(currentEnemy.ATK, playerStats.DEF)}</Typography>
+                            <Typography>💥 Crit Damage: {Math.floor(calculateDamage(currentEnemy.ATK, playerStats.DEF) * 1.2)}</Typography>
                         </>
                     )}
                 </div>
