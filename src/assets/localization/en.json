@@ -14,7 +14,7 @@
     "powerLevel": "Power Level",
     "totalStats": "Total Stats",
     "noEquipmentEquipped": "No equipment equipped",
-    "characterEquipment": "Character Equipment",
+    "characterEquipment": "Equipment",
     "empty": "Empty",
     "settings": "Settings",
     "language": "Language",
@@ -38,7 +38,8 @@
     "clickToEquip": "Click to equip",
     "currentEquipment": "Current Equipment",
     "newEquipment": "New Equipment",
-    "noItemsFound": "No items found matching your criteria"
+    "noItemsFound": "No items found matching your criteria",
+    "inventory": "Inventory"
   },
   "battle": {
     "playerWins": "Player wins!",

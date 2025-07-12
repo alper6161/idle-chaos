@@ -14,7 +14,7 @@
     "powerLevel": "Güç Seviyesi",
     "totalStats": "Toplam İstatistikler",
     "noEquipmentEquipped": "Ekipman takılı değil",
-    "characterEquipment": "Karakter Ekipmanı",
+    "characterEquipment": "Ekipman",
     "empty": "Boş",
     "settings": "Ayarlar",
     "language": "Dil",
@@ -38,7 +38,8 @@
     "clickToEquip": "Donatmak için tıkla",
     "currentEquipment": "Mevcut Ekipman",
     "newEquipment": "Yeni Ekipman",
-    "noItemsFound": "Kriterlerinizle eşleşen eşya bulunamadı"
+    "noItemsFound": "Kriterlerinizle eşleşen eşya bulunamadı",
+    "inventory": "Envanter"
   },
   "battle": {
     "playerWins": "Oyuncu kazandı!",

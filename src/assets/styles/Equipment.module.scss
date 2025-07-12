@@ -105,14 +105,14 @@
 .header {
   position: relative;
   z-index: 1;
-  margin-bottom: 30px;
-  padding: 25px;
+  margin-bottom: 15px;
+  padding: 10px;
   background: linear-gradient(135deg, 
     rgba(26, 26, 46, 0.95) 0%, 
     rgba(22, 33, 62, 0.90) 50%, 
     rgba(15, 52, 96, 0.85) 100%
   );
-  border-radius: 20px;
+  border-radius: 12px;
   backdrop-filter: blur(20px);
   border: 2px solid rgba(255, 215, 0, 0.3);
   box-shadow: 
@@ -134,23 +134,32 @@
   flex: 1;
 }
 
-.pageTitle {
-  font-family: 'Orbitron', monospace !important;
-  font-size: 3rem !important;
-  font-weight: 900 !important;
-  background: linear-gradient(45deg, var(--gold), var(--gold-light), var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+.pixelTitle {
+  font-family: 'Press Start 2P', cursive !important;
+  font-size: 1.5rem !important;
+  font-weight: normal !important;
+  color: #e0e0e0 !important;
+  text-shadow: 
+    2px 2px 0px #000,
+    0 0 20px rgba(224, 224, 224, 0.8);
   margin: 0 !important;
-  letter-spacing: 2px;
-  animation: titleGlow 2s ease-in-out infinite alternate;
+  letter-spacing: 0px;
+  text-align: center;
+  animation: simpleGlow 2s ease-in-out infinite alternate;
 }
 
-@keyframes titleGlow {
-  0% { text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
-  100% { text-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.3); }
+@keyframes simpleGlow {
+  0% { 
+    text-shadow: 
+      2px 2px 0px #000,
+      0 0 20px rgba(224, 224, 224, 0.8);
+  }
+  100% { 
+    text-shadow: 
+      2px 2px 0px #000,
+      0 0 30px rgba(224, 224, 224, 1),
+      0 0 40px rgba(224, 224, 224, 0.6);
+  }
 }
 
 .subtitle {
@@ -237,7 +246,7 @@
   gap: 30px;
   max-width: 1400px;
   margin: 0 auto;
-  align-items: start;
+  align-items: stretch;
 }
 
 // Equipment Section
@@ -245,9 +254,10 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  height: 100%;
 }
 
-.equipmentPanel, .statsPanel, .inventoryPanel {
+.equipmentPanel, .statsPanel, .inventoryPanel, .powerLevelPanel {
   background: linear-gradient(135deg, 
     rgba(26, 26, 46, 0.95) 0%, 
     rgba(22, 33, 62, 0.90) 50%, 
@@ -262,6 +272,7 @@
     0 0 20px rgba(255, 215, 0, 0.05),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
+  margin-bottom: 0 !important;
   
   &:hover {
     border-color: var(--gold);
@@ -270,6 +281,60 @@
       0 0 30px rgba(255, 215, 0, 0.15),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
     transform: translateY(-2px);
+  }
+}
+
+.statsPanel {
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0 !important;
+}
+
+.statsGrid {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.equipmentPanel, .inventoryPanel {
+  height: 100%;
+}
+
+.powerLevelPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  margin-bottom: 0 !important;
+}
+
+.powerLevelContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 10px;
+}
+
+.powerLevelValue {
+  color: var(--legendary) !important;
+  font-weight: normal !important;
+  font-family: 'Press Start 2P', cursive !important;
+  font-size: 2rem !important;
+  text-shadow: 0 0 20px rgba(255, 107, 53, 0.8) !important;
+  margin: 0 !important;
+  animation: powerGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes powerGlow {
+  0% { 
+    text-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+  }
+  100% { 
+    text-shadow: 0 0 30px rgba(255, 107, 53, 1),
+      0 0 50px rgba(255, 107, 53, 0.6);
   }
 }
 
@@ -295,14 +360,25 @@
 }
 
 .panelTitle {
-  font-family: 'Orbitron', monospace !important;
-  font-size: 1.4rem !important;
-  font-weight: 700 !important;
+  font-family: 'Press Start 2P', cursive !important;
+  font-size: 1rem !important;
+  font-weight: normal !important;
   color: var(--text-primary) !important;
   margin: 0 !important;
-  letter-spacing: 1px;
+  letter-spacing: 0px;
   text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  animation: panelTitleGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes panelTitleGlow {
+  0% { 
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  }
+  100% { 
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.6),
+      0 0 25px rgba(255, 255, 255, 0.3);
+  }
 }
 
 // Character Layout
@@ -517,12 +593,15 @@
 }
 
 .slotName {
-  font-size: 0.7rem !important;
-  font-weight: 600 !important;
+  font-size: 0.8rem !important;
+  font-weight: bold !important;
+  font-family: 'Courier New', monospace !important;
   color: var(--text-primary) !important;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+  letter-spacing: 1px;
+  text-shadow: 
+    1px 1px 0px #000,
+    0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .equippedItem {
@@ -561,13 +640,17 @@
 }
 
 .itemName {
-  font-size: 0.8rem !important;
-  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  font-weight: bold !important;
+  font-family: 'Courier New', monospace !important;
   color: var(--text-primary) !important;
   line-height: 1.2 !important;
   margin: 0 !important;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  text-shadow: 
+    1px 1px 0px #000,
+    0 0 10px rgba(255, 215, 0, 0.5);
   word-wrap: break-word;
+  letter-spacing: 0.5px;
 }
 
 .itemRarity {
@@ -608,7 +691,7 @@
 
 // Stats Panel - Horizontal layout
 .statsPanel {
-  height: fit-content;
+  min-height: 100%;
   margin-bottom: 20px;
 }
 
@@ -694,7 +777,7 @@
 .inventorySection {
   display: flex;
   flex-direction: column;
-  height: fit-content;
+  height: 100%;
 }
 
 .inventoryPanel {

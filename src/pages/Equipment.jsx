@@ -480,12 +480,9 @@ function Equipment() {
             <div className={styles.header}>
                 <div className={styles.headerContent}>
                     <div className={styles.titleSection}>
-                        <Typography variant="h4" className={styles.pageTitle}>
-                            {t('common.equipmentForge')}
-                        </Typography>
-                        <Typography variant="subtitle1" className={styles.subtitle}>
-                            {t('common.craftLegend')}
-                        </Typography>
+                        <div className={styles.pixelTitle}>
+                            EQUIPMENT
+                        </div>
                     </div>
                 </div>
             </div>
@@ -530,48 +527,27 @@ function Equipment() {
 
                 {/* Power Level - Separate Panel */}
                 <Paper 
+                    className={styles.powerLevelPanel}
                     style={{ 
                         minWidth: '200px',
-                        backgroundColor: '#2a2a4a',
-                        border: '2px solid #4a4a6a',
-                        borderRadius: '8px',
-                        padding: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                        gap: '0.5rem'
+                        width: '200px'
                     }}
                 >
-                    <LocalFireDepartment 
-                        style={{ 
-                            color: '#ff6b35', 
-                            fontSize: '2rem',
-                            filter: 'drop-shadow(0 0 10px rgba(255, 107, 53, 0.5))'
-                        }} 
-                    />
-                    <Typography 
-                        variant="h4" 
-                        style={{
-                            color: '#ff6b35',
-                            fontWeight: 'bold',
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-                            fontSize: '2rem'
-                        }}
-                    >
-                        {powerLevel}
-                    </Typography>
-                    <Typography 
-                        variant="subtitle1" 
-                        style={{
-                            color: '#e0e0e0',
-                            textAlign: 'center',
-                            fontSize: '0.9rem',
-                            textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
-                        }}
-                    >
-                        {t('common.powerLevel')}
-                    </Typography>
+                    <div className={styles.panelHeader}>
+                        <LocalFireDepartment className={styles.panelIcon} />
+                        <Typography variant="h6" className={styles.panelTitle}>
+                            {t('common.powerLevel')}
+                        </Typography>
+                    </div>
+                    
+                    <div className={styles.powerLevelContent}>
+                        <Typography 
+                            variant="h2" 
+                            className={styles.powerLevelValue}
+                        >
+                            {powerLevel}
+                        </Typography>
+                    </div>
                 </Paper>
             </div>
 
@@ -625,7 +601,7 @@ function Equipment() {
                         <div className={styles.panelHeader}>
                             <FilterList className={styles.panelIcon} />
                             <Typography variant="h6" className={styles.panelTitle}>
-                                Inventory Arsenal
+                                {t('common.inventory')}
                             </Typography>
                         </div>
                         
