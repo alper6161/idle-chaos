@@ -79,7 +79,7 @@ function Battle({ player }) {
     const respawnPlayer = () => {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
-        setPlayerHealth(currentPlayerStats.HEALTH);
+        setPlayerHealth(currentPlayerStats.HEALTH); // <-- Güncel max HP
         localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
         
         setBattleMode('selection');
@@ -113,13 +113,13 @@ function Battle({ player }) {
     const handleEnemySelect = (enemy) => {
         setCurrentEnemy(enemy);
         setBattleMode('battle');
-        
-        const savedHealth = localStorage.getItem("playerHealth");
+
+        // Her zaman güncel max HP'yi al
         const currentPlayerStats = getPlayerStats();
-        const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
-        
+        setPlayerHealth(currentPlayerStats.HEALTH); // <-- Burası önemli
+
         setTimeout(() => {
-            startRealTimeBattle(enemy, currentHealth);
+            startRealTimeBattle(enemy, currentPlayerStats.HEALTH);
         }, 100);
     };
 
@@ -136,8 +136,12 @@ function Battle({ player }) {
     const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
+        
+        // Eğer mevcut HP, yeni max HP'den büyükse, max HP'ye eşitle
+        const adjustedHealth = Math.min(health, currentPlayerStats.HEALTH);
+        
         setCurrentBattle({
-            player: { ...currentPlayerStats, currentHealth: health },
+            player: { ...currentPlayerStats, currentHealth: adjustedHealth },
             enemy: { ...enemy, currentHealth: enemy.maxHp },
             playerProgress: 0,
             enemyProgress: 0,
@@ -187,19 +191,9 @@ function Battle({ player }) {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         
-        const savedHealth = localStorage.getItem("playerHealth");
-        if (savedHealth) {
-            const healthValue = parseInt(savedHealth);
-            if (healthValue < currentPlayerStats.HEALTH) {
-                setPlayerHealth(currentPlayerStats.HEALTH);
-                localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
-            } else {
-                setPlayerHealth(healthValue);
-            }
-        } else {
-            setPlayerHealth(currentPlayerStats.HEALTH);
-            localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
-        }
+        // Her zaman güncel max HP'yi kullan
+        setPlayerHealth(currentPlayerStats.HEALTH);
+        localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
     }, []);
 
     useEffect(() => {
@@ -210,13 +204,13 @@ function Battle({ player }) {
                 if (currentBattle) {
                     setCurrentBattle(prev => ({
                         ...prev,
-                        player: { ...currentPlayerStats, currentHealth: prev.player.currentHealth }
+                        player: { ...currentPlayerStats, currentHealth: Math.min(prev.player.currentHealth, currentPlayerStats.HEALTH) }
                     }));
                 }
             }
         };
 
-        const interval = setInterval(checkEquipmentChanges, 2000);
+        const interval = setInterval(checkEquipmentChanges, 1000);
         
         const handleFocus = () => {
             checkEquipmentChanges();
@@ -286,6 +280,12 @@ function Battle({ player }) {
 
         return () => clearInterval(interval);
     }, [isBattleActive, currentBattle]);
+
+    // playerStats değiştiğinde playerHealth'i de güncelle
+    useEffect(() => {
+        setPlayerHealth(playerStats.HEALTH);
+        localStorage.setItem("playerHealth", playerStats.HEALTH.toString());
+    }, [playerStats.HEALTH]);
 
     // Enemy Selection Screen
     if (battleMode === 'selection') {
@@ -405,7 +405,7 @@ function Battle({ player }) {
                         </Typography>
                         <LinearProgress
                             variant="determinate"
-                            value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : 100}
+                            value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : (playerHealth / playerStats.HEALTH) * 100}
                             className={`${styles.progress} ${styles.playerHpBar}`}
                         />
                     </div>

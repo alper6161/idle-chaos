@@ -28,7 +28,9 @@ export const calculateEquipmentStats = () => {
     Object.values(equippedItems).forEach(item => {
         if (item && item.stats) {
             Object.entries(item.stats).forEach(([stat, value]) => {
-                totalStats[stat] = (totalStats[stat] || 0) + value;
+                // HP'yi HEALTH olarak da ekle
+                const key = stat === "HP" ? "HEALTH" : stat;
+                totalStats[key] = (totalStats[key] || 0) + value;
             });
         }
     });
