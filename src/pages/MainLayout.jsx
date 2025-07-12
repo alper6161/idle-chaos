@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import styles from "../assets/styles/MainLayout.module.scss";
-import { Settings, AccountCircle } from "@mui/icons-material";
+
 import SettingsDialog from "./Settings.jsx";
 import { getGold, formatGold } from "../utils/gold.js";
 import { getActiveBuffsInfo } from "../utils/buffUtils.js";
@@ -60,12 +60,13 @@ function MainLayout() {
                         )}
                     </div>
                     <div className={styles.topbarIcons}>
-                        <Settings 
+                        <span 
                             className={styles.icon} 
                             onClick={handleSettingsClick}
-                            style={{ cursor: 'pointer' }}
-                        />
-                        <AccountCircle className={styles.icon} />
+                            style={{ cursor: 'pointer', fontSize: '24px' }}
+                        >
+                            ⚙️
+                        </span>
                     </div>
                 </div>
                 <Outlet />
