@@ -135,7 +135,6 @@
 }
 
 .pixelTitle {
-  font-family: 'Press Start 2P', cursive !important;
   font-size: 1.5rem !important;
   font-weight: normal !important;
   color: #e0e0e0 !important;
@@ -321,7 +320,6 @@
 .powerLevelValue {
   color: var(--legendary) !important;
   font-weight: normal !important;
-  font-family: 'Press Start 2P', cursive !important;
   font-size: 2rem !important;
   text-shadow: 0 0 20px rgba(255, 107, 53, 0.8) !important;
   margin: 0 !important;
@@ -360,7 +358,6 @@
 }
 
 .panelTitle {
-  font-family: 'Press Start 2P', cursive !important;
   font-size: 1rem !important;
   font-weight: normal !important;
   color: var(--text-primary) !important;
@@ -457,7 +454,7 @@
 .equipmentSlots {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 40px;
   width: 100%;
   max-width: 800px;
 }
@@ -595,7 +592,6 @@
 .slotName {
   font-size: 0.8rem !important;
   font-weight: bold !important;
-  font-family: 'Courier New', monospace !important;
   color: var(--text-primary) !important;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -642,7 +638,6 @@
 .itemName {
   font-size: 0.9rem !important;
   font-weight: bold !important;
-  font-family: 'Courier New', monospace !important;
   color: var(--text-primary) !important;
   line-height: 1.2 !important;
   margin: 0 !important;
