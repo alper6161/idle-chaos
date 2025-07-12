@@ -39,13 +39,26 @@ export function getCombatStats(player, enemy) {
 }
 
 export function getLootDrop(drops) {
-  const looted = [];
+  const items = [];
+  const goldItems = [];
+  let totalGold = 0;
+  
   drops.forEach(drop => {
     if (Math.random() < drop.chance) {
-      looted.push(drop.name);
+      if (drop.type === "equipment") {
+        items.push(drop.name);
+      } else if (drop.type === "gold") {
+        goldItems.push({ name: drop.name, value: drop.value });
+        totalGold += drop.value;
+      }
     }
   });
-  return looted;
+  
+  return {
+    items: items,
+    goldItems: goldItems,
+    gold: totalGold
+  };
 }
 
 export function saveLoot(loot) {

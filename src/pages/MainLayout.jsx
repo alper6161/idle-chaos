@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import styles from "../assets/styles/MainLayout.module.scss";
 import { INITIAL_SKILLS } from "../utils/constants";
 import { Settings, AccountCircle } from "@mui/icons-material";
 import {getSkillIcon} from "../utils/common.js";
 import SettingsDialog from "./Settings.jsx";
+import { getGold, formatGold } from "../utils/gold.js";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [playerGold, setPlayerGold] = useState(getGold());
 
     const handleSettingsClick = () => {
         setSettingsOpen(true);
@@ -16,6 +18,18 @@ function MainLayout() {
     const handleSettingsClose = () => {
         setSettingsOpen(false);
     };
+
+    // Update gold display when localStorage changes
+    useEffect(() => {
+        const updateGold = () => {
+            setPlayerGold(getGold());
+        };
+
+        // Update gold every second (in case it changes in other components)
+        const interval = setInterval(updateGold, 1000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className={styles.layout}>
@@ -68,12 +82,18 @@ function MainLayout() {
             {/* Main Content */}
             <main className={styles.content}>
                 <div className={styles.topbar}>
-                    <Settings 
-                        className={styles.icon} 
-                        onClick={handleSettingsClick}
-                        style={{ cursor: 'pointer' }}
-                    />
-                    <AccountCircle className={styles.icon} />
+                    <div className={styles.goldDisplay}>
+                        <span className={styles.goldIcon}>💰</span>
+                        <span className={styles.goldAmount}>{formatGold(playerGold)}</span>
+                    </div>
+                    <div className={styles.topbarIcons}>
+                        <Settings 
+                            className={styles.icon} 
+                            onClick={handleSettingsClick}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        <AccountCircle className={styles.icon} />
+                    </div>
                 </div>
                 <Outlet />
             </main>

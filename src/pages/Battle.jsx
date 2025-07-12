@@ -26,6 +26,7 @@ import {
     createSpawnTimer 
 } from "../utils/battleUtils.js";
 import { getRandomEnemy } from "../utils/enemies.js";
+import { getGold, addGold, formatGold } from "../utils/gold.js";
 
 
 
@@ -36,6 +37,7 @@ function Battle({ player }) {
 
     // Savaş sistemi state'leri
     const [lootBag, setLootBag] = useState([]);
+    const [playerGold, setPlayerGold] = useState(getGold());
     
     // Yeni savaş sistemi için state'ler
     const [battleResult, setBattleResult] = useState(null);
@@ -184,10 +186,23 @@ function Battle({ player }) {
                     localStorage.setItem("playerHealth", battleResult.playerFinalHealth.toString());
                     
                     if (battleResult.winner === 'player') {
-                        // Loot ekle
-                        const looted = getLootDrop(currentEnemy.drops);
-                        setLootBag(prev => [...prev, ...looted]);
-                        saveLoot(looted);
+                        // Loot ve gold ekle
+                        const lootResult = getLootDrop(currentEnemy.drops);
+                        
+                        // Items'ları loot bag'e ekle
+                        const newLoot = [...lootResult.items];
+                        
+                        // Gold items'ları ayrı ayrı ekle
+                        if (lootResult.goldItems && lootResult.goldItems.length > 0) {
+                            lootResult.goldItems.forEach(goldItem => {
+                                newLoot.push(`💰 ${goldItem.name} ${goldItem.value} gold'a satıldı`);
+                            });
+                            const newGold = addGold(lootResult.gold);
+                            setPlayerGold(newGold);
+                        }
+                        
+                        setLootBag(prev => [...prev, ...newLoot]);
+                        saveLoot(lootResult.items); // Sadece gerçek item'ları kaydet
                         
                         // Yeni düşman bekleme süresini başlat
                         startEnemySpawnTimer();
@@ -400,11 +415,14 @@ function Battle({ player }) {
                 <div className={styles.section}>
                     <Typography variant="h6">Possible Loot</Typography>
                     <Divider />
-                                    {currentEnemy.drops.map((drop) => (
-                    <Typography key={drop.name}>
-                        {drop.name} - {(drop.chance * 100).toFixed(0)}%
-                    </Typography>
-                ))}
+                    {currentEnemy.drops.map((drop) => (
+                        <Typography key={drop.name} className={drop.type === 'gold' ? styles.goldLoot : styles.equipmentLoot}>
+                            {drop.name} - {(drop.chance * 100).toFixed(0)}%
+                            {drop.type === 'gold' && (
+                                <span className={styles.goldValue}> (💰 {drop.value} Gold)</span>
+                            )}
+                        </Typography>
+                    ))}
                 </div>
 
                 {/* LOOT GAINED */}
@@ -415,7 +433,10 @@ function Battle({ player }) {
                         <Typography>No loot yet...</Typography>
                     ) : (
                         lootBag.map((item, idx) => (
-                            <Typography key={idx} className={styles.lootBag}>
+                            <Typography 
+                                key={idx} 
+                                className={item.includes('💰') ? styles.goldLootBag : styles.lootBag}
+                            >
                                 {item}
                             </Typography>
                         ))

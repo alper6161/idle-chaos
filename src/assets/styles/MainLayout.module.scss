@@ -200,28 +200,66 @@
 
     .topbar {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
       gap: 1rem;
 
-      .icon {
-        cursor: pointer;
-        color: #ccc;
-        font-size: 1.5rem;
-        transition: all 0.2s ease;
+      .goldDisplay {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 215, 0, 0.1);
+        border: 2px solid #ffd700;
+        border-radius: 4px;
+        color: #ffd700;
+        font-weight: bold;
+        text-shadow: 1px 1px 0px #000;
         font-smooth: never;
         -webkit-font-smoothing: none;
         -moz-osx-font-smoothing: unset;
         image-rendering: pixelated;
         text-rendering: optimizeSpeed;
 
-        &:hover {
-          color: white;
-          transform: scale(1.1);
-          text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        .goldIcon {
+          font-size: 1.2rem;
         }
 
-        &:active {
-          transform: scale(0.95);
+        .goldAmount {
+          font-size: 0.9rem;
+        }
+
+        &:hover {
+          background: rgba(255, 215, 0, 0.2);
+          transform: scale(1.05);
+          transition: all 0.2s ease;
+        }
+      }
+
+      .topbarIcons {
+        display: flex;
+        gap: 1rem;
+        
+        .icon {
+          cursor: pointer;
+          color: #ccc;
+          font-size: 1.5rem;
+          transition: all 0.2s ease;
+          font-smooth: never;
+          -webkit-font-smoothing: none;
+          -moz-osx-font-smoothing: unset;
+          image-rendering: pixelated;
+          text-rendering: optimizeSpeed;
+
+          &:hover {
+            color: white;
+            transform: scale(1.1);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
         }
       }
     }
