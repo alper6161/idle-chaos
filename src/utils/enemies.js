@@ -148,14 +148,12 @@ const enemies = {
     }
 };
 
-// Function to select random enemy
 export const getRandomEnemy = () => {
     const enemyKeys = Object.keys(enemies);
     const randomKey = enemyKeys[Math.floor(Math.random() * enemyKeys.length)];
     return enemies[randomKey];
 };
 
-// Get specific enemy by ID
 export const getEnemyById = (id) => Object.values(enemies).find(enemy => enemy.id === id);
 
 export default enemies;

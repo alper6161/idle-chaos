@@ -1,11 +1,9 @@
 export function getCombatStats(player, enemy) {
-  // Updated calculation for new battle system
   const playerATK = player?.ATK || 10;
   const playerDEF = player?.DEF || 5;
   const enemyATK = enemy?.ATK || 8;
   const enemyDEF = enemy?.DEF || 3;
 
-  // Hit chance calculation
   const calculateHitChance = (attackerATK, defenderDEF) => {
     const ratio = attackerATK / Math.max(defenderDEF, 1);
     let baseChance = 60;
@@ -19,7 +17,6 @@ export function getCombatStats(player, enemy) {
     return Math.max(5, Math.min(95, baseChance));
   };
 
-  // Hasar hesaplama
   const calculateDamage = (attackerATK, defenderDEF) => {
     let damage = attackerATK - (defenderDEF * 0.5);
     damage = Math.max(1, damage);
@@ -67,17 +64,15 @@ export function saveLoot(loot) {
   localStorage.setItem("lootBag", JSON.stringify(updated));
 }
 
-// New battle function - based on ATK, DEF, HEALTH, ATTACK_SPEED, CRIT_CHANCE, CRIT_DAMAGE values
 export function battle(player, enemy) {
-  // Create copies of fighters (to preserve original values)
   const playerFighter = {
     ATK: player.ATK || 10,
     DEF: player.DEF || 5,
     HEALTH: player.HEALTH || 100,
     maxHealth: player.HEALTH || 100,
     ATTACK_SPEED: player.ATTACK_SPEED || 2.0,
-    CRIT_CHANCE: player.CRIT_CHANCE || 5, // 5% base crit chance
-    CRIT_DAMAGE: player.CRIT_DAMAGE || 150 // 150% base crit damage
+    CRIT_CHANCE: player.CRIT_CHANCE || 5,
+    CRIT_DAMAGE: player.CRIT_DAMAGE || 150
   };
   
   const enemyFighter = {
@@ -86,8 +81,8 @@ export function battle(player, enemy) {
     HEALTH: enemy.HEALTH || 80,
     maxHealth: enemy.HEALTH || 80,
     ATTACK_SPEED: enemy.ATTACK_SPEED || 1.5,
-    CRIT_CHANCE: enemy.CRIT_CHANCE || 3, // 3% base crit chance
-    CRIT_DAMAGE: enemy.CRIT_DAMAGE || 120 // 120% base crit damage
+    CRIT_CHANCE: enemy.CRIT_CHANCE || 3,
+    CRIT_DAMAGE: enemy.CRIT_DAMAGE || 120
   };
 
   const battleLog = [];
@@ -95,21 +90,15 @@ export function battle(player, enemy) {
   let enemyProgress = 0;
   let time = 0;
 
-  // Battle loop - continues until one dies
   while (playerFighter.HEALTH > 0 && enemyFighter.HEALTH > 0) {
-    // Player attack progress - progress should fill faster as ATTACK_SPEED increases
     playerProgress += (playerFighter.ATTACK_SPEED * 2);
-    
-    // Enemy attack progress - progress should fill faster as ATTACK_SPEED increases
     enemyProgress += (enemyFighter.ATTACK_SPEED * 2);
     
-    // Player attack
     if (playerProgress >= 100) {
       const playerHitChance = calculateHitChance(playerFighter.ATK, enemyFighter.DEF);
       const playerHitRoll = Math.random() * 100;
       
       if (playerHitRoll <= playerHitChance) {
-        // Crit hit check
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= playerFighter.CRIT_CHANCE;
         
@@ -147,7 +136,6 @@ export function battle(player, enemy) {
       playerProgress = 0;
     }
 
-    // If enemy dies, battle ends
     if (enemyFighter.HEALTH <= 0) {
       battleLog.push({
         type: 'enemy_defeated',
@@ -156,13 +144,11 @@ export function battle(player, enemy) {
       break;
     }
 
-    // Enemy attack
     if (enemyProgress >= 100) {
       const enemyHitChance = calculateHitChance(enemyFighter.ATK, playerFighter.DEF);
       const enemyHitRoll = Math.random() * 100;
       
       if (enemyHitRoll <= enemyHitChance) {
-        // Crit hit check
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= enemyFighter.CRIT_CHANCE;
         
@@ -200,7 +186,6 @@ export function battle(player, enemy) {
       enemyProgress = 0;
     }
 
-    // If player dies, battle ends
     if (playerFighter.HEALTH <= 0) {
       battleLog.push({
         type: 'player_defeated',
@@ -221,40 +206,29 @@ export function battle(player, enemy) {
   };
 }
 
-// Hit chance calculation function
 function calculateHitChance(attackerATK, defenderDEF) {
-  // Calculate hit chance based on ATK/DEF ratio
   const ratio = attackerATK / Math.max(defenderDEF, 1);
-  
-  // Base hit chance starts at 60%
   let baseChance = 60;
   
-  // Bonus/penalty based on ATK/DEF ratio
   if (ratio >= 2) {
-    baseChance += 25; // Very strong attack
+    baseChance += 25;
   } else if (ratio >= 1.5) {
-    baseChance += 15; // Strong attack
+    baseChance += 15;
   } else if (ratio >= 1) {
-    baseChance += 5; // Normal attack
+    baseChance += 5;
   } else if (ratio >= 0.5) {
-    baseChance -= 10; // Weak attack
+    baseChance -= 10;
   } else {
-    baseChance -= 25; // Very weak attack
+    baseChance -= 25;
   }
   
-  // Limit hit chance between 5% and 95%
   return Math.max(5, Math.min(95, baseChance));
 }
 
-// Damage calculation function
 function calculateDamage(attackerATK, defenderDEF) {
-  // Base damage: ATK - (DEF * 0.5)
   let damage = attackerATK - (defenderDEF * 0.5);
-  
-  // Guarantee minimum 1 damage
   damage = Math.max(1, damage);
   
-  // Add random variation (10%)
   const variation = damage * 0.1;
   damage += (Math.random() - 0.5) * variation;
   

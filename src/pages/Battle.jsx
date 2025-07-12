@@ -36,11 +36,9 @@ function Battle({ player }) {
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
     const [playerHealth, setPlayerHealth] = useState(playerStats.HEALTH);
 
-    // Battle system states
     const [lootBag, setLootBag] = useState([]);
     const [playerGold, setPlayerGold] = useState(getGold());
     
-    // New battle system states
     const [battleResult, setBattleResult] = useState(null);
     const [battleLog, setBattleLog] = useState([]);
     const [isBattleActive, setIsBattleActive] = useState(false);
@@ -49,7 +47,6 @@ function Battle({ player }) {
     const [isWaitingForEnemy, setIsWaitingForEnemy] = useState(false);
     const [enemySpawnProgress, setEnemySpawnProgress] = useState(0);
     
-    // Death popup states
     const [deathDialog, setDeathDialog] = useState({
         open: false,
         countdown: 15
@@ -57,19 +54,16 @@ function Battle({ player }) {
 
 
 
-    // Open death popup
     const showDeathDialog = () => {
         setDeathDialog({
             open: true,
             countdown: 15
         });
         
-        // Start 15 second countdown
         const countdownInterval = setInterval(() => {
             setDeathDialog(prev => {
                 if (prev.countdown <= 1) {
                     clearInterval(countdownInterval);
-                    // Respawn player
                     respawnPlayer();
                     return { open: false, countdown: 15 };
                 }
@@ -78,20 +72,17 @@ function Battle({ player }) {
         }, 1000);
     };
 
-    // Respawn player
     const respawnPlayer = () => {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         setPlayerHealth(currentPlayerStats.HEALTH);
         localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
         
-        // Start battle with new enemy
         const randomEnemy = getRandomEnemy();
         setCurrentEnemy(randomEnemy);
         startRealTimeBattle(randomEnemy, currentPlayerStats.HEALTH);
     };
 
-    // New enemy spawn timer
     const startEnemySpawnTimer = () => {
         createSpawnTimer(
             setIsWaitingForEnemy, 
@@ -100,26 +91,21 @@ function Battle({ player }) {
         );
     };
     
-    // Spawn new enemy
     const spawnNewEnemy = () => {
-        // Select random new enemy
         const randomEnemy = getRandomEnemy();
         setCurrentEnemy(randomEnemy);
         setBattleResult(null);
         setCurrentBattle(null);
         
-        // Get current health value from localStorage
         const savedHealth = localStorage.getItem("playerHealth");
         const currentPlayerStats = getPlayerStats();
         const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
         
-        // Start new battle
         setTimeout(() => {
             startRealTimeBattle(randomEnemy, currentHealth);
         }, 0);
     };
 
-    // Start real-time battle
     const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
@@ -135,21 +121,18 @@ function Battle({ player }) {
         setDamageDisplay({ player: null, enemy: null });
     };
 
-    // Load selected character type and player health
     useEffect(() => {
         const savedCharacter = localStorage.getItem("selectedCharacter");
         if (savedCharacter) {
             setSelectedCharacter(savedCharacter);
         }
         
-        // Get current player stats from equipment
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         
         const savedHealth = localStorage.getItem("playerHealth");
         if (savedHealth) {
             const healthValue = parseInt(savedHealth);
-            // If maximum health has increased, also increase current health
             if (healthValue < currentPlayerStats.HEALTH) {
                 setPlayerHealth(currentPlayerStats.HEALTH);
                 localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
@@ -162,24 +145,19 @@ function Battle({ player }) {
         }
     }, []);
 
-    // Start automatic battle when page loads
     useEffect(() => {
-        // Start battle with random enemy on first load
         if (!isBattleActive && !currentBattle && !battleResult) {
             const randomEnemy = getRandomEnemy();
             setCurrentEnemy(randomEnemy);
             startRealTimeBattle(randomEnemy);
         }
-    }, []); // Only runs when component mounts
+    }, []);
 
-    // Detect equipment changes
     useEffect(() => {
         const checkEquipmentChanges = () => {
             const currentPlayerStats = getPlayerStats();
-            // Check if stats have changed
             if (JSON.stringify(currentPlayerStats) !== JSON.stringify(playerStats)) {
                 setPlayerStats(currentPlayerStats);
-                // If current battle exists, update stats
                 if (currentBattle) {
                     setCurrentBattle(prev => ({
                         ...prev,
@@ -189,10 +167,8 @@ function Battle({ player }) {
             }
         };
 
-        // Check every 2 seconds
         const interval = setInterval(checkEquipmentChanges, 2000);
         
-        // Also check when page gains focus
         const handleFocus = () => {
             checkEquipmentChanges();
         };
@@ -205,7 +181,6 @@ function Battle({ player }) {
         };
     }, [playerStats, currentBattle]);
 
-    // New attack bar system
     useEffect(() => {
         if (!isBattleActive || !currentBattle) return;
 
@@ -213,39 +188,31 @@ function Battle({ player }) {
             setCurrentBattle(prev => {
                 if (!prev) return prev;
 
-                // Attack bar update
                 const playerSpeed = Math.max(1, Math.min(5, prev.player.ATTACK_SPEED));
                 const enemySpeed = Math.max(1, Math.min(5, prev.enemy.ATTACK_SPEED));
                 let newBattle = updateBattleState(prev, playerSpeed, enemySpeed);
 
-                // Player attack
                 if (newBattle.playerProgress >= 100) {
                     newBattle = processPlayerAttack(newBattle, setDamageDisplay);
                 }
 
-                // Enemy attack
                 if (newBattle.enemyProgress >= 100) {
                     newBattle = processEnemyAttack(newBattle, setDamageDisplay);
                 }
 
-                // Check battle result
                 const battleResult = checkBattleResult(newBattle);
                 if (battleResult) {
                     setIsBattleActive(false);
                     setBattleResult(battleResult);
                     
-                    // Update and save player health
                     setPlayerHealth(battleResult.playerFinalHealth);
                     localStorage.setItem("playerHealth", battleResult.playerFinalHealth.toString());
                     
                     if (battleResult.winner === 'player') {
-                        // Add loot and gold
                         const lootResult = getLootDrop(currentEnemy.drops);
                         
-                        // Add items to loot bag
                         const newLoot = [...lootResult.items];
                         
-                        // Add gold items separately
                         if (lootResult.goldItems && lootResult.goldItems.length > 0) {
                             lootResult.goldItems.forEach(goldItem => {
                                 newLoot.push(`💰 ${goldItem.name} ${goldItem.value} gold'a satıldı`);
@@ -255,12 +222,10 @@ function Battle({ player }) {
                         }
                         
                         setLootBag(prev => [...prev, ...newLoot]);
-                        saveLoot(lootResult.items); // Save only real items
+                        saveLoot(lootResult.items);
                         
-                        // Start new enemy waiting timer
                         startEnemySpawnTimer();
                     } else if (battleResult.winner === 'enemy') {
-                        // Player died, show death popup
                         showDeathDialog();
                     }
                     return prev;
@@ -268,7 +233,7 @@ function Battle({ player }) {
 
                 return newBattle;
             });
-        }, 200); // 200ms interval - slower and more controlled
+        }, 200);
 
         return () => clearInterval(interval);
     }, [isBattleActive, currentBattle]);

@@ -10,7 +10,6 @@ import {
 } from "@mui/icons-material";
 import { getSkillIcon } from "../utils/common.js";
 
-// Icons for skill categories
 const categoryIcons = {
     melee: <SportsKabaddi />,
     ranged: <EmojiEvents />,
@@ -18,7 +17,6 @@ const categoryIcons = {
     prayer: <Healing />
 };
 
-// Character types based on skill categories
 const characterTypes = {
     melee: 'warrior',
     ranged: 'ranger',
@@ -34,13 +32,8 @@ function Profile() {
     });
 
     const handleSkillSelect = (category) => {
-        // Determine character type based on selected skill category
         const characterType = characterTypes[category];
-        
-        // Save character type to localStorage
         localStorage.setItem("selectedCharacter", characterType);
-        
-        // Navigate to battle page
         navigate("/battle");
     };
 

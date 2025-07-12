@@ -16,7 +16,6 @@ import {
 } from "@mui/material";
 import { FilterList, Person, TrendingUp, Shield, LocalFireDepartment } from "@mui/icons-material";
 
-// Equipment slots and their icons
 const EQUIPMENT_SLOTS = {
     weapon: { name: "Weapon", icon: "/images/equipment/weapon.png", slot: "weapon", position: "left" },
     shield: { name: "Shield", icon: "/images/equipment/shield.png", slot: "shield", position: "right" },
@@ -30,7 +29,6 @@ const EQUIPMENT_SLOTS = {
     amulet: { name: "Amulet", icon: "/images/equipment/ring.png", slot: "amulet", position: "accessory" }
 };
 
-// Enhanced equipment data with more stats
 const SAMPLE_EQUIPMENT = {
     weapon: { name: "Legendary Dragonslayer", rarity: "legendary", stats: { ATK: 25, CRIT_CHANCE: 15, CRIT_DAMAGE: 30 } },
     shield: { name: "Aegis of Valor", rarity: "epic", stats: { DEF: 18, HP: 50, BLOCK_CHANCE: 20 } },
@@ -44,38 +42,29 @@ const SAMPLE_EQUIPMENT = {
     amulet: null
 };
 
-// Enhanced inventory with more variety
 const SAMPLE_INVENTORY = [
-    // Legendary Weapons
     { id: 1, name: "Excalibur", type: "weapon", rarity: "legendary", stats: { ATK: 30, CRIT_CHANCE: 20, CRIT_DAMAGE: 40, HP: 25 } },
     { id: 2, name: "Shadowbane", type: "weapon", rarity: "legendary", stats: { ATK: 28, CRIT_CHANCE: 25, DODGE: 15 } },
     { id: 3, name: "Frostmourne", type: "weapon", rarity: "legendary", stats: { ATK: 32, CRIT_DAMAGE: 50, FREEZE_CHANCE: 30 } },
     
-    // Epic Weapons
     { id: 4, name: "Dragon Blade", type: "weapon", rarity: "epic", stats: { ATK: 22, CRIT_DAMAGE: 25, FIRE_DAMAGE: 10 } },
     { id: 5, name: "Thunder Strike", type: "weapon", rarity: "epic", stats: { ATK: 20, CRIT_CHANCE: 15, LIGHTNING_DAMAGE: 8 } },
     
-    // Rare Weapons
     { id: 6, name: "Bloodthirsty Axe", type: "weapon", rarity: "rare", stats: { ATK: 18, LIFE_STEAL: 15, CRIT_CHANCE: 10 } },
     { id: 7, name: "Mage's Staff", type: "weapon", rarity: "rare", stats: { ATK: 15, CRIT_CHANCE: 12, MANA_REGEN: 5 } },
     
-    // Legendary Armor
     { id: 8, name: "Dragonscale Armor", type: "chest", rarity: "legendary", stats: { DEF: 35, HP: 80, FIRE_RESISTANCE: 40 } },
     { id: 9, name: "Ethereal Robes", type: "chest", rarity: "legendary", stats: { DEF: 25, HP: 60, CRIT_CHANCE: 20, MANA_REGEN: 10 } },
     
-    // Epic Armor
     { id: 10, name: "Plate of the Titan", type: "chest", rarity: "epic", stats: { DEF: 28, HP: 70, BLOCK_CHANCE: 25 } },
     { id: 11, name: "Shadowweave Vest", type: "chest", rarity: "epic", stats: { DEF: 22, HP: 50, DODGE: 20, CRIT_CHANCE: 12 } },
     
-    // Legendary Accessories
     { id: 12, name: "Ring of Power", type: "ring", rarity: "legendary", stats: { ATK: 15, CRIT_CHANCE: 25, CRIT_DAMAGE: 35 } },
     { id: 13, name: "Amulet of Eternity", type: "amulet", rarity: "legendary", stats: { HP: 100, LIFE_STEAL: 20, REGEN: 5 } },
     
-    // Epic Accessories
     { id: 14, name: "Ruby Ring", type: "ring", rarity: "epic", stats: { ATK: 12, CRIT_CHANCE: 18, FIRE_DAMAGE: 8 } },
     { id: 15, name: "Sapphire Amulet", type: "amulet", rarity: "epic", stats: { HP: 60, CRIT_CHANCE: 15, ICE_DAMAGE: 6 } },
     
-    // More varied equipment
     { id: 16, name: "Boots of Speed", type: "boots", rarity: "rare", stats: { DEF: 8, DODGE: 25, MOVEMENT_SPEED: 15 } },
     { id: 17, name: "Gloves of Precision", type: "gloves", rarity: "rare", stats: { DEF: 6, CRIT_CHANCE: 20, ACCURACY: 15 } },
     { id: 18, name: "Cape of Shadows", type: "cape", rarity: "epic", stats: { DEF: 12, DODGE: 30, STEALTH: 20 } },
@@ -83,13 +72,11 @@ const SAMPLE_INVENTORY = [
     { id: 20, name: "Leggings of Fortitude", type: "legs", rarity: "rare", stats: { DEF: 12, HP: 40, ENDURANCE: 20 } }
 ];
 
-// LocalStorage keys
 const STORAGE_KEYS = {
     EQUIPPED_ITEMS: 'idle-chaos-equipped-items',
     INVENTORY: 'idle-chaos-inventory'
 };
 
-// Load data from localStorage
 const loadFromStorage = (key, defaultValue) => {
     try {
         const stored = localStorage.getItem(key);
@@ -100,7 +87,6 @@ const loadFromStorage = (key, defaultValue) => {
     }
 };
 
-// Save data to localStorage
 const saveToStorage = (key, data) => {
     try {
         localStorage.setItem(key, JSON.stringify(data));
@@ -126,17 +112,14 @@ function Equipment() {
         slot: null
     });
 
-    // Save equipped items whenever they change
     useEffect(() => {
         saveToStorage(STORAGE_KEYS.EQUIPPED_ITEMS, equippedItems);
     }, [equippedItems]);
 
-    // Save inventory whenever it changes
     useEffect(() => {
         saveToStorage(STORAGE_KEYS.INVENTORY, inventory);
     }, [inventory]);
 
-    // Enhanced filtering
     const filteredInventory = inventory.filter(item => {
         const matchesRarity = rarityFilter === "all" || item.rarity === rarityFilter;
         const matchesType = typeFilter === "all" || item.type === typeFilter;
@@ -145,7 +128,6 @@ function Equipment() {
         return matchesRarity && matchesType && matchesSlot;
     });
 
-    // Handle equipping an item
     const handleEquipItem = (item) => {
         const targetSlot = item.type;
         
@@ -166,7 +148,6 @@ function Equipment() {
         }
     };
 
-    // Handle replace confirmation
     const handleReplaceConfirm = () => {
         const { currentItem, newItem, slot } = replaceDialog;
         
@@ -236,7 +217,6 @@ function Equipment() {
         const totalStats = calculateTotalStats();
         let power = 0;
         
-        // Calculate power based on stats
         Object.entries(totalStats).forEach(([stat, value]) => {
             switch (stat) {
                 case "ATK": power += value * 2; break;
