@@ -381,16 +381,16 @@
 .equipmentSlots {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+  gap: 20px;
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
 }
 
 .topSlots, .middleSlots, .centerSlots, .bottomSlots {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 20px;
   grid-column: 1 / -1;
 }
 
@@ -404,14 +404,14 @@
 
 .bottomSlots {
   justify-content: center;
-  gap: 20px;
+  gap: 25px;
 }
 
 // Equipment Slot Styling
 .equipmentSlot {
   position: relative;
-  width: 140px;
-  height: 160px;
+  width: 180px;
+  height: 140px;
   cursor: pointer;
   transition: all 0.3s ease;
   transform-style: preserve-3d;
@@ -491,7 +491,7 @@
   );
   border: 2px solid var(--border-primary);
   border-radius: 12px;
-  padding: 12px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
   backdrop-filter: blur(10px);
@@ -510,14 +510,14 @@
 }
 
 .slotIcon {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
   filter: drop-shadow(0 0 5px var(--gold));
 }
 
 .slotName {
-  font-size: 0.8rem !important;
+  font-size: 0.7rem !important;
   font-weight: 600 !important;
   color: var(--text-primary) !important;
   text-transform: uppercase;
@@ -530,7 +530,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 10px;
+  padding: 8px;
   background: linear-gradient(135deg, 
     rgba(0, 0, 0, 0.6) 0%, 
     rgba(26, 26, 46, 0.4) 50%, 
@@ -561,16 +561,17 @@
 }
 
 .itemName {
-  font-size: 0.75rem !important;
+  font-size: 0.8rem !important;
   font-weight: 600 !important;
   color: var(--text-primary) !important;
   line-height: 1.2 !important;
   margin: 0 !important;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  word-wrap: break-word;
 }
 
 .itemRarity {
-  font-size: 0.6rem !important;
+  font-size: 0.65rem !important;
   font-weight: 500 !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -578,20 +579,8 @@
   opacity: 0.9;
 }
 
-.itemStats {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.statLine {
-  font-size: 0.6rem !important;
-  color: var(--success) !important;
-  font-weight: 500 !important;
-  margin: 0 !important;
-  line-height: 1.1 !important;
-  text-shadow: 0 0 5px rgba(72, 187, 120, 0.3);
-}
+// Removed itemStats and statLine since they're no longer used in equipment slots
+// Stats are now shown in hover tooltips instead
 
 .emptySlot {
   flex: 1;
@@ -609,7 +598,7 @@
 }
 
 .emptyText {
-  font-size: 0.7rem !important;
+  font-size: 0.6rem !important;
   color: var(--text-muted) !important;
   text-transform: uppercase;
   letter-spacing: 0.5px;

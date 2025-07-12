@@ -346,6 +346,27 @@ function Equipment() {
         const equippedItem = equippedItems[slotKey];
         const isEmpty = !equippedItem;
         
+        // Create tooltip content for equipped items
+        const createEquippedItemTooltip = (item) => {
+            if (!item?.stats) return '';
+            
+            return (
+                <div style={{ maxWidth: '200px' }}>
+                    <Typography variant="body2" sx={{ color: getRarityColor(item.rarity), fontWeight: 'bold', mb: 1 }}>
+                        {item.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: getRarityColor(item.rarity), textTransform: 'uppercase', display: 'block', mb: 1 }}>
+                        {item.rarity}
+                    </Typography>
+                    {Object.entries(item.stats).map(([stat, value]) => (
+                        <Typography key={stat} variant="caption" sx={{ color: '#48bb78', display: 'block', lineHeight: 1.3 }}>
+                            +{value} {stat.replace(/_/g, ' ')}
+                        </Typography>
+                    ))}
+                </div>
+            );
+        };
+        
         return (
             <div 
                 className={`${styles.equipmentSlot} ${selectedSlot === slotKey ? styles.selected : ''} ${isEmpty ? styles.empty : styles.equipped}`}
@@ -361,33 +382,47 @@ function Equipment() {
                     </div>
                     
                     {equippedItem ? (
-                        <div 
-                            className={styles.equippedItem}
-                            style={{ 
-                                borderColor: getRarityBorder(equippedItem.rarity),
-                                boxShadow: `0 0 10px ${getRarityColor(equippedItem.rarity)}40`
+                        <Tooltip 
+                            title={createEquippedItemTooltip(equippedItem)}
+                            arrow
+                            placement="top"
+                            componentsProps={{
+                                tooltip: {
+                                    sx: {
+                                        backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                                        border: `2px solid ${getRarityColor(equippedItem.rarity)}`,
+                                        borderRadius: '8px',
+                                        boxShadow: `0 0 20px ${getRarityColor(equippedItem.rarity)}40`,
+                                        backdropFilter: 'blur(10px)',
+                                        maxWidth: '250px'
+                                    }
+                                },
+                                arrow: {
+                                    sx: {
+                                        color: getRarityColor(equippedItem.rarity)
+                                    }
+                                }
                             }}
                         >
-                            <Typography variant="body2" className={styles.itemName}>
-                                {equippedItem.name}
-                            </Typography>
-                            <Typography 
-                                variant="caption" 
-                                className={styles.itemRarity}
-                                style={{ color: getRarityColor(equippedItem.rarity) }}
+                            <div 
+                                className={styles.equippedItem}
+                                style={{ 
+                                    borderColor: getRarityBorder(equippedItem.rarity),
+                                    boxShadow: `0 0 10px ${getRarityColor(equippedItem.rarity)}40`
+                                }}
                             >
-                                {equippedItem.rarity.toUpperCase()}
-                            </Typography>
-                            {equippedItem.stats && (
-                                <div className={styles.itemStats}>
-                                    {Object.entries(equippedItem.stats).slice(0, 3).map(([stat, value]) => (
-                                        <Typography key={stat} variant="caption" className={styles.statLine}>
-                                            +{value} {stat}
-                                        </Typography>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                                <Typography variant="body2" className={styles.itemName}>
+                                    {equippedItem.name}
+                                </Typography>
+                                <Typography 
+                                    variant="caption" 
+                                    className={styles.itemRarity}
+                                    style={{ color: getRarityColor(equippedItem.rarity) }}
+                                >
+                                    {equippedItem.rarity.toUpperCase()}
+                                </Typography>
+                            </div>
+                        </Tooltip>
                     ) : (
                         <div className={styles.emptySlot}>
                             <Typography variant="caption" className={styles.emptyText}>
