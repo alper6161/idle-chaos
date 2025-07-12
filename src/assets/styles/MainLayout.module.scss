@@ -207,9 +207,21 @@
         cursor: pointer;
         color: #ccc;
         font-size: 1.5rem;
+        transition: all 0.2s ease;
+        font-smooth: never;
+        -webkit-font-smoothing: none;
+        -moz-osx-font-smoothing: unset;
+        image-rendering: pixelated;
+        text-rendering: optimizeSpeed;
 
         &:hover {
           color: white;
+          transform: scale(1.1);
+          text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+
+        &:active {
+          transform: scale(0.95);
         }
       }
     }

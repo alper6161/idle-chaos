@@ -1,10 +1,22 @@
+import { useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import styles from "../assets/styles/MainLayout.module.scss";
 import { INITIAL_SKILLS } from "../utils/constants";
 import { Settings, AccountCircle } from "@mui/icons-material";
 import {getSkillIcon} from "../utils/common.js";
+import SettingsDialog from "./Settings.jsx";
 
 function MainLayout() {
+    const [settingsOpen, setSettingsOpen] = useState(false);
+
+    const handleSettingsClick = () => {
+        setSettingsOpen(true);
+    };
+
+    const handleSettingsClose = () => {
+        setSettingsOpen(false);
+    };
+
     return (
         <div className={styles.layout}>
             {/* Sidebar */}
@@ -56,11 +68,21 @@ function MainLayout() {
             {/* Main Content */}
             <main className={styles.content}>
                 <div className={styles.topbar}>
-                    <Settings className={styles.icon} />
+                    <Settings 
+                        className={styles.icon} 
+                        onClick={handleSettingsClick}
+                        style={{ cursor: 'pointer' }}
+                    />
                     <AccountCircle className={styles.icon} />
                 </div>
                 <Outlet />
             </main>
+
+            {/* Settings Dialog */}
+            <SettingsDialog 
+                open={settingsOpen} 
+                onClose={handleSettingsClose} 
+            />
         </div>
     );
 }
