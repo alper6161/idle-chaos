@@ -446,57 +446,93 @@ function Equipment() {
                             {t('common.craftLegend')}
                         </Typography>
                     </div>
-                    <div className={styles.powerSection}>
-                        <div className={styles.powerBadge}>
-                            <LocalFireDepartment className={styles.powerIcon} />
-                            <div className={styles.powerInfo}>
-                                <Typography variant="h6" className={styles.powerLevel}>
-                                    {powerLevel}
-                                </Typography>
-                                <Typography variant="caption" className={styles.powerLabel}>
-                                    {t('common.powerLevel')}
-                                </Typography>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            {/* Stats Panel - Moved to top */}
-            <Paper className={styles.statsPanel}>
-                <div className={styles.panelHeader}>
-                    <TrendingUp className={styles.panelIcon} />
-                    <Typography variant="h6" className={styles.panelTitle}>
-                        {t('common.totalStats')}
-                    </Typography>
-                </div>
-                
-                <div className={styles.statsGrid}>
-                    {Object.entries(totalStats).length > 0 ? (
-                        Object.entries(totalStats).map(([stat, value]) => (
-                            <div key={stat} className={styles.statItem}>
-                                <div className={styles.statIcon}>
-                                    <Shield />
+            {/* Stats and Power Level Section */}
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                {/* Stats Panel */}
+                <Paper className={styles.statsPanel} style={{ flex: '1' }}>
+                    <div className={styles.panelHeader}>
+                        <TrendingUp className={styles.panelIcon} />
+                        <Typography variant="h6" className={styles.panelTitle}>
+                            {t('common.totalStats')}
+                        </Typography>
+                    </div>
+                    
+                    <div className={styles.statsGrid}>
+                        {Object.entries(totalStats).length > 0 ? (
+                            Object.entries(totalStats).map(([stat, value]) => (
+                                <div key={stat} className={styles.statItem}>
+                                    <div className={styles.statIcon}>
+                                        <Shield />
+                                    </div>
+                                    <div className={styles.statContent}>
+                                        <Typography variant="body2" className={styles.statName}>
+                                            {stat.replace(/_/g, ' ')}
+                                        </Typography>
+                                        <Typography variant="h6" className={styles.statValue}>
+                                            {value}
+                                        </Typography>
+                                    </div>
                                 </div>
-                                <div className={styles.statContent}>
-                                    <Typography variant="body2" className={styles.statName}>
-                                        {stat.replace(/_/g, ' ')}
-                                    </Typography>
-                                    <Typography variant="h6" className={styles.statValue}>
-                                        {value}
-                                    </Typography>
-                                </div>
+                            ))
+                        ) : (
+                            <div className={styles.noStats}>
+                                <Typography variant="body2" className={styles.noStatsText}>
+                                    {t('common.noEquipmentEquipped')}
+                                </Typography>
                             </div>
-                        ))
-                    ) : (
-                        <div className={styles.noStats}>
-                            <Typography variant="body2" className={styles.noStatsText}>
-                                {t('common.noEquipmentEquipped')}
-                            </Typography>
-                        </div>
-                    )}
-                </div>
-            </Paper>
+                        )}
+                    </div>
+                </Paper>
+
+                {/* Power Level - Separate Panel */}
+                <Paper 
+                    style={{ 
+                        minWidth: '200px',
+                        backgroundColor: '#2a2a4a',
+                        border: '2px solid #4a4a6a',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        gap: '0.5rem'
+                    }}
+                >
+                    <LocalFireDepartment 
+                        style={{ 
+                            color: '#ff6b35', 
+                            fontSize: '2rem',
+                            filter: 'drop-shadow(0 0 10px rgba(255, 107, 53, 0.5))'
+                        }} 
+                    />
+                    <Typography 
+                        variant="h4" 
+                        style={{
+                            color: '#ff6b35',
+                            fontWeight: 'bold',
+                            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+                            fontSize: '2rem'
+                        }}
+                    >
+                        {powerLevel}
+                    </Typography>
+                    <Typography 
+                        variant="subtitle1" 
+                        style={{
+                            color: '#e0e0e0',
+                            textAlign: 'center',
+                            fontSize: '0.9rem',
+                            textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                        }}
+                    >
+                        {t('common.powerLevel')}
+                    </Typography>
+                </Paper>
+            </div>
 
             <div className={styles.mainContent}>
                 {/* Equipment Section */}
