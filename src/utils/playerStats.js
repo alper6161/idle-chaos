@@ -76,4 +76,4 @@ export const getEquipmentBonuses = () => {
     });
     
     return bonuses;
-}; 
+};

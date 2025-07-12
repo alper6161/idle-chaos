@@ -110,7 +110,8 @@ function Battle({ player }) {
         
         // localStorage'dan güncel can değerini al
         const savedHealth = localStorage.getItem("playerHealth");
-        const currentHealth = savedHealth ? parseInt(savedHealth) : playerStats.HEALTH;
+        const currentPlayerStats = getPlayerStats();
+        const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
         
         // Yeni savaş başlat
         setTimeout(() => {
