@@ -10,7 +10,12 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
+    DialogActions,
+    Card,
+    CardContent,
+    CardActionArea,
+    Tooltip,
+    Grid
 } from "@mui/material";
 import { getLootDrop, saveLoot } from "../utils/combat.js";
 import enemies from "../utils/enemies.js";
@@ -29,10 +34,9 @@ import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
 import { useTranslate } from "../hooks/useTranslate";
 
-
-
 function Battle({ player }) {
-    const [currentEnemy, setCurrentEnemy] = useState(enemies.GOBLIN);
+    const [battleMode, setBattleMode] = useState('selection'); // 'selection' or 'battle'
+    const [currentEnemy, setCurrentEnemy] = useState(null);
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
     const [playerHealth, setPlayerHealth] = useState(playerStats.HEALTH);
@@ -53,8 +57,6 @@ function Battle({ player }) {
         open: false,
         countdown: 15
     });
-
-
 
     const showDeathDialog = () => {
         setDeathDialog({
@@ -80,9 +82,11 @@ function Battle({ player }) {
         setPlayerHealth(currentPlayerStats.HEALTH);
         localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
         
-        const randomEnemy = getRandomEnemy();
-        setCurrentEnemy(randomEnemy);
-        startRealTimeBattle(randomEnemy, currentPlayerStats.HEALTH);
+        setBattleMode('selection');
+        setCurrentEnemy(null);
+        setBattleResult(null);
+        setCurrentBattle(null);
+        setIsBattleActive(false);
     };
 
     const startEnemySpawnTimer = () => {
@@ -94,8 +98,6 @@ function Battle({ player }) {
     };
     
     const spawnNewEnemy = () => {
-        const randomEnemy = getRandomEnemy();
-        setCurrentEnemy(randomEnemy);
         setBattleResult(null);
         setCurrentBattle(null);
         
@@ -104,8 +106,31 @@ function Battle({ player }) {
         const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
         
         setTimeout(() => {
-            startRealTimeBattle(randomEnemy, currentHealth);
+            startRealTimeBattle(currentEnemy, currentHealth);
         }, 0);
+    };
+
+    const handleEnemySelect = (enemy) => {
+        setCurrentEnemy(enemy);
+        setBattleMode('battle');
+        
+        const savedHealth = localStorage.getItem("playerHealth");
+        const currentPlayerStats = getPlayerStats();
+        const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
+        
+        setTimeout(() => {
+            startRealTimeBattle(enemy, currentHealth);
+        }, 100);
+    };
+
+    const handleBackToSelection = () => {
+        setBattleMode('selection');
+        setCurrentEnemy(null);
+        setBattleResult(null);
+        setCurrentBattle(null);
+        setIsBattleActive(false);
+        setIsWaitingForEnemy(false);
+        setEnemySpawnProgress(0);
     };
 
     const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
@@ -122,6 +147,36 @@ function Battle({ player }) {
         setBattleResult(null);
         setDamageDisplay({ player: null, enemy: null });
     };
+
+    const getDifficultyColor = (enemy) => {
+        if (enemy.maxHp <= 25) return '#4caf50'; // Easy - Green
+        if (enemy.maxHp <= 50) return '#ff9800'; // Medium - Orange
+        if (enemy.maxHp <= 80) return '#f44336'; // Hard - Red
+        return '#9c27b0'; // Very Hard - Purple
+    };
+
+    const getDifficultyText = (enemy) => {
+        if (enemy.maxHp <= 25) return 'Easy';
+        if (enemy.maxHp <= 50) return 'Medium';
+        if (enemy.maxHp <= 80) return 'Hard';
+        return 'Very Hard';
+    };
+
+    const renderLootTooltip = (enemy) => (
+        <Box sx={{ p: 1 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+                {t('battle.possibleDrops')}
+            </Typography>
+            {enemy.drops.map((drop, index) => (
+                <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
+                    {drop.name} - {(drop.chance * 100).toFixed(0)}%
+                    {drop.type === 'gold' && (
+                        <span style={{ color: '#ffd700' }}> (💰 {drop.value} Gold)</span>
+                    )}
+                </Typography>
+            ))}
+        </Box>
+    );
 
     useEffect(() => {
         const savedCharacter = localStorage.getItem("selectedCharacter");
@@ -144,14 +199,6 @@ function Battle({ player }) {
         } else {
             setPlayerHealth(currentPlayerStats.HEALTH);
             localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
-        }
-    }, []);
-
-    useEffect(() => {
-        if (!isBattleActive && !currentBattle && !battleResult) {
-            const randomEnemy = getRandomEnemy();
-            setCurrentEnemy(randomEnemy);
-            startRealTimeBattle(randomEnemy);
         }
     }, []);
 
@@ -240,10 +287,99 @@ function Battle({ player }) {
         return () => clearInterval(interval);
     }, [isBattleActive, currentBattle]);
 
+    // Enemy Selection Screen
+    if (battleMode === 'selection') {
+        return (
+            <div className={styles.battleContainer}>
+                <div className={styles.enemySelectionHeader}>
+                    <Typography variant="h4" className={styles.selectionTitle}>
+                        {t('battle.selectEnemy')}
+                    </Typography>
+                    <Typography variant="h6" className={styles.selectionSubtitle}>
+                        {t('battle.choosYourOpponent')}
+                    </Typography>
+                </div>
 
+                <Grid container spacing={3} className={styles.enemyGrid}>
+                    {Object.values(enemies).map((enemy) => (
+                        <Grid item xs={12} sm={6} md={4} lg={3} key={enemy.id}>
+                            <Tooltip
+                                title={renderLootTooltip(enemy)}
+                                arrow
+                                placement="top"
+                                className={styles.enemyTooltip}
+                            >
+                                <Card className={styles.enemyCard}>
+                                    <CardActionArea onClick={() => handleEnemySelect(enemy)}>
+                                        <CardContent className={styles.enemyCardContent}>
+                                            <div className={styles.enemyAvatar}>
+                                                <Avatar 
+                                                    src={getEnemyIcon(enemy.id)} 
+                                                    className={styles.enemyImage}
+                                                    onError={(e) => {
+                                                        e.target.style.display = 'none';
+                                                        e.target.nextSibling.style.display = 'flex';
+                                                    }}
+                                                />
+                                                <div 
+                                                    className={styles.enemyAvatarFallback}
+                                                    style={{ display: 'none' }}
+                                                >
+                                                    {getEnemyInitial(enemy.name)}
+                                                </div>
+                                            </div>
+                                            
+                                            <Typography variant="h6" className={styles.enemyName}>
+                                                {enemy.name}
+                                            </Typography>
+                                            
+                                            <div className={styles.enemyStats}>
+                                                <Typography variant="body2">
+                                                    ❤️ HP: {enemy.maxHp}
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    ⚔️ ATK: {enemy.ATK}
+                                                </Typography>
+                                                <Typography variant="body2">
+                                                    🛡️ DEF: {enemy.DEF}
+                                                </Typography>
+                                            </div>
+                                            
+                                            <div 
+                                                className={styles.difficultyBadge}
+                                                style={{ backgroundColor: getDifficultyColor(enemy) }}
+                                            >
+                                                <Typography variant="caption">
+                                                    {getDifficultyText(enemy)}
+                                                </Typography>
+                                            </div>
+                                        </CardContent>
+                                    </CardActionArea>
+                                </Card>
+                            </Tooltip>
+                        </Grid>
+                    ))}
+                </Grid>
+            </div>
+        );
+    }
 
+    // Battle Screen
     return (
         <div className={styles.battleContainer}>
+            <div className={styles.battleHeader}>
+                <Button 
+                    variant="outlined" 
+                    onClick={handleBackToSelection}
+                    className={styles.backButton}
+                >
+                    {t('battle.backToSelection')}
+                </Button>
+                <Typography variant="h5" className={styles.battleTitle}>
+                    {t('battle.fightThisEnemy')}: {currentEnemy?.name}
+                </Typography>
+            </div>
+
             <div className={styles.fighters}>
                 {/* PLAYER */}
                 <div className={styles.fighter}>
@@ -289,7 +425,7 @@ function Battle({ player }) {
                 {/* ENEMY */}
                 <div className={styles.fighter}>
                     <Avatar 
-                        src={getEnemyIcon(currentEnemy.id)} 
+                        src={getEnemyIcon(currentEnemy?.id)} 
                         className={styles.avatar}
                         onError={(e) => {
                             e.target.style.display = 'none';
@@ -300,9 +436,9 @@ function Battle({ player }) {
                         className={styles.avatarFallback}
                         style={{ display: 'none' }}
                     >
-                        {getEnemyInitial(currentEnemy.name)}
+                        {getEnemyInitial(currentEnemy?.name)}
                     </div>
-                    <Typography variant="h6">{currentEnemy.name}</Typography>
+                    <Typography variant="h6">{currentEnemy?.name}</Typography>
                     
                     {/* Damage Display */}
                     {damageDisplay.enemy && (
@@ -335,9 +471,9 @@ function Battle({ player }) {
                         </div>
                     ) : (
                         <>
-                                                                            <div className={styles.hpBarContainer}>
+                            <div className={styles.hpBarContainer}>
                                 <Typography className={styles.hpText}>
-                                    HP: {currentBattle?.enemy?.currentHealth || currentEnemy.maxHp}/{currentBattle?.enemy?.maxHp || currentEnemy.maxHp}
+                                    HP: {currentBattle?.enemy?.currentHealth || currentEnemy?.maxHp}/{currentBattle?.enemy?.maxHp || currentEnemy?.maxHp}
                                 </Typography>
                                 <LinearProgress
                                     variant="determinate"
@@ -347,7 +483,7 @@ function Battle({ player }) {
                             </div>
                             <div className={styles.attackBarContainer}>
                                 <Typography className={styles.attackTimeText}>
-                                    {Math.ceil(100 / (currentBattle?.enemy?.ATTACK_SPEED || currentEnemy.ATTACK_SPEED || 1.5) * 0.2)}s
+                                    {Math.ceil(100 / (currentBattle?.enemy?.ATTACK_SPEED || currentEnemy?.ATTACK_SPEED || 1.5) * 0.2)}s
                                 </Typography>
                                 <LinearProgress
                                     variant="determinate"
@@ -360,8 +496,6 @@ function Battle({ player }) {
                     )}
                 </div>
             </div>
-
-
 
             {/* Widget Container - Yan yana düzenleme */}
             <div className={styles.widgetContainer}>
@@ -391,9 +525,9 @@ function Battle({ player }) {
                             <Typography>🎯 {t('battle.criticalChance')}: {playerStats.CRIT_CHANCE}% {getEquipmentBonuses().CRIT_CHANCE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span> : ''}</Typography>
                             <Typography>💥 {t('battle.criticalDamage')}: {playerStats.CRIT_DAMAGE}% {getEquipmentBonuses().CRIT_DAMAGE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span> : ''}</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(playerStats.ATK, currentEnemy.DEF)}%</Typography>
-                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(playerStats.ATK, currentEnemy.DEF)}</Typography>
-                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(playerStats.ATK, currentEnemy.DEF) * (playerStats.CRIT_DAMAGE / 100))}</Typography>
+                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(playerStats.ATK, currentEnemy?.DEF || 0)}%</Typography>
+                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(playerStats.ATK, currentEnemy?.DEF || 0)}</Typography>
+                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(playerStats.ATK, currentEnemy?.DEF || 0) * (playerStats.CRIT_DAMAGE / 100))}</Typography>
                         </>
                     )}
                 </div>
@@ -417,16 +551,16 @@ function Battle({ player }) {
                         </>
                     ) : (
                         <>
-                            <Typography>⚔️ {t('battle.attack')}: {currentEnemy.ATK}</Typography>
-                            <Typography>🛡️ {t('battle.defense')}: {currentEnemy.DEF}</Typography>
-                            <Typography>❤️ {t('battle.health')}: {currentEnemy.maxHp}/{currentEnemy.maxHp}</Typography>
-                            <Typography>⚡ {t('battle.attackSpeed')}: {currentEnemy.ATTACK_SPEED || 1.5}</Typography>
+                            <Typography>⚔️ {t('battle.attack')}: {currentEnemy?.ATK}</Typography>
+                            <Typography>🛡️ {t('battle.defense')}: {currentEnemy?.DEF}</Typography>
+                            <Typography>❤️ {t('battle.health')}: {currentEnemy?.maxHp}/{currentEnemy?.maxHp}</Typography>
+                            <Typography>⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}</Typography>
                             <Typography>🎯 {t('battle.criticalChance')}: 3%</Typography>
                             <Typography>💥 {t('battle.criticalDamage')}: 120%</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy.ATK, playerStats.DEF)}%</Typography>
-                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy.ATK, playerStats.DEF)}</Typography>
-                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy.ATK, playerStats.DEF) * 1.2)}</Typography>
+                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%</Typography>
+                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF)}</Typography>
+                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF) * 1.2)}</Typography>
                         </>
                     )}
                 </div>
@@ -435,7 +569,7 @@ function Battle({ player }) {
                 <div className={styles.section}>
                     <Typography variant="h6">{t('battle.possibleLoot')}</Typography>
                     <Divider />
-                    {currentEnemy.drops.map((drop) => (
+                    {currentEnemy?.drops.map((drop) => (
                         <Typography key={drop.name} className={drop.type === 'gold' ? styles.goldLoot : styles.equipmentLoot}>
                             {drop.name} - {(drop.chance * 100).toFixed(0)}%
                             {drop.type === 'gold' && (
@@ -463,8 +597,6 @@ function Battle({ player }) {
                     )}
                 </div>
             </div>
-
-
 
             {/* Battle Log - Her zaman göster */}
             <div className={styles.section}>

@@ -68,7 +68,13 @@
     "critDamage": "Crit Damage",
     "playerFinalHp": "Player Final HP",
     "enemyFinalHp": "Enemy Final HP",
-    "youDied": "YOU DIED!"
+    "youDied": "YOU DIED!",
+    "selectEnemy": "Select Enemy",
+    "choosYourOpponent": "Choose your opponent",
+    "backToSelection": "Back to Selection",
+    "fightThisEnemy": "Fight This Enemy",
+    "possibleDrops": "Possible Drops",
+    "enemyDifficulty": "Enemy Difficulty"
   },
   "equipment": {
     "equip": "Equip",

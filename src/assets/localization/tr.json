@@ -68,7 +68,13 @@
     "critDamage": "Kritik Hasar",
     "playerFinalHp": "Oyuncu Son Can",
     "enemyFinalHp": "Düşman Son Can",
-    "youDied": "ÖLDÜN!"
+    "youDied": "ÖLDÜN!",
+    "selectEnemy": "Düşman Seç",
+    "choosYourOpponent": "Rakibini seç",
+    "backToSelection": "Seçime Geri Dön",
+    "fightThisEnemy": "Bu Düşmanla Savaş",
+    "possibleDrops": "Olası Ganimetler",
+    "enemyDifficulty": "Düşman Zorluğu"
   },
   "equipment": {
     "equip": "Tak",
