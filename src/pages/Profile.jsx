@@ -9,6 +9,7 @@ import {
     EmojiEvents
 } from "@mui/icons-material";
 import { getSkillIcon } from "../utils/common.js";
+import { useTranslate } from "../hooks/useTranslate";
 
 const categoryIcons = {
     melee: <SportsKabaddi />,
@@ -26,6 +27,7 @@ const characterTypes = {
 
 function Profile() {
     const navigate = useNavigate();
+    const { t } = useTranslate();
     const [skills, setSkills] = useState(() => {
         const saved = localStorage.getItem("gameData");
         return saved ? JSON.parse(saved) : INITIAL_SKILLS;
@@ -42,10 +44,10 @@ function Profile() {
     return (
         <div style={{ padding: "2rem" }}>
             <Typography variant="h4" gutterBottom>
-                Skill Selection
+                {t('common.skillSelection')}
             </Typography>
             <Typography variant="body1" color="text.secondary" gutterBottom>
-                Choose your primary skill category to determine your character type
+                {t('common.chooseSkillCategory')}
             </Typography>
 
             <Grid container spacing={3} sx={{ mt: 2 }}>
@@ -81,10 +83,10 @@ function Profile() {
                                         ))}
                                     </div>
                                     <Typography variant="h6" gutterBottom>
-                                        {category.toUpperCase()}
+                                        {t(`skills.${category}`)}
                                     </Typography>
                                     <Typography variant="body2" color="text.secondary">
-                                        {Object.keys(subskills).length} skills available
+                                        {Object.keys(subskills).length} {t('common.skillsAvailable')}
                                     </Typography>
                                     
                                     {/* Skill seviyelerini göster */}
@@ -92,7 +94,7 @@ function Profile() {
                                         {Object.entries(subskills).map(([skillName, value]) => (
                                             <div key={skillName} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                 <Typography variant="body2">
-                                                    {skillName}
+                                                    {t(`skills.${skillName}`)}
                                                 </Typography>
                                                 <Typography variant="body2" fontWeight="bold">
                                                     Lv.{value}

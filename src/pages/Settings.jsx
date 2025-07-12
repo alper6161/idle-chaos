@@ -9,13 +9,20 @@ import {
     Typography,
     Box,
     Alert,
-    IconButton
+    IconButton,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemIcon,
+    Divider
 } from "@mui/material";
-import { Close, Warning, Refresh } from "@mui/icons-material";
+import { Close, Warning, Refresh, Language } from "@mui/icons-material";
+import { useTranslate } from "../hooks/useTranslate";
 
 function Settings({ open, onClose }) {
     const navigate = useNavigate();
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
 
     const handleHardReset = () => {
         // Clear all localStorage data
@@ -67,7 +74,7 @@ function Settings({ open, onClose }) {
                     justifyContent: 'space-between',
                     alignItems: 'center'
                 }}>
-                    SETTINGS
+                    {t('common.settings')}
                     <IconButton 
                         onClick={onClose}
                         sx={{ 
@@ -88,6 +95,59 @@ function Settings({ open, onClose }) {
                     <Box sx={{ mt: 2 }}>
                         <Typography variant="h6" gutterBottom sx={{ 
                             color: '#96ceb4',
+                            fontSize: '0.9rem',
+                            textShadow: '1px 1px 0px #000'
+                        }}>
+                            {t('common.language')}
+                        </Typography>
+                        
+                        <List sx={{ mt: 2, p: 0 }}>
+                            {getAvailableLanguages().map((lang) => (
+                                <ListItem 
+                                    key={lang.code}
+                                    button
+                                    onClick={() => changeLanguage(lang.code)}
+                                    sx={{
+                                        backgroundColor: getCurrentLanguage() === lang.code ? 'rgba(150, 206, 180, 0.2)' : 'transparent',
+                                        border: getCurrentLanguage() === lang.code ? '2px solid #96ceb4' : '2px solid transparent',
+                                        borderRadius: 1,
+                                        mb: 1,
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(150, 206, 180, 0.1)',
+                                            borderColor: '#96ceb4'
+                                        }
+                                    }}
+                                >
+                                    <ListItemIcon sx={{ minWidth: 40 }}>
+                                        <img 
+                                            src={lang.flag} 
+                                            alt={lang.name}
+                                            style={{ 
+                                                width: '24px', 
+                                                height: '16px',
+                                                objectFit: 'contain'
+                                            }}
+                                        />
+                                    </ListItemIcon>
+                                    <ListItemText 
+                                        primary={lang.name}
+                                        sx={{
+                                            '& .MuiListItemText-primary': {
+                                                fontFamily: 'Press Start 2P, monospace',
+                                                fontSize: '0.7rem',
+                                                color: '#e0e0e0',
+                                                textShadow: '1px 1px 0px #000'
+                                            }
+                                        }}
+                                    />
+                                </ListItem>
+                            ))}
+                        </List>
+                        
+                        <Divider sx={{ my: 3, borderColor: '#4a4a6a' }} />
+                        
+                        <Typography variant="h6" gutterBottom sx={{ 
+                            color: '#ff6b6b',
                             fontSize: '0.9rem',
                             textShadow: '1px 1px 0px #000'
                         }}>
@@ -117,7 +177,7 @@ function Settings({ open, onClose }) {
                                     }
                                 }}
                             >
-                                HARD RESET
+                                {t('common.clearData')}
                             </Button>
                             
                             <Typography variant="body2" sx={{ 
@@ -149,7 +209,7 @@ function Settings({ open, onClose }) {
                             }
                         }}
                     >
-                        CLOSE
+                        {t('common.cancel')}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -179,7 +239,7 @@ function Settings({ open, onClose }) {
                     gap: 1
                 }}>
                     <Warning sx={{ color: '#ff6b6b' }} />
-                    CONFIRM RESET
+                    {t('common.clearData')}
                 </DialogTitle>
                 
                 <DialogContent sx={{ 
@@ -198,13 +258,7 @@ function Settings({ open, onClose }) {
                             textShadow: '1px 1px 0px #000'
                         }
                     }}>
-                        This action will permanently delete all your saved data including:
-                        • Character progress
-                        • Equipment and inventory
-                        • Battle statistics
-                        • All game settings
-                        
-                        This action cannot be undone!
+                        {t('common.clearDataConfirm')}
                     </Alert>
                 </DialogContent>
                 
@@ -226,7 +280,7 @@ function Settings({ open, onClose }) {
                             }
                         }}
                     >
-                        CANCEL
+                        {t('common.cancel')}
                     </Button>
                     <Button 
                         onClick={handleResetConfirm}
@@ -249,7 +303,7 @@ function Settings({ open, onClose }) {
                             }
                         }}
                     >
-                        RESET GAME
+                        {t('common.confirm')}
                     </Button>
                 </DialogActions>
             </Dialog>

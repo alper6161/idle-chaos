@@ -15,6 +15,7 @@ import {
     LinearProgress
 } from "@mui/material";
 import { FilterList, Person, TrendingUp, Shield, LocalFireDepartment } from "@mui/icons-material";
+import { useTranslate } from "../hooks/useTranslate";
 
 const EQUIPMENT_SLOTS = {
     weapon: { name: "Weapon", icon: "/images/equipment/weapon.png", slot: "weapon", position: "left" },
@@ -96,6 +97,7 @@ const saveToStorage = (key, data) => {
 };
 
 function Equipment() {
+    const { t } = useTranslate();
     const [equippedItems, setEquippedItems] = useState(() => 
         loadFromStorage(STORAGE_KEYS.EQUIPPED_ITEMS, SAMPLE_EQUIPMENT)
     );
@@ -406,7 +408,7 @@ function Equipment() {
                     ) : (
                         <div className={styles.emptySlot}>
                             <Typography variant="caption" className={styles.emptyText}>
-                                Empty
+                                {t('common.empty')}
                             </Typography>
                         </div>
                     )}
@@ -438,10 +440,10 @@ function Equipment() {
                 <div className={styles.headerContent}>
                     <div className={styles.titleSection}>
                         <Typography variant="h4" className={styles.pageTitle}>
-                            Equipment Forge
+                            {t('common.equipmentForge')}
                         </Typography>
                         <Typography variant="subtitle1" className={styles.subtitle}>
-                            Craft your legend, forge your destiny
+                            {t('common.craftLegend')}
                         </Typography>
                     </div>
                     <div className={styles.powerSection}>
@@ -452,7 +454,7 @@ function Equipment() {
                                     {powerLevel}
                                 </Typography>
                                 <Typography variant="caption" className={styles.powerLabel}>
-                                    Power Level
+                                    {t('common.powerLevel')}
                                 </Typography>
                             </div>
                         </div>
@@ -465,7 +467,7 @@ function Equipment() {
                 <div className={styles.panelHeader}>
                     <TrendingUp className={styles.panelIcon} />
                     <Typography variant="h6" className={styles.panelTitle}>
-                        Total Stats
+                        {t('common.totalStats')}
                     </Typography>
                 </div>
                 
@@ -489,7 +491,7 @@ function Equipment() {
                     ) : (
                         <div className={styles.noStats}>
                             <Typography variant="body2" className={styles.noStatsText}>
-                                No equipment equipped
+                                {t('common.noEquipmentEquipped')}
                             </Typography>
                         </div>
                     )}
@@ -503,7 +505,7 @@ function Equipment() {
                         <div className={styles.panelHeader}>
                             <Person className={styles.panelIcon} />
                             <Typography variant="h6" className={styles.panelTitle}>
-                                Character Equipment
+                                {t('common.characterEquipment')}
                             </Typography>
                         </div>
                         
@@ -603,7 +605,7 @@ function Equipment() {
                                             onClick={() => handleUnequipItem(selectedSlot)}
                                             className={styles.unequipButton}
                                         >
-                                            Unequip
+                                            {t('equipment.unequip')}
                                         </Button>
                                     )}
                                 </div>
@@ -695,7 +697,7 @@ function Equipment() {
                 className={styles.replaceDialog}
             >
                 <DialogTitle className={styles.dialogTitle}>
-                    <Typography variant="h6">Replace Equipment</Typography>
+                    <Typography variant="h6">{t('equipment.replace')}</Typography>
                 </DialogTitle>
                 <DialogContent className={styles.dialogContent}>
                     <div className={styles.replaceComparison}>
@@ -790,10 +792,10 @@ function Equipment() {
                 </DialogContent>
                 <DialogActions className={styles.dialogActions}>
                     <Button onClick={handleReplaceCancel} className={styles.cancelButton}>
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     <Button onClick={handleReplaceConfirm} className={styles.confirmButton}>
-                        Replace Equipment
+                        {t('equipment.replace')}
                     </Button>
                 </DialogActions>
             </Dialog>

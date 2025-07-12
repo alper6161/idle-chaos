@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../assets/styles/Home.module.scss";
+import { useTranslate } from "../hooks/useTranslate";
 
 function Home() {
     const navigate = useNavigate();
     const [hasSave, setHasSave] = useState(false);
+    const { t } = useTranslate();
 
     useEffect(() => {
         const save = localStorage.getItem("gameData");
@@ -19,14 +21,14 @@ function Home() {
     const handleContinue = () => navigate("/battle");
 
     const handleImport = () => {
-        const input = prompt("Paste your save data:");
+        const input = prompt(t('common.pasteSaveData'));
         try {
             const parsed = JSON.parse(input);
             localStorage.setItem("gameData", JSON.stringify(parsed));
-            alert("Save imported!");
+            alert(t('common.saveImported'));
             setHasSave(true);
         } catch (e) {
-            alert("Invalid save data!");
+            alert(t('common.invalidSaveData'));
         }
     };
 
@@ -39,7 +41,7 @@ function Home() {
             />
 
             <button className={styles.button} onClick={handleNewGame}>
-                New Game
+                {t('common.newGame')}
             </button>
 
             {hasSave && (
@@ -47,7 +49,7 @@ function Home() {
                     className={`${styles.button} ${styles.secondary}`}
                     onClick={handleContinue}
                 >
-                    Continue Game
+                    {t('common.continueGame')}
                 </button>
             )}
 
@@ -55,7 +57,7 @@ function Home() {
                 className={`${styles.button} ${styles.secondary}`}
                 onClick={handleImport}
             >
-                Import Save
+                {t('common.importSave')}
             </button>
         </div>
     );

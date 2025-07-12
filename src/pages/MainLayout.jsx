@@ -6,10 +6,12 @@ import { Settings, AccountCircle } from "@mui/icons-material";
 import {getSkillIcon} from "../utils/common.js";
 import SettingsDialog from "./Settings.jsx";
 import { getGold, formatGold } from "../utils/gold.js";
+import { useTranslate } from "../hooks/useTranslate";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [playerGold, setPlayerGold] = useState(getGold());
+    const { t } = useTranslate();
 
     const handleSettingsClick = () => {
         setSettingsOpen(true);
@@ -37,32 +39,32 @@ function MainLayout() {
             <aside className={styles.sidebar}>
                 {/* Equipment Section */}
                 <div className={styles.group}>
-                    <div className={styles.groupTitle}>EQUIPMENT</div>
+                    <div className={styles.groupTitle}>{t('common.equipment').toUpperCase()}</div>
                     <NavLink
                         to="/equipment"
                         className={styles.equipmentItem}
                     >
                         <span className={styles.equipmentIcon}>⚔️</span>
-                        <span className={styles.equipmentLabel}>Equipment</span>
+                        <span className={styles.equipmentLabel}>{t('common.equipment')}</span>
                     </NavLink>
                 </div>
 
                 {/* Battle Section */}
                 <div className={styles.group}>
-                    <div className={styles.groupTitle}>BATTLE</div>
+                    <div className={styles.groupTitle}>{t('common.battle').toUpperCase()}</div>
                     <NavLink
                         to="/battle"
                         className={styles.battleItem}
                     >
                         <span className={styles.battleIcon}>⚔️</span>
-                        <span className={styles.battleLabel}>Battle</span>
+                        <span className={styles.battleLabel}>{t('common.battle')}</span>
                     </NavLink>
                 </div>
 
                 {/* Skills Sections */}
                 {Object.entries(INITIAL_SKILLS).map(([category, subskills]) => (
                     <div key={category} className={styles.group}>
-                        <div className={styles.groupTitle}>{category.toUpperCase()}</div>
+                        <div className={styles.groupTitle}>{t(`skills.${category}`)}</div>
                         {typeof subskills === "object" &&
                             Object.entries(subskills).map(([skill, level]) => (
                                 <NavLink
@@ -71,7 +73,7 @@ function MainLayout() {
                                     className={styles.skillItem}
                                 >
                                     <img src={getSkillIcon(skill)} alt={skill} />
-                                    <span className={styles.skillLabel}>{skill}</span>
+                                    <span className={styles.skillLabel}>{t(`skills.${skill}`)}</span>
                                     <span className={styles.skillLevel}>Lv.{level}</span>
                                 </NavLink>
                             ))}

@@ -27,6 +27,7 @@ import {
 import { getPlayerStats, getEquipmentBonuses } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
+import { useTranslate } from "../hooks/useTranslate";
 
 
 
@@ -35,6 +36,7 @@ function Battle({ player }) {
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
     const [playerHealth, setPlayerHealth] = useState(playerStats.HEALTH);
+    const { t } = useTranslate();
 
     const [lootBag, setLootBag] = useState([]);
     const [playerGold, setPlayerGold] = useState(getGold());
@@ -365,16 +367,16 @@ function Battle({ player }) {
             <div className={styles.widgetContainer}>
                 {/* PLAYER STATS */}
                 <div className={styles.section}>
-                    <Typography variant="h6">Player Stats</Typography>
+                    <Typography variant="h6">{t('battle.health')}</Typography>
                     <Divider />
                     {currentBattle ? (
                         <>
-                            <Typography>⚔️ ATK: {currentBattle.player.ATK}</Typography>
-                            <Typography>🛡️ DEF: {currentBattle.player.DEF}</Typography>
-                            <Typography>❤️ HP: {currentBattle.player.currentHealth}/{currentBattle.player.HEALTH}</Typography>
-                            <Typography>⚡ Attack Speed: {currentBattle.player.ATTACK_SPEED}</Typography>
-                            <Typography>🎯 Crit Chance: {currentBattle.player.CRIT_CHANCE || 5}%</Typography>
-                            <Typography>💥 Crit Damage: {currentBattle.player.CRIT_DAMAGE || 150}%</Typography>
+                            <Typography>⚔️ {t('battle.attack')}: {currentBattle.player.ATK}</Typography>
+                            <Typography>🛡️ {t('battle.defense')}: {currentBattle.player.DEF}</Typography>
+                            <Typography>❤️ {t('battle.health')}: {currentBattle.player.currentHealth}/{currentBattle.player.HEALTH}</Typography>
+                            <Typography>⚡ {t('battle.attackSpeed')}: {currentBattle.player.ATTACK_SPEED}</Typography>
+                            <Typography>🎯 {t('battle.criticalChance')}: {currentBattle.player.CRIT_CHANCE || 5}%</Typography>
+                            <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.player.CRIT_DAMAGE || 150}%</Typography>
                             <Divider sx={{ my: 1 }} />
                             <Typography>🎲 Hit Chance: {calculateHitChance(currentBattle.player.ATK, currentBattle.enemy.DEF)}%</Typography>
                             <Typography>⚔️ Base Damage: {calculateDamage(currentBattle.player.ATK, currentBattle.enemy.DEF)}</Typography>
@@ -382,12 +384,12 @@ function Battle({ player }) {
                         </>
                     ) : (
                         <>
-                            <Typography>⚔️ ATK: {playerStats.ATK} {getEquipmentBonuses().ATK ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span> : ''}</Typography>
-                            <Typography>🛡️ DEF: {playerStats.DEF} {getEquipmentBonuses().DEF ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span> : ''}</Typography>
-                            <Typography>❤️ HP: {playerHealth}/{playerStats.HEALTH} {getEquipmentBonuses().HEALTH ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span> : ''}</Typography>
-                            <Typography>⚡ Attack Speed: {playerStats.ATTACK_SPEED} {getEquipmentBonuses().ATTACK_SPEED ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span> : ''}</Typography>
-                            <Typography>🎯 Crit Chance: {playerStats.CRIT_CHANCE}% {getEquipmentBonuses().CRIT_CHANCE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span> : ''}</Typography>
-                            <Typography>💥 Crit Damage: {playerStats.CRIT_DAMAGE}% {getEquipmentBonuses().CRIT_DAMAGE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span> : ''}</Typography>
+                            <Typography>⚔️ {t('battle.attack')}: {playerStats.ATK} {getEquipmentBonuses().ATK ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span> : ''}</Typography>
+                            <Typography>🛡️ {t('battle.defense')}: {playerStats.DEF} {getEquipmentBonuses().DEF ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span> : ''}</Typography>
+                            <Typography>❤️ {t('battle.health')}: {playerHealth}/{playerStats.HEALTH} {getEquipmentBonuses().HEALTH ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span> : ''}</Typography>
+                            <Typography>⚡ {t('battle.attackSpeed')}: {playerStats.ATTACK_SPEED} {getEquipmentBonuses().ATTACK_SPEED ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span> : ''}</Typography>
+                            <Typography>🎯 {t('battle.criticalChance')}: {playerStats.CRIT_CHANCE}% {getEquipmentBonuses().CRIT_CHANCE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span> : ''}</Typography>
+                            <Typography>💥 {t('battle.criticalDamage')}: {playerStats.CRIT_DAMAGE}% {getEquipmentBonuses().CRIT_DAMAGE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span> : ''}</Typography>
                             <Divider sx={{ my: 1 }} />
                             <Typography>🎲 Hit Chance: {calculateHitChance(playerStats.ATK, currentEnemy.DEF)}%</Typography>
                             <Typography>⚔️ Base Damage: {calculateDamage(playerStats.ATK, currentEnemy.DEF)}</Typography>
@@ -402,12 +404,12 @@ function Battle({ player }) {
                     <Divider />
                     {currentBattle ? (
                         <>
-                            <Typography>⚔️ ATK: {currentBattle.enemy.ATK}</Typography>
-                            <Typography>🛡️ DEF: {currentBattle.enemy.DEF}</Typography>
-                            <Typography>❤️ HP: {currentBattle.enemy.currentHealth}/{currentBattle.enemy.maxHp}</Typography>
-                            <Typography>⚡ Attack Speed: {currentBattle.enemy.ATTACK_SPEED}</Typography>
-                            <Typography>🎯 Crit Chance: {currentBattle.enemy.CRIT_CHANCE || 3}%</Typography>
-                            <Typography>💥 Crit Damage: {currentBattle.enemy.CRIT_DAMAGE || 120}%</Typography>
+                            <Typography>⚔️ {t('battle.attack')}: {currentBattle.enemy.ATK}</Typography>
+                            <Typography>🛡️ {t('battle.defense')}: {currentBattle.enemy.DEF}</Typography>
+                            <Typography>❤️ {t('battle.health')}: {currentBattle.enemy.currentHealth}/{currentBattle.enemy.maxHp}</Typography>
+                            <Typography>⚡ {t('battle.attackSpeed')}: {currentBattle.enemy.ATTACK_SPEED}</Typography>
+                            <Typography>🎯 {t('battle.criticalChance')}: {currentBattle.enemy.CRIT_CHANCE || 3}%</Typography>
+                            <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.enemy.CRIT_DAMAGE || 120}%</Typography>
                             <Divider sx={{ my: 1 }} />
                             <Typography>🎲 Hit Chance: {calculateHitChance(currentBattle.enemy.ATK, currentBattle.player.DEF)}%</Typography>
                             <Typography>⚔️ Base Damage: {calculateDamage(currentBattle.enemy.ATK, currentBattle.player.DEF)}</Typography>
@@ -415,12 +417,12 @@ function Battle({ player }) {
                         </>
                     ) : (
                         <>
-                            <Typography>⚔️ ATK: {currentEnemy.ATK}</Typography>
-                            <Typography>🛡️ DEF: {currentEnemy.DEF}</Typography>
-                            <Typography>❤️ HP: {currentEnemy.maxHp}/{currentEnemy.maxHp}</Typography>
-                            <Typography>⚡ Attack Speed: {currentEnemy.ATTACK_SPEED || 1.5}</Typography>
-                            <Typography>🎯 Crit Chance: 3%</Typography>
-                            <Typography>💥 Crit Damage: 120%</Typography>
+                            <Typography>⚔️ {t('battle.attack')}: {currentEnemy.ATK}</Typography>
+                            <Typography>🛡️ {t('battle.defense')}: {currentEnemy.DEF}</Typography>
+                            <Typography>❤️ {t('battle.health')}: {currentEnemy.maxHp}/{currentEnemy.maxHp}</Typography>
+                            <Typography>⚡ {t('battle.attackSpeed')}: {currentEnemy.ATTACK_SPEED || 1.5}</Typography>
+                            <Typography>🎯 {t('battle.criticalChance')}: 3%</Typography>
+                            <Typography>💥 {t('battle.criticalDamage')}: 120%</Typography>
                             <Divider sx={{ my: 1 }} />
                             <Typography>🎲 Hit Chance: {calculateHitChance(currentEnemy.ATK, playerStats.DEF)}%</Typography>
                             <Typography>⚔️ Base Damage: {calculateDamage(currentEnemy.ATK, playerStats.DEF)}</Typography>
@@ -492,7 +494,7 @@ function Battle({ player }) {
             {battleResult && (
                 <div className={styles.section}>
                     <Typography variant="h6" color={battleResult.winner === 'player' ? 'success.main' : 'error.main'}>
-                        {battleResult.winner === 'player' ? '🎉 Player Wins!' : '💀 Enemy Wins!'}
+                        {battleResult.winner === 'player' ? t('battle.playerWins') : t('battle.enemyWins')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         Player Final HP: {battleResult.playerFinalHealth} | 
@@ -514,10 +516,10 @@ function Battle({ player }) {
                 <DialogContent className={styles.deathDialogContent}>
                     <div className={styles.deathMessage}>
                         <Typography variant="h5" className={styles.deathText}>
-                            You have been defeated by {currentEnemy.name}!
+                            {t('battle.playerDefeated')}
                         </Typography>
                         <Typography variant="body1" className={styles.respawnText}>
-                            Respawning in {deathDialog.countdown} seconds...
+                            {t('battle.respawnIn', { seconds: deathDialog.countdown })}
                         </Typography>
                         <div className={styles.respawnProgress}>
                             <LinearProgress 
