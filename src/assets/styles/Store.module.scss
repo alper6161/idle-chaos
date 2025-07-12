@@ -382,3 +382,269 @@
         font-size: 1.1rem !important;
     }
 } 
+
+// Store Tabs
+.storeTabs {
+  .MuiTab-root {
+    color: #e0e0e0 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 0.7rem !important;
+    text-transform: none !important;
+    
+    &.Mui-selected {
+      color: #4ade80 !important;
+    }
+  }
+  
+  .MuiTabs-indicator {
+    background-color: #4ade80 !important;
+  }
+}
+
+// Buffs Section
+.buffsSection {
+  .sectionTitle {
+    color: #e0e0e0 !important;
+    text-shadow: 2px 2px 0px #000;
+    font-family: 'Press Start 2P', monospace !important;
+    margin-bottom: 1rem !important;
+  }
+}
+
+.itemsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.storeItem {
+  background: linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%) !important;
+  border: 3px solid #4a4a6a !important;
+  border-radius: 0 !important;
+  box-shadow: 
+    0 0 0 2px #000,
+    0 4px 0 0 #3a3a5a;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 0 0 2px #000,
+      0 6px 0 0 #3a3a5a;
+  }
+}
+
+.itemContent {
+  padding: 1rem !important;
+}
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.itemIcon {
+  font-size: 1.5rem !important;
+}
+
+.itemName {
+  color: #e0e0e0 !important;
+  text-shadow: 1px 1px 0px #000;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.8rem !important;
+}
+
+.itemDescription {
+  color: #b0b0b0 !important;
+  font-size: 0.7rem !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.4;
+}
+
+.itemPrice {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.priceText {
+  color: #ffd700 !important;
+  text-shadow: 1px 1px 0px #000;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.9rem !important;
+}
+
+.itemActions {
+  padding: 0 1rem 1rem !important;
+  justify-content: center;
+}
+
+.purchaseButton {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.6rem !important;
+  text-transform: none !important;
+  border-radius: 0 !important;
+  padding: 0.5rem 1rem !important;
+}
+
+// Potions Section
+.potionsSection {
+  .sectionTitle {
+    color: #e0e0e0 !important;
+    text-shadow: 2px 2px 0px #000;
+    font-family: 'Press Start 2P', monospace !important;
+    margin-bottom: 1rem !important;
+  }
+}
+
+.potionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.potionItem {
+  background: linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%) !important;
+  border: 3px solid #4a4a6a !important;
+  border-radius: 0 !important;
+  box-shadow: 
+    0 0 0 2px #000,
+    0 4px 0 0 #3a3a5a;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 0 0 2px #000,
+      0 6px 0 0 #3a3a5a;
+  }
+}
+
+.potionContent {
+  padding: 1rem !important;
+}
+
+.potionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.potionIcon {
+  font-size: 1.5rem !important;
+}
+
+.potionName {
+  color: #e0e0e0 !important;
+  text-shadow: 1px 1px 0px #000;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.8rem !important;
+}
+
+.potionDescription {
+  color: #b0b0b0 !important;
+  font-size: 0.7rem !important;
+  margin-bottom: 1rem !important;
+  line-height: 1.4;
+}
+
+.potionStats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.potionHeal {
+  color: #4ade80 !important;
+  text-shadow: 1px 1px 0px #000;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.7rem !important;
+  font-weight: bold !important;
+}
+
+.potionCount {
+  color: #b0b0b0 !important;
+  font-size: 0.6rem !important;
+  font-family: 'Press Start 2P', monospace !important;
+}
+
+.potionPrice {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.potionActions {
+  padding: 0 1rem 1rem !important;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+// Active Buffs Section
+.activeBuffsSection {
+  margin-top: 2rem;
+  
+  .sectionTitle {
+    color: #e0e0e0 !important;
+    text-shadow: 2px 2px 0px #000;
+    font-family: 'Press Start 2P', monospace !important;
+    margin-bottom: 1rem !important;
+  }
+}
+
+.activeBuffsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.activeBuffCard {
+  background: linear-gradient(145deg, #1a3a2a 0%, #0a2a1a 100%) !important;
+  border: 2px solid #4ade80 !important;
+  border-radius: 0 !important;
+  box-shadow: 
+    0 0 0 1px #000,
+    0 2px 0 0 #3a5a4a;
+}
+
+.activeBuffContent {
+  padding: 0.8rem !important;
+}
+
+.activeBuffHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.activeBuffName {
+  color: #4ade80 !important;
+  text-shadow: 1px 1px 0px #000;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.7rem !important;
+}
+
+.buffProgress {
+  height: 8px !important;
+  border-radius: 0 !important;
+  background: rgba(74, 222, 128, 0.3) !important;
+  
+  .MuiLinearProgress-bar {
+    background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%) !important;
+  }
+}
+
+// Message Alert
+.messageAlert {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.7rem !important;
+} 

@@ -15,8 +15,11 @@ import {
     CardContent,
     CardActionArea,
     Tooltip,
-    Grid
+    Grid,
+    IconButton,
+    Chip
 } from "@mui/material";
+import { LocalDrink } from "@mui/icons-material";
 import { getLootDrop, saveLoot } from "../utils/combat.js";
 import enemies from "../utils/enemies.js";
 import { getEnemyIcon, getSkillIcon, getCharacterIcon, getEnemyInitial, getCharacterName } from "../utils/common.js";
@@ -32,6 +35,14 @@ import {
 import { getPlayerStats, getEquipmentBonuses } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
+import { 
+    POTION_TYPES, 
+    getPotions, 
+    usePotion, 
+    shouldUseAutoPotion,
+    getAutoPotionSettings,
+    saveAutoPotionSettings
+} from "../utils/potions.js";
 import { useTranslate } from "../hooks/useTranslate";
 
 function Battle({ player }) {
@@ -45,6 +56,11 @@ function Battle({ player }) {
     const [lootBag, setLootBag] = useState([]);
     const [playerGold, setPlayerGold] = useState(getGold());
     
+    // Potion states
+    const [potions, setPotions] = useState(getPotions());
+    const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
+    const [lastPotionUsed, setLastPotionUsed] = useState(null);
+    
     const [battleResult, setBattleResult] = useState(null);
     const [battleLog, setBattleLog] = useState([]);
     const [isBattleActive, setIsBattleActive] = useState(false);
@@ -57,6 +73,56 @@ function Battle({ player }) {
         open: false,
         countdown: 15
     });
+
+    // Potion usage function
+    const handleUsePotion = (potionType) => {
+        const result = usePotion(potionType);
+        if (result.success) {
+            setPotions(result.remainingPotions);
+            
+            // Heal the player
+            if (currentBattle) {
+                const newHealth = Math.min(
+                    currentBattle.player.currentHealth + result.healAmount,
+                    currentBattle.player.HEALTH
+                );
+                
+                setCurrentBattle(prev => ({
+                    ...prev,
+                    player: { ...prev.player, currentHealth: newHealth }
+                }));
+                
+                setPlayerHealth(newHealth);
+                localStorage.setItem("playerHealth", newHealth.toString());
+                
+                // Show potion used effect
+                setLastPotionUsed({
+                    type: potionType,
+                    healAmount: result.healAmount,
+                    timestamp: Date.now()
+                });
+                
+                // Clear effect after 2 seconds
+                setTimeout(() => {
+                    setLastPotionUsed(null);
+                }, 2000);
+            }
+        }
+    };
+
+    // Auto potion check
+    const checkAutoPotion = () => {
+        if (!currentBattle || !autoPotionSettings.enabled) return;
+        
+        const potionToUse = shouldUseAutoPotion(
+            currentBattle.player.currentHealth,
+            currentBattle.player.HEALTH
+        );
+        
+        if (potionToUse) {
+            handleUsePotion(potionToUse);
+        }
+    };
 
     const showDeathDialog = () => {
         setDeathDialog({
@@ -276,16 +342,44 @@ function Battle({ player }) {
 
                 return newBattle;
             });
+            
+            // Check for auto potion usage
+            checkAutoPotion();
         }, 200);
 
         return () => clearInterval(interval);
-    }, [isBattleActive, currentBattle]);
+    }, [isBattleActive, currentBattle, autoPotionSettings]);
 
     // playerStats değiştiğinde playerHealth'i de güncelle
     useEffect(() => {
         setPlayerHealth(playerStats.HEALTH);
         localStorage.setItem("playerHealth", playerStats.HEALTH.toString());
     }, [playerStats.HEALTH]);
+
+    // Update auto potion settings when buffs change
+    useEffect(() => {
+        const checkAutoPotionBuff = () => {
+            const activeBuffs = JSON.parse(localStorage.getItem('activeBuffs') || '{}');
+            const autoPotionBuff = activeBuffs['auto_potion'];
+            
+            if (autoPotionBuff && autoPotionBuff.expiresAt > Date.now()) {
+                // Auto potion buff is active
+                const newSettings = { ...autoPotionSettings, enabled: true };
+                setAutoPotionSettings(newSettings);
+                saveAutoPotionSettings(newSettings);
+            } else if (autoPotionSettings.enabled) {
+                // Auto potion buff expired, disable auto potion
+                const newSettings = { ...autoPotionSettings, enabled: false };
+                setAutoPotionSettings(newSettings);
+                saveAutoPotionSettings(newSettings);
+            }
+        };
+
+        const interval = setInterval(checkAutoPotionBuff, 5000);
+        checkAutoPotionBuff(); // Check immediately
+        
+        return () => clearInterval(interval);
+    }, [autoPotionSettings.enabled]);
 
     // Enemy Selection Screen
     if (battleMode === 'selection') {
@@ -490,6 +584,72 @@ function Battle({ player }) {
                     )}
                 </div>
             </div>
+
+            {/* Potion System */}
+            {currentBattle && (
+                <div className={styles.potionSection}>
+                    <div className={styles.potionHeader}>
+                        <Typography variant="h6" className={styles.potionTitle}>
+                            <LocalDrink /> {t('potions.healthPotions')}
+                        </Typography>
+                        <Chip 
+                            label={autoPotionSettings.enabled ? t('potions.autoOn') : t('potions.autoOff')}
+                            color={autoPotionSettings.enabled ? "success" : "default"}
+                            size="small"
+                            className={styles.autoPotionChip}
+                        />
+                    </div>
+                    
+                    <div className={styles.potionGrid}>
+                        {Object.entries(POTION_TYPES).map(([key, potion]) => {
+                            const count = potions[potion.id] || 0;
+                            const canUse = count > 0 && currentBattle.player.currentHealth < currentBattle.player.HEALTH;
+                            
+                            return (
+                                <Tooltip
+                                    key={potion.id}
+                                    title={`${t(`potions.${potion.id}HealthPotion`)} - ${t('potions.restoresHp', { amount: potion.healAmount })} (${count} available)`}
+                                    arrow
+                                    placement="top"
+                                >
+                                    <Button
+                                        variant="contained"
+                                        className={styles.potionButton}
+                                        disabled={!canUse}
+                                        onClick={() => handleUsePotion(potion.id)}
+                                        style={{
+                                            backgroundColor: potion.color,
+                                            border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',
+                                            boxShadow: lastPotionUsed?.type === potion.id ? '0 0 15px #ffd700' : 'none'
+                                        }}
+                                    >
+                                        <div className={styles.potionContent}>
+                                            <Typography variant="caption" className={styles.potionName}>
+                                                {t(`potions.${potion.id}HealthPotion`)}
+                                            </Typography>
+                                            <Typography variant="body2" className={styles.potionHeal}>
+                                                +{potion.healAmount}
+                                            </Typography>
+                                            <Typography variant="caption" className={styles.potionCount}>
+                                                {count}
+                                            </Typography>
+                                        </div>
+                                    </Button>
+                                </Tooltip>
+                            );
+                        })}
+                    </div>
+                    
+                    {/* Potion Used Effect */}
+                    {lastPotionUsed && (
+                        <div className={styles.potionEffect}>
+                            <Typography variant="h4" className={styles.healText}>
+                                +{lastPotionUsed.healAmount} HP
+                            </Typography>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Widget Container - Yan yana düzenleme */}
             <div className={styles.widgetContainer}>

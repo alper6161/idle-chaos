@@ -148,9 +148,12 @@
         "spider": "Giant Spider"
     },
     "store": {
+        "title": "Magic Shop",
         "magicShop": "Magic Shop",
         "enhanceYourJourney": "Enhance your journey with magical items",
         "activeBuffs": "Active Buffs",
+        "buffs": "Buffs",
+        "potions": "Potions",
         "rareDropBoost": "Rare Drop Boost",
         "rareDropBoostDesc": "Increases rare item drop chance by 50%",
         "expBoost": "Experience Boost",
@@ -163,14 +166,33 @@
         "luckyStrikeDesc": "Increases critical hit chance by 25%",
         "lightningSpeed": "Lightning Speed",
         "lightningSpeedDesc": "Increases attack speed by 30%",
+        "autoPotion": "Auto Potion",
+        "autoPotionDesc": "Automatically uses potions when HP drops below 40%",
         "purchase": "Purchase",
         "active": "Active",
         "notEnoughGold": "Not enough gold!",
         "buffAlreadyActive": "This buff is already active!",
+        "buffActivated": "Buff activated successfully!",
         "purchaseSuccess": "Purchase successful!",
         "confirmPurchase": "Confirm Purchase",
         "purchaseConfirmation": "Are you sure you want to purchase {{item}} for {{price}} gold?",
         "remainingGold": "Remaining gold: {{gold}}",
-        "confirm": "Confirm"
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "for": "for"
+    },
+    "potions": {
+        "minorHealthPotion": "Minor Health Potion",
+        "lesserHealthPotion": "Lesser Health Potion",
+        "greaterHealthPotion": "Greater Health Potion",
+        "superiorHealthPotion": "Superior Health Potion",
+        "majorHealthPotion": "Major Health Potion",
+        "restoresHp": "Restores {{amount}} HP",
+        "owned": "Owned: {{count}}",
+        "buy1": "Buy 1",
+        "buy5": "Buy 5",
+        "healthPotions": "Health Potions",
+        "autoOn": "Auto: ON",
+        "autoOff": "Auto: OFF"
     }
 } 

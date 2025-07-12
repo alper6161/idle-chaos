@@ -1,3 +1,5 @@
+import { getAutoPotionSettings, saveAutoPotionSettings } from './potions.js';
+
 // Buff Utility Functions
 // Manages active buffs purchased from the store and provides multipliers
 
@@ -128,4 +130,41 @@ export const getActiveBuffsInfo = () => {
     });
     
     return buffsInfo;
+}; 
+
+// Auto Potion Buff Handler
+export const handleAutoPotionBuff = (buff) => {
+    if (buff.id === 'auto_potion') {
+        // Enable auto potion when buff is activated
+        const autoPotionSettings = getAutoPotionSettings();
+        autoPotionSettings.enabled = true;
+        saveAutoPotionSettings(autoPotionSettings);
+        
+        return {
+            type: 'auto_potion',
+            enabled: true,
+            threshold: 40
+        };
+    }
+    return null;
+};
+
+// Get active auto potion status
+export const getActiveAutoPotion = () => {
+    const activeBuffs = getActiveBuffs();
+    const autoPotionBuff = activeBuffs.find(buff => buff.id === 'auto_potion');
+    
+    if (autoPotionBuff) {
+        return {
+            enabled: true,
+            threshold: 40,
+            expiresAt: autoPotionBuff.expiresAt
+        };
+    }
+    
+    return {
+        enabled: false,
+        threshold: 40,
+        expiresAt: null
+    };
 }; 

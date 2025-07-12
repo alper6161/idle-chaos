@@ -148,9 +148,12 @@
         "spider": "Dev Örümcek"
     },
     "store": {
+        "title": "Sihirli Mağaza",
         "magicShop": "Sihirli Mağaza",
         "enhanceYourJourney": "Sihirli eşyalarla yolculuğunu güçlendir",
         "activeBuffs": "Aktif Güçlendirmeler",
+        "buffs": "Güçlendirmeler",
+        "potions": "İksirler",
         "rareDropBoost": "Nadir Düşüş Artışı",
         "rareDropBoostDesc": "Nadir eşya düşüş şansını %50 artırır",
         "expBoost": "Deneyim Artışı",
@@ -163,14 +166,33 @@
         "luckyStrikeDesc": "Kritik vuruş şansını %25 artırır",
         "lightningSpeed": "Şimşek Hızı",
         "lightningSpeedDesc": "Saldırı hızını %30 artırır",
+        "autoPotion": "Otomatik İksir",
+        "autoPotionDesc": "Can %40'ın altına düştüğünde otomatik olarak iksir kullanır",
         "purchase": "Satın Al",
         "active": "Aktif",
         "notEnoughGold": "Yeterli altın yok!",
         "buffAlreadyActive": "Bu güçlendirme zaten aktif!",
+        "buffActivated": "Güçlendirme başarıyla aktifleştirildi!",
         "purchaseSuccess": "Satın alma başarılı!",
         "confirmPurchase": "Satın Almayı Onayla",
         "purchaseConfirmation": "{{item}} öğesini {{price}} altına satın almak istediğinizden emin misiniz?",
         "remainingGold": "Kalan altın: {{gold}}",
-        "confirm": "Onayla"
+        "confirm": "Onayla",
+        "cancel": "İptal",
+        "for": "için"
+    },
+    "potions": {
+        "minorHealthPotion": "Küçük Can İksiri",
+        "lesserHealthPotion": "Düşük Can İksiri",
+        "greaterHealthPotion": "Büyük Can İksiri",
+        "superiorHealthPotion": "Üstün Can İksiri",
+        "majorHealthPotion": "Ana Can İksiri",
+        "restoresHp": "{{amount}} Can iyileştirir",
+        "owned": "Sahip: {{count}}",
+        "buy1": "1 Tane Al",
+        "buy5": "5 Tane Al",
+        "healthPotions": "Can İksirleri",
+        "autoOn": "Otomatik: AÇIK",
+        "autoOff": "Otomatik: KAPALI"
     }
 } 

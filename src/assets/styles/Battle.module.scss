@@ -886,3 +886,158 @@
     background: linear-gradient(90deg, #ff6b6b 0%, #ff8e8e 100%) !important;
   }
 }
+
+// Potion System Styles
+.potionSection {
+  background: linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%);
+  border: 3px solid #4a4a6a;
+  border-radius: 0;
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: 
+    0 0 0 2px #000,
+    0 4px 0 0 #3a3a5a;
+}
+
+.potionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.potionTitle {
+  color: #e0e0e0 !important;
+  text-shadow: 2px 2px 0px #000;
+  font-size: 1rem !important;
+  letter-spacing: 1px;
+  font-family: 'Press Start 2P', monospace !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.autoPotionChip {
+  font-family: 'Press Start 2P', monospace !important;
+  font-size: 0.5rem !important;
+  text-shadow: 1px 1px 0px #000 !important;
+}
+
+.potionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.potionButton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 !important;
+  border: 2px solid #000 !important;
+  box-shadow: 
+    0 0 0 1px #000,
+    0 2px 0 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+  min-height: 80px;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 0 0 1px #000,
+      0 4px 0 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    filter: grayscale(1);
+  }
+}
+
+.potionContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.potionName {
+  color: #ffffff !important;
+  text-shadow: 1px 1px 0px #000;
+  font-size: 0.5rem !important;
+  font-family: 'Press Start 2P', monospace !important;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.potionHeal {
+  color: #ffffff !important;
+  text-shadow: 1px 1px 0px #000;
+  font-size: 0.8rem !important;
+  font-weight: bold !important;
+  font-family: 'Press Start 2P', monospace !important;
+}
+
+.potionCount {
+  color: #ffffff !important;
+  text-shadow: 1px 1px 0px #000;
+  font-size: 0.6rem !important;
+  font-family: 'Press Start 2P', monospace !important;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0;
+  border: 1px solid #ffffff;
+}
+
+.potionEffect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  pointer-events: none;
+  animation: potionHeal 2s ease-out forwards;
+}
+
+.healText {
+  color: #4ade80 !important;
+  text-shadow: 
+    2px 2px 0px #000,
+    0 0 10px #4ade80,
+    0 0 20px #4ade80;
+  font-family: 'Press Start 2P', monospace !important;
+  font-weight: bold !important;
+  animation: healFloat 2s ease-out forwards;
+}
+
+@keyframes potionHeal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+}
+
+@keyframes healFloat {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50px);
+  }
+}

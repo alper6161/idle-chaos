@@ -13,7 +13,9 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Alert
+    Alert,
+    Tabs,
+    Tab
 } from "@mui/material";
 import { 
     ShoppingCart, 
@@ -25,10 +27,12 @@ import {
     Speed,
     AttachMoney,
     EmojiEvents,
-    Whatshot
+    Whatshot,
+    LocalDrink
 } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 import { getGold, setGold } from "../utils/gold";
+import { POTION_TYPES, addPotions, getPotions } from "../utils/potions.js";
 import styles from "../assets/styles/Store.module.scss";
 
 const STORE_ITEMS = [
@@ -106,12 +110,28 @@ const STORE_ITEMS = [
     }
 ];
 
+// Auto Potion Buff
+const AUTO_POTION_BUFF = {
+    id: 'auto_potion',
+    name: 'Auto Potion',
+    nameKey: 'store.autoPotion',
+    description: 'Automatically uses potions when HP drops below 40%',
+    descriptionKey: 'store.autoPotionDesc',
+    icon: LocalDrink,
+    price: 1000,
+    duration: 24 * 60 * 60 * 1000, // 24 hours
+    color: '#4ade80',
+    type: 'auto_potion'
+};
+
 function Store() {
     const { t } = useTranslate();
     const [playerGold, setPlayerGold] = useState(getGold());
     const [activeBuffs, setActiveBuffs] = useState({});
     const [purchaseDialog, setPurchaseDialog] = useState({ open: false, item: null });
     const [message, setMessage] = useState({ show: false, text: '', type: 'success' });
+    const [currentTab, setCurrentTab] = useState(0);
+    const [playerPotions, setPlayerPotions] = useState(getPotions());
 
     // Load active buffs from localStorage on component mount
     useEffect(() => {
@@ -169,8 +189,8 @@ function Store() {
             return;
         }
 
-        // Check if buff is already active
-        if (activeBuffs[item.id]) {
+        // Check if buff is already active (only for buffs, not potions)
+        if (item.type !== 'potion' && activeBuffs[item.id]) {
             setMessage({ show: true, text: t('store.buffAlreadyActive'), type: 'warning' });
             return;
         }
@@ -186,21 +206,70 @@ function Store() {
         setGold(newGold);
         setPlayerGold(newGold);
         
-        // Add buff
-        const newBuff = {
-            id: item.id,
-            name: item.name,
-            expiresAt: Date.now() + item.duration,
-            type: item.type,
-            color: item.color
-        };
-        
-        const updatedBuffs = { ...activeBuffs, [item.id]: newBuff };
-        setActiveBuffs(updatedBuffs);
-        localStorage.setItem('activeBuffs', JSON.stringify(updatedBuffs));
+        if (item.type === 'potion') {
+            // Handle potion purchase
+            const potionType = item.potionType;
+            const newPotions = addPotions(potionType, item.quantity);
+            setPlayerPotions(newPotions);
+            
+            setMessage({ 
+                show: true, 
+                text: `Purchased ${item.quantity}x ${item.name}!`, 
+                type: 'success' 
+            });
+        } else {
+            // Handle buff purchase
+            const newBuff = {
+                id: item.id,
+                name: item.name,
+                expiresAt: Date.now() + item.duration,
+                type: item.type,
+                color: item.color
+            };
+            
+            const updatedBuffs = { ...activeBuffs, [item.id]: newBuff };
+            setActiveBuffs(updatedBuffs);
+            localStorage.setItem('activeBuffs', JSON.stringify(updatedBuffs));
+            
+            setMessage({ 
+                show: true, 
+                text: t('store.buffActivated'), 
+                type: 'success' 
+            });
+        }
         
         setPurchaseDialog({ open: false, item: null });
-        setMessage({ show: true, text: t('store.purchaseSuccess'), type: 'success' });
+        
+        setTimeout(() => {
+            setMessage({ show: false, text: '', type: 'success' });
+        }, 3000);
+    };
+
+    const handlePotionPurchase = (potionType, quantity = 1) => {
+        const potion = POTION_TYPES[potionType.toUpperCase()];
+        const totalPrice = potion.price * quantity;
+        
+        if (playerGold < totalPrice) {
+            setMessage({ show: true, text: t('store.notEnoughGold'), type: 'error' });
+            return;
+        }
+        
+        const newGold = playerGold - totalPrice;
+        setGold(newGold);
+        setPlayerGold(newGold);
+        
+        const newPotions = addPotions(potionType, quantity);
+        setPlayerPotions(newPotions);
+        
+        setMessage({ 
+            show: true, 
+            text: `Purchased ${quantity}x ${potion.name}!`, 
+            type: 'success' 
+        });
+        
+        setTimeout(() => {
+            setMessage({ show: false, text: '', type: 'success' });
+        }, 3000);
     };
 
     const formatTimeRemaining = (expiresAt) => {
@@ -213,6 +282,10 @@ function Store() {
     const getProgressValue = (expiresAt, duration) => {
         const remaining = Math.max(0, expiresAt - Date.now());
         return (remaining / duration) * 100;
+    };
+
+    const formatGold = (amount) => {
+        return `💰 ${amount.toLocaleString()}`;
     };
 
     return (
@@ -259,147 +332,172 @@ function Store() {
                 </div>
             </div>
 
-            {/* Active Buffs */}
+            <Typography variant="h4" className={styles.storeTitle}>
+                {t('store.title')}
+            </Typography>
+            
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+                <Tabs 
+                    value={currentTab} 
+                    onChange={(e, newValue) => setCurrentTab(newValue)}
+                    className={styles.storeTabs}
+                >
+                    <Tab label={t('store.buffs')} />
+                    <Tab label={t('store.potions')} />
+                </Tabs>
+            </Box>
+
+            {currentTab === 0 && (
+                <div className={styles.buffsSection}>
+                    <Typography variant="h6" className={styles.sectionTitle}>
+                        {t('store.buffs')}
+                    </Typography>
+                    
+                    <div className={styles.itemsGrid}>
+                        {[...STORE_ITEMS, AUTO_POTION_BUFF].map((item) => (
+                            <Card key={item.id} className={styles.storeItem}>
+                                <CardContent className={styles.itemContent}>
+                                    <div className={styles.itemHeader}>
+                                        <item.icon className={styles.itemIcon} style={{ color: item.color }} />
+                                        <Typography variant="h6" className={styles.itemName}>
+                                            {t(item.nameKey) || item.name}
+                                        </Typography>
+                                    </div>
+                                    <Typography variant="body2" className={styles.itemDescription}>
+                                        {t(item.descriptionKey) || item.description}
+                                    </Typography>
+                                    <div className={styles.itemPrice}>
+                                        <Typography variant="h6" className={styles.priceText}>
+                                            {formatGold(item.price)}
+                                        </Typography>
+                                    </div>
+                                </CardContent>
+                                <CardActions className={styles.itemActions}>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => handlePurchase(item)}
+                                        disabled={activeBuffs[item.id]}
+                                        className={styles.purchaseButton}
+                                    >
+                                        {activeBuffs[item.id] ? t('store.active') : t('store.purchase')}
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {currentTab === 1 && (
+                <div className={styles.potionsSection}>
+                    <Typography variant="h6" className={styles.sectionTitle}>
+                        {t('store.potions')}
+                    </Typography>
+                    
+                    <div className={styles.potionsGrid}>
+                        {Object.entries(POTION_TYPES).map(([key, potion]) => {
+                            const count = playerPotions[potion.id] || 0;
+                            
+                            return (
+                                <Card key={potion.id} className={styles.potionItem}>
+                                    <CardContent className={styles.potionContent}>
+                                        <div className={styles.potionHeader}>
+                                            <LocalDrink className={styles.potionIcon} style={{ color: potion.color }} />
+                                            <Typography variant="h6" className={styles.potionName}>
+                                                {t(`potions.${potion.id}HealthPotion`) || potion.name}
+                                            </Typography>
+                                        </div>
+                                        <Typography variant="body2" className={styles.potionDescription}>
+                                            {t('potions.restoresHp', { amount: potion.healAmount })}
+                                        </Typography>
+                                        <div className={styles.potionStats}>
+                                            <Typography variant="body2" className={styles.potionHeal}>
+                                                +{potion.healAmount} HP
+                                            </Typography>
+                                            <Typography variant="body2" className={styles.potionCount}>
+                                                {t('potions.owned', { count })}
+                                            </Typography>
+                                        </div>
+                                        <div className={styles.potionPrice}>
+                                            <Typography variant="h6" className={styles.priceText}>
+                                                {formatGold(potion.price)}
+                                            </Typography>
+                                        </div>
+                                    </CardContent>
+                                    <CardActions className={styles.potionActions}>
+                                        <Button
+                                            variant="contained"
+                                            onClick={() => handlePotionPurchase(potion.id, 1)}
+                                            className={styles.purchaseButton}
+                                            size="small"
+                                        >
+                                            {t('potions.buy1')}
+                                        </Button>
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => handlePotionPurchase(potion.id, 5)}
+                                            className={styles.purchaseButton}
+                                            size="small"
+                                        >
+                                            {t('potions.buy5')}
+                                        </Button>
+                                    </CardActions>
+                                </Card>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Active Buffs Display */}
             {Object.keys(activeBuffs).length > 0 && (
-                <Paper className={styles.activeBuffsPanel}>
+                <div className={styles.activeBuffsSection}>
                     <Typography variant="h6" className={styles.sectionTitle}>
                         {t('store.activeBuffs')}
                     </Typography>
                     <div className={styles.activeBuffsGrid}>
-                        {Object.entries(activeBuffs).map(([key, buff]) => {
-                            const item = STORE_ITEMS.find(i => i.id === key);
-                            return (
-                                <div key={key} className={styles.activeBuff}>
-                                    <div className={styles.buffIcon} style={{ color: buff.color }}>
-                                        <item.icon />
-                                    </div>
-                                    <div className={styles.buffInfo}>
-                                        <Typography variant="body2" className={styles.buffName}>
-                                            {t(item.nameKey)}
+                        {Object.entries(activeBuffs).map(([buffId, buff]) => (
+                            <Card key={buffId} className={styles.activeBuffCard}>
+                                <CardContent className={styles.activeBuffContent}>
+                                    <div className={styles.activeBuffHeader}>
+                                        <Typography variant="h6" className={styles.activeBuffName}>
+                                            {buff.name}
                                         </Typography>
-                                        <Typography variant="caption" className={styles.buffTime}>
-                                            {formatTimeRemaining(buff.expiresAt)}
-                                        </Typography>
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={getProgressValue(buff.expiresAt, item.duration)}
-                                            className={styles.buffProgress}
-                                            sx={{ 
-                                                '& .MuiLinearProgress-bar': { 
-                                                    backgroundColor: buff.color 
-                                                }
-                                            }}
+                                        <Chip 
+                                            label={formatTimeRemaining(buff.expiresAt)} 
+                                            color="primary" 
+                                            size="small"
                                         />
                                     </div>
-                                </div>
-                            );
-                        })}
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={getProgressValue(buff.expiresAt, STORE_ITEMS.find(item => item.id === buffId)?.duration || 3600000)}
+                                        className={styles.buffProgress}
+                                    />
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
-                </Paper>
+                </div>
             )}
 
-            {/* Store Items */}
-            <div className={styles.storeGrid}>
-                {STORE_ITEMS.map((item) => {
-                    const isActive = activeBuffs[item.id];
-                    const canAfford = playerGold >= item.price;
-                    const Icon = item.icon;
-                    
-                    return (
-                        <Card key={item.id} className={styles.storeItem}>
-                            <CardContent className={styles.itemContent}>
-                                <div className={styles.itemHeader}>
-                                    <div 
-                                        className={styles.itemIcon}
-                                        style={{ 
-                                            backgroundColor: `${item.color}20`,
-                                            border: `2px solid ${item.color}`,
-                                            color: item.color
-                                        }}
-                                    >
-                                        <Icon />
-                                    </div>
-                                    <Typography variant="h6" className={styles.itemName}>
-                                        {t(item.nameKey)}
-                                    </Typography>
-                                </div>
-                                
-                                <Typography variant="body2" className={styles.itemDescription}>
-                                    {t(item.descriptionKey)}
-                                </Typography>
-                                
-                                <div className={styles.itemDetails}>
-                                    <Chip 
-                                        label={`${item.duration / (60 * 60 * 1000)}h`}
-                                        icon={<Schedule />}
-                                        size="small"
-                                        className={styles.durationChip}
-                                    />
-                                    <div className={styles.priceSection}>
-                                        <Typography variant="h6" className={styles.price}>
-                                            💰 {item.price.toLocaleString()}
-                                        </Typography>
-                                    </div>
-                                </div>
-                            </CardContent>
-                            
-                            <CardActions className={styles.itemActions}>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => handlePurchase(item)}
-                                    disabled={!canAfford || isActive}
-                                    className={styles.purchaseButton}
-                                    style={{
-                                        backgroundColor: canAfford && !isActive ? item.color : undefined,
-                                        opacity: isActive ? 0.6 : 1
-                                    }}
-                                >
-                                    {isActive ? t('store.active') : 
-                                     !canAfford ? t('store.notEnoughGold') : 
-                                     t('store.purchase')}
-                                </Button>
-                            </CardActions>
-                        </Card>
-                    );
-                })}
-            </div>
-
-            {/* Purchase Confirmation Dialog */}
-            <Dialog 
-                open={purchaseDialog.open} 
-                onClose={() => setPurchaseDialog({ open: false, item: null })}
-                maxWidth="sm"
-                fullWidth
-            >
-                <DialogTitle className={styles.dialogTitle}>
-                    {t('store.confirmPurchase')}
-                </DialogTitle>
+            {/* Purchase Dialog */}
+            <Dialog open={purchaseDialog.open} onClose={() => setPurchaseDialog({ open: false, item: null })}>
+                <DialogTitle>{t('store.confirmPurchase')}</DialogTitle>
                 <DialogContent>
-                    {purchaseDialog.item && (
-                        <div className={styles.confirmationContent}>
-                            <Typography variant="body1" gutterBottom>
-                                {t('store.purchaseConfirmation', { 
-                                    item: t(purchaseDialog.item.nameKey),
-                                    price: purchaseDialog.item.price 
-                                })}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {t('store.remainingGold', { 
-                                    gold: (playerGold - purchaseDialog.item.price).toLocaleString() 
-                                })}
-                            </Typography>
-                        </div>
-                    )}
+                    <Typography>
+                        {purchaseDialog.item && (
+                            purchaseDialog.item.type === 'potion' 
+                                ? `${t('store.purchase')} ${purchaseDialog.item.quantity}x ${purchaseDialog.item.name} ${t('store.for')} ${formatGold(purchaseDialog.item.price)}?`
+                                : `${t('store.purchase')} ${purchaseDialog.item.name} ${t('store.for')} ${formatGold(purchaseDialog.item.price)}?`
+                        )}
+                    </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setPurchaseDialog({ open: false, item: null })}>
-                        {t('common.cancel')}
+                        {t('store.cancel')}
                     </Button>
-                    <Button 
-                        onClick={confirmPurchase}
-                        variant="contained"
-                        color="primary"
-                    >
+                    <Button onClick={confirmPurchase} variant="contained">
                         {t('store.confirm')}
                     </Button>
                 </DialogActions>
@@ -408,9 +506,9 @@ function Store() {
             {/* Message Alert */}
             {message.show && (
                 <Alert 
-                    severity={message.type}
-                    onClose={() => setMessage({ show: false, text: '', type: 'success' })}
+                    severity={message.type} 
                     className={styles.messageAlert}
+                    onClose={() => setMessage({ show: false, text: '', type: 'success' })}
                 >
                     {message.text}
                 </Alert>
