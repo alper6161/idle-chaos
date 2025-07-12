@@ -10,7 +10,7 @@ import {
 } from "@mui/icons-material";
 import { getSkillIcon } from "../utils/common.js";
 
-// Skill kategorilerine göre ikonlar
+// Icons for skill categories
 const categoryIcons = {
     melee: <SportsKabaddi />,
     ranged: <EmojiEvents />,
@@ -18,7 +18,7 @@ const categoryIcons = {
     prayer: <Healing />
 };
 
-// Skill kategorilerine göre karakter tipleri
+// Character types based on skill categories
 const characterTypes = {
     melee: 'warrior',
     ranged: 'ranger',
@@ -34,13 +34,13 @@ function Profile() {
     });
 
     const handleSkillSelect = (category) => {
-        // Seçilen skill kategorisine göre karakter tipini belirle
+        // Determine character type based on selected skill category
         const characterType = characterTypes[category];
         
-        // Karakter tipini localStorage'a kaydet
+        // Save character type to localStorage
         localStorage.setItem("selectedCharacter", characterType);
         
-        // Battle sayfasına yönlendir
+        // Navigate to battle page
         navigate("/battle");
     };
 

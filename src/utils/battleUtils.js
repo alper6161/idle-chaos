@@ -1,7 +1,7 @@
-// Battle Utilities - Savaş ile ilgili yardımcı fonksiyonlar
+// Battle Utilities - Helper functions related to battle
 // Note: Player stats are now handled by playerStats.js utility
 
-// Vurma ihtimali hesaplama
+// Hit chance calculation
 export const calculateHitChance = (attackerATK, defenderDEF) => {
     const ratio = attackerATK / Math.max(defenderDEF, 1);
     let baseChance = 60;
@@ -15,7 +15,7 @@ export const calculateHitChance = (attackerATK, defenderDEF) => {
     return Math.max(5, Math.min(95, baseChance));
 };
 
-// Hasar hesaplama
+// Damage calculation
 export const calculateDamage = (attackerATK, defenderDEF) => {
     let damage = attackerATK - (defenderDEF * 0.5);
     damage = Math.max(1, damage);
@@ -24,26 +24,26 @@ export const calculateDamage = (attackerATK, defenderDEF) => {
     return Math.floor(damage);
 };
 
-// Savaş durumu güncelleme
+// Battle state update
 export const updateBattleState = (prevBattle, playerSpeed, enemySpeed) => {
     if (!prevBattle) return prevBattle;
 
     const newBattle = { ...prevBattle };
     
-    // Attack bar hesaplama - her tick'te 1-5 arası artış
+    // Attack bar calculation - 1-5 increase per tick
     newBattle.playerProgress = Math.min(100, newBattle.playerProgress + playerSpeed);
     newBattle.enemyProgress = Math.min(100, newBattle.enemyProgress + enemySpeed);
 
     return newBattle;
 };
 
-// Oyuncu saldırısı işleme
+// Process player attack
 export const processPlayerAttack = (battle, setDamageDisplay) => {
     const hitChance = calculateHitChance(battle.player.ATK, battle.enemy.DEF);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
-        // Crit hit kontrolü
+        // Crit hit check
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= (battle.player.CRIT_CHANCE || 5);
         
@@ -101,13 +101,13 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
     }
 };
 
-// Düşman saldırısı işleme
+// Process enemy attack
 export const processEnemyAttack = (battle, setDamageDisplay) => {
     const hitChance = calculateHitChance(battle.enemy.ATK, battle.player.DEF);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
-        // Crit hit kontrolü
+        // Crit hit check
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= (battle.enemy.CRIT_CHANCE || 3);
         
@@ -165,7 +165,7 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
     }
 };
 
-// Savaş sonucu kontrol
+// Check battle result
 export const checkBattleResult = (battle) => {
     if (battle.enemy.currentHealth <= 0) {
         return {
@@ -188,13 +188,13 @@ export const checkBattleResult = (battle) => {
     return null;
 };
 
-// Yeni düşman spawn timer'ı
+// New enemy spawn timer
 export const createSpawnTimer = (setIsWaitingForEnemy, setEnemySpawnProgress, onComplete) => {
     setIsWaitingForEnemy(true);
     setEnemySpawnProgress(0);
     
-    const duration = 5000; // 5 saniye
-    const interval = 50; // 50ms her güncelleme
+    const duration = 5000; // 5 seconds
+    const interval = 50; // 50ms per update
     const steps = duration / interval;
     let currentStep = 0;
     

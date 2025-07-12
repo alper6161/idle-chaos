@@ -7,12 +7,12 @@ export const getSkillIcon = (skill) => `/images/skills/${skill}.png`;
 
 export const getEnemyIcon = (enemy) => `/images/enemies/${enemy}.png`;
 
-// Düşman isminin ilk harfini al
+// Get first letter of enemy name
 export const getEnemyInitial = (enemyName) => enemyName.charAt(0).toUpperCase();
 
 export const getCharacterIcon = (character) => `/images/characters/${character}.png`;
 
-// Karakter tipine göre isim
+// Get name based on character type
 export const getCharacterName = (character) => {
     const names = {
         warrior: 'WARRIOR',
@@ -23,9 +23,9 @@ export const getCharacterName = (character) => {
     return names[character] || 'WARRIOR';
 };
 
-// Sistem renkleri - Tüm renk tanımları burada toplanır
+// System colors - All color definitions are collected here
 export const SYSTEM_COLORS = {
-  // Arka plan renkleri
+  // Background colors
   BACKGROUND: {
     PRIMARY: '#2a2a4a',
     SECONDARY: '#3a3a5a',
@@ -34,14 +34,14 @@ export const SYSTEM_COLORS = {
     CARD_DARK: '#2a2a4a'
   },
   
-  // Border renkleri
+  // Border colors
   BORDER: {
     PRIMARY: '#4a4a6a',
     SECONDARY: '#6a6a8a',
     DARK: '#000000'
   },
   
-  // HP Bar renkleri
+  // HP Bar colors
   HP_BAR: {
     PLAYER: {
       START: '#4ade80',
@@ -53,13 +53,13 @@ export const SYSTEM_COLORS = {
     }
   },
   
-  // Attack Bar renkleri
+  // Attack Bar colors
   ATTACK_BAR: {
     START: '#f97316',
     END: '#ea580c'
   },
   
-  // Damage Display renkleri
+  // Damage Display colors
   DAMAGE_DISPLAY: {
     PLAYER: {
       PRIMARY: '#22c55e',
@@ -71,7 +71,7 @@ export const SYSTEM_COLORS = {
     }
   },
   
-  // Text renkleri
+  // Text colors
   TEXT: {
     PRIMARY: '#e0e0e0',
     SECONDARY: '#4ecdc4',
@@ -80,7 +80,7 @@ export const SYSTEM_COLORS = {
     ERROR: '#ff6b6b'
   },
   
-  // Combat Log renkleri
+  // Combat Log colors
   COMBAT_LOG: {
     PLAYER_ATTACK: '#96ceb4',
     ENEMY_ATTACK: '#ff6b6b',
@@ -88,7 +88,7 @@ export const SYSTEM_COLORS = {
     DEFEAT: '#ff6b6b'
   },
   
-  // Button renkleri
+  // Button colors
   BUTTON: {
     PRIMARY: '#4a4a6a',
     SECONDARY: '#3a3a5a',
@@ -96,7 +96,7 @@ export const SYSTEM_COLORS = {
     TEXT: '#e0e0e0'
   },
   
-  // Gradient renkleri
+  // Gradient colors
   GRADIENT: {
     PLAYER_HP: 'linear-gradient(90deg, #4ade80 0%, #22c55e 100%)',
     ENEMY_HP: 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)',
