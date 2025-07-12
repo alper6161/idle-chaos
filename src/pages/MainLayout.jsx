@@ -6,11 +6,13 @@ import { Settings, AccountCircle } from "@mui/icons-material";
 import {getSkillIcon} from "../utils/common.js";
 import SettingsDialog from "./Settings.jsx";
 import { getGold, formatGold } from "../utils/gold.js";
+import { getActiveBuffsInfo } from "../utils/buffUtils.js";
 import { useTranslate } from "../hooks/useTranslate";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [playerGold, setPlayerGold] = useState(getGold());
+    const [activeBuffs, setActiveBuffs] = useState(getActiveBuffsInfo());
     const { t } = useTranslate();
 
     const handleSettingsClick = () => {
@@ -21,14 +23,15 @@ function MainLayout() {
         setSettingsOpen(false);
     };
 
-    // Update gold display when localStorage changes
+    // Update gold and buffs display when localStorage changes
     useEffect(() => {
-        const updateGold = () => {
+        const updateGoldAndBuffs = () => {
             setPlayerGold(getGold());
+            setActiveBuffs(getActiveBuffsInfo());
         };
 
-        // Update gold every second (in case it changes in other components)
-        const interval = setInterval(updateGold, 1000);
+        // Update gold and buffs every second (in case they change in other components)
+        const interval = setInterval(updateGoldAndBuffs, 1000);
 
         return () => clearInterval(interval);
     }, []);
@@ -96,9 +99,21 @@ function MainLayout() {
             {/* Main Content */}
             <main className={styles.content}>
                 <div className={styles.topbar}>
-                    <div className={styles.goldDisplay}>
-                        <span className={styles.goldIcon}>💰</span>
-                        <span className={styles.goldAmount}>{formatGold(playerGold)}</span>
+                    <div className={styles.leftSection}>
+                        <div className={styles.goldDisplay}>
+                            <span className={styles.goldIcon}>💰</span>
+                            <span className={styles.goldAmount}>{formatGold(playerGold)}</span>
+                        </div>
+                        {activeBuffs.length > 0 && (
+                            <div className={styles.buffsDisplay}>
+                                {activeBuffs.map((buff) => (
+                                    <div key={buff.id} className={styles.buffIndicator} style={{ borderColor: buff.color }}>
+                                        <span className={styles.buffIcon} style={{ color: buff.color }}>⚡</span>
+                                        <span className={styles.buffTime}>{buff.timeRemaining}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div className={styles.topbarIcons}>
                         <Settings 

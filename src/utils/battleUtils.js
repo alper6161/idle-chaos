@@ -1,3 +1,5 @@
+import { applyDamageMultiplier } from './buffUtils.js';
+
 export const calculateHitChance = (attackerATK, defenderDEF) => {
     const ratio = attackerATK / Math.max(defenderDEF, 1);
     let baseChance = 60;
@@ -39,6 +41,9 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
         const isCrit = critRoll <= (battle.player.CRIT_CHANCE || 5);
         
         let damage = calculateDamage(battle.player.ATK, battle.enemy.DEF);
+        
+        // Apply damage buff
+        damage = applyDamageMultiplier(damage);
         
         if (isCrit) {
             damage = Math.floor(damage * ((battle.player.CRIT_DAMAGE || 150) / 100));

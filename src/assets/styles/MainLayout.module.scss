@@ -242,6 +242,58 @@
       align-items: center;
       gap: 1rem;
 
+      .leftSection {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .buffsDisplay {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      .buffIndicator {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.6rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid;
+        border-radius: 4px;
+        font-size: 0.6rem;
+        font-weight: bold;
+        text-shadow: 1px 1px 0px #000;
+        animation: buffPulse 2s ease-in-out infinite;
+        
+        .buffIcon {
+          font-size: 0.8rem;
+          filter: drop-shadow(0 0 3px currentColor);
+        }
+        
+        .buffTime {
+          color: #ffffff;
+          font-family: 'Press Start 2P', monospace;
+          font-size: 0.5rem;
+        }
+
+        &:hover {
+          transform: scale(1.05);
+          transition: all 0.2s ease;
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+      }
+
+      @keyframes buffPulse {
+        0%, 100% {
+          box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+      }
+
       .goldDisplay {
         display: flex;
         align-items: center;

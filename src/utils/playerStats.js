@@ -1,3 +1,5 @@
+import { getBuffedPlayerStats } from './buffUtils.js';
+
 export const BASE_PLAYER_STATS = {
     ATK: 10,
     DEF: 5,
@@ -51,7 +53,13 @@ export const getPlayerStats = () => {
     finalStats.CRIT_CHANCE = Math.max(0, Math.min(100, finalStats.CRIT_CHANCE));
     finalStats.CRIT_DAMAGE = Math.max(100, finalStats.CRIT_DAMAGE);
 
-    return finalStats;
+    // Apply store buffs
+    try {
+        return getBuffedPlayerStats(finalStats);
+    } catch (error) {
+        console.error('Error applying buffs:', error);
+        return finalStats;
+    }
 };
 
 export const getEquipmentBonuses = () => {

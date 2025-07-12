@@ -1,3 +1,5 @@
+import { applyDropRateMultiplier, applyGoldMultiplier, applyDamageMultiplier } from './buffUtils.js';
+
 export function getCombatStats(player, enemy) {
   const playerATK = player?.ATK || 10;
   const playerDEF = player?.DEF || 5;
@@ -40,13 +42,20 @@ export function getLootDrop(drops) {
   const goldItems = [];
   let totalGold = 0;
   
+  // Apply drop rate and gold buffs using imported functions
+  
   drops.forEach(drop => {
-    if (Math.random() < drop.chance) {
+    // Apply drop rate buff to increase drop chances
+    const buffedChance = applyDropRateMultiplier(drop.chance);
+    
+    if (Math.random() < buffedChance) {
       if (drop.type === "equipment") {
         items.push(drop.name);
       } else if (drop.type === "gold") {
-        goldItems.push({ name: drop.name, value: drop.value });
-        totalGold += drop.value;
+        // Apply gold multiplier buff to increase gold value
+        const buffedValue = applyGoldMultiplier(drop.value);
+        goldItems.push({ name: drop.name, value: buffedValue });
+        totalGold += buffedValue;
       }
     }
   });
@@ -103,6 +112,9 @@ export function battle(player, enemy) {
         const isCrit = critRoll <= playerFighter.CRIT_CHANCE;
         
         let damage = calculateDamage(playerFighter.ATK, enemyFighter.DEF);
+        
+        // Apply damage buff
+        damage = applyDamageMultiplier(damage);
         
         if (isCrit) {
           damage = Math.floor(damage * (playerFighter.CRIT_DAMAGE / 100));
