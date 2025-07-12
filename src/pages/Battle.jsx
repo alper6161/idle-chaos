@@ -410,9 +410,6 @@ function Battle({ player }) {
                         />
                     </div>
                     <div className={styles.attackBarContainer}>
-                        <Typography className={styles.attackTimeText}>
-                            {Math.ceil(100 / (currentBattle?.player?.ATTACK_SPEED || playerStats.ATTACK_SPEED) * 0.2)}s
-                        </Typography>
                         <LinearProgress
                             variant="determinate"
                             value={currentBattle?.playerProgress || 0}
@@ -482,9 +479,6 @@ function Battle({ player }) {
                                 />
                             </div>
                             <div className={styles.attackBarContainer}>
-                                <Typography className={styles.attackTimeText}>
-                                    {Math.ceil(100 / (currentBattle?.enemy?.ATTACK_SPEED || currentEnemy?.ATTACK_SPEED || 1.5) * 0.2)}s
-                                </Typography>
                                 <LinearProgress
                                     variant="determinate"
                                     value={currentBattle?.enemyProgress || 0}
