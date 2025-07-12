@@ -958,6 +958,50 @@
       animation: itemGlow 2s ease-in-out infinite;
     }
   }
+  
+  &.newItem {
+    animation: newItemPulse 2s ease-in-out infinite;
+    
+    .itemContent {
+      border-color: var(--gold) !important;
+      box-shadow: 
+        0 0 30px rgba(255, 215, 0, 0.6),
+        0 5px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+      background: linear-gradient(135deg, 
+        rgba(255, 215, 0, 0.1) 0%, 
+        rgba(26, 26, 46, 0.95) 30%, 
+        rgba(22, 33, 62, 0.90) 70%, 
+        rgba(255, 215, 0, 0.1) 100%
+      ) !important;
+    }
+    
+    .itemGlow {
+      opacity: 1 !important;
+      background-color: rgba(255, 215, 0, 0.3) !important;
+      animation: newItemGlow 1.5s ease-in-out infinite !important;
+    }
+  }
+}
+
+@keyframes newItemPulse {
+  0%, 100% { 
+    transform: scale(1);
+  }
+  50% { 
+    transform: scale(1.05);
+  }
+}
+
+@keyframes newItemGlow {
+  0%, 100% { 
+    opacity: 0.3;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+  }
 }
 
 .itemGlow {

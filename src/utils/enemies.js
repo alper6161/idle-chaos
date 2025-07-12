@@ -46,6 +46,7 @@ const enemies = {
         ATTACK_SPEED: 3,
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/GiantRat.png/220px-GiantRat.png",
         drops: [
+            { name: "Rat Fang Dagger", chance: 0.15, type: "equipment" },
             { name: "Rat Tail", chance: 0.4, type: "gold", value: 8 },
             { name: "Rotten Cheese", chance: 0.2, type: "gold", value: 15 }
         ]
@@ -59,6 +60,7 @@ const enemies = {
         ATTACK_SPEED: 2,
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Green_slime_icon.png/240px-Green_slime_icon.png",
         drops: [
+            { name: "Slime Shield", chance: 0.18, type: "equipment" },
             { name: "Sticky Goo", chance: 0.5, type: "gold", value: 6 },
             { name: "Slime Core", chance: 0.15, type: "gold", value: 22 }
         ]
@@ -114,6 +116,8 @@ const enemies = {
         ATTACK_SPEED: 1,
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Dragon_icon.png/220px-Dragon_icon.png",
         drops: [
+            { name: "Dragon Flame Sword", chance: 0.08, type: "equipment" },
+            { name: "Dragon Scale Armor", chance: 0.05, type: "equipment" },
             { name: "Dragon Scale", chance: 0.4, type: "gold", value: 18 },
             { name: "Dragon Claw", chance: 0.2, type: "gold", value: 30 },
             { name: "Dragon Breath", chance: 0.1, type: "gold", value: 50 }
@@ -128,6 +132,7 @@ const enemies = {
         ATTACK_SPEED: 3,
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/3/3c/Ghost_icon.png/220px-Ghost_icon.png",
         drops: [
+            { name: "Spirit Cloak", chance: 0.12, type: "equipment" },
             { name: "Ectoplasm", chance: 0.5, type: "gold", value: 8 },
             { name: "Soul Fragment", chance: 0.3, type: "gold", value: 14 }
         ]
@@ -141,6 +146,8 @@ const enemies = {
         ATTACK_SPEED: 3,
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8c/Giant_spider.png/220px-Giant_spider.png",
         drops: [
+            { name: "Spider Fang Blade", chance: 0.16, type: "equipment" },
+            { name: "Silk Armor", chance: 0.10, type: "equipment" },
             { name: "Spider Silk", chance: 0.4, type: "gold", value: 9 },
             { name: "Spider Venom", chance: 0.2, type: "gold", value: 16 },
             { name: "Spider Leg", chance: 0.3, type: "gold", value: 11 }

@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { FilterList, Person, TrendingUp, Shield, LocalFireDepartment } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
+import { convertLootBagToEquipment, clearProcessedLootBag } from "../utils/equipmentGenerator";
 
 const EQUIPMENT_SLOTS = {
     weapon: { name: "Weapon", icon: "/images/equipment/weapon.png", slot: "weapon", position: "left" },
@@ -113,6 +114,7 @@ function Equipment() {
         newItem: null,
         slot: null
     });
+    const [newItemIds, setNewItemIds] = useState(new Set());
 
     useEffect(() => {
         saveToStorage(STORAGE_KEYS.EQUIPPED_ITEMS, equippedItems);
@@ -121,6 +123,45 @@ function Equipment() {
     useEffect(() => {
         saveToStorage(STORAGE_KEYS.INVENTORY, inventory);
     }, [inventory]);
+
+    // Check for new equipment from battle loot and add to inventory
+    useEffect(() => {
+        const checkForNewLoot = () => {
+            try {
+                const lootBag = JSON.parse(localStorage.getItem("lootBag") || "[]");
+                if (lootBag.length > 0) {
+                    const newEquipment = convertLootBagToEquipment(lootBag);
+                    if (newEquipment.length > 0) {
+                        setInventory(prev => {
+                            // Ensure unique IDs
+                            const existingIds = new Set(prev.map(item => item.id));
+                            const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
+                            
+                            // Mark new items for highlighting
+                            if (uniqueNewEquipment.length > 0) {
+                                setNewItemIds(new Set(uniqueNewEquipment.map(item => item.id)));
+                                // Remove highlight after 5 seconds
+                                setTimeout(() => {
+                                    setNewItemIds(new Set());
+                                }, 5000);
+                            }
+                            
+                            return [...prev, ...uniqueNewEquipment];
+                        });
+                        clearProcessedLootBag(); // Clear loot bag after processing
+                    }
+                }
+            } catch (error) {
+                console.error('Error processing loot bag:', error);
+            }
+        };
+
+        // Check immediately and then every 2 seconds
+        checkForNewLoot();
+        const interval = setInterval(checkForNewLoot, 2000);
+        
+        return () => clearInterval(interval);
+    }, []);
 
     const filteredInventory = inventory.filter(item => {
         const matchesRarity = rarityFilter === "all" || item.rarity === rarityFilter;
@@ -653,7 +694,7 @@ function Equipment() {
                                         }}
                                     >
                                         <div 
-                                            className={styles.inventoryItem}
+                                            className={`${styles.inventoryItem} ${newItemIds.has(item.id) ? styles.newItem : ''}`}
                                             onClick={() => handleEquipItem(item)}
                                         >
                                             <div className={styles.itemGlow} style={{
