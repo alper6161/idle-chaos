@@ -74,7 +74,7 @@ function MainLayout() {
                                 >
                                     <img src={getSkillIcon(skill)} alt={skill} />
                                     <span className={styles.skillLabel}>{t(`skills.${skill}`)}</span>
-                                    <span className={styles.skillLevel}>Lv.{level}</span>
+                                    <span className={styles.skillLevel}>{t('common.level')}{level}</span>
                                 </NavLink>
                             ))}
                     </div>

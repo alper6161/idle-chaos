@@ -253,7 +253,7 @@ function Equipment() {
                         ))}
                     </div>
                     <div className={styles.tooltipFooter}>
-                        <Typography variant="caption">Click to equip</Typography>
+                        <Typography variant="caption">{t('common.clickToEquip')}</Typography>
                     </div>
                 </div>
             );
@@ -295,7 +295,7 @@ function Equipment() {
                 </div>
                 <div className={styles.tooltipComparison}>
                     <Typography variant="caption" className={styles.comparisonTitle}>
-                        vs {currentItem.name}
+                        {t('common.vs')} {currentItem.name}
                     </Typography>
                     <div className={styles.tooltipStats}>
                         {Object.entries(statComparison).map(([stat, comparison]) => (
@@ -317,7 +317,7 @@ function Equipment() {
                     </div>
                 </div>
                 <div className={styles.tooltipFooter}>
-                    <Typography variant="caption">Click to equip</Typography>
+                    <Typography variant="caption">{t('common.clickToEquip')}</Typography>
                 </div>
             </div>
         );
@@ -577,7 +577,7 @@ function Equipment() {
                         {selectedSlot && (
                             <div className={styles.selectedSlotInfo}>
                                 <Typography variant="body2" className={styles.slotInfo}>
-                                    <strong>Selected:</strong> {EQUIPMENT_SLOTS[selectedSlot]?.name}
+                                    <strong>{t('common.selected')}</strong> {EQUIPMENT_SLOTS[selectedSlot]?.name}
                                 </Typography>
                                 <div className={styles.slotActions}>
                                     <Button 
@@ -586,7 +586,7 @@ function Equipment() {
                                         onClick={handleUnselectSlot}
                                         className={styles.unselectButton}
                                     >
-                                        Unselect
+                                        {t('common.unselect')}
                                     </Button>
                                     {equippedItems[selectedSlot] && (
                                         <Button 
@@ -669,7 +669,7 @@ function Equipment() {
                             ) : (
                                 <div className={styles.noItems}>
                                     <Typography variant="body2" className={styles.noItemsText}>
-                                        No items found matching your criteria
+                                        {t('common.noItemsFound')}
                                     </Typography>
                                 </div>
                             )}
@@ -693,7 +693,7 @@ function Equipment() {
                     <div className={styles.replaceComparison}>
                         <div className={styles.currentItem}>
                             <Typography variant="h6" className={styles.dialogSectionTitle}>
-                                Current Equipment
+                                {t('common.currentEquipment')}
                             </Typography>
                             {replaceDialog.currentItem && (
                                 <div 
@@ -739,7 +739,7 @@ function Equipment() {
 
                         <div className={styles.newItem}>
                             <Typography variant="h6" className={styles.dialogSectionTitle}>
-                                New Equipment
+                                {t('common.newEquipment')}
                             </Typography>
                             {replaceDialog.newItem && (
                                 <div 

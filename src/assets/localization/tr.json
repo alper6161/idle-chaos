@@ -28,7 +28,16 @@
     "battle": "Savaş",
     "profile": "Profil",
     "equipment": "Ekipman",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "level": "Sv.",
+    "gameLogo": "Oyun Logosu",
+    "selected": "Seçilen:",
+    "unselect": "Seçimi Kaldır",
+    "vs": "karşı",
+    "clickToEquip": "Donatmak için tıkla",
+    "currentEquipment": "Mevcut Ekipman",
+    "newEquipment": "Yeni Ekipman",
+    "noItemsFound": "Kriterlerinizle eşleşen eşya bulunamadı"
   },
   "battle": {
     "playerWins": "Oyuncu kazandı!",
@@ -47,7 +56,18 @@
     "defense": "Savunma",
     "attackSpeed": "Saldırı Hızı",
     "criticalChance": "Kritik Şans",
-    "criticalDamage": "Kritik Hasar"
+    "criticalDamage": "Kritik Hasar",
+    "enemyStats": "Düşman İstatistikleri",
+    "possibleLoot": "Olası Ganimet",
+    "lootGained": "Elde Edilen Ganimet",
+    "noLootYet": "Henüz ganimet yok...",
+    "battleLog": "Savaş Günlüğü",
+    "hitChance": "Vuruş Şansı",
+    "baseDamage": "Temel Hasar",
+    "critDamage": "Kritik Hasar",
+    "playerFinalHp": "Oyuncu Son Can",
+    "enemyFinalHp": "Düşman Son Can",
+    "youDied": "ÖLDÜN!"
   },
   "equipment": {
     "equip": "Tak",

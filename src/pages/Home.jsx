@@ -36,7 +36,7 @@ function Home() {
         <div className={styles.homeContainer}>
             <img
                 src="/images/logo.png"
-                alt="Game Logo"
+                                        alt={t('common.gameLogo')}
                 className={styles.logo}
             />
 

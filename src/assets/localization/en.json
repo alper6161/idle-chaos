@@ -28,7 +28,16 @@
     "battle": "Battle",
     "profile": "Profile",
     "equipment": "Equipment",
-    "settings": "Settings"
+    "settings": "Settings",
+    "level": "Lv.",
+    "gameLogo": "Game Logo",
+    "selected": "Selected:",
+    "unselect": "Unselect",
+    "vs": "vs",
+    "clickToEquip": "Click to equip",
+    "currentEquipment": "Current Equipment",
+    "newEquipment": "New Equipment",
+    "noItemsFound": "No items found matching your criteria"
   },
   "battle": {
     "playerWins": "Player wins!",
@@ -47,7 +56,18 @@
     "defense": "Defense",
     "attackSpeed": "Attack Speed",
     "criticalChance": "Critical Chance",
-    "criticalDamage": "Critical Damage"
+    "criticalDamage": "Critical Damage",
+    "enemyStats": "Enemy Stats",
+    "possibleLoot": "Possible Loot",
+    "lootGained": "Loot Gained",
+    "noLootYet": "No loot yet...",
+    "battleLog": "Battle Log",
+    "hitChance": "Hit Chance",
+    "baseDamage": "Base Damage",
+    "critDamage": "Crit Damage",
+    "playerFinalHp": "Player Final HP",
+    "enemyFinalHp": "Enemy Final HP",
+    "youDied": "YOU DIED!"
   },
   "equipment": {
     "equip": "Equip",
