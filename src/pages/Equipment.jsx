@@ -260,27 +260,27 @@ function Equipment() {
         const equippedItem = equippedItems[targetSlot];
 
         if (!equippedItem) {
-            return (
+    return (
                 <div className={styles.tooltipContent}>
                     <Typography variant="body2" className={styles.tooltipTitle}>
                         {inventoryItem.name}
-                    </Typography>
+            </Typography>
                     <Typography variant="caption" className={styles.tooltipRarity}>
                         {inventoryItem.rarity.toUpperCase()}
-                    </Typography>
+                        </Typography>
                     {inventoryItem.stats && (
                         <div className={styles.tooltipStats}>
                             {Object.entries(inventoryItem.stats).map(([stat, value]) => (
                                 <Typography key={stat} variant="caption" className={styles.tooltipStat}>
-                                    +{value} {stat}
-                                </Typography>
-                            ))}
-                        </div>
-                    )}
+                                                                +{value} {stat}
+                                                            </Typography>
+                                                        ))}
+                                                    </div>
+                                                )}
                     <Typography variant="caption" className={styles.tooltipAction}>
                         Click to equip
-                    </Typography>
-                </div>
+                                                </Typography>
+                                            </div>
             );
         }
 
@@ -293,28 +293,28 @@ function Equipment() {
                     <div className={styles.tooltipCurrent}>
                         <Typography variant="body2" className={styles.tooltipTitle}>
                             Current: {equippedItem.name}
-                        </Typography>
+                                                </Typography>
                         <Typography variant="caption" className={styles.tooltipRarity}>
                             {equippedItem.rarity.toUpperCase()}
-                        </Typography>
+                                                </Typography>
                         {Object.entries(equippedStats).map(([stat, value]) => (
                             <Typography key={stat} variant="caption" className={styles.tooltipStat}>
-                                +{value} {stat}
-                            </Typography>
-                        ))}
-                    </div>
-                    
+                                                                +{value} {stat}
+                                                            </Typography>
+                                                        ))}
+                                </div>
+
                     <div className={styles.tooltipArrow}>
                         <Typography variant="h6">→</Typography>
-                    </div>
-                    
+                                        </div>
+                                        
                     <div className={styles.tooltipNew}>
                         <Typography variant="body2" className={styles.tooltipTitle}>
                             New: {inventoryItem.name}
-                        </Typography>
+                                                </Typography>
                         <Typography variant="caption" className={styles.tooltipRarity}>
                             {inventoryItem.rarity.toUpperCase()}
-                        </Typography>
+                                                </Typography>
                         {Object.entries(inventoryStats).map(([stat, value]) => {
                             const equippedValue = equippedStats[stat] || 0;
                             const difference = value - equippedValue;
@@ -330,74 +330,74 @@ function Equipment() {
                                     }`}
                                 >
                                     +{value} {stat} {difference !== 0 && `(${difference > 0 ? '+' : ''}${difference})`}
-                                </Typography>
+                                                </Typography>
                             );
                         })}
-                    </div>
-                </div>
+                                                    </div>
+                                            </div>
                 <Typography variant="caption" className={styles.tooltipAction}>
                     Click to replace
-                </Typography>
-            </div>
+                                                </Typography>
+                                            </div>
         );
     };
 
     // Create equipment slot component
     const EquipmentSlot = ({ slotKey, slotData }) => (
-        <div 
+                                    <div 
             className={`${styles.equipmentSlot} ${selectedSlot === slotKey ? styles.selected : ''}`}
             onClick={() => setSelectedSlot(slotKey)}
-        >
-            <div className={styles.slotHeader}>
+                                    >
+                                        <div className={styles.slotHeader}>
                 <img src={slotData.icon} alt={slotData.name} className={styles.slotIcon} />
                 <span className={styles.slotName}>{slotData.name}</span>
-            </div>
-            
+                                        </div>
+                                        
             {equippedItems[slotKey] ? (
-                <div 
-                    className={styles.equippedItem}
-                    style={{ 
+                                            <div 
+                                                className={styles.equippedItem}
+                                                style={{ 
                         borderColor: getRarityBorder(equippedItems[slotKey].rarity),
                         color: getRarityColor(equippedItems[slotKey].rarity)
-                    }}
-                >
-                    <Typography variant="body2" className={styles.itemName}>
+                                                }}
+                                            >
+                                                <Typography variant="body2" className={styles.itemName}>
                         {equippedItems[slotKey].name}
-                    </Typography>
-                    <Typography variant="caption" className={styles.itemRarity}>
+                                                </Typography>
+                                                <Typography variant="caption" className={styles.itemRarity}>
                         {equippedItems[slotKey].rarity.toUpperCase()}
-                    </Typography>
+                                                </Typography>
                     {equippedItems[slotKey].stats && (
-                        <div className={styles.itemStats}>
+                                                    <div className={styles.itemStats}>
                             {Object.entries(equippedItems[slotKey].stats).map(([stat, value]) => (
-                                <Typography key={stat} variant="caption" className={styles.statLine}>
-                                    +{value} {stat}
-                                </Typography>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <div className={styles.emptySlot}>
-                    <Typography variant="body2" color="text.secondary">
-                        Empty
-                    </Typography>
-                </div>
-            )}
-        </div>
+                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
+                                                                +{value} {stat}
+                                                            </Typography>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className={styles.emptySlot}>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Empty
+                                                </Typography>
+                                            </div>
+                                        )}
+                                    </div>
     );
 
     return (
         <div className={styles.equipmentContainer}>
             <Typography variant="h4" className={styles.pageTitle}>
                 Equipment
-            </Typography>
+                                                </Typography>
 
             {/* Total Stats - Compact at Top */}
             <Paper className={styles.statsPanel}>
                 <Typography variant="h6" className={styles.sectionTitle}>
                     Total Stats
-                </Typography>
+                                                </Typography>
                 <Divider className={styles.divider} />
                 
                 <div className={styles.statsList}>
@@ -405,9 +405,9 @@ function Equipment() {
                         <div key={stat} className={styles.statItem}>
                             <span className={styles.statName}>{stat}</span>
                             <span className={styles.statValue}>+{value}</span>
-                        </div>
-                    ))}
-                </div>
+                                        </div>
+                                                        ))}
+                                                    </div>
             </Paper>
 
             {/* Main Content - Equipment and Inventory Side by Side */}
@@ -416,7 +416,7 @@ function Equipment() {
                 <Paper className={styles.equipmentGrid}>
                     <Typography variant="h6" className={styles.sectionTitle}>
                         Equipment Slots
-                    </Typography>
+                                                </Typography>
                     <Divider className={styles.divider} />
                     
                     <div className={styles.characterEquipment}>
@@ -424,19 +424,19 @@ function Equipment() {
                         <div className={styles.topRow}>
                             <div className={styles.helmetSlot}>
                                 <EquipmentSlot slotKey="helmet" slotData={EQUIPMENT_SLOTS.helmet} />
-                            </div>
-                        </div>
-
+                                    </div>
+                                        </div>
+                                        
                         {/* Middle Row - Weapon and Shield */}
                         <div className={styles.middleRow}>
                             <div className={styles.weaponSlot}>
                                 <EquipmentSlot slotKey="weapon" slotData={EQUIPMENT_SLOTS.weapon} />
-                            </div>
+                                                    </div>
                             <div className={styles.characterSilhouette}>
                                 <div className={styles.characterPlaceholder}>
                                     <Typography variant="body2" className={styles.characterText}>
                                         CHARACTER
-                                    </Typography>
+                                                </Typography>
                                 </div>
                             </div>
                             <div className={styles.shieldSlot}>
@@ -475,50 +475,50 @@ function Equipment() {
                             </div>
                         </div>
                     </div>
-                </Paper>
+                    </Paper>
 
-                {/* Inventory Section */}
-                <Paper className={styles.inventorySection}>
-                    <div className={styles.inventoryHeader}>
-                        <Typography variant="h6" className={styles.sectionTitle}>
-                            Inventory {selectedSlot && selectedSlot !== null && EQUIPMENT_SLOTS[selectedSlot] && `- ${EQUIPMENT_SLOTS[selectedSlot].name}`}
+            {/* Inventory Section */}
+            <Paper className={styles.inventorySection}>
+                <div className={styles.inventoryHeader}>
+                    <Typography variant="h6" className={styles.sectionTitle}>
+                        Inventory {selectedSlot && selectedSlot !== null && EQUIPMENT_SLOTS[selectedSlot] && `- ${EQUIPMENT_SLOTS[selectedSlot].name}`}
+                    </Typography>
+                    {selectedSlot && (
+                        <Button 
+                            variant="outlined" 
+                            size="small" 
+                            onClick={() => {
+                                setSelectedSlot(null);
+                            }}
+                            className={styles.clearFilterButton}
+                        >
+                            Show All Items
+                        </Button>
+                    )}
+                </div>
+                <Divider className={styles.divider} />
+                
+                {selectedSlot && selectedSlot !== null && (
+                    <div className={styles.selectedSlotInfo}>
+                        <Typography variant="body2" className={styles.slotInfo}>
+                            Selected: {EQUIPMENT_SLOTS[selectedSlot] ? EQUIPMENT_SLOTS[selectedSlot].name : selectedSlot}
                         </Typography>
-                        {selectedSlot && (
+                        {equippedItems[selectedSlot] && (
                             <Button 
                                 variant="outlined" 
                                 size="small" 
-                                onClick={() => {
-                                    setSelectedSlot(null);
-                                }}
-                                className={styles.clearFilterButton}
+                                onClick={() => handleUnequipItem(selectedSlot)}
+                                className={styles.unequipButton}
                             >
-                                Show All Items
+                                Unequip Current Item
                             </Button>
                         )}
                     </div>
-                    <Divider className={styles.divider} />
-                    
-                    {selectedSlot && selectedSlot !== null && (
-                        <div className={styles.selectedSlotInfo}>
-                            <Typography variant="body2" className={styles.slotInfo}>
-                                Selected: {EQUIPMENT_SLOTS[selectedSlot] ? EQUIPMENT_SLOTS[selectedSlot].name : selectedSlot}
-                            </Typography>
-                            {equippedItems[selectedSlot] && (
-                                <Button 
-                                    variant="outlined" 
-                                    size="small" 
-                                    onClick={() => handleUnequipItem(selectedSlot)}
-                                    className={styles.unequipButton}
-                                >
-                                    Unequip Current Item
-                                </Button>
-                            )}
-                        </div>
-                    )}
-                    
-                    <div className={styles.inventoryGrid}>
-                        {filteredInventory.length > 0 ? (
-                            filteredInventory.map((item) => (
+                )}
+                
+                <div className={styles.inventoryGrid}>
+                    {filteredInventory.length > 0 ? (
+                        filteredInventory.map((item) => (
                                 <Tooltip
                                     key={item.id}
                                     title={createComparisonTooltip(item)}
@@ -530,53 +530,53 @@ function Equipment() {
                                     }}
                                 >
                                     <div 
-                                        className={styles.inventoryItem}
-                                        onClick={() => handleEquipItem(item)}
-                                        onContextMenu={(e) => {
-                                            e.preventDefault();
-                                            handleEquipItem(item);
-                                        }}
-                                    >
-                                        <div 
-                                            className={styles.itemContent}
-                                            style={{ 
-                                                borderColor: getRarityBorder(item.rarity),
-                                                color: getRarityColor(item.rarity)
-                                            }}
-                                        >
-                                            <div className={styles.itemHeader}>
-                                                <img 
-                                                    src={EQUIPMENT_SLOTS[item.type] ? EQUIPMENT_SLOTS[item.type].icon : EQUIPMENT_SLOTS.weapon.icon} 
-                                                    alt={item.type || 'item'} 
-                                                    className={styles.itemIcon} 
-                                                />
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {item.name}
-                                                </Typography>
-                                            </div>
-                                            <Typography variant="caption" className={styles.itemRarity}>
-                                                {item.rarity.toUpperCase()}
-                                            </Typography>
-                                            {item.stats && (
-                                                <div className={styles.itemStats}>
-                                                    {Object.entries(item.stats).map(([stat, value]) => (
-                                                        <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                            +{value} {stat}
-                                                        </Typography>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
+                                className={styles.inventoryItem}
+                                onClick={() => handleEquipItem(item)}
+                                onContextMenu={(e) => {
+                                    e.preventDefault();
+                                    handleEquipItem(item);
+                                }}
+                            >
+                                <div 
+                                    className={styles.itemContent}
+                                    style={{ 
+                                        borderColor: getRarityBorder(item.rarity),
+                                        color: getRarityColor(item.rarity)
+                                    }}
+                                >
+                                    <div className={styles.itemHeader}>
+                                        <img 
+                                            src={EQUIPMENT_SLOTS[item.type] ? EQUIPMENT_SLOTS[item.type].icon : EQUIPMENT_SLOTS.weapon.icon} 
+                                            alt={item.type || 'item'} 
+                                            className={styles.itemIcon} 
+                                        />
+                                        <Typography variant="body2" className={styles.itemName}>
+                                            {item.name}
+                                        </Typography>
                                     </div>
+                                    <Typography variant="caption" className={styles.itemRarity}>
+                                        {item.rarity.toUpperCase()}
+                                    </Typography>
+                                    {item.stats && (
+                                        <div className={styles.itemStats}>
+                                            {Object.entries(item.stats).map(([stat, value]) => (
+                                                <Typography key={stat} variant="caption" className={styles.statLine}>
+                                                    +{value} {stat}
+                                                </Typography>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                                 </Tooltip>
-                            ))
-                        ) : (
-                            <Typography variant="body2" color="text.secondary" className={styles.noItems}>
-                                {selectedSlot && EQUIPMENT_SLOTS[selectedSlot] ? `No ${EQUIPMENT_SLOTS[selectedSlot].name} items in inventory` : 'No items in inventory'}
-                            </Typography>
-                        )}
-                    </div>
-                </Paper>
+                        ))
+                    ) : (
+                        <Typography variant="body2" color="text.secondary" className={styles.noItems}>
+                            {selectedSlot && EQUIPMENT_SLOTS[selectedSlot] ? `No ${EQUIPMENT_SLOTS[selectedSlot].name} items in inventory` : 'No items in inventory'}
+                        </Typography>
+                    )}
+                </div>
+            </Paper>
             </div>
 
             {/* Replace Item Dialog */}

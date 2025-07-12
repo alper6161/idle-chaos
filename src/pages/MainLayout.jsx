@@ -21,6 +21,18 @@ function MainLayout() {
                     </NavLink>
                 </div>
 
+                {/* Battle Section */}
+                <div className={styles.group}>
+                    <div className={styles.groupTitle}>BATTLE</div>
+                    <NavLink
+                        to="/battle"
+                        className={styles.battleItem}
+                    >
+                        <span className={styles.battleIcon}>⚔️</span>
+                        <span className={styles.battleLabel}>Battle</span>
+                    </NavLink>
+                </div>
+
                 {/* Skills Sections */}
                 {Object.entries(INITIAL_SKILLS).map(([category, subskills]) => (
                     <div key={category} className={styles.group}>

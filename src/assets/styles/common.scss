@@ -80,27 +80,112 @@ body {
   scrollbar-color: var(--border-color) var(--primary-bg);
 }
 
-// Global Typography
+// Global Typography - Enhanced Pixel Art Style
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
-  text-shadow: 2px 2px 0px var(--shadow-dark);
+  text-shadow: 
+    2px 2px 0px var(--shadow-dark),
+    1px 1px 0px var(--shadow-dark);
   font-family: 'Press Start 2P', monospace;
   letter-spacing: 1px;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
 }
 
 p {
   color: var(--text-primary);
-  text-shadow: 1px 1px 0px var(--shadow-dark);
+  text-shadow: 
+    1px 1px 0px var(--shadow-dark),
+    0.5px 0.5px 0px var(--shadow-dark);
   font-family: 'Press Start 2P', monospace;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
 }
 
-// Global Button Styles
+// Enhanced Typography for all text elements
+span, div, label, strong, em, b, i {
+  font-family: 'Press Start 2P', monospace;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
+}
+
+// Material-UI Typography override for pixel art
+.MuiTypography-root {
+  font-family: 'Press Start 2P', monospace !important;
+  font-smooth: never !important;
+  -webkit-font-smoothing: none !important;
+  -moz-osx-font-smoothing: unset !important;
+  image-rendering: pixelated !important;
+  text-rendering: optimizeSpeed !important;
+  text-shadow: 1px 1px 0px var(--shadow-dark) !important;
+}
+
+// Material-UI Button text override
+.MuiButton-root {
+  font-family: 'Press Start 2P', monospace !important;
+  font-smooth: never !important;
+  -webkit-font-smoothing: none !important;
+  -moz-osx-font-smoothing: unset !important;
+  image-rendering: pixelated !important;
+  text-rendering: optimizeSpeed !important;
+}
+
+// Material-UI Dialog text override
+.MuiDialogTitle-root,
+.MuiDialogContent-root,
+.MuiDialogActions-root {
+  font-family: 'Press Start 2P', monospace !important;
+  font-smooth: never !important;
+  -webkit-font-smoothing: none !important;
+  -moz-osx-font-smoothing: unset !important;
+  image-rendering: pixelated !important;
+  text-rendering: optimizeSpeed !important;
+}
+
+// Material-UI Card text override
+.MuiCard-root,
+.MuiCardContent-root {
+  font-family: 'Press Start 2P', monospace !important;
+  font-smooth: never !important;
+  -webkit-font-smoothing: none !important;
+  -moz-osx-font-smoothing: unset !important;
+  image-rendering: pixelated !important;
+  text-rendering: optimizeSpeed !important;
+}
+
+// Material-UI Tooltip text override
+.MuiTooltip-tooltip {
+  font-family: 'Press Start 2P', monospace !important;
+  font-smooth: never !important;
+  -webkit-font-smoothing: none !important;
+  -moz-osx-font-smoothing: unset !important;
+  image-rendering: pixelated !important;
+  text-rendering: optimizeSpeed !important;
+  text-shadow: 1px 1px 0px var(--shadow-dark) !important;
+}
+
+// Global Button Styles - Enhanced Pixel Art
 button {
   font-family: 'Press Start 2P', monospace;
   text-transform: uppercase;
   letter-spacing: 1px;
   border-radius: 0;
   transition: all 0.2s ease;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
+  text-shadow: 1px 1px 0px var(--shadow-dark);
   
   &:hover {
     transform: translateY(-2px);
@@ -130,7 +215,7 @@ a {
   }
 }
 
-// Global Input Styles
+// Global Input Styles - Enhanced Pixel Art
 input, textarea, select {
   font-family: 'Press Start 2P', monospace;
   background: var(--primary-bg);
@@ -138,6 +223,12 @@ input, textarea, select {
   border-radius: 0;
   color: var(--text-primary);
   padding: 0.5rem;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: unset;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
+  text-shadow: 1px 1px 0px var(--shadow-dark);
   box-shadow: 
     0 0 0 1px var(--shadow-dark),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1);
