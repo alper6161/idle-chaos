@@ -510,16 +510,6 @@ function Equipment() {
                         </div>
                         
                         <div className={styles.characterLayout}>
-                            {/* Character Silhouette */}
-                            <div className={styles.characterCenter}>
-                                <div className={styles.characterSilhouette}>
-                                    <div className={styles.characterGlow}></div>
-                                    <Avatar className={styles.characterAvatar}>
-                                        <Person />
-                                    </Avatar>
-                                </div>
-                            </div>
-                            
                             {/* Equipment Slots arranged around character */}
                             <div className={styles.equipmentSlots}>
                                 {/* Top row */}
