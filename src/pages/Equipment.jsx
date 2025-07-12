@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../assets/styles/Equipment.module.scss";
 import {
     Typography,
@@ -10,7 +10,8 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions
+    DialogActions,
+    Tooltip
 } from "@mui/material";
 
 // Equipment slots and their icons
@@ -95,16 +96,56 @@ const SAMPLE_INVENTORY = [
     { id: 31, name: "Magic Amulet", type: "amulet", rarity: "rare", stats: { HP: 30, CRIT_CHANCE: 3 } }
 ];
 
+// LocalStorage keys
+const STORAGE_KEYS = {
+    EQUIPPED_ITEMS: 'idle-chaos-equipped-items',
+    INVENTORY: 'idle-chaos-inventory'
+};
+
+// Load data from localStorage
+const loadFromStorage = (key, defaultValue) => {
+    try {
+        const stored = localStorage.getItem(key);
+        return stored ? JSON.parse(stored) : defaultValue;
+    } catch (error) {
+        console.error(`Error loading ${key} from localStorage:`, error);
+        return defaultValue;
+    }
+};
+
+// Save data to localStorage
+const saveToStorage = (key, data) => {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+    } catch (error) {
+        console.error(`Error saving ${key} to localStorage:`, error);
+    }
+};
+
 function Equipment() {
-    const [equippedItems, setEquippedItems] = useState(SAMPLE_EQUIPMENT);
+    const [equippedItems, setEquippedItems] = useState(() => 
+        loadFromStorage(STORAGE_KEYS.EQUIPPED_ITEMS, SAMPLE_EQUIPMENT)
+    );
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [inventory, setInventory] = useState(SAMPLE_INVENTORY);
+    const [inventory, setInventory] = useState(() => 
+        loadFromStorage(STORAGE_KEYS.INVENTORY, SAMPLE_INVENTORY)
+    );
     const [replaceDialog, setReplaceDialog] = useState({
         open: false,
         currentItem: null,
         newItem: null,
         slot: null
     });
+
+    // Save equipped items whenever they change
+    useEffect(() => {
+        saveToStorage(STORAGE_KEYS.EQUIPPED_ITEMS, equippedItems);
+    }, [equippedItems]);
+
+    // Save inventory whenever it changes
+    useEffect(() => {
+        saveToStorage(STORAGE_KEYS.INVENTORY, inventory);
+    }, [inventory]);
 
     // Filter inventory based on selected slot
     const filteredInventory = selectedSlot && selectedSlot !== null
@@ -213,601 +254,330 @@ function Equipment() {
 
     const totalStats = calculateTotalStats();
 
+    // Create comparison tooltip content
+    const createComparisonTooltip = (inventoryItem) => {
+        const targetSlot = inventoryItem.type;
+        const equippedItem = equippedItems[targetSlot];
+
+        if (!equippedItem) {
+            return (
+                <div className={styles.tooltipContent}>
+                    <Typography variant="body2" className={styles.tooltipTitle}>
+                        {inventoryItem.name}
+                    </Typography>
+                    <Typography variant="caption" className={styles.tooltipRarity}>
+                        {inventoryItem.rarity.toUpperCase()}
+                    </Typography>
+                    {inventoryItem.stats && (
+                        <div className={styles.tooltipStats}>
+                            {Object.entries(inventoryItem.stats).map(([stat, value]) => (
+                                <Typography key={stat} variant="caption" className={styles.tooltipStat}>
+                                    +{value} {stat}
+                                </Typography>
+                            ))}
+                        </div>
+                    )}
+                    <Typography variant="caption" className={styles.tooltipAction}>
+                        Click to equip
+                    </Typography>
+                </div>
+            );
+        }
+
+        const inventoryStats = inventoryItem.stats || {};
+        const equippedStats = equippedItem.stats || {};
+
+        return (
+            <div className={styles.tooltipContent}>
+                <div className={styles.tooltipComparison}>
+                    <div className={styles.tooltipCurrent}>
+                        <Typography variant="body2" className={styles.tooltipTitle}>
+                            Current: {equippedItem.name}
+                        </Typography>
+                        <Typography variant="caption" className={styles.tooltipRarity}>
+                            {equippedItem.rarity.toUpperCase()}
+                        </Typography>
+                        {Object.entries(equippedStats).map(([stat, value]) => (
+                            <Typography key={stat} variant="caption" className={styles.tooltipStat}>
+                                +{value} {stat}
+                            </Typography>
+                        ))}
+                    </div>
+                    
+                    <div className={styles.tooltipArrow}>
+                        <Typography variant="h6">→</Typography>
+                    </div>
+                    
+                    <div className={styles.tooltipNew}>
+                        <Typography variant="body2" className={styles.tooltipTitle}>
+                            New: {inventoryItem.name}
+                        </Typography>
+                        <Typography variant="caption" className={styles.tooltipRarity}>
+                            {inventoryItem.rarity.toUpperCase()}
+                        </Typography>
+                        {Object.entries(inventoryStats).map(([stat, value]) => {
+                            const equippedValue = equippedStats[stat] || 0;
+                            const difference = value - equippedValue;
+                            const isBetter = difference > 0;
+                            const isWorse = difference < 0;
+                            
+                            return (
+                                <Typography 
+                                    key={stat} 
+                                    variant="caption" 
+                                    className={`${styles.tooltipStat} ${
+                                        isBetter ? styles.statBetter : isWorse ? styles.statWorse : ''
+                                    }`}
+                                >
+                                    +{value} {stat} {difference !== 0 && `(${difference > 0 ? '+' : ''}${difference})`}
+                                </Typography>
+                            );
+                        })}
+                    </div>
+                </div>
+                <Typography variant="caption" className={styles.tooltipAction}>
+                    Click to replace
+                </Typography>
+            </div>
+        );
+    };
+
+    // Create equipment slot component
+    const EquipmentSlot = ({ slotKey, slotData }) => (
+        <div 
+            className={`${styles.equipmentSlot} ${selectedSlot === slotKey ? styles.selected : ''}`}
+            onClick={() => setSelectedSlot(slotKey)}
+        >
+            <div className={styles.slotHeader}>
+                <img src={slotData.icon} alt={slotData.name} className={styles.slotIcon} />
+                <span className={styles.slotName}>{slotData.name}</span>
+            </div>
+            
+            {equippedItems[slotKey] ? (
+                <div 
+                    className={styles.equippedItem}
+                    style={{ 
+                        borderColor: getRarityBorder(equippedItems[slotKey].rarity),
+                        color: getRarityColor(equippedItems[slotKey].rarity)
+                    }}
+                >
+                    <Typography variant="body2" className={styles.itemName}>
+                        {equippedItems[slotKey].name}
+                    </Typography>
+                    <Typography variant="caption" className={styles.itemRarity}>
+                        {equippedItems[slotKey].rarity.toUpperCase()}
+                    </Typography>
+                    {equippedItems[slotKey].stats && (
+                        <div className={styles.itemStats}>
+                            {Object.entries(equippedItems[slotKey].stats).map(([stat, value]) => (
+                                <Typography key={stat} variant="caption" className={styles.statLine}>
+                                    +{value} {stat}
+                                </Typography>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className={styles.emptySlot}>
+                    <Typography variant="body2" color="text.secondary">
+                        Empty
+                    </Typography>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className={styles.equipmentContainer}>
             <Typography variant="h4" className={styles.pageTitle}>
                 Equipment
             </Typography>
 
-            <Grid container spacing={3}>
-                {/* Equipment Slots */}
-                <Grid item xs={12} md={8}>
-                    <Paper className={styles.equipmentGrid}>
-                        <Typography variant="h6" className={styles.sectionTitle}>
-                            Equipment Slots
-                        </Typography>
-                        <Divider className={styles.divider} />
-                        
-                        <div className={styles.characterEquipment}>
-                            {/* Top Row - Helmet */}
-                            <div className={styles.topRow}>
-                                <div className={styles.helmetSlot}>
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'helmet' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('helmet')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.helmet.icon} alt="Helmet" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Helmet</span>
-                                        </div>
-                                        
-                                        {equippedItems.helmet ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.helmet.rarity),
-                                                    color: getRarityColor(equippedItems.helmet.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.helmet.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.helmet.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.helmet.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.helmet.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Middle Row - Weapon and Shield */}
-                            <div className={styles.middleRow}>
-                                <div className={styles.weaponSlot}>
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'weapon' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('weapon')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.weapon.icon} alt="Weapon" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Weapon</span>
-                                        </div>
-                                        
-                                        {equippedItems.weapon ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.weapon.rarity),
-                                                    color: getRarityColor(equippedItems.weapon.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.weapon.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.weapon.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.weapon.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.weapon.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className={styles.shieldSlot}>
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'shield' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('shield')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.shield.icon} alt="Shield" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Shield</span>
-                                        </div>
-                                        
-                                        {equippedItems.shield ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.shield.rarity),
-                                                    color: getRarityColor(equippedItems.shield.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.shield.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.shield.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.shield.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.shield.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Bottom Row - Armor, Gloves, and Accessories */}
-                            <div className={styles.bottomRow}>
-                                <div className={styles.armorSlots}>
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'chest' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('chest')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.chest.icon} alt="Chest" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Chest</span>
-                                        </div>
-                                        
-                                        {equippedItems.chest ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.chest.rarity),
-                                                    color: getRarityColor(equippedItems.chest.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.chest.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.chest.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.chest.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.chest.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'legs' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('legs')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.legs.icon} alt="Legs" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Legs</span>
-                                        </div>
-                                        
-                                        {equippedItems.legs ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.legs.rarity),
-                                                    color: getRarityColor(equippedItems.legs.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.legs.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.legs.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.legs.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.legs.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'boots' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('boots')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.boots.icon} alt="Boots" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Boots</span>
-                                        </div>
-                                        
-                                        {equippedItems.boots ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.boots.rarity),
-                                                    color: getRarityColor(equippedItems.boots.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.boots.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.boots.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.boots.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.boots.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className={styles.glovesSlot}>
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'gloves' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('gloves')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.gloves.icon} alt="Gloves" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Gloves</span>
-                                        </div>
-                                        
-                                        {equippedItems.gloves ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.gloves.rarity),
-                                                    color: getRarityColor(equippedItems.gloves.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.gloves.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.gloves.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.gloves.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.gloves.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className={styles.accessorySlots}>
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'cape' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('cape')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.cape.icon} alt="Cape" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Cape</span>
-                                        </div>
-                                        
-                                        {equippedItems.cape ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.cape.rarity),
-                                                    color: getRarityColor(equippedItems.cape.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.cape.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.cape.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.cape.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.cape.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'ring' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('ring')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.ring.icon} alt="Ring" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Ring</span>
-                                        </div>
-                                        
-                                        {equippedItems.ring ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.ring.rarity),
-                                                    color: getRarityColor(equippedItems.ring.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.ring.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.ring.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.ring.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.ring.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div 
-                                        className={`${styles.equipmentSlot} ${selectedSlot === 'amulet' ? styles.selected : ''}`}
-                                        onClick={() => setSelectedSlot('amulet')}
-                                    >
-                                        <div className={styles.slotHeader}>
-                                            <img src={EQUIPMENT_SLOTS.amulet.icon} alt="Amulet" className={styles.slotIcon} />
-                                            <span className={styles.slotName}>Amulet</span>
-                                        </div>
-                                        
-                                        {equippedItems.amulet ? (
-                                            <div 
-                                                className={styles.equippedItem}
-                                                style={{ 
-                                                    borderColor: getRarityBorder(equippedItems.amulet.rarity),
-                                                    color: getRarityColor(equippedItems.amulet.rarity)
-                                                }}
-                                            >
-                                                <Typography variant="body2" className={styles.itemName}>
-                                                    {equippedItems.amulet.name}
-                                                </Typography>
-                                                <Typography variant="caption" className={styles.itemRarity}>
-                                                    {equippedItems.amulet.rarity.toUpperCase()}
-                                                </Typography>
-                                                {equippedItems.amulet.stats && (
-                                                    <div className={styles.itemStats}>
-                                                        {Object.entries(equippedItems.amulet.stats).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                                +{value} {stat}
-                                                            </Typography>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className={styles.emptySlot}>
-                                                <Typography variant="body2" color="text.secondary">
-                                                    Empty
-                                                </Typography>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </Paper>
-                </Grid>
-
-                {/* Stats Panel */}
-                <Grid item xs={12} md={4}>
-                    <Paper className={styles.statsPanel}>
-                        <Typography variant="h6" className={styles.sectionTitle}>
-                            Equipment Stats
-                        </Typography>
-                        <Divider className={styles.divider} />
-                        
-                        <div className={styles.statsList}>
-                            <div className={styles.statItem}>
-                                <span className={styles.statIcon}>⚔️</span>
-                                <span className={styles.statName}>Attack:</span>
-                                <span className={styles.statValue}>+{totalStats.ATK}</span>
-                            </div>
-                            <div className={styles.statItem}>
-                                <span className={styles.statIcon}>🛡️</span>
-                                <span className={styles.statName}>Defense:</span>
-                                <span className={styles.statValue}>+{totalStats.DEF}</span>
-                            </div>
-                            <div className={styles.statItem}>
-                                <span className={styles.statIcon}>❤️</span>
-                                <span className={styles.statName}>Health:</span>
-                                <span className={styles.statValue}>+{totalStats.HP}</span>
-                            </div>
-                            <div className={styles.statItem}>
-                                <span className={styles.statIcon}>🎯</span>
-                                <span className={styles.statName}>Crit Chance:</span>
-                                <span className={styles.statValue}>+{totalStats.CRIT_CHANCE}%</span>
-                            </div>
-                            <div className={styles.statItem}>
-                                <span className={styles.statIcon}>💥</span>
-                                <span className={styles.statName}>Crit Damage:</span>
-                                <span className={styles.statValue}>+{totalStats.CRIT_DAMAGE}%</span>
-                            </div>
-                        </div>
-
-                        <Divider className={styles.divider} />
-                        
-                        <Typography variant="body2" className={styles.totalItems}>
-                            Equipped Items: {Object.values(equippedItems).filter(item => item !== null).length}/10
-                        </Typography>
-                    </Paper>
-                </Grid>
-            </Grid>
-
-            {/* Inventory Section */}
-            <Paper className={styles.inventorySection}>
-                <div className={styles.inventoryHeader}>
-                    <Typography variant="h6" className={styles.sectionTitle}>
-                        Inventory {selectedSlot && selectedSlot !== null && EQUIPMENT_SLOTS[selectedSlot] && `- ${EQUIPMENT_SLOTS[selectedSlot].name}`}
-                    </Typography>
-                    {selectedSlot && (
-                        <Button 
-                            variant="outlined" 
-                            size="small" 
-                            onClick={() => {
-                                setSelectedSlot(null);
-                            }}
-                            className={styles.clearFilterButton}
-                        >
-                            Show All Items
-                        </Button>
-                    )}
-                </div>
+            {/* Total Stats - Compact at Top */}
+            <Paper className={styles.statsPanel}>
+                <Typography variant="h6" className={styles.sectionTitle}>
+                    Total Stats
+                </Typography>
                 <Divider className={styles.divider} />
                 
-                {selectedSlot && selectedSlot !== null && (
-                    <div className={styles.selectedSlotInfo}>
-                        <Typography variant="body2" className={styles.slotInfo}>
-                            Selected: {EQUIPMENT_SLOTS[selectedSlot] ? EQUIPMENT_SLOTS[selectedSlot].name : selectedSlot}
+                <div className={styles.statsList}>
+                    {Object.entries(totalStats).map(([stat, value]) => (
+                        <div key={stat} className={styles.statItem}>
+                            <span className={styles.statName}>{stat}</span>
+                            <span className={styles.statValue}>+{value}</span>
+                        </div>
+                    ))}
+                </div>
+            </Paper>
+
+            {/* Main Content - Equipment and Inventory Side by Side */}
+            <div className={styles.mainContent}>
+                {/* Equipment Slots */}
+                <Paper className={styles.equipmentGrid}>
+                    <Typography variant="h6" className={styles.sectionTitle}>
+                        Equipment Slots
+                    </Typography>
+                    <Divider className={styles.divider} />
+                    
+                    <div className={styles.characterEquipment}>
+                        {/* Top Row - Helmet */}
+                        <div className={styles.topRow}>
+                            <div className={styles.helmetSlot}>
+                                <EquipmentSlot slotKey="helmet" slotData={EQUIPMENT_SLOTS.helmet} />
+                            </div>
+                        </div>
+
+                        {/* Middle Row - Weapon and Shield */}
+                        <div className={styles.middleRow}>
+                            <div className={styles.weaponSlot}>
+                                <EquipmentSlot slotKey="weapon" slotData={EQUIPMENT_SLOTS.weapon} />
+                            </div>
+                            <div className={styles.characterSilhouette}>
+                                <div className={styles.characterPlaceholder}>
+                                    <Typography variant="body2" className={styles.characterText}>
+                                        CHARACTER
+                                    </Typography>
+                                </div>
+                            </div>
+                            <div className={styles.shieldSlot}>
+                                <EquipmentSlot slotKey="shield" slotData={EQUIPMENT_SLOTS.shield} />
+                            </div>
+                        </div>
+
+                        {/* Armor Row - Chest, Gloves, Legs */}
+                        <div className={styles.armorRow}>
+                            <div className={styles.chestSlot}>
+                                <EquipmentSlot slotKey="chest" slotData={EQUIPMENT_SLOTS.chest} />
+                            </div>
+                            <div className={styles.glovesSlot}>
+                                <EquipmentSlot slotKey="gloves" slotData={EQUIPMENT_SLOTS.gloves} />
+                            </div>
+                            <div className={styles.legsSlot}>
+                                <EquipmentSlot slotKey="legs" slotData={EQUIPMENT_SLOTS.legs} />
+                            </div>
+                        </div>
+
+                        {/* Bottom Row - Boots and Accessories */}
+                        <div className={styles.bottomRow}>
+                            <div className={styles.bootsSlot}>
+                                <EquipmentSlot slotKey="boots" slotData={EQUIPMENT_SLOTS.boots} />
+                            </div>
+                            <div className={styles.accessorySlots}>
+                                <div className={styles.capeSlot}>
+                                    <EquipmentSlot slotKey="cape" slotData={EQUIPMENT_SLOTS.cape} />
+                                </div>
+                                <div className={styles.ringSlot}>
+                                    <EquipmentSlot slotKey="ring" slotData={EQUIPMENT_SLOTS.ring} />
+                                </div>
+                                <div className={styles.amuletSlot}>
+                                    <EquipmentSlot slotKey="amulet" slotData={EQUIPMENT_SLOTS.amulet} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Paper>
+
+                {/* Inventory Section */}
+                <Paper className={styles.inventorySection}>
+                    <div className={styles.inventoryHeader}>
+                        <Typography variant="h6" className={styles.sectionTitle}>
+                            Inventory {selectedSlot && selectedSlot !== null && EQUIPMENT_SLOTS[selectedSlot] && `- ${EQUIPMENT_SLOTS[selectedSlot].name}`}
                         </Typography>
-                        {equippedItems[selectedSlot] && (
+                        {selectedSlot && (
                             <Button 
                                 variant="outlined" 
                                 size="small" 
-                                onClick={() => handleUnequipItem(selectedSlot)}
-                                className={styles.unequipButton}
+                                onClick={() => {
+                                    setSelectedSlot(null);
+                                }}
+                                className={styles.clearFilterButton}
                             >
-                                Unequip Current Item
+                                Show All Items
                             </Button>
                         )}
                     </div>
-                )}
-                
-                <div className={styles.inventoryGrid}>
-                    {filteredInventory.length > 0 ? (
-                        filteredInventory.map((item) => (
-                            <div 
-                                key={item.id} 
-                                className={styles.inventoryItem}
-                                onClick={() => handleEquipItem(item)}
-                                onContextMenu={(e) => {
-                                    e.preventDefault();
-                                    handleEquipItem(item);
-                                }}
-                            >
-                                <div 
-                                    className={styles.itemContent}
-                                    style={{ 
-                                        borderColor: getRarityBorder(item.rarity),
-                                        color: getRarityColor(item.rarity)
+                    <Divider className={styles.divider} />
+                    
+                    {selectedSlot && selectedSlot !== null && (
+                        <div className={styles.selectedSlotInfo}>
+                            <Typography variant="body2" className={styles.slotInfo}>
+                                Selected: {EQUIPMENT_SLOTS[selectedSlot] ? EQUIPMENT_SLOTS[selectedSlot].name : selectedSlot}
+                            </Typography>
+                            {equippedItems[selectedSlot] && (
+                                <Button 
+                                    variant="outlined" 
+                                    size="small" 
+                                    onClick={() => handleUnequipItem(selectedSlot)}
+                                    className={styles.unequipButton}
+                                >
+                                    Unequip Current Item
+                                </Button>
+                            )}
+                        </div>
+                    )}
+                    
+                    <div className={styles.inventoryGrid}>
+                        {filteredInventory.length > 0 ? (
+                            filteredInventory.map((item) => (
+                                <Tooltip
+                                    key={item.id}
+                                    title={createComparisonTooltip(item)}
+                                    placement="top"
+                                    arrow
+                                    classes={{
+                                        tooltip: styles.customTooltip,
+                                        arrow: styles.tooltipArrow
                                     }}
                                 >
-                                    <div className={styles.itemHeader}>
-                                        <img 
-                                            src={EQUIPMENT_SLOTS[item.type] ? EQUIPMENT_SLOTS[item.type].icon : EQUIPMENT_SLOTS.weapon.icon} 
-                                            alt={item.type || 'item'} 
-                                            className={styles.itemIcon} 
-                                        />
-                                        <Typography variant="body2" className={styles.itemName}>
-                                            {item.name}
-                                        </Typography>
-                                    </div>
-                                    <Typography variant="caption" className={styles.itemRarity}>
-                                        {item.rarity.toUpperCase()}
-                                    </Typography>
-                                    {item.stats && (
-                                        <div className={styles.itemStats}>
-                                            {Object.entries(item.stats).map(([stat, value]) => (
-                                                <Typography key={stat} variant="caption" className={styles.statLine}>
-                                                    +{value} {stat}
+                                    <div 
+                                        className={styles.inventoryItem}
+                                        onClick={() => handleEquipItem(item)}
+                                        onContextMenu={(e) => {
+                                            e.preventDefault();
+                                            handleEquipItem(item);
+                                        }}
+                                    >
+                                        <div 
+                                            className={styles.itemContent}
+                                            style={{ 
+                                                borderColor: getRarityBorder(item.rarity),
+                                                color: getRarityColor(item.rarity)
+                                            }}
+                                        >
+                                            <div className={styles.itemHeader}>
+                                                <img 
+                                                    src={EQUIPMENT_SLOTS[item.type] ? EQUIPMENT_SLOTS[item.type].icon : EQUIPMENT_SLOTS.weapon.icon} 
+                                                    alt={item.type || 'item'} 
+                                                    className={styles.itemIcon} 
+                                                />
+                                                <Typography variant="body2" className={styles.itemName}>
+                                                    {item.name}
                                                 </Typography>
-                                            ))}
+                                            </div>
+                                            <Typography variant="caption" className={styles.itemRarity}>
+                                                {item.rarity.toUpperCase()}
+                                            </Typography>
+                                            {item.stats && (
+                                                <div className={styles.itemStats}>
+                                                    {Object.entries(item.stats).map(([stat, value]) => (
+                                                        <Typography key={stat} variant="caption" className={styles.statLine}>
+                                                            +{value} {stat}
+                                                        </Typography>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <Typography variant="body2" color="text.secondary" className={styles.noItems}>
-                            {selectedSlot && EQUIPMENT_SLOTS[selectedSlot] ? `No ${EQUIPMENT_SLOTS[selectedSlot].name} items in inventory` : 'No items in inventory'}
-                        </Typography>
-                    )}
-                </div>
-            </Paper>
+                                    </div>
+                                </Tooltip>
+                            ))
+                        ) : (
+                            <Typography variant="body2" color="text.secondary" className={styles.noItems}>
+                                {selectedSlot && EQUIPMENT_SLOTS[selectedSlot] ? `No ${EQUIPMENT_SLOTS[selectedSlot].name} items in inventory` : 'No items in inventory'}
+                            </Typography>
+                        )}
+                    </div>
+                </Paper>
+            </div>
 
             {/* Replace Item Dialog */}
             <Dialog 

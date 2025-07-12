@@ -32,6 +32,59 @@
   margin: 1rem 0 !important;
 }
 
+// Compact Stats Panel
+.statsPanel {
+  background: linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%) !important;
+  border: 2px solid #4a4a6a !important;
+  border-radius: 0 !important;
+  padding: 1rem !important;
+  box-shadow: 
+    0 0 0 1px #000,
+    0 2px 0 0 #2a2a4a;
+  height: fit-content;
+}
+
+.statsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.statItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  border-left: 3px solid #4a4a6a;
+  min-width: 120px;
+}
+
+.statName {
+  color: #e0e0e0;
+  font-size: 0.6rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 0px #000;
+  flex-grow: 1;
+}
+
+.statValue {
+  color: #96ceb4;
+  font-size: 0.6rem;
+  font-weight: bold;
+  text-shadow: 1px 1px 0px #000;
+}
+
+// Main Content - Side by Side Layout
+.mainContent {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  flex: 1;
+}
+
 .equipmentGrid {
   background: linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%) !important;
   border: 2px solid #4a4a6a !important;
@@ -40,12 +93,14 @@
   box-shadow: 
     0 0 0 1px #000,
     0 2px 0 0 #2a2a4a;
+  height: fit-content;
 }
 
+// RPG Character Equipment Layout
 .characterEquipment {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
   margin-top: 1rem;
   align-items: center;
 }
@@ -57,43 +112,76 @@
 }
 
 .helmetSlot {
-  width: 200px;
+  width: 150px;
 }
 
 .middleRow {
   display: flex;
   justify-content: center;
-  gap: 3rem;
+  align-items: center;
+  gap: 2rem;
   width: 100%;
 }
 
 .weaponSlot, .shieldSlot {
-  width: 200px;
+  width: 150px;
+}
+
+.characterSilhouette {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.characterPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px dashed #4a4a6a;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.characterText {
+  color: #888 !important;
+  font-size: 0.5rem !important;
+  text-align: center;
+  text-shadow: 1px 1px 0px #000;
+}
+
+.armorRow {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.chestSlot, .glovesSlot, .legsSlot {
+  width: 150px;
 }
 
 .bottomRow {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 1rem;
   width: 100%;
 }
 
-.armorSlots, .glovesSlot, .accessorySlots {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.armorSlots {
-  width: 200px;
-}
-
-.glovesSlot {
-  width: 200px;
+.bootsSlot {
+  width: 150px;
 }
 
 .accessorySlots {
-  width: 200px;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.capeSlot, .ringSlot, .amuletSlot {
+  width: 120px;
 }
 
 .equipmentSlot {
@@ -195,17 +283,6 @@
   font-size: 0.6rem !important;
 }
 
-.statsPanel {
-  background: linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%) !important;
-  border: 2px solid #4a4a6a !important;
-  border-radius: 0 !important;
-  padding: 1.5rem !important;
-  box-shadow: 
-    0 0 0 1px #000,
-    0 2px 0 0 #2a2a4a;
-  height: fit-content;
-}
-
 .inventorySection {
   background: linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%) !important;
   border: 2px solid #4a4a6a !important;
@@ -214,7 +291,7 @@
   box-shadow: 
     0 0 0 1px #000,
     0 2px 0 0 #2a2a4a;
-  margin-top: 2rem;
+  height: fit-content;
 }
 
 .inventoryHeader {
@@ -265,9 +342,9 @@
 
 .inventoryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem;
-  max-height: 400px;
+  max-height: 500px;
   overflow-y: auto;
 }
 
@@ -294,6 +371,8 @@
   flex-direction: column;
   gap: 0.5rem;
   transition: all 0.2s ease;
+  height: 160px; // Fixed height for all items
+  overflow: hidden;
   
   &:hover {
     background: rgba(0, 0, 0, 0.5);
@@ -305,12 +384,147 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: 24px;
 }
 
 .itemIcon {
   width: 20px;
   height: 20px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+
+.itemName {
+  font-size: 0.6rem !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 0px #000 !important;
+  line-height: 1.2 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemRarity {
+  font-size: 0.5rem !important;
+  opacity: 0.8;
+  text-shadow: 1px 1px 0px #000;
+  flex-shrink: 0;
+}
+
+.itemStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  overflow-y: auto;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 0;
+  }
+}
+
+.statLine {
+  font-size: 0.5rem !important;
+  color: #96ceb4 !important;
+  text-shadow: 1px 1px 0px #000;
+  line-height: 1.1;
+}
+
+// Custom Tooltip Styles
+.customTooltip {
+  background: linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%) !important;
+  border: 2px solid #4a4a6a !important;
+  border-radius: 0 !important;
+  padding: 1rem !important;
+  box-shadow: 
+    0 0 0 1px #000,
+    0 4px 0 0 #2a2a4a !important;
+  max-width: 400px !important;
+  font-family: 'Press Start 2P', monospace !important;
+}
+
+.tooltipContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tooltipTitle {
+  color: #e0e0e0 !important;
+  font-size: 0.7rem !important;
+  font-weight: bold !important;
+  text-shadow: 1px 1px 0px #000 !important;
+  line-height: 1.2 !important;
+}
+
+.tooltipRarity {
+  font-size: 0.5rem !important;
+  opacity: 0.8;
+  text-shadow: 1px 1px 0px #000;
+}
+
+.tooltipStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tooltipStat {
+  font-size: 0.5rem !important;
+  color: #96ceb4 !important;
+  text-shadow: 1px 1px 0px #000;
+  line-height: 1.1;
+  
+  &.statBetter {
+    color: #1eff00 !important;
+    font-weight: bold !important;
+  }
+  
+  &.statWorse {
+    color: #ff6b6b !important;
+    font-weight: bold !important;
+  }
+}
+
+.tooltipAction {
+  font-size: 0.5rem !important;
+  color: #ffd700 !important;
+  text-shadow: 1px 1px 0px #000;
+  font-weight: bold !important;
+  text-align: center;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #4a4a6a;
+}
+
+.tooltipComparison {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.tooltipCurrent, .tooltipNew {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.tooltipArrow {
+  color: #ffd700;
+  font-weight: bold;
+  text-shadow: 2px 2px 0px #000;
+  font-size: 1rem !important;
 }
 
 .noItems {
@@ -435,59 +649,12 @@
   }
 }
 
-.statsList {
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  margin-top: 1rem;
-}
-
-.statItem {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 0;
-  border-left: 3px solid #4a4a6a;
-}
-
-.statIcon {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.statName {
-  color: #e0e0e0;
-  font-size: 0.6rem;
-  font-weight: bold;
-  text-shadow: 1px 1px 0px #000;
-  flex-grow: 1;
-}
-
-.statValue {
-  color: #96ceb4;
-  font-size: 0.6rem;
-  font-weight: bold;
-  text-shadow: 1px 1px 0px #000;
-}
-
 .totalItems {
   color: #e0e0e0 !important;
   font-size: 0.6rem !important;
   text-align: center;
   text-shadow: 1px 1px 0px #000;
   margin-top: 1rem;
-}
-
-.inventorySection {
-  background: linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%) !important;
-  border: 2px solid #4a4a6a !important;
-  border-radius: 0 !important;
-  padding: 1.5rem !important;
-  box-shadow: 
-    0 0 0 1px #000,
-    0 2px 0 0 #2a2a4a;
 }
 
 .placeholderText {
@@ -498,29 +665,58 @@
   margin-top: 1rem;
 }
 
-// Responsive design
-@media (max-width: 768px) {
-  .equipmentContainer {
-    padding: 1rem;
+// Responsive Design
+@media (max-width: 1200px) {
+  .mainContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
   .characterEquipment {
+    gap: 0.5rem;
+  }
+  
+  .helmetSlot, .weaponSlot, .shieldSlot, .chestSlot, .glovesSlot, .legsSlot, .bootsSlot {
+    width: 120px;
+  }
+  
+  .capeSlot, .ringSlot, .amuletSlot {
+    width: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .equipmentContainer {
+    padding: 1rem;
     gap: 1rem;
   }
   
-  .middleRow {
-    gap: 1rem;
+  .statsList {
+    flex-direction: column;
   }
   
-  .bottomRow {
-    gap: 1rem;
+  .statItem {
+    min-width: auto;
   }
   
-  .helmetSlot, .weaponSlot, .shieldSlot, .armorSlots, .accessorySlots {
-    width: 150px;
+  .characterEquipment {
+    gap: 0.5rem;
   }
   
-  .equipmentSlot {
-    min-height: 100px;
+  .helmetSlot, .weaponSlot, .shieldSlot, .chestSlot, .glovesSlot, .legsSlot, .bootsSlot {
+    width: 100px;
+  }
+  
+  .capeSlot, .ringSlot, .amuletSlot {
+    width: 80px;
+  }
+  
+  .characterSilhouette {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .inventoryGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 } 

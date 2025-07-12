@@ -1,0 +1,260 @@
+// Common Styles for Idle Chaos Game
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+// Global Variables
+:root {
+  --primary-bg: #2a2a4a;
+  --secondary-bg: #3a3a5a;
+  --accent-color: #96ceb4;
+  --gold-color: #ffd700;
+  --danger-color: #ff6b6b;
+  --success-color: #4ecdc4;
+  --text-primary: #e0e0e0;
+  --text-secondary: #888;
+  --border-color: #4a4a6a;
+  --shadow-dark: #000;
+  --shadow-light: #2a2a4a;
+}
+
+// Global Reset and Base Styles
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Press Start 2P', monospace;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+// Custom Scrollbar Styles - Pixel Art Theme
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--primary-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  box-shadow: 
+    inset 0 0 0 1px var(--shadow-dark),
+    0 0 0 1px var(--shadow-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--secondary-bg) 0%, var(--border-color) 50%, var(--secondary-bg) 100%);
+  border: 2px solid var(--shadow-dark);
+  border-radius: 0;
+  box-shadow: 
+    0 0 0 1px var(--shadow-dark),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    background: linear-gradient(45deg, var(--accent-color) 0%, var(--gold-color) 50%, var(--accent-color) 100%);
+    box-shadow: 
+      0 0 0 1px var(--shadow-dark),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+  
+  &:active {
+    background: linear-gradient(45deg, var(--gold-color) 0%, var(--accent-color) 50%, var(--gold-color) 100%);
+    box-shadow: 
+      0 0 0 1px var(--shadow-dark),
+      inset 0 0 0 2px rgba(255, 255, 255, 0.3);
+  }
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--primary-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+}
+
+// Firefox Scrollbar Styles
+* {
+  scrollbar-width: auto;
+  scrollbar-color: var(--border-color) var(--primary-bg);
+}
+
+// Global Typography
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  text-shadow: 2px 2px 0px var(--shadow-dark);
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 1px;
+}
+
+p {
+  color: var(--text-primary);
+  text-shadow: 1px 1px 0px var(--shadow-dark);
+  font-family: 'Press Start 2P', monospace;
+}
+
+// Global Button Styles
+button {
+  font-family: 'Press Start 2P', monospace;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-radius: 0;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 0 0 1px var(--shadow-dark),
+      0 4px 0 0 var(--border-color);
+  }
+  
+  &:active {
+    transform: translateY(0px);
+    box-shadow: 
+      0 0 0 1px var(--shadow-dark),
+      0 2px 0 0 var(--border-color);
+  }
+}
+
+// Global Link Styles
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  text-shadow: 1px 1px 0px var(--shadow-dark);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: var(--gold-color);
+    text-shadow: 2px 2px 0px var(--shadow-dark);
+  }
+}
+
+// Global Input Styles
+input, textarea, select {
+  font-family: 'Press Start 2P', monospace;
+  background: var(--primary-bg);
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  color: var(--text-primary);
+  padding: 0.5rem;
+  box-shadow: 
+    0 0 0 1px var(--shadow-dark),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  
+  &:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 
+      0 0 0 1px var(--shadow-dark),
+      0 0 0 2px var(--accent-color),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+}
+
+// Global Paper/Container Styles
+.paper-container {
+  background: linear-gradient(145deg, var(--secondary-bg) 0%, var(--primary-bg) 100%);
+  border: 2px solid var(--border-color);
+  border-radius: 0;
+  box-shadow: 
+    0 0 0 1px var(--shadow-dark),
+    0 2px 0 0 var(--shadow-light);
+}
+
+// Global Animation Classes
+.pixel-bounce {
+  animation: pixelBounce 0.3s ease;
+}
+
+@keyframes pixelBounce {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
+}
+
+.pixel-glow {
+  animation: pixelGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pixelGlow {
+  0% { box-shadow: 0 0 5px var(--accent-color); }
+  100% { box-shadow: 0 0 20px var(--accent-color), 0 0 30px var(--accent-color); }
+}
+
+// Global Utility Classes
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
+// Global Loading Spinner
+.pixel-spinner {
+  width: 32px;
+  height: 32px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--accent-color);
+  border-radius: 0;
+  animation: pixelSpin 1s linear infinite;
+}
+
+@keyframes pixelSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Global Focus Styles
+*:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+// Global Selection Styles
+::selection {
+  background: var(--accent-color);
+  color: var(--shadow-dark);
+}
+
+::-moz-selection {
+  background: var(--accent-color);
+  color: var(--shadow-dark);
+}
+
+// Global Disabled Styles
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+// Global Error Styles
+.error {
+  color: var(--danger-color);
+  text-shadow: 1px 1px 0px var(--shadow-dark);
+}
+
+// Global Success Styles
+.success {
+  color: var(--success-color);
+  text-shadow: 1px 1px 0px var(--shadow-dark);
+}
+
+// Global Warning Styles
+.warning {
+  color: var(--gold-color);
+  text-shadow: 1px 1px 0px var(--shadow-dark);
+} 
