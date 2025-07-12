@@ -15,7 +15,8 @@ export const useTranslate = () => {
   const getAvailableLanguages = () => {
     return [
       { code: 'en', name: 'English', flag: '/images/flags/UnitedKingdom.png' },
-      { code: 'tr', name: 'Türkçe', flag: '/images/flags/Turkey.png' }
+      { code: 'tr', name: 'Türkçe', flag: '/images/flags/Turkey.png' },
+      { code: 'zh', name: '中文', flag: '/images/flags/China.png' }
     ];
   };
 
