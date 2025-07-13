@@ -32,7 +32,7 @@ const EQUIPMENT_SLOTS = {
 };
 
 const SAMPLE_EQUIPMENT = {
-    weapon: { name: "Legendary Dragonslayer", rarity: "legendary", stats: { ATK: 25, CRIT_CHANCE: 15, CRIT_DAMAGE: 30 } },
+    weapon: { name: "Legendary Dragonslayer", weaponType: "melee", rarity: "legendary", stats: { ATK: 25, CRIT_CHANCE: 15, CRIT_DAMAGE: 30 } },
     shield: { name: "Aegis of Valor", rarity: "epic", stats: { DEF: 18, HP: 50, BLOCK_CHANCE: 20 } },
     helmet: { name: "Crown of Wisdom", rarity: "rare", stats: { DEF: 12, HP: 30, CRIT_CHANCE: 8 } },
     chest: null,
@@ -45,15 +45,15 @@ const SAMPLE_EQUIPMENT = {
 };
 
 const SAMPLE_INVENTORY = [
-    { id: 1, name: "Excalibur", type: "weapon", rarity: "legendary", stats: { ATK: 30, CRIT_CHANCE: 20, CRIT_DAMAGE: 40, HP: 25 } },
-    { id: 2, name: "Shadowbane", type: "weapon", rarity: "legendary", stats: { ATK: 28, CRIT_CHANCE: 25, DODGE: 15 } },
-    { id: 3, name: "Frostmourne", type: "weapon", rarity: "legendary", stats: { ATK: 32, CRIT_DAMAGE: 50, FREEZE_CHANCE: 30 } },
+    { id: 1, name: "Excalibur", type: "weapon", weaponType: "melee", rarity: "legendary", stats: { ATK: 30, CRIT_CHANCE: 20, CRIT_DAMAGE: 40, HP: 25 } },
+    { id: 2, name: "Shadowbane", type: "weapon", weaponType: "melee", rarity: "legendary", stats: { ATK: 28, CRIT_CHANCE: 25, DODGE: 15 } },
+    { id: 3, name: "Frostmourne", type: "weapon", weaponType: "melee", rarity: "legendary", stats: { ATK: 32, CRIT_DAMAGE: 50, FREEZE_CHANCE: 30 } },
     
-    { id: 4, name: "Dragon Blade", type: "weapon", rarity: "epic", stats: { ATK: 22, CRIT_DAMAGE: 25, FIRE_DAMAGE: 10 } },
-    { id: 5, name: "Thunder Strike", type: "weapon", rarity: "epic", stats: { ATK: 20, CRIT_CHANCE: 15, LIGHTNING_DAMAGE: 8 } },
+    { id: 4, name: "Dragon Blade", type: "weapon", weaponType: "melee", rarity: "epic", stats: { ATK: 22, CRIT_DAMAGE: 25, FIRE_DAMAGE: 10 } },
+    { id: 5, name: "Thunder Strike", type: "weapon", weaponType: "magic", rarity: "epic", stats: { ATK: 20, CRIT_CHANCE: 15, LIGHTNING_DAMAGE: 8 } },
     
-    { id: 6, name: "Bloodthirsty Axe", type: "weapon", rarity: "rare", stats: { ATK: 18, LIFE_STEAL: 15, CRIT_CHANCE: 10 } },
-    { id: 7, name: "Mage's Staff", type: "weapon", rarity: "rare", stats: { ATK: 15, CRIT_CHANCE: 12, MANA_REGEN: 5 } },
+    { id: 6, name: "Bloodthirsty Axe", type: "weapon", weaponType: "melee", rarity: "rare", stats: { ATK: 18, LIFE_STEAL: 15, CRIT_CHANCE: 10 } },
+    { id: 7, name: "Mage's Staff", type: "weapon", weaponType: "magic", rarity: "rare", stats: { ATK: 15, CRIT_CHANCE: 12, MANA_REGEN: 5 } },
     
     { id: 8, name: "Dragonscale Armor", type: "chest", rarity: "legendary", stats: { DEF: 35, HP: 80, FIRE_RESISTANCE: 40 } },
     { id: 9, name: "Ethereal Robes", type: "chest", rarity: "legendary", stats: { DEF: 25, HP: 60, CRIT_CHANCE: 20, MANA_REGEN: 10 } },
@@ -161,6 +161,18 @@ function Equipment() {
         const interval = setInterval(checkForNewLoot, 2000);
         
         return () => clearInterval(interval);
+    }, []);
+
+    // Clear old localStorage data to start fresh with weapon types
+    useEffect(() => {
+        const clearOldData = () => {
+            localStorage.removeItem(STORAGE_KEYS.INVENTORY);
+            localStorage.removeItem(STORAGE_KEYS.EQUIPPED_ITEMS);
+            console.log('Cleared old equipment data to start fresh with weapon types');
+        };
+        
+        // Uncomment the line below to clear old data (run once)
+        clearOldData();
     }, []);
 
     const filteredInventory = inventory.filter(item => {
@@ -285,6 +297,11 @@ function Equipment() {
                         <Typography variant="caption" className={styles.tooltipRarity}>
                             {inventoryItem.rarity.toUpperCase()}
                         </Typography>
+                        {inventoryItem.weaponType && (
+                            <Typography variant="caption" className={styles.tooltipWeaponType}>
+                                {inventoryItem.weaponType.toUpperCase()} WEAPON
+                            </Typography>
+                        )}
                     </div>
                     <div className={styles.tooltipStats}>
                         {Object.entries(inventoryItem.stats || {}).map(([stat, value]) => (
@@ -333,6 +350,11 @@ function Equipment() {
                     <Typography variant="caption" className={styles.tooltipRarity}>
                         {inventoryItem.rarity.toUpperCase()}
                     </Typography>
+                    {inventoryItem.weaponType && (
+                        <Typography variant="caption" className={styles.tooltipWeaponType}>
+                            {inventoryItem.weaponType.toUpperCase()} WEAPON
+                        </Typography>
+                    )}
                 </div>
                 <div className={styles.tooltipComparison}>
                     <Typography variant="caption" className={styles.comparisonTitle}>
@@ -381,6 +403,11 @@ function Equipment() {
                     <Typography variant="caption" sx={{ color: getRarityColor(item.rarity), textTransform: 'uppercase', display: 'block', mb: 1 }}>
                         {item.rarity}
                     </Typography>
+                    {item.weaponType && (
+                        <Typography variant="caption" sx={{ color: '#ffd700', textTransform: 'uppercase', display: 'block', mb: 1, fontWeight: 'bold' }}>
+                            {item.weaponType.toUpperCase()} WEAPON
+                        </Typography>
+                    )}
                     {Object.entries(item.stats).map(([stat, value]) => (
                         <Typography key={stat} variant="caption" sx={{ color: '#48bb78', display: 'block', lineHeight: 1.3 }}>
                             +{value} {stat.replace(/_/g, ' ')}
@@ -437,13 +464,23 @@ function Equipment() {
                                 <Typography variant="body2" className={styles.itemName}>
                                     {equippedItem.name}
                                 </Typography>
-                                <Typography 
-                                    variant="caption" 
-                                    className={styles.itemRarity}
-                                    style={{ color: getRarityColor(equippedItem.rarity) }}
-                                >
-                                    {equippedItem.rarity.toUpperCase()}
-                                </Typography>
+                                <div className={styles.itemInfo}>
+                                    <Typography 
+                                        variant="caption" 
+                                        className={styles.itemRarity}
+                                        style={{ color: getRarityColor(equippedItem.rarity) }}
+                                    >
+                                        {equippedItem.rarity.toUpperCase()}
+                                    </Typography>
+                                    {equippedItem.weaponType && (
+                                        <Typography 
+                                            variant="caption" 
+                                            className={styles.itemWeaponType}
+                                        >
+                                            {equippedItem.weaponType}
+                                        </Typography>
+                                    )}
+                                </div>
                             </div>
                         </Tooltip>
                     ) : (
@@ -694,13 +731,23 @@ function Equipment() {
                                                         {item.name}
                                                     </Typography>
                                                 </div>
-                                                <Typography 
-                                                    variant="caption" 
-                                                    className={styles.itemRarity}
-                                                    style={{ color: getRarityColor(item.rarity) }}
-                                                >
-                                                    {item.rarity.toUpperCase()}
-                                                </Typography>
+                                                <div className={styles.itemInfo}>
+                                                    <Typography 
+                                                        variant="caption" 
+                                                        className={styles.itemRarity}
+                                                        style={{ color: getRarityColor(item.rarity) }}
+                                                    >
+                                                        {item.rarity.toUpperCase()}
+                                                    </Typography>
+                                                    {item.weaponType && (
+                                                        <Typography 
+                                                            variant="caption" 
+                                                            className={styles.itemWeaponType}
+                                                        >
+                                                            {item.weaponType}
+                                                        </Typography>
+                                                    )}
+                                                </div>
                                                 {item.stats && (
                                                     <div className={styles.itemStats}>
                                                         {Object.entries(item.stats).slice(0, 3).map(([stat, value]) => (

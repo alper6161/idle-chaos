@@ -47,6 +47,8 @@ const enemies = {
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/GiantRat.png/220px-GiantRat.png",
         drops: [
             { name: "Rat Fang Dagger", chance: 0.15, type: "equipment" },
+            { name: "Rat Fang Bow", chance: 0.12, type: "equipment" },
+            { name: "Rat Fang Staff", chance: 0.10, type: "equipment" },
             { name: "Rat Tail", chance: 0.4, type: "gold", value: 8 },
             { name: "Rotten Cheese", chance: 0.2, type: "gold", value: 15 }
         ]
@@ -75,6 +77,8 @@ const enemies = {
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8c/Skeleton_warrior.png/220px-Skeleton_warrior.png",
         drops: [
             { name: "Bone Sword", chance: 0.25, type: "equipment" },
+            { name: "Bone Crossbow", chance: 0.20, type: "equipment" },
+            { name: "Bone Wand", chance: 0.18, type: "equipment" },
             { name: "Skeleton Skull", chance: 0.3, type: "gold", value: 10 },
             { name: "Ancient Coin", chance: 0.4, type: "gold", value: 7 }
         ]
@@ -89,6 +93,8 @@ const enemies = {
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/2/2c/Orc_warrior.png/220px-Orc_warrior.png",
         drops: [
             { name: "Orc Axe", chance: 0.2, type: "equipment" },
+            { name: "Orc Throwing Axe", chance: 0.15, type: "equipment" },
+            { name: "Orc Shaman Staff", chance: 0.12, type: "equipment" },
             { name: "Tough Hide", chance: 0.4, type: "gold", value: 12 },
             { name: "Berserker Rage", chance: 0.1, type: "gold", value: 25 }
         ]
@@ -117,6 +123,10 @@ const enemies = {
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/4/4c/Dragon_icon.png/220px-Dragon_icon.png",
         drops: [
             { name: "Dragon Flame Sword", chance: 0.08, type: "equipment" },
+            { name: "Dragon Bone Bow", chance: 0.06, type: "equipment" },
+            { name: "Dragon Bone Staff", chance: 0.05, type: "equipment" },
+            { name: "Spirit Hunter Bow", chance: 0.03, type: "equipment" },
+            { name: "Spirit Mage Staff", chance: 0.02, type: "equipment" },
             { name: "Dragon Scale Armor", chance: 0.05, type: "equipment" },
             { name: "Dragon Scale", chance: 0.4, type: "gold", value: 18 },
             { name: "Dragon Claw", chance: 0.2, type: "gold", value: 30 },
@@ -147,6 +157,8 @@ const enemies = {
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/8/8c/Giant_spider.png/220px-Giant_spider.png",
         drops: [
             { name: "Spider Fang Blade", chance: 0.16, type: "equipment" },
+            { name: "Spider Silk Bow", chance: 0.14, type: "equipment" },
+            { name: "Spider Silk Staff", chance: 0.12, type: "equipment" },
             { name: "Silk Armor", chance: 0.10, type: "equipment" },
             { name: "Spider Silk", chance: 0.4, type: "gold", value: 9 },
             { name: "Spider Venom", chance: 0.2, type: "gold", value: 16 },

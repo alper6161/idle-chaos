@@ -385,9 +385,23 @@ function Battle({ player }) {
     // Update attack types when equipment changes
     useEffect(() => {
         const updateAttackTypes = () => {
-            const equippedWeapon = JSON.parse(localStorage.getItem("equippedItems") || "{}").weapon;
+            // Check both possible localStorage keys
+            const equippedItems1 = JSON.parse(localStorage.getItem("equippedItems") || "{}");
+            const equippedItems2 = JSON.parse(localStorage.getItem("idle-chaos-equipped-items") || "{}");
+            
+            const equippedWeapon = equippedItems1.weapon || equippedItems2.weapon;
             const weaponType = getWeaponType(equippedWeapon);
             const attackTypes = getAvailableAttackTypes(weaponType);
+            
+            console.log('🔧 Weapon Update:', {
+                weapon: equippedWeapon?.name,
+                weaponType: weaponType,
+                attackTypes: attackTypes.map(at => at.type),
+                currentSelected: selectedAttackType,
+                localStorage1: equippedItems1,
+                localStorage2: equippedItems2
+            });
+            
             setAvailableAttackTypes(attackTypes);
             
             // If current selected attack type is not available, select the first one
@@ -398,14 +412,20 @@ function Battle({ player }) {
 
         updateAttackTypes();
         
-        // Listen for equipment changes
+        // Listen for equipment changes - check every 2 seconds
+        const interval = setInterval(updateAttackTypes, 2000);
+        
+        // Also listen for storage events (other tabs)
         const handleStorageChange = () => {
             updateAttackTypes();
         };
         
         window.addEventListener('storage', handleStorageChange);
         
-        return () => window.removeEventListener('storage', handleStorageChange);
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('storage', handleStorageChange);
+        };
     }, [selectedAttackType]);
 
     // Update auto potion settings when buffs change

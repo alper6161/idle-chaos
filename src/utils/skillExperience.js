@@ -314,6 +314,12 @@ export const getWeaponType = (equippedWeapon) => {
         return 'melee'; // Default to melee
     }
     
+    // First check if weapon has weaponType property (new system)
+    if (equippedWeapon.weaponType) {
+        return equippedWeapon.weaponType;
+    }
+    
+    // Fallback to name-based detection (old system)
     const weaponName = equippedWeapon.name.toLowerCase();
     
     // Melee weapons
