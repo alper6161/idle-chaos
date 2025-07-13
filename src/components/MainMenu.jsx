@@ -36,65 +36,65 @@ function MainMenu() {
 
     return (
         <aside className={styles.sidebar}>
-                            {/* Equipment Section */}
-                <div className={styles.group}>
-                    <div className={styles.groupTitle}>{t('common.equipment').toUpperCase()}</div>
-                    <NavLink
-                        to="/equipment"
-                        className={styles.equipmentItem}
-                    >
-                        <span className={styles.equipmentIcon}>🛡️</span>
-                        <span className={styles.equipmentLabel}>{t('common.equipment')}</span>
-                    </NavLink>
-                </div>
+            {/* Equipment Section */}
+            <div className={styles.group}>
+                <div className={styles.groupTitle}>{t('common.equipment').toUpperCase()}</div>
+                <NavLink
+                    to="/equipment"
+                    className={styles.equipmentItem}
+                >
+                    <span className={styles.equipmentIcon}>🛡️</span>
+                    <span className={styles.equipmentLabel}>{t('common.equipment')}</span>
+                </NavLink>
+            </div>
 
-                            {/* Store Section */}
-                <div className={styles.group}>
-                    <div className={styles.groupTitle}>{t('common.store').toUpperCase()}</div>
-                    <NavLink
-                        to="/store"
-                        className={styles.storeItem}
-                    >
-                        <span className={styles.storeIcon}>💰</span>
-                        <span className={styles.storeLabel}>{t('common.store')}</span>
-                    </NavLink>
-                </div>
+            {/* Store Section */}
+            <div className={styles.group}>
+                <div className={styles.groupTitle}>{t('common.store').toUpperCase()}</div>
+                <NavLink
+                    to="/store"
+                    className={styles.storeItem}
+                >
+                    <span className={styles.storeIcon}>💰</span>
+                    <span className={styles.storeLabel}>{t('common.store')}</span>
+                </NavLink>
+            </div>
 
-                            {/* Skills Section */}
-                <div className={styles.group}>
-                    <div className={styles.groupTitle}>{t('skills.title')}</div>
-                    <NavLink
-                        to="/skills"
-                        className={styles.skillsItem}
-                    >
-                        <span className={styles.skillsIcon}>🎯</span>
-                        <span className={styles.skillsLabel}>{t('skills.title')}</span>
-                    </NavLink>
-                </div>
+            {/* Skills Section */}
+            <div className={styles.group}>
+                <div className={styles.groupTitle}>{t('skills.title')}</div>
+                <NavLink
+                    to="/skills"
+                    className={styles.skillsItem}
+                >
+                    <span className={styles.skillsIcon}>🎯</span>
+                    <span className={styles.skillsLabel}>{t('skills.title')}</span>
+                </NavLink>
+            </div>
 
-                            {/* Battle Section */}
-                <div className={styles.group}>
-                    <div className={styles.groupTitle}>{t('common.battle').toUpperCase()}</div>
-                    <NavLink
-                        to="/battle"
-                        className={styles.battleItem}
-                    >
-                        <span className={styles.battleIcon}>⚔️</span>
-                        <span className={styles.battleLabel}>{t('common.battle')}</span>
-                    </NavLink>
-                </div>
+            {/* Battle Section */}
+            <div className={styles.group}>
+                <div className={styles.groupTitle}>{t('common.battle').toUpperCase()}</div>
+                <NavLink
+                    to="/battle"
+                    className={styles.battleItem}
+                >
+                    <span className={styles.battleIcon}>⚔️</span>
+                    <span className={styles.battleLabel}>{t('common.battle')}</span>
+                </NavLink>
+            </div>
 
-                            {/* Achievement Section */}
-                <div className={styles.group}>
-                    <div className={styles.groupTitle}>ACHIEVEMENTS</div>
-                    <NavLink
-                        to="/achievement"
-                        className={styles.achievementItem}
-                    >
-                        <span className={styles.achievementIcon}>🏆</span>
-                        <span className={styles.achievementLabel}>Achievements</span>
-                    </NavLink>
-                </div>
+            {/* Achievement Section */}
+            <div className={styles.group}>
+                <div className={styles.groupTitle}>ACHIEVEMENTS</div>
+                <NavLink
+                    to="/achievement"
+                    className={styles.achievementItem}
+                >
+                    <span className={styles.achievementIcon}>🏆</span>
+                    <span className={styles.achievementLabel}>Achievements</span>
+                </NavLink>
+            </div>
 
             {/* Skills Sections */}
             {Object.entries(skills).map(([category, subskills]) => (
