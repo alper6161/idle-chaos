@@ -102,11 +102,13 @@
     "ring": "Yüzük",
     "amulet": "Kolye"
   },
-  "skills": {
-    "title": "Yetenekler",
-    "passiveBuffs": "PASİF GÜÇLENDİRİCİLER",
-    "maxedSkills": "Maksimum Yetenekler",
-    "completeSkillsToUnlock": "Pasif güçlendiricileri açmak için yetenekleri tamamlayın",
+      "skills": {
+        "title": "Yetenekler",
+        "passiveBuffs": "PASİF GÜÇLENDİRİCİLER",
+        "maxedSkills": "Maksimum Yetenekler",
+        "activeBuffs": "Aktif Güçlendiriciler",
+        "specialBuffs": "Özel Güçlendiriciler",
+        "completeSkillsToUnlock": "Pasif güçlendiricileri açmak için yetenekleri tamamlayın",
     "level": "Seviye",
     "currentXp": "Mevcut XP",
     "xpToNext": "Sonraki XP",

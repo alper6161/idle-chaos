@@ -102,11 +102,13 @@
     "ring": "Ring",
     "amulet": "Amulet"
   },
-  "skills": {
-    "title": "Skills",
-    "passiveBuffs": "PASSIVE BUFFS",
-    "maxedSkills": "Maxed Skills",
-    "completeSkillsToUnlock": "Complete skills to unlock passive buffs",
+      "skills": {
+        "title": "Skills",
+        "passiveBuffs": "PASSIVE BUFFS",
+        "maxedSkills": "Maxed Skills",
+        "activeBuffs": "Active Buffs",
+        "specialBuffs": "Special Buffs",
+        "completeSkillsToUnlock": "Complete skills to unlock passive buffs",
     "level": "Level",
     "currentXp": "Current XP",
     "xpToNext": "XP to Next",
