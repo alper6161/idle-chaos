@@ -482,7 +482,20 @@ function Store() {
             )}
 
             {/* Purchase Dialog */}
-            <Dialog open={purchaseDialog.open} onClose={() => setPurchaseDialog({ open: false, item: null })}>
+            <Dialog 
+                open={purchaseDialog.open} 
+                onClose={() => setPurchaseDialog({ open: false, item: null })}
+                className={styles.purchaseDialog}
+                PaperProps={{
+                    style: {
+                        background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 100%)',
+                        border: '2px solid #4a4a6a',
+                        borderRadius: '12px',
+                        color: '#e0e0e0',
+                        backdropFilter: 'blur(10px)'
+                    }
+                }}
+            >
                 <DialogTitle>{t('store.confirmPurchase')}</DialogTitle>
                 <DialogContent>
                     <Typography>

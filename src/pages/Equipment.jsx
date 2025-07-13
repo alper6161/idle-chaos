@@ -695,9 +695,9 @@ function Equipment() {
                         {/* Inventory Grid */}
                         <div className={styles.inventoryGrid}>
                             {filteredInventory.length > 0 ? (
-                                filteredInventory.map((item) => (
+                                filteredInventory.map((item, index) => (
                                     <Tooltip
-                                        key={item.id}
+                                        key={`inventory-${item.id}-${index}`}
                                         title={createComparisonTooltip(item)}
                                         placement="top"
                                         arrow
@@ -750,8 +750,8 @@ function Equipment() {
                                                 </div>
                                                 {item.stats && (
                                                     <div className={styles.itemStats}>
-                                                        {Object.entries(item.stats).slice(0, 3).map(([stat, value]) => (
-                                                            <Typography key={stat} variant="caption" className={styles.statLine}>
+                                                        {Object.entries(item.stats).slice(0, 3).map(([stat, value], statIndex) => (
+                                                            <Typography key={`item-${item.id}-${stat}-${statIndex}`} variant="caption" className={styles.statLine}>
                                                                 +{value} {stat.replace(/_/g, ' ')}
                                                             </Typography>
                                                         ))}
@@ -787,7 +787,7 @@ function Equipment() {
                 className={styles.replaceDialog}
             >
                 <DialogTitle className={styles.dialogTitle}>
-                    <Typography variant="h6">{t('equipment.replace')}</Typography>
+                    {t('equipment.replace')}
                 </DialogTitle>
                 <DialogContent className={styles.dialogContent}>
                     <div className={styles.replaceComparison}>
@@ -822,8 +822,8 @@ function Equipment() {
                                     </Typography>
                                     {replaceDialog.currentItem.stats && (
                                         <div className={styles.dialogItemStats}>
-                                            {Object.entries(replaceDialog.currentItem.stats).map(([stat, value]) => (
-                                                <Typography key={stat} variant="caption" className={styles.dialogStatLine}>
+                                            {Object.entries(replaceDialog.currentItem.stats).map(([stat, value], index) => (
+                                                <Typography key={`current-${stat}-${index}`} variant="caption" className={styles.dialogStatLine}>
                                                     +{value} {stat.replace(/_/g, ' ')}
                                                 </Typography>
                                             ))}
@@ -868,8 +868,8 @@ function Equipment() {
                                     </Typography>
                                     {replaceDialog.newItem.stats && (
                                         <div className={styles.dialogItemStats}>
-                                            {Object.entries(replaceDialog.newItem.stats).map(([stat, value]) => (
-                                                <Typography key={stat} variant="caption" className={styles.dialogStatLine}>
+                                            {Object.entries(replaceDialog.newItem.stats).map(([stat, value], index) => (
+                                                <Typography key={`new-${stat}-${index}`} variant="caption" className={styles.dialogStatLine}>
                                                     +{value} {stat.replace(/_/g, ' ')}
                                                 </Typography>
                                             ))}
