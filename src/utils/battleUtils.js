@@ -88,15 +88,22 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
     const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
     const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0; // Slash skill gives damage range bonus
     const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0; // Crush skill gives crit damage bonus
+    const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0; // Throwing skill gives attack speed
+    const critChanceBonus = skillBuffs.CRIT_CHANCE || 0; // Archery skill gives crit chance
+    const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
     
-    const hitChance = calculateHitChance(battle.player.ATK, battle.enemy.DEF, accuracyBonus);
+    // Apply ATK bonus from magic skills
+    const effectiveATK = battle.player.ATK + atkBonus;
+    
+    const hitChance = calculateHitChance(effectiveATK, battle.enemy.DEF, accuracyBonus);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
         const critRoll = Math.random() * 100;
-        const isCrit = critRoll <= (battle.player.CRIT_CHANCE || 5);
+        const effectiveCritChance = (battle.player.CRIT_CHANCE || 5) + critChanceBonus;
+        const isCrit = critRoll <= effectiveCritChance;
         
-        let damage = calculateDamage(battle.player.ATK, battle.enemy.DEF, damageRangeBonus);
+        let damage = calculateDamage(effectiveATK, battle.enemy.DEF, damageRangeBonus);
         
         // Apply damage buff
         damage = applyDamageMultiplier(damage);

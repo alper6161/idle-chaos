@@ -220,13 +220,15 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
         skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3); // +3 HP per level
     }
 
-    // Utility skills are always active
-    if (skillData.utility?.critChance) {
+    // Utility skills are always active (but only for specific attack types)
+    // critChance skill is for archery only
+    if (selectedAttackType === 'archery' && skillData.utility?.critChance) {
         const critChanceLevel = getSkillLevel(skillData.utility.critChance);
         skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5); // +0.5% crit per level
     }
 
-    if (skillData.utility?.critDamage) {
+    // critDamage skill is for crush only
+    if (selectedAttackType === 'crush' && skillData.utility?.critDamage) {
         const critDamageLevel = getSkillLevel(skillData.utility.critDamage);
         skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1); // +1% crit damage per level
     }

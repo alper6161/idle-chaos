@@ -109,13 +109,13 @@ const BATTLE_ACTION_SKILLS = {
     
     // Ranged attacks
     'archery': ['archery', 'critChance'],
-    'throwing': ['throwing', 'critChance'],
-    'poison': ['poison', 'critChance'],
+    'throwing': ['throwing', 'attackSpeed'],
+    'poison': ['poison', 'lifeSteal'],
     
     // Magic attacks
-    'lightning': ['lightning', 'critChance'],
-    'fire': ['fire', 'critChance'],
-    'ice': ['ice', 'critChance'],
+    'lightning': ['lightning', 'critDamage'],
+    'fire': ['fire', 'critDamage'],
+    'ice': ['ice', 'critDamage'],
     
     // Defense actions
     'block': ['block', 'armor'],

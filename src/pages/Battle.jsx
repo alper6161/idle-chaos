@@ -306,7 +306,12 @@ function Battle({ player }) {
             setCurrentBattle(prev => {
                 if (!prev) return prev;
 
-                const playerSpeed = Math.max(1, Math.min(5, prev.player.ATTACK_SPEED));
+                // Calculate skill buffs for attack speed
+                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
+                const effectiveAttackSpeed = prev.player.ATTACK_SPEED + attackSpeedBonus;
+                
+                const playerSpeed = Math.max(1, Math.min(5, effectiveAttackSpeed));
                 const enemySpeed = Math.max(1, Math.min(5, prev.enemy.ATTACK_SPEED));
                 let newBattle = updateBattleState(prev, playerSpeed, enemySpeed);
 
@@ -393,14 +398,7 @@ function Battle({ player }) {
             const weaponType = getWeaponType(equippedWeapon);
             const attackTypes = getAvailableAttackTypes(weaponType);
             
-            console.log('🔧 Weapon Update:', {
-                weapon: equippedWeapon?.name,
-                weaponType: weaponType,
-                attackTypes: attackTypes.map(at => at.type),
-                currentSelected: selectedAttackType,
-                localStorage1: equippedItems1,
-                localStorage2: equippedItems2
-            });
+
             
             setAvailableAttackTypes(attackTypes);
             
@@ -468,7 +466,7 @@ function Battle({ player }) {
 
                 <Grid container spacing={3} className={styles.enemyGrid}>
                     {Object.values(enemies).map((enemy) => (
-                        <Grid item xs={12} sm={6} lg={3} key={enemy.id}>
+                        <Grid xs={12} sm={6} lg={3} key={enemy.id}>
                             <Tooltip
                                 title={renderLootTooltip(enemy)}
                                 arrow
@@ -713,36 +711,30 @@ function Battle({ player }) {
                             const canUse = count > 0 && currentBattle.player.currentHealth < currentBattle.player.HEALTH;
                             
                             return (
-                                <Tooltip
+                                <Button
                                     key={potion.id}
-                                    title={`${t(`potions.${potion.id}HealthPotion`)} - ${t('potions.restoresHp', { amount: potion.healAmount })} (${count} available)`}
-                                    arrow
-                                    placement="top"
+                                    variant="contained"
+                                    className={styles.potionButton}
+                                    disabled={!canUse}
+                                    onClick={() => handleUsePotion(potion.id)}
+                                    style={{
+                                        backgroundColor: potion.color,
+                                        border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',
+                                        boxShadow: lastPotionUsed?.type === potion.id ? '0 0 15px #ffd700' : 'none'
+                                    }}
                                 >
-                                    <Button
-                                        variant="contained"
-                                        className={styles.potionButton}
-                                        disabled={!canUse}
-                                        onClick={() => handleUsePotion(potion.id)}
-                                        style={{
-                                            backgroundColor: potion.color,
-                                            border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',
-                                            boxShadow: lastPotionUsed?.type === potion.id ? '0 0 15px #ffd700' : 'none'
-                                        }}
-                                    >
-                                        <div className={styles.potionContent}>
-                                            <Typography variant="caption" className={styles.potionName}>
-                                                {t(`potions.${potion.id}HealthPotion`)}
-                                            </Typography>
-                                            <Typography variant="body2" className={styles.potionHeal}>
-                                                +{potion.healAmount}
-                                            </Typography>
-                                            <Typography variant="caption" className={styles.potionCount}>
-                                                {count}
-                                            </Typography>
-                                        </div>
-                                    </Button>
-                                </Tooltip>
+                                    <div className={styles.potionContent}>
+                                        <Typography variant="caption" className={styles.potionName}>
+                                            {t(`potions.${potion.id}HealthPotion`)}
+                                        </Typography>
+                                        <Typography variant="body2" className={styles.potionHeal}>
+                                            +{potion.healAmount}
+                                        </Typography>
+                                        <Typography variant="caption" className={styles.potionCount}>
+                                            {count}
+                                        </Typography>
+                                    </div>
+                                </Button>
                             );
                         })}
                     </div>
@@ -766,17 +758,49 @@ function Battle({ player }) {
                     <Divider />
                     {currentBattle ? (
                         <>
-                            <Typography>⚔️ {t('battle.attack')}: {currentBattle.player.ATK}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const atkBonus = skillBuffs.ATK || 0;
+                                const effectiveATK = currentBattle.player.ATK + atkBonus;
+                                return (
+                                    <Typography>
+                                        ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
+                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
+                                    </Typography>
+                                );
+                            })()}
                             <Typography>🛡️ {t('battle.defense')}: {currentBattle.player.DEF}</Typography>
                             <Typography>❤️ {t('battle.health')}: {currentBattle.player.currentHealth}/{currentBattle.player.HEALTH}</Typography>
-                            <Typography>⚡ {t('battle.attackSpeed')}: {currentBattle.player.ATTACK_SPEED}</Typography>
-                            <Typography>🎯 {t('battle.criticalChance')}: {currentBattle.player.CRIT_CHANCE || 5}%</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
+                                const effectiveAttackSpeed = currentBattle.player.ATTACK_SPEED + attackSpeedBonus;
+                                return (
+                                    <Typography>
+                                        ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
+                                        {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
+                                    </Typography>
+                                );
+                            })()}
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
+                                const effectiveCritChance = (currentBattle.player.CRIT_CHANCE || 5) + critChanceBonus;
+                                return (
+                                    <Typography>
+                                        🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
+                                        {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
+                                    </Typography>
+                                );
+                            })()}
                             <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.player.CRIT_DAMAGE || 150}%</Typography>
                             <Divider sx={{ my: 1 }} />
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
-                                const hitChance = calculateHitChance(currentBattle.player.ATK, currentBattle.enemy.DEF, accuracyBonus);
+                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                const effectiveATK = currentBattle.player.ATK + atkBonus;
+                                const hitChance = calculateHitChance(effectiveATK, currentBattle.enemy.DEF, accuracyBonus);
                                 return (
                                     <Typography>🎲 {t('battle.hitChance')}: {hitChance}%</Typography>
                                 );
@@ -785,7 +809,9 @@ function Battle({ player }) {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0;
                                 const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                const damageRange = calculateDamageRange(currentBattle.player.ATK, currentBattle.enemy.DEF, damageRangeBonus);
+                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                const effectiveATK = currentBattle.player.ATK + atkBonus;
+                                const damageRange = calculateDamageRange(effectiveATK, currentBattle.enemy.DEF, damageRangeBonus);
                                 const totalCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
                                 const critDamageRange = {
                                     min: Math.floor(damageRange.min * (totalCritDamage / 100)),
@@ -801,17 +827,55 @@ function Battle({ player }) {
                         </>
                     ) : (
                         <>
-                            <Typography>⚔️ {t('battle.attack')}: {playerStats.ATK} {getEquipmentBonuses().ATK ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span> : ''}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const atkBonus = skillBuffs.ATK || 0;
+                                const effectiveATK = playerStats.ATK + atkBonus;
+                                return (
+                                    <Typography>
+                                        ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
+                                        {getEquipmentBonuses().ATK && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span>}
+                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
+                                    </Typography>
+                                );
+                            })()}
                             <Typography>🛡️ {t('battle.defense')}: {playerStats.DEF} {getEquipmentBonuses().DEF ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span> : ''}</Typography>
                             <Typography>❤️ {t('battle.health')}: {playerHealth}/{playerStats.HEALTH} {getEquipmentBonuses().HEALTH ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span> : ''}</Typography>
-                            <Typography>⚡ {t('battle.attackSpeed')}: {playerStats.ATTACK_SPEED} {getEquipmentBonuses().ATTACK_SPEED ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span> : ''}</Typography>
-                            <Typography>🎯 {t('battle.criticalChance')}: {playerStats.CRIT_CHANCE}% {getEquipmentBonuses().CRIT_CHANCE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span> : ''}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
+                                const effectiveAttackSpeed = playerStats.ATTACK_SPEED + attackSpeedBonus;
+                                return (
+                                    <Typography>
+                                        ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
+                                        {getEquipmentBonuses().ATTACK_SPEED && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span>}
+                                        {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
+                                    </Typography>
+                                );
+                            })()}
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
+                                const effectiveCritChance = playerStats.CRIT_CHANCE + critChanceBonus;
+                                
+
+                                
+                                return (
+                                    <Typography>
+                                        🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
+                                        {getEquipmentBonuses().CRIT_CHANCE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span>}
+                                        {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
+                                    </Typography>
+                                );
+                            })()}
                             <Typography>💥 {t('battle.criticalDamage')}: {playerStats.CRIT_DAMAGE}% {getEquipmentBonuses().CRIT_DAMAGE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span> : ''}</Typography>
                             <Divider sx={{ my: 1 }} />
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0;
-                                const hitChance = calculateHitChance(playerStats.ATK, currentEnemy?.DEF || 0, accuracyBonus);
+                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                const effectiveATK = playerStats.ATK + atkBonus;
+                                const hitChance = calculateHitChance(effectiveATK, currentEnemy?.DEF || 0, accuracyBonus);
                                 return (
                                     <Typography>🎲 {t('battle.hitChance')}: {hitChance}%</Typography>
                                 );
@@ -820,7 +884,9 @@ function Battle({ player }) {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0;
                                 const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                const baseDamage = calculateDamage(playerStats.ATK, currentEnemy?.DEF || 0, damageRangeBonus);
+                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                const effectiveATK = playerStats.ATK + atkBonus;
+                                const baseDamage = calculateDamage(effectiveATK, currentEnemy?.DEF || 0, damageRangeBonus);
                                 const totalCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
                                 return (
                                     <>

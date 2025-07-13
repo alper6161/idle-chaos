@@ -30,6 +30,7 @@ export const INITIAL_SKILLS = {
         counterAttack: { level: 1, xp: 0 },
         doubleAttack: { level: 1, xp: 0 },
         critChance: { level: 1, xp: 0 },
-        critDamage: { level: 1, xp: 0 }
+        critDamage: { level: 1, xp: 0 },
+        attackSpeed: { level: 1, xp: 0 }
     }
 };
