@@ -1,11 +1,38 @@
 import { NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
 import styles from "../assets/styles/MainLayout.module.scss";
 import { INITIAL_SKILLS } from "../utils/constants";
 import { getSkillIcon } from "../utils/common.js";
 import { useTranslate } from "../hooks/useTranslate";
+import { getSkillData } from "../utils/skillExperience.js";
 
 function MainMenu() {
     const { t } = useTranslate();
+    const [skills, setSkills] = useState(INITIAL_SKILLS);
+
+    useEffect(() => {
+        const loadSkills = () => {
+            const skillData = getSkillData();
+            setSkills(skillData);
+        };
+
+        loadSkills();
+        
+        // Listen for skill updates
+        const handleStorageChange = () => {
+            loadSkills();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Also check for local updates (when same tab updates localStorage)
+        const interval = setInterval(loadSkills, 1000);
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(interval);
+        };
+    }, []);
 
     return (
         <aside className={styles.sidebar}>
@@ -58,11 +85,11 @@ function MainMenu() {
                 </div>
 
             {/* Skills Sections */}
-            {Object.entries(INITIAL_SKILLS).map(([category, subskills]) => (
+            {Object.entries(skills).map(([category, subskills]) => (
                 <div key={category} className={styles.group}>
                     <div className={styles.groupTitle}>{t(`skills.${category}`)}</div>
                     {typeof subskills === "object" &&
-                        Object.entries(subskills).map(([skill, level]) => (
+                        Object.entries(subskills).map(([skill, skillObj]) => (
                             <NavLink
                                 key={skill}
                                 to="/skills"
@@ -70,7 +97,7 @@ function MainMenu() {
                             >
                                 <img src={getSkillIcon(skill)} alt={skill} />
                                 <span className={styles.skillLabel}>{t(`skills.${skill}`)}</span>
-                                <span className={styles.skillLevel}>{t('common.level')}{level}</span>
+                                <span className={styles.skillLevel}>{t('common.level')}{skillObj.level}</span>
                             </NavLink>
                         ))}
                 </div>

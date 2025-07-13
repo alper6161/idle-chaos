@@ -312,6 +312,66 @@
   text-shadow: 1px 1px 0px #000;
 }
 
+// Loot Symbols Container
+.lootSymbolsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid #4a4a6a;
+  border-radius: 0;
+  min-height: 60px;
+  align-items: center;
+}
+
+.lootSymbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  border: 2px solid;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 
+    0 0 0 1px #000,
+    0 2px 0 0 rgba(0, 0, 0, 0.3);
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 0 1px #000,
+      0 4px 0 0 rgba(0, 0, 0, 0.3);
+  }
+}
+
+.goldSymbol {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  color: #ffd700;
+  
+  &:hover {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: #ffed4e;
+    color: #ffed4e;
+  }
+}
+
+.equipmentSymbol {
+  border-color: #96ceb4;
+  background: rgba(150, 206, 180, 0.1);
+  color: #96ceb4;
+  
+  &:hover {
+    background: rgba(150, 206, 180, 0.2);
+    border-color: #a8e6c8;
+    color: #a8e6c8;
+  }
+}
+
 .equipmentBonus {
   color: #96ceb4;
   font-weight: bold;
@@ -472,6 +532,32 @@
     color: #ff6b6b;
     background: rgba(255, 107, 107, 0.1);
   }
+  
+  &.victory {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.2);
+    border-left: 3px solid #4ade80;
+    font-weight: bold;
+    text-shadow: 0 0 8px #4ade80;
+  }
+  
+  &.loot {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.1);
+    border-left: 2px solid #fbbf24;
+  }
+}
+
+.skillXPMessage {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  line-height: 1.2;
+  margin: 0.1rem 0 0.3rem 0.5rem;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0;
+  background: rgba(76, 175, 80, 0.1);
+  border-left: 2px solid #4caf50;
+  animation: xpGlow 1s ease-in-out;
 }
 
 // Damage display animation - Video oyunu tarzı yıldız şekli
@@ -577,6 +663,21 @@
   50% {
     text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
     box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+}
+
+@keyframes xpGlow {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

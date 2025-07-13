@@ -26,13 +26,15 @@ import { getEnemyIcon, getSkillIcon, getCharacterIcon, getEnemyInitial, getChara
 import { 
     calculateHitChance, 
     calculateDamage, 
+    calculateDamageRange,
     updateBattleState, 
     processPlayerAttack, 
     processEnemyAttack, 
     checkBattleResult, 
     createSpawnTimer 
 } from "../utils/battleUtils.js";
-import { getPlayerStats, getEquipmentBonuses } from "../utils/playerStats.js";
+import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements } from "../utils/skillExperience.js";
+import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
 import { 
@@ -206,6 +208,9 @@ function Battle({ player }) {
         // Eğer mevcut HP, yeni max HP'den büyükse, max HP'ye eşitle
         const adjustedHealth = Math.min(health, currentPlayerStats.HEALTH);
         
+        // Award HP experience for participating in battle
+        const hpXP = awardBattleActionXP('battle_participation', 0, false, true);
+        
         setCurrentBattle({
             player: { ...currentPlayerStats, currentHealth: adjustedHealth },
             enemy: { ...enemy, currentHealth: enemy.maxHp },
@@ -333,6 +338,23 @@ function Battle({ player }) {
                         setLootBag(prev => [...prev, ...newLoot]);
                         saveLoot(lootResult.items);
                         
+                        // Add loot messages to battle log
+                        const updatedBattle = {
+                            ...newBattle,
+                            battleLog: [
+                                ...newBattle.battleLog,
+                                {
+                                    type: 'victory',
+                                    message: `🎉 ${t('battle.playerWins')}! Enemy defeated!`
+                                },
+                                ...newLoot.map(item => ({
+                                    type: 'loot',
+                                    message: `📦 Loot: ${item}`
+                                }))
+                            ]
+                        };
+                        
+                        setCurrentBattle(updatedBattle);
                         startEnemySpawnTimer();
                     } else if (battleResult.winner === 'enemy') {
                         showDeathDialog();
@@ -396,7 +418,7 @@ function Battle({ player }) {
 
                 <Grid container spacing={3} className={styles.enemyGrid}>
                     {Object.values(enemies).map((enemy) => (
-                        <Grid item xs={12} sm={6} md={4} lg={3} key={enemy.id}>
+                        <Grid item xs={12} sm={6} lg={3} key={enemy.id}>
                             <Tooltip
                                 title={renderLootTooltip(enemy)}
                                 arrow
@@ -411,8 +433,10 @@ function Battle({ player }) {
                                                     src={getEnemyIcon(enemy.id)} 
                                                     className={styles.enemyImage}
                                                     onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextSibling.style.display = 'flex';
+                                                        if (e.target && e.target.nextSibling) {
+                                                            e.target.style.display = 'none';
+                                                            e.target.nextSibling.style.display = 'flex';
+                                                        }
                                                     }}
                                                 />
                                                 <div 
@@ -519,8 +543,10 @@ function Battle({ player }) {
                         src={getEnemyIcon(currentEnemy?.id)} 
                         className={styles.avatar}
                         onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
+                            if (e.target && e.target.nextSibling) {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                            }
                         }}
                     />
                     <div 
@@ -666,9 +692,29 @@ function Battle({ player }) {
                             <Typography>🎯 {t('battle.criticalChance')}: {currentBattle.player.CRIT_CHANCE || 5}%</Typography>
                             <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.player.CRIT_DAMAGE || 150}%</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(currentBattle.player.ATK, currentBattle.enemy.DEF)}%</Typography>
-                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(currentBattle.player.ATK, currentBattle.enemy.DEF)}</Typography>
-                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentBattle.player.ATK, currentBattle.enemy.DEF) * ((currentBattle.player.CRIT_DAMAGE || 150) / 100))}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffs();
+                                const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
+                                const hitChance = calculateHitChance(currentBattle.player.ATK, currentBattle.enemy.DEF, accuracyBonus);
+                                return (
+                                    <Typography>🎲 {t('battle.hitChance')}: {hitChance}%</Typography>
+                                );
+                            })()}
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffs();
+                                const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0;
+                                const damageRange = calculateDamageRange(currentBattle.player.ATK, currentBattle.enemy.DEF, damageRangeBonus);
+                                const critDamageRange = {
+                                    min: Math.floor(damageRange.min * ((currentBattle.player.CRIT_DAMAGE || 150) / 100)),
+                                    max: Math.floor(damageRange.max * ((currentBattle.player.CRIT_DAMAGE || 150) / 100))
+                                };
+                                return (
+                                    <>
+                                        <Typography>⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}</Typography>
+                                        <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
+                                    </>
+                                );
+                            })()}
                         </>
                     ) : (
                         <>
@@ -700,8 +746,19 @@ function Battle({ player }) {
                             <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.enemy.CRIT_DAMAGE || 120}%</Typography>
                             <Divider sx={{ my: 1 }} />
                             <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(currentBattle.enemy.ATK, currentBattle.player.DEF)}%</Typography>
-                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(currentBattle.enemy.ATK, currentBattle.player.DEF)}</Typography>
-                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentBattle.enemy.ATK, currentBattle.player.DEF) * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100))}</Typography>
+                            {(() => {
+                                const damageRange = calculateDamageRange(currentBattle.enemy.ATK, currentBattle.player.DEF);
+                                const critDamageRange = {
+                                    min: Math.floor(damageRange.min * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100)),
+                                    max: Math.floor(damageRange.max * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100))
+                                };
+                                return (
+                                    <>
+                                        <Typography>⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}</Typography>
+                                        <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
+                                    </>
+                                );
+                            })()}
                         </>
                     ) : (
                         <>
@@ -740,14 +797,40 @@ function Battle({ player }) {
                     {lootBag.length === 0 ? (
                         <Typography>{t('battle.noLootYet')}</Typography>
                     ) : (
-                        lootBag.map((item, idx) => (
-                            <Typography 
-                                key={idx} 
-                                className={item.includes('💰') ? styles.goldLootBag : styles.lootBag}
-                            >
-                                {item}
-                            </Typography>
-                        ))
+                        <div className={styles.lootSymbolsContainer}>
+                            {lootBag.map((item, idx) => {
+                                const isGold = item.includes('💰');
+                                const isEquipment = item.includes('⚔️') || item.includes('🛡️') || item.includes('💍') || item.includes('👑');
+                                
+                                let symbol = '📦';
+                                let tooltipText = item;
+                                
+                                if (isGold) {
+                                    symbol = '💰';
+                                    tooltipText = `Gold: ${item.replace('💰', '').trim()}`;
+                                } else if (isEquipment) {
+                                    if (item.includes('⚔️')) symbol = '⚔️';
+                                    else if (item.includes('🛡️')) symbol = '🛡️';
+                                    else if (item.includes('💍')) symbol = '💍';
+                                    else if (item.includes('👑')) symbol = '👑';
+                                    else symbol = '⚔️';
+                                    tooltipText = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
+                                }
+                                
+                                return (
+                                    <Tooltip 
+                                        key={idx} 
+                                        title={tooltipText}
+                                        arrow
+                                        placement="top"
+                                    >
+                                        <div className={`${styles.lootSymbol} ${isGold ? styles.goldSymbol : styles.equipmentSymbol}`}>
+                                            {symbol}
+                                        </div>
+                                    </Tooltip>
+                                );
+                            })}
+                        </div>
                     )}
                 </div>
             </div>
@@ -758,20 +841,33 @@ function Battle({ player }) {
                 <Divider />
                 <Box className={styles.battleLog}>
                     {currentBattle?.battleLog?.map((log, idx) => (
-                        <Typography 
-                            key={idx} 
-                            variant="body2" 
-                            className={`${styles.battleLogItem} ${
+                        <div key={idx}>
+                            <Typography 
+                                variant="body2" 
+                                                            className={`${styles.battleLogItem} ${
                                 log.type === 'player_attack' ? styles.playerAttack :
                                 log.type === 'player_crit' ? styles.playerCrit :
                                 log.type === 'enemy_attack' ? styles.enemyAttack :
                                 log.type === 'enemy_crit' ? styles.enemyCrit :
                                 log.type?.includes('miss') ? styles.miss :
-                                log.type?.includes('defeated') ? styles.defeat : ''
+                                log.type?.includes('defeated') ? styles.defeat :
+                                log.type === 'victory' ? styles.victory :
+                                log.type === 'loot' ? styles.loot : ''
                             }`}
-                        >
-                            {log.message}
-                        </Typography>
+                            >
+                                {log.message}
+                            </Typography>
+                            {log.skillXP && log.skillXP.skillsAwarded.length > 0 && (
+                                <Typography 
+                                    variant="caption" 
+                                    className={styles.skillXPMessage}
+                                    style={{ color: '#4caf50', marginLeft: '10px' }}
+                                >
+                                    ✨ +{log.skillXP.xpAwarded} XP to {log.skillXP.skillsAwarded.join(', ')}
+                                    {log.skillXP.leveledUp && ' 🎉 LEVEL UP!'}
+                                </Typography>
+                            )}
+                        </div>
                     ))}
                 </Box>
             </div>

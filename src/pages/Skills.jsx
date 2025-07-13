@@ -25,6 +25,7 @@ import {
 import { INITIAL_SKILLS } from "../utils/constants.js";
 import { getSkillIcon } from "../utils/common.js";
 import { useTranslate } from "../hooks/useTranslate";
+import { getSkillInfo, getSkillData } from "../utils/skillExperience.js";
 import styles from "../assets/styles/Skills.module.scss";
 
 // Skill buffs data - what buffs each skill provides at different levels
@@ -180,10 +181,31 @@ const SKILL_BUFFS = {
 
 function Skills() {
     const { t } = useTranslate();
-    const [skills, setSkills] = useState(() => {
-        const saved = localStorage.getItem("gameData");
-        return saved ? JSON.parse(saved) : INITIAL_SKILLS;
-    });
+    const [skills, setSkills] = useState(() => getSkillData());
+
+    // Update skills when localStorage changes
+    useEffect(() => {
+        const loadSkills = () => {
+            setSkills(getSkillData());
+        };
+
+        loadSkills();
+        
+        // Listen for skill updates
+        const handleStorageChange = () => {
+            loadSkills();
+        };
+
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Also check for local updates (when same tab updates localStorage)
+        const interval = setInterval(loadSkills, 1000);
+        
+        return () => {
+            window.removeEventListener('storage', handleStorageChange);
+            clearInterval(interval);
+        };
+    }, []);
     const [expandedCategories, setExpandedCategories] = useState(() => {
         // Tüm kategorileri başlangıçta açık yap
         const initialExpanded = {};
@@ -202,11 +224,10 @@ function Skills() {
         let totalSkillLevels = 0;
 
         Object.entries(skills).forEach(([category, subskills]) => {
-            Object.entries(subskills).forEach(([skillName, level]) => {
-                if (level >= 99) {
+            Object.entries(subskills).forEach(([skillName, skillObj]) => {
+                if (skillObj.level >= 99) {
                     totalCompletedSkills++;
-                    totalSkillLevels += level;
-                    
+                    totalSkillLevels += skillObj.level;
                     // Add skill-specific buffs
                     if (SKILL_BUFFS[skillName] && SKILL_BUFFS[skillName][99]) {
                         buffs.push({
@@ -218,7 +239,6 @@ function Skills() {
                 }
             });
         });
-
         // Add general buffs based on completion
         if (totalCompletedSkills >= 5) {
             buffs.push({
@@ -227,7 +247,6 @@ function Skills() {
                 icon: "/images/skills/autoAwesome.png"
             });
         }
-
         if (totalSkillLevels >= 1000) {
             buffs.push({
                 name: "Legendary Status",
@@ -235,7 +254,6 @@ function Skills() {
                 icon: "/images/skills/trendingUp.png"
             });
         }
-
         return {
             buffs,
             totalCompletedSkills,
@@ -348,7 +366,7 @@ function Skills() {
                         
                         <Collapse in={expandedCategories[category]}>
                             <Box className={styles.widgetContent}>
-                                {Object.entries(subskills).map(([skillName, level]) => (
+                                {Object.entries(subskills).map(([skillName, skillObj]) => (
                                     <Box key={skillName} className={styles.skillItem}>
                                         <Box className={styles.skillHeader}>
                                             <img 
@@ -361,7 +379,7 @@ function Skills() {
                                                     {t(`skills.${skillName}`)}
                                                 </div>
                                                 <div className={styles.skillLevel}>
-                                                    {t('skills.level')} {level}/99
+                                                    {t('skills.level')} {skillObj.level}/99
                                                 </div>
                                             </Box>
                                             <IconButton
@@ -375,21 +393,28 @@ function Skills() {
                                         <Box className={styles.skillProgress}>
                                             <LinearProgress 
                                                 variant="determinate" 
-                                                value={getSkillProgress(level)}
+                                                value={getSkillProgress(skillObj.level)}
                                                 className={styles.progressBar}
                                             />
                                             <div className={styles.progressText}>
-                                                {Math.round(getSkillProgress(level))}%
+                                                {Math.round(getSkillProgress(skillObj.level))}%
                                             </div>
                                         </Box>
                                         
                                         <Box className={styles.skillStats}>
-                                            <div className={styles.statLabel}>
-                                                {t('skills.currentXp')}: 0
-                                            </div>
-                                            <div className={styles.statLabel}>
-                                                {t('skills.xpToNext')}: {(level + 1) * 1000}
-                                            </div>
+                                            {(() => {
+                                                const skillInfo = getSkillInfo(skillName);
+                                                return (
+                                                    <>
+                                                        <div className={styles.statLabel}>
+                                                            {t('skills.currentXp')}: {skillInfo.xp}
+                                                        </div>
+                                                        <div className={styles.statLabel}>
+                                                            {t('skills.xpToNext')}: {skillInfo.xpToNext}
+                                                        </div>
+                                                    </>
+                                                );
+                                            })()}
                                         </Box>
                                     </Box>
                                 ))}
@@ -436,7 +461,7 @@ function Skills() {
                                         {t(`skills.${selectedSkill}`)}
                                     </div>
                                     <div className={styles.detailsSkillLevel}>
-                                        {t('skills.level')} {skills[Object.keys(skills).find(cat => skills[cat][selectedSkill])][selectedSkill]}/99
+                                        {t('skills.level')} {skills[Object.keys(skills).find(cat => skills[cat][selectedSkill])][selectedSkill].level}/99
                                     </div>
                                 </Box>
                             </Box>

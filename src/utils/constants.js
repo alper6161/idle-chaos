@@ -1,50 +1,35 @@
 export const INITIAL_SKILLS = {
     melee: {
-        stab: 1,
-        slash: 1,
-        crush: 1,
+        stab: { level: 1, xp: 0 },
+        slash: { level: 1, xp: 0 },
+        crush: { level: 1, xp: 0 }
     },
     ranged: {
-        poison: 1,
-        throwing: 1,
-        archery: 1,
+        archery: { level: 1, xp: 0 },
+        throwing: { level: 1, xp: 0 },
+        poison: { level: 1, xp: 0 }
     },
     magic: {
-        lightning: 1,
-        fire: 1,
-        ice: 1,
+        lightning: { level: 1, xp: 0 },
+        fire: { level: 1, xp: 0 },
+        ice: { level: 1, xp: 0 }
     },
-    prayer: {
-        heal: 1,
-        buff: 1,
-        shadow: 1,
-    },
-    hitpool: {
-        hp: 10,
-        energy: 0,
-    },
-    defence: {
-        dodge: 1,
-        block: 1,
-        armor: 1,
-    },
-    resistance: {
-        fire: 1,
-        ice: 1,
-        poison: 1,
-        lightning: 1,
-        stab: 1,
-        slash: 1,
-        crush: 1,
-        archery: 1,
-        throwing: 1,
-        shadow: 1,
+    defense: {
+        block: { level: 1, xp: 0 },
+        dodge: { level: 1, xp: 0 },
+        armor: { level: 1, xp: 0 }
     },
     utility: {
-        lifeSteal: 1,
-        counterAttack: 1,
-        doubleAttack: 1,
-        critChance: 1,
-        critDamage: 1
+        heal: { level: 1, xp: 0 },
+        buff: { level: 1, xp: 0 },
+        hp: { level: 1, xp: 0 },
+        energy: { level: 1, xp: 0 }
+    },
+    advanced: {
+        lifeSteal: { level: 1, xp: 0 },
+        counterAttack: { level: 1, xp: 0 },
+        doubleAttack: { level: 1, xp: 0 },
+        critChance: { level: 1, xp: 0 },
+        critDamage: { level: 1, xp: 0 }
     }
 };

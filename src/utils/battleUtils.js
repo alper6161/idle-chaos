@@ -1,7 +1,14 @@
 import { applyDamageMultiplier } from './buffUtils.js';
+import { awardBattleActionXP, getAttackTypeFromWeapon, getEquippedWeapon } from './skillExperience.js';
+import { calculateSkillBuffs } from './playerStats.js';
 
-export const calculateHitChance = (attackerATK, defenderDEF) => {
-    const ratio = attackerATK / Math.max(defenderDEF, 1);
+export const calculateHitChance = (attackerATK, defenderDEF, accuracyBonus = 0) => {
+    // Ensure we have valid numbers
+    const atk = Number(attackerATK) || 0;
+    const def = Number(defenderDEF) || 0;
+    const accuracy = Number(accuracyBonus) || 0;
+    
+    const ratio = atk / Math.max(def, 1);
     let baseChance = 60;
     
     if (ratio >= 2) baseChance += 25;
@@ -10,15 +17,48 @@ export const calculateHitChance = (attackerATK, defenderDEF) => {
     else if (ratio < 0.8) baseChance -= 20;
     else if (ratio < 0.5) baseChance -= 35;
     
+    // Apply accuracy bonus from skills (like stab)
+    baseChance += accuracy;
+    
     return Math.max(5, Math.min(95, baseChance));
 };
 
+export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0) => {
+    // Ensure we have valid numbers
+    const atk = Number(attackerATK) || 0;
+    const def = Number(defenderDEF) || 0;
+    const bonus = Number(damageRangeBonus) || 0;
+    
+    let baseDamage = atk - (def * 0.5);
+    baseDamage = Math.max(1, baseDamage);
+    
+    // Calculate damage range (min and max)
+    const variation = baseDamage * 0.15; // 15% variation
+    const minDamage = Math.floor(baseDamage - variation);
+    let maxDamage = Math.floor(baseDamage + variation);
+    
+    // Apply slash skill bonus to max damage
+    maxDamage += bonus;
+    
+    return {
+        min: Math.max(1, minDamage),
+        max: Math.max(1, maxDamage)
+    };
+};
+
 export const calculateDamage = (attackerATK, defenderDEF) => {
-    let damage = attackerATK - (defenderDEF * 0.5);
-    damage = Math.max(1, damage);
-    const variation = damage * 0.1;
-    damage += (Math.random() - 0.5) * variation;
-    return Math.floor(damage);
+    // Ensure we have valid numbers
+    const atk = Number(attackerATK) || 0;
+    const def = Number(defenderDEF) || 0;
+    
+    const damageRange = calculateDamageRange(atk, def);
+    
+    // Random damage within the range
+    const damage = Math.floor(
+        damageRange.min + Math.random() * (damageRange.max - damageRange.min + 1)
+    );
+    
+    return Math.max(1, damage);
 };
 
 export const updateBattleState = (prevBattle, playerSpeed, enemySpeed) => {
@@ -33,8 +73,16 @@ export const updateBattleState = (prevBattle, playerSpeed, enemySpeed) => {
 };
 
 export const processPlayerAttack = (battle, setDamageDisplay) => {
-    const hitChance = calculateHitChance(battle.player.ATK, battle.enemy.DEF);
+    // Calculate accuracy bonus from skills (stab skill)
+    const skillBuffs = calculateSkillBuffs();
+    const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
+    
+    const hitChance = calculateHitChance(battle.player.ATK, battle.enemy.DEF, accuracyBonus);
     const hitRoll = Math.random() * 100;
+    
+    // Determine attack type based on equipped weapon
+    const equippedWeapon = getEquippedWeapon();
+    const attackType = getAttackTypeFromWeapon(equippedWeapon);
     
     if (hitRoll <= hitChance) {
         const critRoll = Math.random() * 100;
@@ -44,6 +92,9 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
         
         // Apply damage buff
         damage = applyDamageMultiplier(damage);
+        
+        // Award skill experience for the attack
+        const xpResult = awardBattleActionXP(attackType, damage, isCrit, true);
         
         if (isCrit) {
             damage = Math.floor(damage * ((battle.player.CRIT_DAMAGE || 150) / 100));
@@ -59,7 +110,8 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
                 battleLog: [...battle.battleLog, {
                     type: 'player_crit',
                     damage: damage,
-                    message: `⚡ CRITICAL HIT! Player deals ${damage} damage! ⚡`
+                    message: `⚡ CRITICAL HIT! Player deals ${damage} damage! ⚡`,
+                    skillXP: xpResult
                 }]
             };
         } else {
@@ -75,11 +127,15 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
                 battleLog: [...battle.battleLog, {
                     type: 'player_attack',
                     damage: damage,
-                    message: `Player hits for ${damage} damage!`
+                    message: `Player hits for ${damage} damage!`,
+                    skillXP: xpResult
                 }]
             };
         }
     } else {
+        // Award small XP for attempting attack (even if missed)
+        const xpResult = awardBattleActionXP(attackType, 0, false, false);
+        
         setDamageDisplay(prev => ({ ...prev, enemy: 'MISS' }));
         setTimeout(() => setDamageDisplay(prev => ({ ...prev, enemy: null })), 1000);
         
@@ -88,7 +144,8 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
             playerProgress: 0,
             battleLog: [...battle.battleLog, {
                 type: 'player_miss',
-                message: `Player misses!`
+                message: `Player misses!`,
+                skillXP: xpResult
             }]
         };
     }
@@ -104,6 +161,9 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
         
         let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF);
         
+        // Award defense skill experience for taking damage
+        const defenseXP = awardBattleActionXP('damage_taken', damage, isCrit, true);
+        
         if (isCrit) {
             damage = Math.floor(damage * ((battle.enemy.CRIT_DAMAGE || 120) / 100));
             const newPlayerHealth = Math.max(0, battle.player.currentHealth - damage);
@@ -118,7 +178,8 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
                 battleLog: [...battle.battleLog, {
                     type: 'enemy_crit',
                     damage: damage,
-                    message: `💥 CRITICAL HIT! Enemy deals ${damage} damage! 💥`
+                    message: `💥 CRITICAL HIT! Enemy deals ${damage} damage! 💥`,
+                    skillXP: defenseXP
                 }]
             };
         } else {
@@ -134,11 +195,15 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
                 battleLog: [...battle.battleLog, {
                     type: 'enemy_attack',
                     damage: damage,
-                    message: `Enemy hits for ${damage} damage!`
+                    message: `Enemy hits for ${damage} damage!`,
+                    skillXP: defenseXP
                 }]
             };
         }
     } else {
+        // Award defense XP for dodging
+        const defenseXP = awardBattleActionXP('dodge', 0, false, true);
+        
         setDamageDisplay(prev => ({ ...prev, player: 'MISS' }));
         setTimeout(() => setDamageDisplay(prev => ({ ...prev, player: null })), 1000);
         
@@ -147,7 +212,8 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
             enemyProgress: 0,
             battleLog: [...battle.battleLog, {
                 type: 'enemy_miss',
-                message: `Enemy misses!`
+                message: `Enemy misses!`,
+                skillXP: defenseXP
             }]
         };
     }
