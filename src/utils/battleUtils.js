@@ -1,6 +1,6 @@
 import { applyDamageMultiplier } from './buffUtils.js';
 import { awardBattleActionXP, getAttackTypeFromWeapon, getEquippedWeapon } from './skillExperience.js';
-import { calculateSkillBuffs } from './playerStats.js';
+import { calculateSkillBuffs, calculateSkillBuffsForAttackType } from './playerStats.js';
 
 export const calculateHitChance = (attackerATK, defenderDEF, accuracyBonus = 0) => {
     // Ensure we have valid numbers
@@ -46,12 +46,13 @@ export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus 
     };
 };
 
-export const calculateDamage = (attackerATK, defenderDEF) => {
+export const calculateDamage = (attackerATK, defenderDEF, damageRangeBonus = 0) => {
     // Ensure we have valid numbers
     const atk = Number(attackerATK) || 0;
     const def = Number(defenderDEF) || 0;
+    const bonus = Number(damageRangeBonus) || 0;
     
-    const damageRange = calculateDamageRange(atk, def);
+    const damageRange = calculateDamageRange(atk, def, bonus);
     
     // Random damage within the range
     const damage = Math.floor(
@@ -72,23 +73,30 @@ export const updateBattleState = (prevBattle, playerSpeed, enemySpeed) => {
     return newBattle;
 };
 
-export const processPlayerAttack = (battle, setDamageDisplay) => {
-    // Calculate accuracy bonus from skills (stab skill)
-    const skillBuffs = calculateSkillBuffs();
+export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType = null) => {
+    // Use selected attack type or determine from equipped weapon
+    let attackType;
+    if (selectedAttackType) {
+        attackType = selectedAttackType;
+    } else {
+        const equippedWeapon = getEquippedWeapon();
+        attackType = getAttackTypeFromWeapon(equippedWeapon);
+    }
+    
+    // Calculate skill buffs based on selected attack type only
+    const skillBuffs = calculateSkillBuffsForAttackType(attackType);
     const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
+    const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0; // Slash skill gives damage range bonus
+    const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0; // Crush skill gives crit damage bonus
     
     const hitChance = calculateHitChance(battle.player.ATK, battle.enemy.DEF, accuracyBonus);
     const hitRoll = Math.random() * 100;
-    
-    // Determine attack type based on equipped weapon
-    const equippedWeapon = getEquippedWeapon();
-    const attackType = getAttackTypeFromWeapon(equippedWeapon);
     
     if (hitRoll <= hitChance) {
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= (battle.player.CRIT_CHANCE || 5);
         
-        let damage = calculateDamage(battle.player.ATK, battle.enemy.DEF);
+        let damage = calculateDamage(battle.player.ATK, battle.enemy.DEF, damageRangeBonus);
         
         // Apply damage buff
         damage = applyDamageMultiplier(damage);
@@ -97,7 +105,9 @@ export const processPlayerAttack = (battle, setDamageDisplay) => {
         const xpResult = awardBattleActionXP(attackType, damage, isCrit, true);
         
         if (isCrit) {
-            damage = Math.floor(damage * ((battle.player.CRIT_DAMAGE || 150) / 100));
+            // Apply crush skill crit damage bonus
+            const totalCritDamage = (battle.player.CRIT_DAMAGE || 150) + critDamageBonus;
+            damage = Math.floor(damage * (totalCritDamage / 100));
             const newEnemyHealth = Math.max(0, battle.enemy.currentHealth - damage);
             
             setDamageDisplay(prev => ({ ...prev, enemy: damage, enemyType: 'crit' }));
@@ -159,7 +169,7 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= (battle.enemy.CRIT_CHANCE || 3);
         
-        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF);
+        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF, 0); // Enemies don't get skill bonuses
         
         // Award defense skill experience for taking damage
         const defenseXP = awardBattleActionXP('damage_taken', damage, isCrit, true);

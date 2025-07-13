@@ -308,6 +308,66 @@ export const getEquippedWeapon = () => {
     return equippedItems.weapon || null;
 };
 
+// Get weapon type from equipped weapon
+export const getWeaponType = (equippedWeapon) => {
+    if (!equippedWeapon) {
+        return 'melee'; // Default to melee
+    }
+    
+    const weaponName = equippedWeapon.name.toLowerCase();
+    
+    // Melee weapons
+    if (weaponName.includes('sword') || weaponName.includes('dagger') || weaponName.includes('blade') ||
+        weaponName.includes('axe') || weaponName.includes('cleaver') || weaponName.includes('hammer') || 
+        weaponName.includes('club') || weaponName.includes('mace') || weaponName.includes('rusty sword') || 
+        weaponName.includes('bone sword') || weaponName.includes('orc axe') || weaponName.includes('troll club')) {
+        return 'melee';
+    }
+    
+    // Ranged weapons
+    if (weaponName.includes('bow') || weaponName.includes('arrow') || weaponName.includes('throwing') || 
+        weaponName.includes('knife')) {
+        return 'ranged';
+    }
+    
+    // Magic weapons
+    if (weaponName.includes('staff') || weaponName.includes('wand') || weaponName.includes('dragon flame sword')) {
+        return 'magic';
+    }
+    
+    return 'melee'; // Default
+};
+
+// Get available attack types based on weapon type
+export const getAvailableAttackTypes = (weaponType) => {
+    switch (weaponType) {
+        case 'melee':
+            return [
+                { type: 'stab', name: 'Stab', icon: '🗡️', description: '🗡️ Stab: +XP to Stab skill (Accuracy/Crit Chance)' },
+                { type: 'slash', name: 'Slash', icon: '⚔️', description: '⚔️ Slash: +XP to Slash skill (Max Damage Bonus)' },
+                { type: 'crush', name: 'Crush', icon: '🔨', description: '🔨 Crush: +XP to Crush skill (Crit Damage)' }
+            ];
+        case 'ranged':
+            return [
+                { type: 'archery', name: 'Archery', icon: '🏹', description: '🏹 Archery: +XP to Archery skill (Crit Chance)' },
+                { type: 'throwing', name: 'Throwing', icon: '🎯', description: '🎯 Throwing: +XP to Throwing skill (Attack Speed)' },
+                { type: 'poison', name: 'Poison', icon: '☠️', description: '☠️ Poison: +XP to Poison skill (Damage over Time)' }
+            ];
+        case 'magic':
+            return [
+                { type: 'lightning', name: 'Lightning', icon: '⚡', description: '⚡ Lightning: +XP to Lightning skill (+Attack Power)' },
+                { type: 'fire', name: 'Fire', icon: '🔥', description: '🔥 Fire: +XP to Fire skill (+Attack Power)' },
+                { type: 'ice', name: 'Ice', icon: '❄️', description: '❄️ Ice: +XP to Ice skill (+Attack Power)' }
+            ];
+        default:
+            return [
+                { type: 'stab', name: 'Stab', icon: '🗡️', description: '🗡️ Stab: +XP to Stab skill (Accuracy/Crit Chance)' },
+                { type: 'slash', name: 'Slash', icon: '⚔️', description: '⚔️ Slash: +XP to Slash skill (Max Damage Bonus)' },
+                { type: 'crush', name: 'Crush', icon: '🔨', description: '🔨 Crush: +XP to Crush skill (Crit Damage)' }
+            ];
+    }
+};
+
 // Debug function to test skill leveling
 export const debugSkillLeveling = (skillName) => {
     const skillInfo = getSkillInfo(skillName);

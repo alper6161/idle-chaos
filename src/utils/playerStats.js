@@ -132,6 +132,108 @@ export const calculateSkillBuffs = () => {
     return skillBuffs;
 };
 
+// Calculate skill buffs based on selected attack type only
+export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
+    const skillData = getSkillData();
+    const skillBuffs = {};
+
+    // Helper function to get skill level safely
+    const getSkillLevel = (skillObj) => {
+        if (!skillObj) return 0;
+        if (typeof skillObj === 'number') return skillObj;
+        if (typeof skillObj === 'object' && skillObj.level !== undefined) return skillObj.level;
+        return 0;
+    };
+
+    // Only apply the bonus for the selected attack type
+    switch (selectedAttackType) {
+        case 'stab':
+            if (skillData.melee?.stab) {
+                const stabLevel = getSkillLevel(skillData.melee.stab);
+                skillBuffs.ACCURACY_BONUS = stabLevel * 0.8; // +0.8% accuracy per level
+            }
+            break;
+        case 'slash':
+            if (skillData.melee?.slash) {
+                const slashLevel = getSkillLevel(skillData.melee.slash);
+                skillBuffs.DAMAGE_RANGE_BONUS = slashLevel * 0.5; // +0.5 max damage per level
+            }
+            break;
+        case 'crush':
+            if (skillData.melee?.crush) {
+                const crushLevel = getSkillLevel(skillData.melee.crush);
+                skillBuffs.CRIT_DAMAGE = crushLevel * 2; // +2% crit damage per level
+            }
+            break;
+        case 'archery':
+            if (skillData.ranged?.archery) {
+                const archeryLevel = getSkillLevel(skillData.ranged.archery);
+                skillBuffs.CRIT_CHANCE = archeryLevel * 0.4; // +0.4% crit per level
+            }
+            break;
+        case 'throwing':
+            if (skillData.ranged?.throwing) {
+                const throwingLevel = getSkillLevel(skillData.ranged.throwing);
+                skillBuffs.ATTACK_SPEED = throwingLevel * 0.05; // +0.05 attack speed per level
+            }
+            break;
+        case 'lightning':
+            if (skillData.magic?.lightning) {
+                const lightningLevel = getSkillLevel(skillData.magic.lightning);
+                skillBuffs.ATK = lightningLevel * 0.4; // +0.4 ATK per level
+            }
+            break;
+        case 'fire':
+            if (skillData.magic?.fire) {
+                const fireLevel = getSkillLevel(skillData.magic.fire);
+                skillBuffs.ATK = fireLevel * 0.4; // +0.4 ATK per level
+            }
+            break;
+        case 'ice':
+            if (skillData.magic?.ice) {
+                const iceLevel = getSkillLevel(skillData.magic.ice);
+                skillBuffs.ATK = iceLevel * 0.4; // +0.4 ATK per level
+            }
+            break;
+    }
+
+    // Defense skills are always active (not attack type specific)
+    if (skillData.defence?.dodge) {
+        const dodgeLevel = getSkillLevel(skillData.defence.dodge);
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (dodgeLevel * 0.2); // +0.2 DEF per level
+    }
+
+    if (skillData.defence?.block) {
+        const blockLevel = getSkillLevel(skillData.defence.block);
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (blockLevel * 0.3); // +0.3 DEF per level
+    }
+
+    if (skillData.defence?.armor) {
+        const armorLevel = getSkillLevel(skillData.defence.armor);
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (armorLevel * 0.4); // +0.4 DEF per level
+        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (armorLevel * 2); // +2 HP per level
+    }
+
+    // Hitpool skills are always active
+    if (skillData.hitpool?.hp) {
+        const hpLevel = getSkillLevel(skillData.hitpool.hp);
+        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3); // +3 HP per level
+    }
+
+    // Utility skills are always active
+    if (skillData.utility?.critChance) {
+        const critChanceLevel = getSkillLevel(skillData.utility.critChance);
+        skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5); // +0.5% crit per level
+    }
+
+    if (skillData.utility?.critDamage) {
+        const critDamageLevel = getSkillLevel(skillData.utility.critDamage);
+        skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1); // +1% crit damage per level
+    }
+
+    return skillBuffs;
+};
+
 export const getPlayerStats = () => {
     const equipmentStats = calculateEquipmentStats();
     const skillBuffs = calculateSkillBuffs();

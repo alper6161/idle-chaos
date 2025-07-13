@@ -33,8 +33,8 @@ import {
     checkBattleResult, 
     createSpawnTimer 
 } from "../utils/battleUtils.js";
-import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements } from "../utils/skillExperience.js";
-import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs } from "../utils/playerStats.js";
+import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements, getWeaponType, getAvailableAttackTypes } from "../utils/skillExperience.js";
+import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
 import { 
@@ -75,6 +75,10 @@ function Battle({ player }) {
         open: false,
         countdown: 15
     });
+    
+    // Attack type selection
+    const [selectedAttackType, setSelectedAttackType] = useState('stab');
+    const [availableAttackTypes, setAvailableAttackTypes] = useState([]);
 
     // Potion usage function
     const handleUsePotion = (potionType) => {
@@ -307,7 +311,7 @@ function Battle({ player }) {
                 let newBattle = updateBattleState(prev, playerSpeed, enemySpeed);
 
                 if (newBattle.playerProgress >= 100) {
-                    newBattle = processPlayerAttack(newBattle, setDamageDisplay);
+                    newBattle = processPlayerAttack(newBattle, setDamageDisplay, selectedAttackType);
                 }
 
                 if (newBattle.enemyProgress >= 100) {
@@ -377,6 +381,32 @@ function Battle({ player }) {
         setPlayerHealth(playerStats.HEALTH);
         localStorage.setItem("playerHealth", playerStats.HEALTH.toString());
     }, [playerStats.HEALTH]);
+
+    // Update attack types when equipment changes
+    useEffect(() => {
+        const updateAttackTypes = () => {
+            const equippedWeapon = JSON.parse(localStorage.getItem("equippedItems") || "{}").weapon;
+            const weaponType = getWeaponType(equippedWeapon);
+            const attackTypes = getAvailableAttackTypes(weaponType);
+            setAvailableAttackTypes(attackTypes);
+            
+            // If current selected attack type is not available, select the first one
+            if (!attackTypes.find(at => at.type === selectedAttackType)) {
+                setSelectedAttackType(attackTypes[0]?.type || 'stab');
+            }
+        };
+
+        updateAttackTypes();
+        
+        // Listen for equipment changes
+        const handleStorageChange = () => {
+            updateAttackTypes();
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, [selectedAttackType]);
 
     // Update auto potion settings when buffs change
     useEffect(() => {
@@ -498,6 +528,8 @@ function Battle({ player }) {
                 </Typography>
             </div>
 
+
+
             <div className={styles.fighters}>
                 {/* PLAYER */}
                 <div className={styles.fighter}>
@@ -535,6 +567,35 @@ function Battle({ player }) {
                             sx={{ height: '15px', borderRadius: '8px' }}
                         />
                     </div>
+                    
+                    {/* Attack Type Selection - Small */}
+                    {currentBattle && (
+                        <div className={styles.attackTypeSmall}>
+                            <Typography variant="caption" className={styles.attackTypeSmallTitle}>
+                                🎯 {t('battle.selectAttackType')}
+                            </Typography>
+                            <div className={styles.attackTypeSmallGrid}>
+                                {availableAttackTypes.map((attackType) => (
+                                    <Tooltip
+                                        key={attackType.type}
+                                        title={attackType.description}
+                                        arrow
+                                        placement="top"
+                                    >
+                                        <Button
+                                            variant="text"
+                                            className={`${styles.attackTypeSmallButton} ${
+                                                selectedAttackType === attackType.type ? styles.attackTypeSelected : ''
+                                            }`}
+                                            onClick={() => setSelectedAttackType(attackType.type)}
+                                        >
+                                            <span className={styles.attackTypeSmallIcon}>{attackType.icon}</span>
+                                        </Button>
+                                    </Tooltip>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* ENEMY */}
@@ -693,7 +754,7 @@ function Battle({ player }) {
                             <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.player.CRIT_DAMAGE || 150}%</Typography>
                             <Divider sx={{ my: 1 }} />
                             {(() => {
-                                const skillBuffs = calculateSkillBuffs();
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
                                 const hitChance = calculateHitChance(currentBattle.player.ATK, currentBattle.enemy.DEF, accuracyBonus);
                                 return (
@@ -701,12 +762,14 @@ function Battle({ player }) {
                                 );
                             })()}
                             {(() => {
-                                const skillBuffs = calculateSkillBuffs();
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0;
+                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
                                 const damageRange = calculateDamageRange(currentBattle.player.ATK, currentBattle.enemy.DEF, damageRangeBonus);
+                                const totalCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
                                 const critDamageRange = {
-                                    min: Math.floor(damageRange.min * ((currentBattle.player.CRIT_DAMAGE || 150) / 100)),
-                                    max: Math.floor(damageRange.max * ((currentBattle.player.CRIT_DAMAGE || 150) / 100))
+                                    min: Math.floor(damageRange.min * (totalCritDamage / 100)),
+                                    max: Math.floor(damageRange.max * (totalCritDamage / 100))
                                 };
                                 return (
                                     <>
@@ -725,9 +788,27 @@ function Battle({ player }) {
                             <Typography>🎯 {t('battle.criticalChance')}: {playerStats.CRIT_CHANCE}% {getEquipmentBonuses().CRIT_CHANCE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span> : ''}</Typography>
                             <Typography>💥 {t('battle.criticalDamage')}: {playerStats.CRIT_DAMAGE}% {getEquipmentBonuses().CRIT_DAMAGE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span> : ''}</Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(playerStats.ATK, currentEnemy?.DEF || 0)}%</Typography>
-                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(playerStats.ATK, currentEnemy?.DEF || 0)}</Typography>
-                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(playerStats.ATK, currentEnemy?.DEF || 0) * (playerStats.CRIT_DAMAGE / 100))}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0;
+                                const hitChance = calculateHitChance(playerStats.ATK, currentEnemy?.DEF || 0, accuracyBonus);
+                                return (
+                                    <Typography>🎲 {t('battle.hitChance')}: {hitChance}%</Typography>
+                                );
+                            })()}
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0;
+                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
+                                const baseDamage = calculateDamage(playerStats.ATK, currentEnemy?.DEF || 0, damageRangeBonus);
+                                const totalCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
+                                return (
+                                    <>
+                                        <Typography>⚔️ {t('battle.baseDamage')}: {baseDamage}</Typography>
+                                        <Typography>💥 {t('battle.critDamage')}: {Math.floor(baseDamage * (totalCritDamage / 100))}</Typography>
+                                    </>
+                                );
+                            })()}
                         </>
                     )}
                 </div>
@@ -770,8 +851,8 @@ function Battle({ player }) {
                             <Typography>💥 {t('battle.criticalDamage')}: 120%</Typography>
                             <Divider sx={{ my: 1 }} />
                             <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%</Typography>
-                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF)}</Typography>
-                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF) * 1.2)}</Typography>
+                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0)}</Typography>
+                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0) * 1.2)}</Typography>
                         </>
                     )}
                 </div>
