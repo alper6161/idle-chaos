@@ -32,9 +32,9 @@ const EQUIPMENT_SLOTS = {
 };
 
 const SAMPLE_EQUIPMENT = {
-    weapon: { name: "Legendary Dragonslayer", weaponType: "melee", rarity: "legendary", stats: { ATK: 25, CRIT_CHANCE: 15, CRIT_DAMAGE: 30 } },
-    shield: { name: "Aegis of Valor", rarity: "epic", stats: { DEF: 18, HP: 50, BLOCK_CHANCE: 20 } },
-    helmet: { name: "Crown of Wisdom", rarity: "rare", stats: { DEF: 12, HP: 30, CRIT_CHANCE: 8 } },
+    weapon: { name: "Legendary Dragonslayer", weaponType: "melee", rarity: "legendary", level: 50, stats: { ATK: 25, CRIT_CHANCE: 15, CRIT_DAMAGE: 30 } },
+    shield: { name: "Aegis of Valor", rarity: "epic", level: 45, stats: { DEF: 18, HP: 50, BLOCK_CHANCE: 20 } },
+    helmet: { name: "Crown of Wisdom", rarity: "rare", level: 40, stats: { DEF: 12, HP: 30, CRIT_CHANCE: 8 } },
     chest: null,
     legs: null,
     boots: null,
@@ -45,33 +45,33 @@ const SAMPLE_EQUIPMENT = {
 };
 
 const SAMPLE_INVENTORY = [
-    { id: 1, name: "Excalibur", type: "weapon", weaponType: "melee", rarity: "legendary", stats: { ATK: 30, CRIT_CHANCE: 20, CRIT_DAMAGE: 40, HP: 25 } },
-    { id: 2, name: "Shadowbane", type: "weapon", weaponType: "melee", rarity: "legendary", stats: { ATK: 28, CRIT_CHANCE: 25, DODGE: 15 } },
-    { id: 3, name: "Frostmourne", type: "weapon", weaponType: "melee", rarity: "legendary", stats: { ATK: 32, CRIT_DAMAGE: 50, FREEZE_CHANCE: 30 } },
+    { id: 1, name: "Excalibur", type: "weapon", weaponType: "melee", rarity: "legendary", level: 85, stats: { ATK: 30, CRIT_CHANCE: 20, CRIT_DAMAGE: 40, HP: 25 } },
+    { id: 2, name: "Shadowbane", type: "weapon", weaponType: "melee", rarity: "legendary", level: 82, stats: { ATK: 28, CRIT_CHANCE: 25, DODGE: 15 } },
+    { id: 3, name: "Frostmourne", type: "weapon", weaponType: "melee", rarity: "legendary", level: 88, stats: { ATK: 32, CRIT_DAMAGE: 50, FREEZE_CHANCE: 30 } },
     
-    { id: 4, name: "Dragon Blade", type: "weapon", weaponType: "melee", rarity: "epic", stats: { ATK: 22, CRIT_DAMAGE: 25, FIRE_DAMAGE: 10 } },
-    { id: 5, name: "Thunder Strike", type: "weapon", weaponType: "magic", rarity: "epic", stats: { ATK: 20, CRIT_CHANCE: 15, LIGHTNING_DAMAGE: 8 } },
+    { id: 4, name: "Dragon Blade", type: "weapon", weaponType: "melee", rarity: "epic", level: 65, stats: { ATK: 22, CRIT_DAMAGE: 25, FIRE_DAMAGE: 10 } },
+    { id: 5, name: "Thunder Strike", type: "weapon", weaponType: "magic", rarity: "epic", level: 62, stats: { ATK: 20, CRIT_CHANCE: 15, LIGHTNING_DAMAGE: 8 } },
     
-    { id: 6, name: "Bloodthirsty Axe", type: "weapon", weaponType: "melee", rarity: "rare", stats: { ATK: 18, LIFE_STEAL: 15, CRIT_CHANCE: 10 } },
-    { id: 7, name: "Mage's Staff", type: "weapon", weaponType: "magic", rarity: "rare", stats: { ATK: 15, CRIT_CHANCE: 12, MANA_REGEN: 5 } },
+    { id: 6, name: "Bloodthirsty Axe", type: "weapon", weaponType: "melee", rarity: "rare", level: 45, stats: { ATK: 18, LIFE_STEAL: 15, CRIT_CHANCE: 10 } },
+    { id: 7, name: "Mage's Staff", type: "weapon", weaponType: "magic", rarity: "rare", level: 48, stats: { ATK: 15, CRIT_CHANCE: 12, MANA_REGEN: 5 } },
     
-    { id: 8, name: "Dragonscale Armor", type: "chest", rarity: "legendary", stats: { DEF: 35, HP: 80, FIRE_RESISTANCE: 40 } },
-    { id: 9, name: "Ethereal Robes", type: "chest", rarity: "legendary", stats: { DEF: 25, HP: 60, CRIT_CHANCE: 20, MANA_REGEN: 10 } },
+    { id: 8, name: "Dragonscale Armor", type: "chest", rarity: "legendary", level: 80, stats: { DEF: 35, HP: 80, FIRE_RESISTANCE: 40 } },
+    { id: 9, name: "Ethereal Robes", type: "chest", rarity: "legendary", level: 78, stats: { DEF: 25, HP: 60, CRIT_CHANCE: 20, MANA_REGEN: 10 } },
     
-    { id: 10, name: "Plate of the Titan", type: "chest", rarity: "epic", stats: { DEF: 28, HP: 70, BLOCK_CHANCE: 25 } },
-    { id: 11, name: "Shadowweave Vest", type: "chest", rarity: "epic", stats: { DEF: 22, HP: 50, DODGE: 20, CRIT_CHANCE: 12 } },
+    { id: 10, name: "Plate of the Titan", type: "chest", rarity: "epic", level: 58, stats: { DEF: 28, HP: 70, BLOCK_CHANCE: 25 } },
+    { id: 11, name: "Shadowweave Vest", type: "chest", rarity: "epic", level: 55, stats: { DEF: 22, HP: 50, DODGE: 20, CRIT_CHANCE: 12 } },
     
-    { id: 12, name: "Ring of Power", type: "ring", rarity: "legendary", stats: { ATK: 15, CRIT_CHANCE: 25, CRIT_DAMAGE: 35 } },
-    { id: 13, name: "Amulet of Eternity", type: "amulet", rarity: "legendary", stats: { HP: 100, LIFE_STEAL: 20, REGEN: 5 } },
+    { id: 12, name: "Ring of Power", type: "ring", rarity: "legendary", level: 75, stats: { ATK: 15, CRIT_CHANCE: 25, CRIT_DAMAGE: 35 } },
+    { id: 13, name: "Amulet of Eternity", type: "amulet", rarity: "legendary", level: 72, stats: { HP: 100, LIFE_STEAL: 20, REGEN: 5 } },
     
-    { id: 14, name: "Ruby Ring", type: "ring", rarity: "epic", stats: { ATK: 12, CRIT_CHANCE: 18, FIRE_DAMAGE: 8 } },
-    { id: 15, name: "Sapphire Amulet", type: "amulet", rarity: "epic", stats: { HP: 60, CRIT_CHANCE: 15, ICE_DAMAGE: 6 } },
+    { id: 14, name: "Ruby Ring", type: "ring", rarity: "epic", level: 52, stats: { ATK: 12, CRIT_CHANCE: 18, FIRE_DAMAGE: 8 } },
+    { id: 15, name: "Sapphire Amulet", type: "amulet", rarity: "epic", level: 54, stats: { HP: 60, CRIT_CHANCE: 15, ICE_DAMAGE: 6 } },
     
-    { id: 16, name: "Boots of Speed", type: "boots", rarity: "rare", stats: { DEF: 8, DODGE: 25, MOVEMENT_SPEED: 15 } },
-    { id: 17, name: "Gloves of Precision", type: "gloves", rarity: "rare", stats: { DEF: 6, CRIT_CHANCE: 20, ACCURACY: 15 } },
-    { id: 18, name: "Cape of Shadows", type: "cape", rarity: "epic", stats: { DEF: 12, DODGE: 30, STEALTH: 20 } },
-    { id: 19, name: "Helmet of the Berserker", type: "helmet", rarity: "epic", stats: { DEF: 15, ATK: 8, RAGE: 25 } },
-    { id: 20, name: "Leggings of Fortitude", type: "legs", rarity: "rare", stats: { DEF: 12, HP: 40, ENDURANCE: 20 } }
+    { id: 16, name: "Boots of Speed", type: "boots", rarity: "rare", level: 38, stats: { DEF: 8, DODGE: 25, MOVEMENT_SPEED: 15 } },
+    { id: 17, name: "Gloves of Precision", type: "gloves", rarity: "rare", level: 42, stats: { DEF: 6, CRIT_CHANCE: 20, ACCURACY: 15 } },
+    { id: 18, name: "Cape of Shadows", type: "cape", rarity: "epic", level: 56, stats: { DEF: 12, DODGE: 30, STEALTH: 20 } },
+    { id: 19, name: "Helmet of the Berserker", type: "helmet", rarity: "epic", level: 59, stats: { DEF: 15, ATK: 8, RAGE: 25 } },
+    { id: 20, name: "Leggings of Fortitude", type: "legs", rarity: "rare", level: 44, stats: { DEF: 12, HP: 40, ENDURANCE: 20 } }
 ];
 
 const STORAGE_KEYS = {
@@ -99,14 +99,44 @@ const saveToStorage = (key, data) => {
 
 function Equipment() {
     const { t } = useTranslate();
-    const [equippedItems, setEquippedItems] = useState(() => 
-        loadFromStorage(STORAGE_KEYS.EQUIPPED_ITEMS, SAMPLE_EQUIPMENT)
-    );
+    const [equippedItems, setEquippedItems] = useState(() => {
+        const loadedEquippedItems = loadFromStorage(STORAGE_KEYS.EQUIPPED_ITEMS, SAMPLE_EQUIPMENT);
+        
+        // Add levels to equipped items that don't have them
+        const equippedItemsWithLevels = {};
+        
+        Object.keys(loadedEquippedItems).forEach(slot => {
+            const item = loadedEquippedItems[slot];
+            if (item && !item.level) {
+                // Add level based on rarity
+                const levelRanges = {
+                    common: { min: 1, max: 20 },
+                    uncommon: { min: 15, max: 35 },
+                    rare: { min: 30, max: 50 },
+                    epic: { min: 45, max: 70 },
+                    legendary: { min: 60, max: 100 }
+                };
+                
+                const rarity = item.rarity || 'common';
+                const range = levelRanges[rarity];
+                const randomLevel = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                
+                equippedItemsWithLevels[slot] = { ...item, level: randomLevel };
+            } else {
+                equippedItemsWithLevels[slot] = item;
+            }
+        });
+        
+        // Save updated equipped items back to localStorage
+        localStorage.setItem(STORAGE_KEYS.EQUIPPED_ITEMS, JSON.stringify(equippedItemsWithLevels));
+        
+        return equippedItemsWithLevels;
+    });
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [inventory, setInventory] = useState(() => {
         const loadedInventory = loadFromStorage(STORAGE_KEYS.INVENTORY, SAMPLE_INVENTORY);
         
-        // Filter out invalid items
+        // Filter out invalid items and add levels to items that don't have them
         const validInventory = loadedInventory.filter(item => {
             if (!item || typeof item !== 'object') {
                 console.warn('Removing invalid item:', item);
@@ -130,8 +160,34 @@ function Equipment() {
             }
             return true;
         });
+
+        // Add levels to items that don't have them
+        const inventoryWithLevels = validInventory.map(item => {
+            if (!item.level) {
+                // Add level based on rarity and stats
+                const levelRanges = {
+                    common: { min: 1, max: 20 },
+                    uncommon: { min: 15, max: 35 },
+                    rare: { min: 30, max: 50 },
+                    epic: { min: 45, max: 70 },
+                    legendary: { min: 60, max: 100 }
+                };
+                
+                const rarity = item.rarity || 'common';
+                const range = levelRanges[rarity];
+                const randomLevel = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                
+                return { ...item, level: randomLevel };
+            }
+            return item;
+        });
+
+        // Save updated inventory back to localStorage
+        if (inventoryWithLevels.length > 0) {
+            localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(inventoryWithLevels));
+        }
         
-        return validInventory;
+        return inventoryWithLevels;
     });
     const [rarityFilter, setRarityFilter] = useState("all");
     const [typeFilter, setTypeFilter] = useState("all");
@@ -158,7 +214,7 @@ function Equipment() {
                 const lootBag = JSON.parse(localStorage.getItem("lootBag") || "[]");
                 
                 if (lootBag.length > 0) {
-                    const newEquipment = convertLootBagToEquipment(lootBag);
+                    const newEquipment = convertLootBagToEquipment(lootBag, null); // No enemy info available here, will use default difficulty
                     
                     if (newEquipment && newEquipment.length > 0) {
                         setInventory(prev => {
@@ -166,16 +222,36 @@ function Equipment() {
                             const existingIds = new Set(prev.map(item => item.id));
                             const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
                             
+                            // Add levels to new equipment if they don't have them
+                            const equipmentWithLevels = uniqueNewEquipment.map(item => {
+                                if (!item.level) {
+                                    const levelRanges = {
+                                        common: { min: 1, max: 20 },
+                                        uncommon: { min: 15, max: 35 },
+                                        rare: { min: 30, max: 50 },
+                                        epic: { min: 45, max: 70 },
+                                        legendary: { min: 60, max: 100 }
+                                    };
+                                    
+                                    const rarity = item.rarity || 'common';
+                                    const range = levelRanges[rarity];
+                                    const randomLevel = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+                                    
+                                    return { ...item, level: randomLevel };
+                                }
+                                return item;
+                            });
+                            
                             // Mark new items for highlighting
-                            if (uniqueNewEquipment.length > 0) {
-                                setNewItemIds(new Set(uniqueNewEquipment.map(item => item.id)));
+                            if (equipmentWithLevels.length > 0) {
+                                setNewItemIds(new Set(equipmentWithLevels.map(item => item.id)));
                                 // Remove highlight after 5 seconds
                                 setTimeout(() => {
                                     setNewItemIds(new Set());
                                 }, 5000);
                             }
                             
-                            const updatedInventory = [...prev, ...uniqueNewEquipment];
+                            const updatedInventory = [...prev, ...equipmentWithLevels];
                             return updatedInventory;
                         });
                         clearProcessedLootBag(); // Clear loot bag after processing
@@ -383,6 +459,11 @@ function Equipment() {
                         <Typography variant="caption" className={styles.tooltipRarity}>
                             {(inventoryItem.rarity || 'common').toUpperCase()}
                         </Typography>
+                        {inventoryItem.level && (
+                            <Typography variant="caption" className={styles.tooltipLevel}>
+                                iLvl {inventoryItem.level}
+                            </Typography>
+                        )}
                         {inventoryItem.weaponType && (
                             <Typography variant="caption" className={styles.tooltipWeaponType}>
                                 {inventoryItem.weaponType.toUpperCase()} WEAPON
@@ -436,6 +517,11 @@ function Equipment() {
                     <Typography variant="caption" className={styles.tooltipRarity}>
                         {(inventoryItem.rarity || 'common').toUpperCase()}
                     </Typography>
+                    {inventoryItem.level && (
+                        <Typography variant="caption" className={styles.tooltipLevel}>
+                            Level {inventoryItem.level}
+                        </Typography>
+                    )}
                     {inventoryItem.weaponType && (
                         <Typography variant="caption" className={styles.tooltipWeaponType}>
                             {inventoryItem.weaponType.toUpperCase()} WEAPON
@@ -489,6 +575,11 @@ function Equipment() {
                     <Typography variant="caption" sx={{ color: getRarityColor(item.rarity || 'common'), textTransform: 'uppercase', display: 'block', mb: 1 }}>
                         {item.rarity || 'common'}
                     </Typography>
+                    {item.level && (
+                        <Typography variant="caption" sx={{ color: '#00ff88', display: 'block', mb: 1, fontWeight: 'bold' }}>
+                            iLvl {item.level}
+                        </Typography>
+                    )}
                     {item.weaponType && (
                         <Typography variant="caption" sx={{ color: '#ffd700', textTransform: 'uppercase', display: 'block', mb: 1, fontWeight: 'bold' }}>
                             {item.weaponType.toUpperCase()} WEAPON
@@ -558,6 +649,15 @@ function Equipment() {
                                     >
                                         {equippedItem.rarity.toUpperCase()}
                                     </Typography>
+                                    {equippedItem.level && (
+                                        <Typography 
+                                            variant="caption" 
+                                            className={styles.itemLevel}
+                                            style={{ color: '#00ff88' }}
+                                        >
+                                            iLvl {equippedItem.level}
+                                        </Typography>
+                                    )}
                                     {equippedItem.weaponType && (
                                         <Typography 
                                             variant="caption" 
@@ -580,6 +680,8 @@ function Equipment() {
             </div>
         );
     };
+
+
 
     const totalStats = calculateTotalStats();
     const powerLevel = getPowerLevel();
@@ -825,6 +927,15 @@ function Equipment() {
                                                     >
                                                         {(item.rarity || 'common').toUpperCase()}
                                                     </Typography>
+                                                    {item.level && (
+                                                        <Typography 
+                                                            variant="caption" 
+                                                            className={styles.itemLevel}
+                                                            style={{ color: '#00ff88' }}
+                                                        >
+                                                            iLvl {item.level}
+                                                        </Typography>
+                                                    )}
                                                     {item.weaponType && (
                                                         <Typography 
                                                             variant="caption" 
@@ -906,6 +1017,15 @@ function Equipment() {
                                     >
                                         {(replaceDialog.currentItem.rarity || 'common').toUpperCase()}
                                     </Typography>
+                                    {replaceDialog.currentItem.level && (
+                                        <Typography 
+                                            variant="caption" 
+                                            className={styles.dialogItemLevel}
+                                            style={{ color: '#00ff88' }}
+                                        >
+                                            iLvl {replaceDialog.currentItem.level}
+                                        </Typography>
+                                    )}
                                     {replaceDialog.currentItem.stats && (
                                         <div className={styles.dialogItemStats}>
                                             {Object.entries(replaceDialog.currentItem.stats).map(([stat, value], index) => (
@@ -952,6 +1072,15 @@ function Equipment() {
                                     >
                                         {(replaceDialog.newItem.rarity || 'common').toUpperCase()}
                                     </Typography>
+                                    {replaceDialog.newItem.level && (
+                                        <Typography 
+                                            variant="caption" 
+                                            className={styles.dialogItemLevel}
+                                            style={{ color: '#00ff88' }}
+                                        >
+                                            iLvl {replaceDialog.newItem.level}
+                                        </Typography>
+                                    )}
                                     {replaceDialog.newItem.stats && (
                                         <div className={styles.dialogItemStats}>
                                             {Object.entries(replaceDialog.newItem.stats).map(([stat, value], index) => (

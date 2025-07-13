@@ -681,6 +681,21 @@
   white-space: nowrap;
 }
 
+.itemLevel {
+  font-size: 0.55rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 0 !important;
+  color: #00ff88 !important;
+  background: rgba(0, 255, 136, 0.15) !important;
+  padding: 1px 3px !important;
+  border-radius: 2px !important;
+  border: 1px solid rgba(0, 255, 136, 0.4) !important;
+  text-shadow: 0 0 3px rgba(0, 255, 136, 0.6) !important;
+  white-space: nowrap;
+}
+
 // Removed itemStats and statLine since they're no longer used in equipment slots
 // Stats are now shown in hover tooltips instead
 
@@ -1358,6 +1373,16 @@
   opacity: 0.9;
 }
 
+.dialogItemLevel {
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 !important;
+  color: #00ff88 !important;
+  opacity: 0.9;
+}
+
 .dialogItemStats {
   display: flex;
   flex-direction: column;
@@ -1514,6 +1539,22 @@
   padding: 2px 6px;
   border-radius: 4px;
   border: 1px solid rgba(255, 215, 0, 0.3);
+  display: inline-block;
+  width: fit-content;
+}
+
+.tooltipLevel {
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 !important;
+  color: #00ff88 !important;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+  background: linear-gradient(45deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05));
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 136, 0.3);
   display: inline-block;
   width: fit-content;
 }

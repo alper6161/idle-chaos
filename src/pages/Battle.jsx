@@ -404,7 +404,7 @@ function Battle({ player }) {
                             const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                             
                             // Ekipmanları equipment object'lerine dönüştür
-                            const newEquipment = convertLootBagToEquipment(equipmentLoot);
+                            const newEquipment = convertLootBagToEquipment(equipmentLoot, currentEnemy);
                             
                             // Eşsiz ID'ye göre tekrar eklemeyi önle
                             const existingIds = new Set(currentInventory.map(item => item.id));
