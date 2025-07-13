@@ -14,7 +14,9 @@ function Home() {
     }, []);
 
     const handleNewGame = () => {
-        localStorage.removeItem("gameData");
+        // Clear all localStorage data (like Clear All Data in Settings)
+        localStorage.clear();
+        setHasSave(false);
         navigate("/battle");
     };
 
@@ -36,7 +38,7 @@ function Home() {
         <div className={styles.homeContainer}>
             <img
                 src="/images/logo.png"
-                                        alt={t('common.gameLogo')}
+                alt={t('common.gameLogo')}
                 className={styles.logo}
             />
 
