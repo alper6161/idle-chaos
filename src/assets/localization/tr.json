@@ -45,6 +45,13 @@
     "inventory": "Envanter",
     "close": "Kapat"
   },
+  "story": {
+    "welcome": "Hoş geldin, savaşçı!",
+    "intro": "Bu topraklarda tehlikeli yaratıklar dolaşıyor ve sen onları durdurmak için buradasın.",
+    "instructions": "Savaşarak deneyim kazan, yeni beceriler öğren ve güçlü ekipmanlar topla.",
+    "ready": "Hazır mısın?",
+    "understood": "Anladım"
+  },
   "battle": {
     "playerWins": "Oyuncu kazandı!",
     "enemyWins": "Düşman kazandı!",

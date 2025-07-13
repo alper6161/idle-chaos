@@ -45,6 +45,13 @@
     "inventory": "Inventory",
     "close": "Close"
   },
+  "story": {
+    "welcome": "Welcome, warrior!",
+    "intro": "Dangerous creatures roam these lands and you are here to stop them.",
+    "instructions": "Fight to gain experience, learn new skills and collect powerful equipment.",
+    "ready": "Are you ready?",
+    "understood": "Understood"
+  },
   "battle": {
     "playerWins": "Player wins!",
     "enemyWins": "Enemy wins!",

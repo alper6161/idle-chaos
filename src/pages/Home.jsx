@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../assets/styles/Home.module.scss";
 import { useTranslate } from "../hooks/useTranslate";
+import StoryModal from "../components/StoryModal.jsx";
 
 function Home() {
     const navigate = useNavigate();
     const [hasSave, setHasSave] = useState(false);
+    const [showStoryModal, setShowStoryModal] = useState(false);
     const { t } = useTranslate();
 
     useEffect(() => {
@@ -17,6 +19,11 @@ function Home() {
         // Clear all localStorage data (like Clear All Data in Settings)
         localStorage.clear();
         setHasSave(false);
+        setShowStoryModal(true);
+    };
+
+    const handleStoryClose = () => {
+        setShowStoryModal(false);
         navigate("/battle");
     };
 
@@ -61,6 +68,13 @@ function Home() {
             >
                 {t('common.importSave')}
             </button>
+
+            {/* Story Modal */}
+            <StoryModal
+                open={showStoryModal}
+                onClose={handleStoryClose}
+                characterImage="/images/characters/warrior.png"
+            />
         </div>
     );
 }

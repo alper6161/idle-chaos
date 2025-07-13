@@ -45,6 +45,13 @@
     "inventory": "背包",
     "close": "关闭"
   },
+  "story": {
+    "welcome": "欢迎，战士！",
+    "intro": "危险的生物在这片土地上徘徊，你在这里阻止它们。",
+    "instructions": "战斗获得经验，学习新技能并收集强大的装备。",
+    "ready": "准备好了吗？",
+    "understood": "明白了"
+  },
   "battle": {
     "playerWins": "玩家获胜！",
     "enemyWins": "敌人获胜！",
