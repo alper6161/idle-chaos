@@ -18,26 +18,22 @@ export const EQUIPMENT_TEMPLATES = {
     "Rusty Sword": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 5, CRIT_CHANCE: 3 },
-        allowedEnemies: ["goblin"]
+        baseStats: { ATK: 5, CRIT_CHANCE: 3 }
     },
     "Rat Fang Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 4, CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 },
-        allowedEnemies: ["rat"]
+        baseStats: { ATK: 4, CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
     },
     "Bone Sword": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 8, CRIT_CHANCE: 5, CRIT_DAMAGE: 10 },
-        allowedEnemies: ["skeleton"]
+        baseStats: { ATK: 8, CRIT_CHANCE: 5, CRIT_DAMAGE: 10 }
     },
     "Orc Axe": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 12, CRIT_DAMAGE: 15 },
-        allowedEnemies: ["orc"]
+        baseStats: { ATK: 12, CRIT_DAMAGE: 15 }
     },
     "Spider Fang Blade": {
         type: "weapon",
@@ -57,8 +53,7 @@ export const EQUIPMENT_TEMPLATES = {
     "Wolf Fang Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 7, CRIT_CHANCE: 10, ATTACK_SPEED: 0.3 },
-        allowedEnemies: ["wolf"]
+        baseStats: { ATK: 7, CRIT_CHANCE: 10, ATTACK_SPEED: 0.3 }
     },
     "Zombie Hand Dagger": {
         type: "weapon",

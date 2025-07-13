@@ -59,7 +59,11 @@ const ADDITIONAL_STATS_POOL = {
 let equipmentCounter = 1000; // Start IDs from 1000 to avoid conflicts
 
 const generateEquipmentId = () => {
-    return ++equipmentCounter;
+    // Use timestamp + counter to ensure unique IDs
+    const timestamp = Date.now();
+    const uniqueId = timestamp * 1000 + equipmentCounter;
+    equipmentCounter++;
+    return uniqueId;
 };
 
 // Determine difficulty based on enemy stats
@@ -75,72 +79,71 @@ const getEnemyDifficulty = (enemy) => {
     return 'IMPOSSIBLE';
 };
 
-// Generate item level based on difficulty
+// Generate item level based on difficulty with minimum levels
 const generateItemLevel = (difficulty) => {
-    const levelRange = DIFFICULTY_LEVELS[difficulty];
-    if (!levelRange) return 1;
-    
-    return Math.floor(Math.random() * (levelRange.maxLevel - levelRange.minLevel + 1)) + levelRange.minLevel;
-};
-
-// Determine rarity with RNG - every item can drop with any rarity
-const determineRarity = (difficulty) => {
-    const difficultyConfig = DIFFICULTY_LEVELS[difficulty];
-    const rarityBonus = difficultyConfig ? difficultyConfig.rarityBonus : 0;
-    
-    // Base rarity chances
-    const rarityChances = {
-        common: 0.6,
-        uncommon: 0.25,
-        rare: 0.1,
-        epic: 0.04,
-        legendary: 0.01
+    // Minimum levels per difficulty
+    const minimumLevels = {
+        EASY: 1,
+        NORMAL: 10,
+        HARD: 25,
+        VERY_HARD: 40,
+        IMPOSSIBLE: 50
     };
     
-    // Apply difficulty bonus to upgrade chances
-    if (rarityBonus > 0) {
-        const rand = Math.random();
-        if (rand < rarityBonus) {
-            // Upgrade rarity based on difficulty
-            const rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-            const upgradeChances = {
-                common: 0.3,      // 30% chance to upgrade from common
-                uncommon: 0.25,   // 25% chance to upgrade from uncommon
-                rare: 0.2,        // 20% chance to upgrade from rare
-                epic: 0.15        // 15% chance to upgrade from epic
-            };
-            
-            // First determine base rarity
-            const baseRand = Math.random();
-            let cumulative = 0;
-            let selectedRarity = 'common';
-            
-            for (const [rarity, chance] of Object.entries(rarityChances)) {
-                cumulative += chance;
-                if (baseRand <= cumulative) {
-                    selectedRarity = rarity;
-                    break;
-                }
-            }
-            
-            // Then apply upgrade chance
-            const upgradeChance = upgradeChances[selectedRarity] || 0;
-            if (Math.random() < upgradeChance) {
-                const currentIndex = rarityOrder.indexOf(selectedRarity);
-                if (currentIndex < rarityOrder.length - 1) {
-                    return rarityOrder[currentIndex + 1];
-                }
-            }
-            
-            return selectedRarity;
-        }
+    const levelRange = DIFFICULTY_LEVELS[difficulty];
+    if (!levelRange) return minimumLevels.EASY;
+    
+    // Use minimum level if it's higher than the range minimum
+    const minLevel = Math.max(levelRange.minLevel, minimumLevels[difficulty] || 1);
+    const maxLevel = levelRange.maxLevel;
+    
+    return Math.floor(Math.random() * (maxLevel - minLevel + 1)) + minLevel;
+};
+
+// Determine rarity with RNG - difficulty affects rarity chances
+const determineRarity = (difficulty) => {
+    // Base rarity chances for EASY difficulty
+    const baseRarityChances = {
+        common: 0.7,
+        uncommon: 0.2,
+        rare: 0.08,
+        epic: 0.015,
+        legendary: 0.005
+    };
+    
+    // Difficulty-based rarity multipliers
+    const difficultyMultipliers = {
+        EASY: { common: 1.0, uncommon: 1.0, rare: 1.0, epic: 1.0, legendary: 1.0 },
+        NORMAL: { common: 0.9, uncommon: 1.1, rare: 1.2, epic: 1.3, legendary: 1.4 },
+        HARD: { common: 0.8, uncommon: 1.2, rare: 1.4, epic: 1.6, legendary: 1.8 },
+        VERY_HARD: { common: 0.7, uncommon: 1.3, rare: 1.6, epic: 2.0, legendary: 2.5 },
+        IMPOSSIBLE: { common: 0.6, uncommon: 1.4, rare: 1.8, epic: 2.5, legendary: 3.0 }
+    };
+    
+    const multipliers = difficultyMultipliers[difficulty] || difficultyMultipliers.EASY;
+    
+    // Apply difficulty multipliers to rarity chances
+    const adjustedChances = {};
+    let totalChance = 0;
+    
+    for (const [rarity, baseChance] of Object.entries(baseRarityChances)) {
+        const multiplier = multipliers[rarity];
+        const adjustedChance = baseChance * multiplier;
+        adjustedChances[rarity] = adjustedChance;
+        totalChance += adjustedChance;
     }
     
-    // Normal RNG without difficulty bonus
+    // Normalize chances to sum to 1
+    const normalizedChances = {};
+    for (const [rarity, chance] of Object.entries(adjustedChances)) {
+        normalizedChances[rarity] = chance / totalChance;
+    }
+    
+    // Determine rarity using adjusted chances
     const rand = Math.random();
     let cumulative = 0;
     
-    for (const [rarity, chance] of Object.entries(rarityChances)) {
+    for (const [rarity, chance] of Object.entries(normalizedChances)) {
         cumulative += chance;
         if (rand <= cumulative) {
             return rarity;
@@ -211,6 +214,8 @@ const getRandomAdditionalStats = (equipmentType, rarity, level) => {
 
 export const generateEquipmentFromName = (equipmentName, enemy = null) => {
     try {
+        console.log('🔍 Generating equipment for:', equipmentName, 'from enemy:', enemy?.name);
+        
         if (!equipmentName || typeof equipmentName !== 'string') {
             console.warn('Invalid equipment name:', equipmentName);
             return null;
@@ -222,15 +227,10 @@ export const generateEquipmentFromName = (equipmentName, enemy = null) => {
             console.warn(`No template found for equipment: ${equipmentName}`);
             return null;
         }
+        
+        console.log('✅ Template found:', template);
 
-        // Check if this item can drop from this enemy
-        if (template.allowedEnemies && enemy) {
-            const enemyId = enemy.id || enemy.name?.toLowerCase();
-            if (!template.allowedEnemies.includes(enemyId)) {
-                console.warn(`Item ${equipmentName} cannot drop from enemy ${enemyId}`);
-                return null;
-            }
-        }
+
 
         // Determine difficulty and generate level
         const difficulty = getEnemyDifficulty(enemy);
@@ -275,6 +275,8 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
     const equipment = [];
     
     try {
+        console.log('🔄 Converting loot bag to equipment:', lootBagItems);
+        
         // Ensure lootBagItems is an array
         if (!Array.isArray(lootBagItems)) {
             console.warn('lootBagItems is not an array:', lootBagItems);

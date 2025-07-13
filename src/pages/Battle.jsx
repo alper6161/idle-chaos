@@ -415,10 +415,20 @@ function Battle({ player }) {
                             const existingIds = new Set(currentInventory.map(item => item.id));
                             const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
                             
+                            console.log('🔍 Debug inventory:', {
+                                newEquipmentCount: newEquipment.length,
+                                existingIdsCount: existingIds.size,
+                                uniqueNewEquipmentCount: uniqueNewEquipment.length,
+                                newEquipmentIds: newEquipment.map(item => item.id),
+                                existingIds: Array.from(existingIds)
+                            });
+                            
                             if (uniqueNewEquipment.length > 0) {
                                 const updatedInventory = [...currentInventory, ...uniqueNewEquipment];
                                 localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedInventory));
-                                console.log('Added equipment to inventory immediately:', uniqueNewEquipment);
+                                console.log('✅ Added equipment to inventory immediately:', uniqueNewEquipment);
+                            } else {
+                                console.log('❌ No unique equipment to add - all items already exist');
                             }
                         } catch (err) {
                             console.error('Inventory güncellenirken hata:', err);
