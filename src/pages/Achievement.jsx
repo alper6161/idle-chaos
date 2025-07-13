@@ -23,7 +23,9 @@ import {
     Visibility, 
     VisibilityOff,
     Star,
-    StarBorder
+    StarBorder,
+    TrendingUp,
+    Person
 } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 import { 
@@ -118,6 +120,40 @@ function Achievement() {
         return ACHIEVEMENT_COLORS[reward] || "#6b7280";
     };
 
+    const calculateTotalProgress = () => {
+        const allEnemies = Object.keys(enemies);
+        let totalProgress = 0;
+        let totalAchievements = 0;
+
+        allEnemies.forEach(enemyKey => {
+            const enemyId = enemyKey.toLowerCase();
+            const data = achievementsData[enemyId];
+            if (data) {
+                totalProgress += data.unlockedAchievements.length;
+                totalAchievements += data.thresholds.length;
+            }
+        });
+
+        return totalAchievements > 0 ? (totalProgress / totalAchievements) * 100 : 0;
+    };
+
+    const getTotalUnlockedAchievements = () => {
+        const allEnemies = Object.keys(enemies);
+        let totalUnlocked = 0;
+        let totalAchievements = 0;
+
+        allEnemies.forEach(enemyKey => {
+            const enemyId = enemyKey.toLowerCase();
+            const data = achievementsData[enemyId];
+            if (data) {
+                totalUnlocked += data.unlockedAchievements.length;
+                totalAchievements += data.thresholds.length;
+            }
+        });
+
+        return { unlocked: totalUnlocked, total: totalAchievements };
+    };
+
     const EnemyWidget = ({ enemyId, enemy, data }) => {
         const progress = getAchievementProgress(enemyId);
         const nextAchievement = data.nextAchievement;
@@ -125,9 +161,9 @@ function Achievement() {
         const totalAchievements = data.thresholds.length;
 
         return (
-            <Card className={styles.enemyWidget} onClick={() => handleEnemyClick(enemyId)}>
-                <CardContent className={styles.enemyWidgetContent}>
-                    <div className={styles.enemyHeader}>
+            <Card className={styles.achievementCard} onClick={() => handleEnemyClick(enemyId)}>
+                <CardContent className={styles.achievementCardContent}>
+                    <div className={styles.achievementHeader}>
                         <Avatar 
                             src={getEnemyIcon(enemyId)} 
                             className={styles.enemyAvatar}
@@ -145,7 +181,7 @@ function Achievement() {
                             {getEnemyInitial(enemy.name)}
                         </div>
                         
-                        <div className={styles.enemyInfo}>
+                        <div className={styles.achievementInfo}>
                             <Typography variant="h6" className={styles.enemyName}>
                                 {enemy.name}
                             </Typography>
@@ -164,7 +200,7 @@ function Achievement() {
                         </div>
                     </div>
 
-                    <div className={styles.enemyStats}>
+                    <div className={styles.achievementStats}>
                         <div className={styles.statRow}>
                             <span className={styles.statLabel}>❤️ HP:</span>
                             <span className={styles.statValue}>
@@ -187,9 +223,9 @@ function Achievement() {
 
                     {nextAchievement && (
                         <div className={styles.nextAchievement}>
-                                                    <Typography variant="caption" className={styles.nextAchievementText}>
-                            {t('achievements.next')}: {nextAchievement.kills} {t('achievements.kills')}
-                        </Typography>
+                            <Typography variant="caption" className={styles.nextAchievementText}>
+                                {t('achievements.next')}: {nextAchievement.kills} {t('achievements.kills')}
+                            </Typography>
                             <LinearProgress 
                                 variant="determinate" 
                                 value={(data.currentKills / nextAchievement.kills) * 100}
@@ -213,100 +249,181 @@ function Achievement() {
         );
     };
 
+    const { unlocked, total } = getTotalUnlockedAchievements();
+    const totalProgress = calculateTotalProgress();
+
     return (
         <div className={styles.achievementContainer}>
+            {/* Animated Background */}
+            <div className={styles.backgroundAnimation}>
+                <div className={styles.floatingParticles}>
+                    {[...Array(20)].map((_, i) => (
+                        <div
+                            key={i}
+                            className={styles.particle}
+                            style={{
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 100}%`,
+                                animationDelay: `${Math.random() * 3}s`,
+                                animationDuration: `${3 + Math.random() * 2}s`
+                            }}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Header Section */}
             <div className={styles.header}>
-                <Typography variant="h4" className={styles.title}>
-                    🏆 {t('achievements.title')}
-                </Typography>
-                <Typography variant="h6" className={styles.subtitle}>
-                    {t('achievements.subtitle')}
-                </Typography>
-                
-                <Box className={styles.totalStats}>
-                    <Paper className={styles.totalKillsCard}>
-                                            <Typography variant="h5" className={styles.totalKillsTitle}>
-                        {t('achievements.totalKills')}
-                    </Typography>
-                        <Typography variant="h3" className={styles.totalKillsValue}>
-                            {totalKills}
+                <div className={styles.headerContent}>
+                    <div className={styles.titleSection}>
+                        <Typography variant="h4" className={styles.pixelTitle}>
+                            🏆 {t('achievements.title')}
                         </Typography>
-                    </Paper>
-                </Box>
-            </div>
-
-            <div className={styles.enemyGrid}>
-                {Object.keys(enemies).map(enemyKey => {
-                    const enemyId = enemyKey.toLowerCase();
-                    const enemy = enemies[enemyKey];
-                    const data = achievementsData[enemyId];
+                        <Typography variant="h6" className={styles.subtitle}>
+                            {t('achievements.subtitle')}
+                        </Typography>
+                    </div>
                     
-                    if (!data) return null;
-                    
-                    return (
-                        <div key={enemyId} className={styles.enemyGridItem}>
-                            <EnemyWidget 
-                                enemyId={enemyId}
-                                enemy={enemy}
-                                data={data}
-                            />
+                    <div className={styles.powerSection}>
+                        <div className={styles.powerBadge}>
+                            <TrendingUp className={styles.powerIcon} />
+                            <div className={styles.powerInfo}>
+                                <Typography variant="h3" className={styles.powerLevel}>
+                                    {totalKills}
+                                </Typography>
+                                <Typography variant="body2" className={styles.powerLabel}>
+                                    {t('achievements.totalKills')}
+                                </Typography>
+                            </div>
                         </div>
-                    );
-                })}
+                        
+                        <div className={styles.powerBadge}>
+                            <EmojiEvents className={styles.powerIcon} />
+                            <div className={styles.powerInfo}>
+                                <Typography variant="h3" className={styles.powerLevel}>
+                                    {unlocked}/{total}
+                                </Typography>
+                                <Typography variant="body2" className={styles.powerLabel}>
+                                    {t('achievements.achievements')}
+                                </Typography>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Achievement Details Dialog */}
+            {/* Main Content Layout */}
+            <div className={styles.mainContent}>
+                {/* Character/Achievement Overview Section */}
+                <div className={styles.characterSection}>
+                    <div className={styles.characterCard}>
+                        <div className={styles.characterHeader}>
+                            <Person className={styles.characterIcon} />
+                            <Typography variant="h5" className={styles.characterTitle}>
+                                {t('achievements.progress')}
+                            </Typography>
+                        </div>
+                        
+                        <div className={styles.overallProgressSection}>
+                            <div className={styles.progressInfo}>
+                                <Typography variant="h6" className={styles.progressTitle}>
+                                    {t('achievements.overallProgress')}
+                                </Typography>
+                                <Typography variant="h4" className={styles.progressValue}>
+                                    {Math.round(totalProgress)}%
+                                </Typography>
+                            </div>
+                            
+                            <LinearProgress 
+                                variant="determinate" 
+                                value={totalProgress}
+                                className={styles.overallProgressBar}
+                            />
+                            
+                            <div className={styles.progressStats}>
+                                <div className={styles.statItem}>
+                                    <Typography variant="body2" className={styles.statLabel}>
+                                        {t('achievements.unlocked')}
+                                    </Typography>
+                                    <Typography variant="h6" className={styles.statValue}>
+                                        {unlocked}
+                                    </Typography>
+                                </div>
+                                <div className={styles.statItem}>
+                                    <Typography variant="body2" className={styles.statLabel}>
+                                        {t('achievements.total')}
+                                    </Typography>
+                                    <Typography variant="h6" className={styles.statValue}>
+                                        {total}
+                                    </Typography>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Achievements List Section */}
+                <div className={styles.achievementsSection}>
+                    <div className={styles.achievementsHeader}>
+                        <Typography variant="h5" className={styles.achievementsTitle}>
+                            {t('achievements.enemyAchievements')}
+                        </Typography>
+                    </div>
+                    
+                    <div className={styles.achievementsGrid}>
+                        {Object.keys(enemies).map(enemyKey => {
+                            const enemyId = enemyKey.toLowerCase();
+                            const enemy = enemies[enemyKey];
+                            const data = achievementsData[enemyId];
+                            
+                            if (!data) return null;
+                            
+                            return (
+                                <div key={enemyId} className={styles.achievementGridItem}>
+                                    <EnemyWidget 
+                                        enemyId={enemyId}
+                                        enemy={enemy}
+                                        data={data}
+                                    />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* Achievement Detail Dialog */}
             <Dialog 
                 open={achievementDialog.open} 
                 onClose={handleCloseDialog}
                 maxWidth="md"
                 fullWidth
+                className={styles.achievementDialog}
             >
                 <DialogTitle className={styles.dialogTitle}>
-                    <div className={styles.dialogHeader}>
-                        <Avatar 
-                            src={getEnemyIcon(achievementDialog.enemy?.id)} 
-                            className={styles.dialogAvatar}
-                        />
-                        <Typography variant="h6">
-                            {achievementDialog.enemy?.name} {t('achievements.achievements')}
-                        </Typography>
-                    </div>
+                    {achievementDialog.enemy?.name} - {t('achievements.achievements')}
                 </DialogTitle>
-                
                 <DialogContent className={styles.dialogContent}>
-                    {achievementDialog.achievements.length > 0 ? (
-                        <div className={styles.achievementsList}>
-                            {achievementDialog.achievements.map((achievement, index) => (
-                                <Paper key={index} className={styles.achievementItem}>
-                                    <div className={styles.achievementHeader}>
-                                        <span className={styles.achievementIcon}>
-                                            {getAchievementIcon(achievement.reward)}
-                                        </span>
-                                        <Typography variant="h6" className={styles.achievementTitle}>
-                                            {achievement.description}
-                                        </Typography>
-                                        <Chip 
-                                            label={`${achievement.killThreshold} kills`}
-                                            size="small"
-                                            color="primary"
-                                        />
-                                    </div>
-                                    <Typography variant="body2" className={styles.achievementDescription}>
-                                        Unlocked at {new Date(achievement.unlockedAt).toLocaleDateString()}
+                    <div className={styles.achievementsList}>
+                        {achievementDialog.achievements.map((achievement, index) => (
+                            <div key={index} className={styles.achievementItem}>
+                                <div className={styles.achievementIcon}>
+                                    {getAchievementIcon(achievement.reward)}
+                                </div>
+                                <div className={styles.achievementDetails}>
+                                    <Typography variant="h6" className={styles.achievementName}>
+                                        {achievement.name}
                                     </Typography>
-                                </Paper>
-                            ))}
-                        </div>
-                    ) : (
-                        <Typography variant="body1" className={styles.noAchievements}>
-                            {t('achievements.noAchievements')}
-                        </Typography>
-                    )}
+                                    <Typography variant="body2" className={styles.achievementDescription}>
+                                        {achievement.description}
+                                    </Typography>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </DialogContent>
-                
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="primary">
+                <DialogActions className={styles.dialogActions}>
+                    <Button onClick={handleCloseDialog} className={styles.closeButton}>
                         {t('common.close')}
                     </Button>
                 </DialogActions>

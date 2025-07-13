@@ -218,6 +218,11 @@
         "unlockHp": "生命值已显示",
         "unlockAtk": "攻击力已显示",
         "unlockDef": "防御力已显示",
-        "unlockAll": "所有属性已显示"
+        "unlockAll": "所有属性已显示",
+        "progress": "进度",
+        "overallProgress": "总体进度",
+        "unlocked": "已解锁",
+        "total": "总计",
+        "enemyAchievements": "敌人成就"
     }
 } 

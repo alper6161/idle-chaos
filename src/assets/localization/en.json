@@ -221,6 +221,11 @@
         "unlockHp": "HP revealed",
         "unlockAtk": "ATK revealed",
         "unlockDef": "DEF revealed",
-        "unlockAll": "All stats revealed"
+        "unlockAll": "All stats revealed",
+        "progress": "Progress",
+        "overallProgress": "Overall Progress",
+        "unlocked": "Unlocked",
+        "total": "Total",
+        "enemyAchievements": "Enemy Achievements"
     }
 } 

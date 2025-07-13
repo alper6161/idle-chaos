@@ -221,6 +221,11 @@
         "unlockHp": "Can açıldı",
         "unlockAtk": "Saldırı açıldı",
         "unlockDef": "Savunma açıldı",
-        "unlockAll": "Tüm istatistikler açıldı"
+        "unlockAll": "Tüm istatistikler açıldı",
+        "progress": "İlerleme",
+        "overallProgress": "Genel İlerleme",
+        "unlocked": "Açılan",
+        "total": "Toplam",
+        "enemyAchievements": "Düşman Başarıları"
     }
 } 

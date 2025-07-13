@@ -27,695 +27,895 @@
 }
 
 .achievementContainer {
-    min-height: calc(100vh - 40px);
-    width: 100%;
-    background: transparent;
-    color: var(--text-primary);
-    font-family: 'Rajdhani', sans-serif;
-    position: relative;
-    overflow-x: hidden;
-    padding: 20px;
+  min-height: calc(100vh - 40px);
+  width: 100%;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: 'Rajdhani', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+  padding: 20px;
+  box-sizing: border-box;
+  
+  // Ensure no white backgrounds leak through
+  * {
     box-sizing: border-box;
-    
-    // Ensure no white backgrounds leak through
-    * {
-      box-sizing: border-box;
-    }
-    
-    // Override any Material-UI white backgrounds
-    .MuiPaper-root {
-      background: transparent !important;
-    }
-    
-    .MuiDialog-paper {
-      background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%) !important;
-    }
+  }
+  
+  // Override any Material-UI white backgrounds
+  .MuiPaper-root {
+    background: transparent !important;
+  }
+  
+  .MuiDialog-paper {
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%) !important;
+  }
+  
+  // Override Material-UI Card components
+  .MuiCard-root {
+    background: transparent !important;
+  }
+  
+  .MuiCardContent-root {
+    background: transparent !important;
+  }
+  
+  // Override any other Material-UI components that might have white backgrounds
+  .MuiChip-root {
+    background: linear-gradient(135deg, 
+      rgba(26, 26, 46, 0.9) 0%, 
+      rgba(22, 33, 62, 0.8) 50%, 
+      rgba(15, 52, 96, 0.7) 100%
+    ) !important;
+  }
+  
+  .MuiAvatar-root {
+    background: transparent !important;
+  }
+  
+  .MuiTypography-root {
+    color: var(--text-primary) !important;
+  }
+}
+
+// Animated Background
+.backgroundAnimation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  background: transparent;
+  
+  // Add subtle overlay pattern that doesn't interfere with main layout
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.01) 1px, transparent 1px),
+      radial-gradient(circle at 75% 75%, rgba(255, 215, 0, 0.005) 1px, transparent 1px);
+    background-size: 50px 50px, 100px 100px;
+  }
+}
+
+.floatingParticles {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: float 3s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--gold);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+  50% { transform: translateY(-20px) rotate(180deg); opacity: 0.7; }
 }
 
 // Header Section
 .header {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 30px;
-    padding: 20px;
-    background: linear-gradient(135deg, 
-      rgba(26, 26, 46, 0.95) 0%, 
-      rgba(22, 33, 62, 0.90) 50%, 
-      rgba(15, 52, 96, 0.85) 100%
-    );
-    border-radius: 15px;
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(255, 215, 0, 0.3);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.5),
-      0 0 40px rgba(255, 215, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    text-align: center;
-    
-    .title {
-        font-family: 'Orbitron', monospace !important;
-        font-size: 2rem !important;
-        font-weight: 700 !important;
-        color: var(--gold) !important;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        margin: 0 0 10px 0 !important;
-        text-shadow: 
-          2px 2px 0px #000,
-          0 0 20px rgba(255, 215, 0, 0.8);
-        animation: titleGlow 3s ease-in-out infinite alternate;
-    }
-    
-    .subtitle {
-        font-size: 1.1rem !important;
-        color: var(--text-secondary) !important;
-        margin: 0 0 20px 0 !important;
-        font-weight: 400 !important;
-        letter-spacing: 1px;
-        text-shadow: 0 0 10px rgba(160, 174, 192, 0.3);
-    }
+  position: relative;
+  z-index: 1;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: linear-gradient(135deg, 
+    rgba(26, 26, 46, 0.95) 0%, 
+    rgba(22, 33, 62, 0.90) 50%, 
+    rgba(15, 52, 96, 0.85) 100%
+  );
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(255, 215, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-@keyframes titleGlow {
-    0% { 
-        text-shadow: 
-          2px 2px 0px #000,
-          0 0 20px rgba(255, 215, 0, 0.8);
-    }
-    100% { 
-        text-shadow: 
-          2px 2px 0px #000,
-          0 0 30px rgba(255, 215, 0, 1),
-          0 0 40px rgba(255, 215, 0, 0.6);
-    }
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-.totalStats {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
-    
-    .totalKillsCard {
-        background: linear-gradient(135deg, 
-          rgba(26, 26, 46, 0.9) 0%, 
-          rgba(255, 107, 53, 0.1) 50%, 
-          rgba(26, 26, 46, 0.9) 100%
-        );
-        backdrop-filter: blur(20px);
-        border: 2px solid var(--legendary);
-        padding: 25px 40px;
-        border-radius: 20px;
-        text-align: center;
-        min-width: 250px;
-        box-shadow: 
-          0 0 20px rgba(255, 107, 53, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        animation: powerPulse 3s ease-in-out infinite;
-        
-        .totalKillsTitle {
-            font-family: 'Orbitron', monospace !important;
-            font-size: 1rem !important;
-            color: var(--text-primary) !important;
-            margin-bottom: 10px !important;
-            font-weight: 600 !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-        }
-        
-        .totalKillsValue {
-            font-family: 'Orbitron', monospace !important;
-            font-size: 3rem !important;
-            font-weight: 900 !important;
-            color: var(--legendary) !important;
-            text-shadow: 
-              2px 2px 0px #000,
-              0 0 20px rgba(255, 107, 53, 0.8);
-            margin: 0 !important;
-        }
-    }
+.titleSection {
+  flex: 1;
+}
+
+.pixelTitle {
+  font-size: 1.5rem !important;
+  font-weight: normal !important;
+  color: #e0e0e0 !important;
+  text-shadow: 
+    2px 2px 0px #000,
+    0 0 20px rgba(224, 224, 224, 0.8);
+  margin: 0 !important;
+  letter-spacing: 0px;
+  text-align: center;
+  animation: simpleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes simpleGlow {
+  0% { 
+    text-shadow: 
+      2px 2px 0px #000,
+      0 0 20px rgba(224, 224, 224, 0.8);
+  }
+  100% { 
+    text-shadow: 
+      2px 2px 0px #000,
+      0 0 30px rgba(224, 224, 224, 1),
+      0 0 40px rgba(224, 224, 224, 0.6);
+  }
+}
+
+.subtitle {
+  font-size: 1.2rem !important;
+  color: var(--text-secondary) !important;
+  margin: 5px 0 0 0 !important;
+  font-weight: 300 !important;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(160, 174, 192, 0.3);
+}
+
+.powerSection {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.powerBadge {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 18px 30px;
+  background: linear-gradient(135deg, 
+    rgba(26, 26, 46, 0.9) 0%, 
+    rgba(22, 33, 62, 0.8) 50%, 
+    rgba(255, 107, 53, 0.1) 100%
+  );
+  border-radius: 50px;
+  border: 2px solid var(--legendary);
+  box-shadow: 
+    0 0 20px rgba(255, 107, 53, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: powerPulse 3s ease-in-out infinite;
 }
 
 @keyframes powerPulse {
-    0%, 100% { 
-        box-shadow: 
-          0 0 20px rgba(255, 107, 53, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1); 
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1); }
+  50% { box-shadow: 0 0 30px rgba(255, 107, 53, 0.5), 0 0 40px rgba(255, 107, 53, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2); }
+}
+
+.powerIcon {
+  color: var(--legendary) !important;
+  font-size: 2rem !important;
+  animation: iconSpin 4s linear infinite;
+  filter: drop-shadow(0 0 10px var(--legendary));
+}
+
+@keyframes iconSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.powerInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.powerLevel {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  color: var(--legendary) !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+}
+
+.powerLabel {
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  margin: 0 !important;
+  font-weight: 300 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+// Main Content Layout
+.mainContent {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+// Character Section
+.characterSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.characterCard {
+  background: linear-gradient(135deg, 
+    rgba(26, 26, 46, 0.9) 0%, 
+    rgba(22, 33, 62, 0.8) 50%, 
+    rgba(15, 52, 96, 0.7) 100%
+  );
+  backdrop-filter: blur(20px);
+  border: 2px solid var(--border-primary);
+  border-radius: 20px;
+  padding: 25px;
+  height: 100%;
+  box-shadow: 
+    0 5px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+}
+
+.characterHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  position: relative;
+  z-index: 1;
+}
+
+.characterIcon {
+  color: var(--gold) !important;
+  font-size: 2rem !important;
+  filter: drop-shadow(0 0 10px var(--gold));
+}
+
+.characterTitle {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.overallProgressSection {
+  position: relative;
+  z-index: 1;
+}
+
+.progressInfo {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.progressTitle {
+  font-size: 1.1rem !important;
+  color: var(--text-secondary) !important;
+  margin: 0 0 10px 0 !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.progressValue {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 3rem !important;
+  font-weight: 700 !important;
+  color: var(--gold) !important;
+  margin: 0 !important;
+  text-shadow: 
+    2px 2px 0px #000,
+    0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+.overallProgressBar {
+  margin: 20px 0 !important;
+  height: 12px !important;
+  border-radius: 6px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  
+  .MuiLinearProgress-bar {
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+  }
+}
+
+.progressStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 25px;
+}
+
+.statItem {
+  text-align: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statLabel {
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  margin: 0 0 5px 0 !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+// Achievements Section
+.achievementsSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.achievementsHeader {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.achievementsTitle {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.achievementsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 10px;
+  
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+    
+    &:hover {
+      background: var(--gold-light);
     }
-    50% { 
-        box-shadow: 
-          0 0 30px rgba(255, 107, 53, 0.5),
-          0 0 40px rgba(255, 107, 53, 0.2),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2); 
-    }
+  }
 }
 
-.enemyGrid {
-    margin-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-    gap: 25px;
-    max-width: 1400px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 20px;
-    align-items: stretch;
-}
-
-.enemyGridItem {
-    display: flex;
-    height: 100%;
-    min-height: 100%;
-}
-
-.enemyWidget {
+.achievementGridItem {
+  display: flex;
+  height: 100%;
+  min-height: 100%;
+  
+  // Override any Material-UI Card within grid items
+  .MuiCard-root {
     background: linear-gradient(135deg, 
       rgba(26, 26, 46, 0.9) 0%, 
       rgba(22, 33, 62, 0.8) 50%, 
       rgba(15, 52, 96, 0.7) 100%
-    );
-    backdrop-filter: blur(20px);
-    border: 2px solid var(--border-primary);
-    border-radius: 20px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    height: 100%;
-    position: relative;
-    overflow: hidden;
+    ) !important;
+    border: 2px solid var(--border-primary) !important;
+    border-radius: 20px !important;
     box-shadow: 
       0 5px 20px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .MuiCardContent-root {
+    background: transparent !important;
+    padding: 25px !important;
+  }
+}
+
+.achievementCard {
+  background: linear-gradient(135deg, 
+    rgba(26, 26, 46, 0.9) 0%, 
+    rgba(22, 33, 62, 0.8) 50%, 
+    rgba(15, 52, 96, 0.7) 100%
+  ) !important;
+  backdrop-filter: blur(20px);
+  border: 2px solid var(--border-primary);
+  border-radius: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 5px 20px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  
+  // Override Material-UI Card background
+  &.MuiCard-root {
+    background: linear-gradient(135deg, 
+      rgba(26, 26, 46, 0.9) 0%, 
+      rgba(22, 33, 62, 0.8) 50%, 
+      rgba(15, 52, 96, 0.7) 100%
+    ) !important;
+  }
+  
+  // Override any Material-UI Card styles
+  &[class*="MuiCard"] {
+    background: linear-gradient(135deg, 
+      rgba(26, 26, 46, 0.9) 0%, 
+      rgba(22, 33, 62, 0.8) 50%, 
+      rgba(15, 52, 96, 0.7) 100%
+    ) !important;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  &:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+      0 15px 40px rgba(0, 0, 0, 0.6),
+      0 0 30px rgba(255, 215, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-color: var(--gold);
+  }
+  
+  .achievementCardContent {
+    padding: 25px;
+    height: 100%;
     display: flex;
     flex-direction: column;
+    position: relative;
+    z-index: 1;
     flex: 1;
     
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-        animation: shimmer 3s ease-in-out infinite;
-        pointer-events: none;
+    // Override Material-UI CardContent background
+    &.MuiCardContent-root {
+      background: transparent !important;
     }
-    
-    &:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 
-          0 15px 40px rgba(0, 0, 0, 0.6),
-          0 0 30px rgba(255, 215, 0, 0.2),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        border-color: var(--gold);
-    }
-    
-    .enemyWidgetContent {
-        padding: 25px;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        position: relative;
-        z-index: 1;
-        flex: 1;
-    }
+  }
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-.enemyHeader {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    gap: 15px;
-    
-    .enemyAvatar {
-        width: 60px;
-        height: 60px;
-        border: 3px solid var(--gold);
-        border-radius: 50%;
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        transition: all 0.3s ease;
-        
-        &:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-        }
-    }
-    
-    .enemyAvatarFallback {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
-        border: 3px solid var(--gold);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: 1.5rem;
-        color: var(--gold);
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-    }
-    
-    .enemyInfo {
-        flex: 1;
-        
-        .enemyName {
-            font-family: 'Orbitron', monospace !important;
-            font-size: 1.3rem !important;
-            font-weight: 700 !important;
-            color: var(--text-primary) !important;
-            margin-bottom: 5px !important;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .killCount {
-            font-size: 1rem !important;
-            color: var(--text-secondary) !important;
-            font-weight: 500 !important;
-            text-shadow: 0 0 5px rgba(160, 174, 192, 0.3);
-        }
-    }
-    
-    .achievementBadge {
-        .MuiChip-root {
-            background: linear-gradient(135deg, 
-              rgba(26, 26, 46, 0.9) 0%, 
-              rgba(255, 215, 0, 0.1) 50%, 
-              rgba(26, 26, 46, 0.9) 100%
-            ) !important;
-            color: var(--gold) !important;
-            border: 2px solid var(--gold) !important;
-            font-weight: 600 !important;
-            font-size: 0.8rem !important;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
-            transition: all 0.3s ease;
-            
-            &:hover {
-                transform: scale(1.05);
-                box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-            }
-            
-            &.MuiChip-colorSuccess {
-                background: linear-gradient(135deg, 
-                  rgba(26, 26, 46, 0.9) 0%, 
-                  rgba(72, 187, 120, 0.2) 50%, 
-                  rgba(26, 26, 46, 0.9) 100%
-                ) !important;
-                border-color: var(--success) !important;
-                color: var(--success) !important;
-                box-shadow: 0 0 15px rgba(72, 187, 120, 0.3);
-            }
-        }
-    }
+.achievementHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
 }
 
-.enemyStats {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: linear-gradient(135deg, 
-      rgba(26, 26, 46, 0.6) 0%, 
-      rgba(22, 33, 62, 0.5) 100%
-    );
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    
-    .statRow {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-        padding: 8px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        
-        &:last-child {
-            margin-bottom: 0;
-            border-bottom: none;
-        }
-        
-        .statLabel {
-            color: var(--text-secondary) !important;
-            font-weight: 600 !important;
-            font-size: 0.9rem !important;
-            text-shadow: 0 0 5px rgba(160, 174, 192, 0.3);
-        }
-        
-        .statValue {
-            color: var(--text-primary) !important;
-            font-weight: 700 !important;
-            font-size: 1.1rem !important;
-            font-family: 'Orbitron', monospace !important;
-            text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
-        }
-    }
+.enemyAvatar {
+  width: 50px !important;
+  height: 50px !important;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.enemyAvatarFallback {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--legendary) 0%, var(--epic) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: white;
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.achievementInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.enemyName {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.killCount {
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  margin: 0 !important;
+  font-weight: 400 !important;
+}
+
+.achievementBadge {
+  position: relative;
+  z-index: 1;
+}
+
+.achievementStats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statLabel {
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  font-weight: 400 !important;
+}
+
+.statValue {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 .nextAchievement {
-    margin-bottom: 20px;
-    padding: 15px;
-    background: linear-gradient(135deg, 
-      rgba(26, 26, 46, 0.7) 0%, 
-      rgba(78, 205, 196, 0.1) 50%, 
-      rgba(26, 26, 46, 0.7) 100%
-    );
-    border-radius: 12px;
-    border: 1px solid rgba(78, 205, 196, 0.3);
-    
-    .nextAchievementText {
-        color: var(--text-primary) !important;
-        display: block;
-        margin-bottom: 10px !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        text-shadow: 0 0 5px rgba(78, 205, 196, 0.3);
-        text-align: center;
-    }
-    
-    .progressBar {
-        height: 8px !important;
-        border-radius: 4px !important;
-        background: rgba(0, 0, 0, 0.3) !important;
-        
-        .MuiLinearProgress-bar {
-            background: linear-gradient(90deg, #4ecdc4, #44a08d) !important;
-            box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-        }
-    }
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.nextAchievementText {
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+  margin: 0 0 8px 0 !important;
+  font-weight: 400 !important;
+  text-align: center;
+}
+
+.progressBar {
+  height: 8px !important;
+  border-radius: 4px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  
+  .MuiLinearProgress-bar {
+    background: linear-gradient(90deg, var(--info) 0%, var(--success) 100%) !important;
+    border-radius: 4px !important;
+    box-shadow: 0 0 8px rgba(66, 153, 225, 0.5) !important;
+  }
 }
 
 .achievementProgress {
-    margin-top: auto;
-    padding: 15px;
-    background: linear-gradient(135deg, 
-      rgba(26, 26, 46, 0.7) 0%, 
-      rgba(255, 217, 61, 0.1) 50%, 
-      rgba(26, 26, 46, 0.7) 100%
-    );
-    border-radius: 12px;
-    border: 1px solid rgba(255, 217, 61, 0.3);
-    
-    .overallProgress {
-        height: 10px !important;
-        border-radius: 5px !important;
-        margin-bottom: 10px !important;
-        background: rgba(0, 0, 0, 0.3) !important;
-        
-        .MuiLinearProgress-bar {
-            background: linear-gradient(90deg, #ffd93d, #ffb347) !important;
-            box-shadow: 0 0 15px rgba(255, 217, 61, 0.5);
-        }
-    }
-    
-    .progressText {
-        color: var(--text-primary) !important;
-        text-align: center;
-        display: block;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        text-shadow: 0 0 5px rgba(255, 217, 61, 0.3);
-    }
+  margin-top: auto;
+  position: relative;
+  z-index: 1;
 }
 
-// Enhanced Dialog Styles
+.overallProgress {
+  height: 10px !important;
+  border-radius: 5px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  margin-bottom: 8px !important;
+  
+  .MuiLinearProgress-bar {
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 100%) !important;
+    border-radius: 5px !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+  }
+}
+
+.progressText {
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+  text-align: center !important;
+  margin: 0 !important;
+  font-weight: 400 !important;
+}
+
+// Dialog Styles
+.achievementDialog {
+  .MuiDialog-paper {
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%) !important;
+    border: 2px solid var(--gold);
+    border-radius: 20px;
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.8),
+      0 0 40px rgba(255, 215, 0, 0.2);
+  }
+}
+
 .dialogTitle {
-    background: linear-gradient(135deg, 
-      var(--primary-bg) 0%, 
-      var(--secondary-bg) 100%
-    ) !important;
-    border-bottom: 2px solid var(--gold);
-    padding: 20px 30px !important;
-    
-    .dialogHeader {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        
-        .dialogAvatar {
-            width: 50px;
-            height: 50px;
-            border: 3px solid var(--gold);
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-        
-        h6 {
-            font-family: 'Orbitron', monospace !important;
-            font-size: 1.5rem !important;
-            font-weight: 700 !important;
-            color: var(--gold) !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin: 0 !important;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-        }
-    }
+  font-family: 'Orbitron', monospace !important;
+  font-size: 1.3rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  text-align: center !important;
+  margin: 0 !important;
+  padding: 25px 25px 15px 25px !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .dialogContent {
-    padding: 30px !important;
-    max-height: 500px;
-    overflow-y: auto;
-    background: linear-gradient(135deg, 
-      rgba(26, 26, 46, 0.95) 0%, 
-      rgba(22, 33, 62, 0.90) 100%
-    ) !important;
+  padding: 0 25px 25px 25px !important;
 }
 
 .achievementsList {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .achievementItem {
-    background: linear-gradient(135deg, 
-      rgba(26, 26, 46, 0.9) 0%, 
-      rgba(22, 33, 62, 0.8) 50%, 
-      rgba(15, 52, 96, 0.7) 100%
-    );
-    border: 2px solid var(--border-primary);
-    border-radius: 15px;
-    padding: 20px;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-      0 5px 20px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-        animation: shimmer 3s ease-in-out infinite;
-        pointer-events: none;
-    }
-    
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 
-          0 8px 25px rgba(0, 0, 0, 0.5),
-          0 0 20px rgba(255, 215, 0, 0.2);
-        border-color: var(--gold);
-    }
-    
-    .achievementHeader {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 10px;
-        position: relative;
-        z-index: 1;
-        
-        .achievementIcon {
-            font-size: 2rem;
-            filter: drop-shadow(0 0 5px currentColor);
-        }
-        
-        .achievementTitle {
-            flex: 1;
-            font-family: 'Orbitron', monospace !important;
-            font-size: 1.1rem !important;
-            font-weight: 700 !important;
-            color: var(--text-primary) !important;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-        
-        .MuiChip-root {
-            background: linear-gradient(135deg, 
-              rgba(26, 26, 46, 0.9) 0%, 
-              rgba(67, 131, 240, 0.2) 50%, 
-              rgba(26, 26, 46, 0.9) 100%
-            ) !important;
-            color: var(--info) !important;
-            border: 2px solid var(--info) !important;
-            font-weight: 600 !important;
-            font-size: 0.8rem !important;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 10px rgba(67, 131, 240, 0.3);
-        }
-    }
-    
-    .achievementDescription {
-        color: var(--text-secondary) !important;
-        font-style: italic;
-        font-size: 0.9rem !important;
-        text-shadow: 0 0 5px rgba(160, 174, 192, 0.3);
-        position: relative;
-        z-index: 1;
-    }
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--gold);
+    transform: translateX(5px);
+  }
 }
 
-.noAchievements {
-    text-align: center;
-    color: var(--text-muted) !important;
-    font-style: italic;
-    padding: 40px 20px;
-    font-size: 1.1rem !important;
-    text-shadow: 0 0 5px rgba(113, 128, 150, 0.3);
+.achievementIcon {
+  font-size: 2rem;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+}
+
+.achievementDetails {
+  flex: 1;
+}
+
+.achievementName {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  margin: 0 0 5px 0 !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.achievementDescription {
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  margin: 0 !important;
+  font-weight: 400 !important;
+  line-height: 1.4;
+}
+
+.dialogActions {
+  padding: 15px 25px 25px 25px !important;
+  justify-content: center !important;
+}
+
+.closeButton {
+  background: linear-gradient(135deg, var(--legendary) 0%, var(--epic) 100%) !important;
+  color: white !important;
+  font-family: 'Orbitron', monospace !important;
+  font-weight: 600 !important;
+  padding: 12px 30px !important;
+  border-radius: 25px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  border: 2px solid var(--gold) !important;
+  box-shadow: 
+    0 5px 15px rgba(255, 107, 53, 0.3),
+    0 0 20px rgba(255, 215, 0, 0.2) !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 8px 25px rgba(255, 107, 53, 0.5),
+      0 0 30px rgba(255, 215, 0, 0.4) !important;
+  }
 }
 
 // Responsive Design
 @media (max-width: 1200px) {
-    .enemyGrid {
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-        gap: 20px;
-        align-items: stretch;
-    }
+  .mainContent {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .characterCard {
+    height: auto;
+    min-height: 300px;
+  }
+  
+  .achievementsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
 }
 
 @media (max-width: 768px) {
-    .achievementContainer {
-        padding: 15px;
-    }
-    
-    .enemyGrid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 15px;
-        padding: 0 10px;
-        align-items: stretch;
-    }
-    
-    .enemyWidget {
-        .enemyWidgetContent {
-            padding: 20px;
-        }
-    }
-    
-    .enemyHeader {
-        .enemyAvatar {
-            width: 50px;
-            height: 50px;
-        }
-        
-        .enemyAvatarFallback {
-            width: 50px;
-            height: 50px;
-            font-size: 1.2rem;
-        }
-        
-        .enemyName {
-            font-size: 1.1rem !important;
-        }
-    }
-    
-    .enemyStats {
-        .statRow {
-            .statValue {
-                font-size: 1rem;
-            }
-        }
-    }
-    
-    .header {
-        .title {
-            font-size: 1.5rem !important;
-        }
-        
-        .subtitle {
-            font-size: 1rem !important;
-        }
-    }
-    
-    .totalStats {
-        .totalKillsCard {
-            padding: 20px 30px;
-            min-width: 200px;
-            
-            .totalKillsValue {
-                font-size: 2.5rem !important;
-            }
-        }
-    }
+  .headerContent {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .powerSection {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .powerBadge {
+    padding: 15px 25px;
+  }
+  
+  .achievementsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .characterCard {
+    padding: 20px;
+  }
+  
+  .progressStats {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
 }
 
 @media (max-width: 480px) {
-    .achievementContainer {
-        padding: 10px;
+  .achievementContainer {
+    padding: 15px;
+  }
+  
+  .header {
+    padding: 15px;
+  }
+  
+  .powerBadge {
+    padding: 12px 20px;
+  }
+  
+  .powerLevel {
+    font-size: 1.5rem !important;
+  }
+  
+  .characterCard {
+    padding: 15px;
+  }
+  
+  .achievementCard {
+    .achievementCardContent {
+      padding: 20px;
     }
-    
-    .enemyGrid {
-        grid-template-columns: 1fr;
-        gap: 15px;
-        padding: 0 5px;
-        align-items: stretch;
-    }
-    
-    .enemyWidget {
-        .enemyWidgetContent {
-            padding: 15px;
-        }
-    }
-    
-    .enemyHeader {
-        .enemyAvatar {
-            width: 45px;
-            height: 45px;
-        }
-        
-        .enemyAvatarFallback {
-            width: 45px;
-            height: 45px;
-            font-size: 1.1rem;
-        }
-        
-        .enemyName {
-            font-size: 1rem !important;
-        }
-    }
-    
-    .header {
-        .title {
-            font-size: 1.3rem !important;
-        }
-        
-        .subtitle {
-            font-size: 0.9rem !important;
-        }
-    }
-    
-    .totalStats {
-        .totalKillsCard {
-            padding: 15px 25px;
-            min-width: 180px;
-            
-            .totalKillsValue {
-                font-size: 2rem !important;
-            }
-        }
-    }
+  }
+}
+
+// Global Material-UI Overrides for Achievement Page
+.achievementContainer {
+  // Force dark backgrounds on all Material-UI components
+  .MuiCard-root,
+  .MuiPaper-root,
+  .MuiChip-root,
+  .MuiAvatar-root,
+  .MuiDialog-paper {
+    background: linear-gradient(135deg, 
+      rgba(26, 26, 46, 0.9) 0%, 
+      rgba(22, 33, 62, 0.8) 50%, 
+      rgba(15, 52, 96, 0.7) 100%
+    ) !important;
+  }
+  
+  // Ensure CardContent is transparent
+  .MuiCardContent-root {
+    background: transparent !important;
+  }
+  
+  // Override any white text colors
+  .MuiTypography-root {
+    color: var(--text-primary) !important;
+  }
+  
+  // Override any white borders
+  .MuiCard-root,
+  .MuiPaper-root {
+    border-color: var(--border-primary) !important;
+  }
 } 
