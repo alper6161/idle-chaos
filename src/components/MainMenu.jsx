@@ -33,6 +33,18 @@ function MainMenu() {
                     </NavLink>
                 </div>
 
+                            {/* Skills Section */}
+                <div className={styles.group}>
+                    <div className={styles.groupTitle}>{t('skills.title')}</div>
+                    <NavLink
+                        to="/skills"
+                        className={styles.skillsItem}
+                    >
+                        <span className={styles.skillsIcon}>🎯</span>
+                        <span className={styles.skillsLabel}>{t('skills.title')}</span>
+                    </NavLink>
+                </div>
+
                             {/* Battle Section */}
                 <div className={styles.group}>
                     <div className={styles.groupTitle}>{t('common.battle').toUpperCase()}</div>
@@ -53,7 +65,7 @@ function MainMenu() {
                         Object.entries(subskills).map(([skill, level]) => (
                             <NavLink
                                 key={skill}
-                                to={`/skills/${skill}`}
+                                to="/skills"
                                 className={styles.skillItem}
                             >
                                 <img src={getSkillIcon(skill)} alt={skill} />

@@ -26,7 +26,7 @@
     "confirm": "确认",
     "backToHome": "返回主页",
     "battle": "战斗",
-    "profile": "档案",
+    "skills": "技能",
     "equipment": "装备",
     "settings": "设置",
     "store": "商店",
@@ -102,6 +102,16 @@
     "amulet": "护符"
   },
   "skills": {
+    "title": "技能",
+    "passiveBuffs": "被动增益",
+    "maxedSkills": "满级技能",
+    "completeSkillsToUnlock": "完成技能以解锁被动增益",
+    "level": "等级",
+    "currentXp": "当前经验",
+    "xpToNext": "升级所需经验",
+    "availableBuffs": "可用增益：",
+    "close": "关闭",
+    "skillDetails": "技能详情",
     "melee": "近战",
     "ranged": "远程",
     "magic": "魔法",
@@ -182,18 +192,18 @@
     "cancel": "取消",
     "for": "为"
   },
-  "potions": {
-    "minorHealthPotion": "小型生命药水",
-    "lesserHealthPotion": "次级生命药水",
-    "greaterHealthPotion": "高级生命药水",
-    "superiorHealthPotion": "卓越生命药水",
-    "majorHealthPotion": "主要生命药水",
-    "restoresHp": "恢复 {{amount}} 点生命值",
-    "owned": "拥有：{{count}}",
-    "buy1": "购买 1",
-    "buy5": "购买 5",
-    "healthPotions": "生命药水",
-    "autoOn": "自动：开启",
-    "autoOff": "自动：关闭"
-  }
+      "potions": {
+        "minorHealthPotion": "小型生命药水",
+        "lesserHealthPotion": "次级生命药水",
+        "greaterHealthPotion": "高级生命药水",
+        "superiorHealthPotion": "卓越生命药水",
+        "majorHealthPotion": "主要生命药水",
+        "restoresHp": "恢复 {{amount}} 点生命值",
+        "owned": "拥有：{{count}}",
+        "buy1": "购买 1",
+        "buy5": "购买 5",
+        "healthPotions": "生命药水",
+        "autoOn": "自动：开启",
+        "autoOff": "自动：关闭"
+    }
 } 

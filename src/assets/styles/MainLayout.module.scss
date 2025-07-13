@@ -220,6 +220,44 @@
           text-rendering: optimizeSpeed;
         }
       }
+
+      .skillsItem {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        color: #3b82f6;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.2s;
+        border: 2px solid #3b82f6;
+        background: rgba(59, 130, 246, 0.1);
+        min-width: 0;
+        overflow: hidden;
+
+        &:hover {
+          background: rgba(59, 130, 246, 0.2);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .skillsIcon {
+          font-size: 1.2rem;
+          flex-shrink: 0;
+        }
+
+        .skillsLabel {
+          flex-grow: 1;
+          font-size: 0.8rem;
+          font-weight: bold;
+          text-shadow: 1px 1px 0px #000;
+          font-smooth: never;
+          -webkit-font-smoothing: none;
+          -moz-osx-font-smoothing: unset;
+          image-rendering: pixelated;
+          text-rendering: optimizeSpeed;
+        }
+      }
     }
 
     .divider {
