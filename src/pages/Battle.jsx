@@ -465,8 +465,10 @@ function Battle({ player }) {
                 </div>
 
                 <Grid container spacing={3} className={styles.enemyGrid}>
-                    {Object.values(enemies).map((enemy) => (
-                        <Grid xs={12} sm={6} lg={3} key={enemy.id}>
+                    {Object.values(enemies)
+                        .sort((a, b) => a.maxHp - b.maxHp) // Kolaydan zora sırala
+                        .map((enemy) => (
+                        <Grid key={enemy.id}>
                             <Tooltip
                                 title={renderLootTooltip(enemy)}
                                 arrow
