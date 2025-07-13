@@ -771,8 +771,28 @@ function Battle({ player }) {
                                     </Typography>
                                 );
                             })()}
-                            <Typography>🛡️ {t('battle.defense')}: {currentBattle.player.DEF}</Typography>
-                            <Typography>❤️ {t('battle.health')}: {currentBattle.player.currentHealth}/{currentBattle.player.HEALTH}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const defBonus = skillBuffs.DEF || 0;
+                                const effectiveDEF = currentBattle.player.DEF + defBonus;
+                                return (
+                                    <Typography>
+                                        🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
+                                        {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
+                                    </Typography>
+                                );
+                            })()}
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const healthBonus = skillBuffs.HEALTH || 0;
+                                const effectiveHealth = currentBattle.player.HEALTH + healthBonus;
+                                return (
+                                    <Typography>
+                                        ❤️ {t('battle.health')}: {currentBattle.player.currentHealth}/{effectiveHealth.toFixed(0)}
+                                        {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
+                                    </Typography>
+                                );
+                            })()}
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
@@ -795,7 +815,20 @@ function Battle({ player }) {
                                     </Typography>
                                 );
                             })()}
-                            <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.player.CRIT_DAMAGE || 150}%</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
+                                const effectiveCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
+                                
+
+                                
+                                return (
+                                    <Typography>
+                                        💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
+                                        {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
+                                    </Typography>
+                                );
+                            })()}
                             <Divider sx={{ my: 1 }} />
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
@@ -804,7 +837,10 @@ function Battle({ player }) {
                                 const effectiveATK = currentBattle.player.ATK + atkBonus;
                                 const hitChance = calculateHitChance(effectiveATK, currentBattle.enemy.DEF, accuracyBonus);
                                 return (
-                                    <Typography>🎲 {t('battle.hitChance')}: {hitChance}%</Typography>
+                                    <Typography>
+                                        🎲 {t('battle.hitChance')}: {hitChance}%
+                                        {accuracyBonus > 0 && <span className={styles.skillBonus}> (+{accuracyBonus.toFixed(1)}%)</span>}
+                                    </Typography>
                                 );
                             })()}
                             {(() => {
@@ -821,7 +857,10 @@ function Battle({ player }) {
                                 };
                                 return (
                                     <>
-                                        <Typography>⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}</Typography>
+                                        <Typography>
+                                            ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
+                                            {damageRangeBonus > 0 && <span className={styles.skillBonus}> (+{damageRangeBonus.toFixed(1)} max damage)</span>}
+                                        </Typography>
                                         <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
                                     </>
                                 );
@@ -841,8 +880,30 @@ function Battle({ player }) {
                                     </Typography>
                                 );
                             })()}
-                            <Typography>🛡️ {t('battle.defense')}: {playerStats.DEF} {getEquipmentBonuses().DEF ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span> : ''}</Typography>
-                            <Typography>❤️ {t('battle.health')}: {playerHealth}/{playerStats.HEALTH} {getEquipmentBonuses().HEALTH ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span> : ''}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const defBonus = skillBuffs.DEF || 0;
+                                const effectiveDEF = playerStats.DEF + defBonus;
+                                return (
+                                    <Typography>
+                                        🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
+                                        {getEquipmentBonuses().DEF && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span>}
+                                        {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
+                                    </Typography>
+                                );
+                            })()}
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const healthBonus = skillBuffs.HEALTH || 0;
+                                const effectiveHealth = playerStats.HEALTH + healthBonus;
+                                return (
+                                    <Typography>
+                                        ❤️ {t('battle.health')}: {playerHealth}/{effectiveHealth.toFixed(0)}
+                                        {getEquipmentBonuses().HEALTH && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span>}
+                                        {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
+                                    </Typography>
+                                );
+                            })()}
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
@@ -860,8 +921,6 @@ function Battle({ player }) {
                                 const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
                                 const effectiveCritChance = playerStats.CRIT_CHANCE + critChanceBonus;
                                 
-
-                                
                                 return (
                                     <Typography>
                                         🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
@@ -870,7 +929,19 @@ function Battle({ player }) {
                                     </Typography>
                                 );
                             })()}
-                            <Typography>💥 {t('battle.criticalDamage')}: {playerStats.CRIT_DAMAGE}% {getEquipmentBonuses().CRIT_DAMAGE ? <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span> : ''}</Typography>
+                            {(() => {
+                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
+                                const effectiveCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
+                                
+                                return (
+                                    <Typography>
+                                        💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
+                                        {getEquipmentBonuses().CRIT_DAMAGE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span>}
+                                        {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
+                                    </Typography>
+                                );
+                            })()}
                             <Divider sx={{ my: 1 }} />
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
@@ -879,7 +950,10 @@ function Battle({ player }) {
                                 const effectiveATK = playerStats.ATK + atkBonus;
                                 const hitChance = calculateHitChance(effectiveATK, currentEnemy?.DEF || 0, accuracyBonus);
                                 return (
-                                    <Typography>🎲 {t('battle.hitChance')}: {hitChance}%</Typography>
+                                    <Typography>
+                                        🎲 {t('battle.hitChance')}: {hitChance}%
+                                        {accuracyBonus > 0 && <span className={styles.skillBonus}> (+{accuracyBonus.toFixed(1)}%)</span>}
+                                    </Typography>
                                 );
                             })()}
                             {(() => {
@@ -892,7 +966,10 @@ function Battle({ player }) {
                                 const totalCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
                                 return (
                                     <>
-                                        <Typography>⚔️ {t('battle.baseDamage')}: {baseDamage}</Typography>
+                                        <Typography>
+                                            ⚔️ {t('battle.baseDamage')}: {baseDamage}
+                                            {damageRangeBonus > 0 && <span className={styles.skillBonus}> (+{damageRangeBonus.toFixed(1)} max damage)</span>}
+                                        </Typography>
                                         <Typography>💥 {t('battle.critDamage')}: {Math.floor(baseDamage * (totalCritDamage / 100))}</Typography>
                                     </>
                                 );
@@ -988,7 +1065,7 @@ function Battle({ player }) {
                                 
                                 return (
                                     <Tooltip 
-                                        key={idx} 
+                                        key={`loot-${idx}-${item}`} 
                                         title={tooltipText}
                                         arrow
                                         placement="top"
@@ -1010,7 +1087,7 @@ function Battle({ player }) {
                 <Divider />
                 <Box className={styles.battleLog}>
                     {currentBattle?.battleLog?.map((log, idx) => (
-                        <div key={idx}>
+                        <div key={`battle-log-${idx}-${log.type}`}>
                             <Typography 
                                 variant="body2" 
                                                             className={`${styles.battleLogItem} ${
