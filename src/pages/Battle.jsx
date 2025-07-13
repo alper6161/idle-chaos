@@ -23,6 +23,7 @@ import { LocalDrink } from "@mui/icons-material";
 import { getLootDrop, saveLoot } from "../utils/combat.js";
 import enemies from "../utils/enemies.js";
 import { getEnemyIcon, getSkillIcon, getCharacterIcon, getEnemyInitial, getCharacterName } from "../utils/common.js";
+import { SKILL_LEVEL_BONUSES } from "../utils/constants.js";
 import { 
     calculateHitChance, 
     calculateDamage, 
@@ -33,7 +34,7 @@ import {
     checkBattleResult, 
     createSpawnTimer 
 } from "../utils/battleUtils.js";
-import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements, getWeaponType, getAvailableAttackTypes } from "../utils/skillExperience.js";
+import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements, getWeaponType, getAvailableAttackTypes, getSkillData } from "../utils/skillExperience.js";
 import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
@@ -281,6 +282,34 @@ function Battle({ player }) {
             case 'hit_chance': return 25; // ATK ile birlikte açılsın
             default: return 100;
         }
+    };
+
+    // Get selected skill level and bonuses
+    const getSelectedSkillInfo = () => {
+        if (!selectedAttackType) return { level: 0, bonuses: null };
+        
+        const skillData = getSkillData();
+        let skillLevel = 0;
+        
+        // Find the skill level in all categories
+        Object.values(skillData).forEach(category => {
+            if (category[selectedAttackType]) {
+                skillLevel = category[selectedAttackType].level || 0;
+            }
+        });
+        
+        const bonuses = SKILL_LEVEL_BONUSES[selectedAttackType];
+        
+        // Debug logging
+        console.log('getSelectedSkillInfo:', {
+            selectedAttackType,
+            skillLevel,
+            bonuses,
+            hasBonuses: !!bonuses,
+            levelGreaterThanZero: skillLevel > 0
+        });
+        
+        return { level: skillLevel, bonuses };
     };
 
     const renderLootTooltip = (enemy) => (
@@ -946,7 +975,7 @@ function Battle({ player }) {
                             })()}
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0;
+                                const damageRangeBonus = skillBuffs ? skillBuffs.MIN_DAMAGE.toFixed(1) + ' - ' + skillBuffs.MAX_DAMAGE.toFixed(1) : 0;
                                 const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
                                 const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
                                 const effectiveATK = currentBattle.player.ATK + atkBonus;
@@ -960,7 +989,7 @@ function Battle({ player }) {
                                     <>
                                         <Typography>
                                             ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
-                                            {damageRangeBonus > 0 && <span className={styles.skillBonus}> (+{damageRangeBonus.toFixed(1)} max damage)</span>}
+                                            {damageRangeBonus && <span className={styles.skillBonus}> ({damageRangeBonus})</span>}
                                         </Typography>
                                         <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
                                     </>
@@ -973,11 +1002,19 @@ function Battle({ player }) {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
                                 const atkBonus = skillBuffs.ATK || 0;
                                 const effectiveATK = playerStats.ATK + atkBonus;
+                                const { level, bonuses } = getSelectedSkillInfo();
+                                
+                                // Debug logging for display
+                                console.log('Display section:', { level, bonuses, condition: bonuses && level > 0 });
+                                
                                 return (
                                     <Typography>
                                         ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
                                         {getEquipmentBonuses().ATK && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span>}
                                         {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
+                                        {bonuses && level > 0 && (
+                                            <span className={styles.skillBonus}> (+{bonuses.ATK} per level, Lv.{level})</span>
+                                        )}
                                     </Typography>
                                 );
                             })()}
@@ -1046,30 +1083,39 @@ function Battle({ player }) {
                             <Divider sx={{ my: 1 }} />
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0;
-                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                const atkBonus = skillBuffs.ATK || 0;
                                 const effectiveATK = playerStats.ATK + atkBonus;
-                                const hitChance = calculateHitChance(effectiveATK, currentEnemy?.DEF || 0, accuracyBonus);
+                                const hitChance = calculateHitChance(effectiveATK, currentEnemy?.DEF || 0, 0);
                                 return (
                                     <Typography>
                                         🎲 {t('battle.hitChance')}: {hitChance}%
-                                        {accuracyBonus > 0 && <span className={styles.skillBonus}> (+{accuracyBonus.toFixed(1)}%)</span>}
+                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)} ATK)</span>}
                                     </Typography>
                                 );
                             })()}
                             {(() => {
                                 const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0;
-                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                const atkBonus = skillBuffs.ATK || 0;
                                 const effectiveATK = playerStats.ATK + atkBonus;
-                                const baseDamage = calculateDamage(effectiveATK, currentEnemy?.DEF || 0, damageRangeBonus);
-                                const totalCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
+                                const damageRange = calculateDamageRange(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
+                                const baseDamage = calculateDamage(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
+                                const totalCritDamage = playerStats.CRIT_DAMAGE;
+                                const { level, bonuses } = getSelectedSkillInfo();
+                                
                                 return (
                                     <>
                                         <Typography>
-                                            ⚔️ {t('battle.baseDamage')}: {baseDamage}
-                                            {damageRangeBonus > 0 && <span className={styles.skillBonus}> (+{damageRangeBonus.toFixed(1)} max damage)</span>}
+                                            ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
+                                            {(skillBuffs.MIN_DAMAGE > 0 || skillBuffs.MAX_DAMAGE > 0) && (
+                                                <span className={styles.skillBonus}> 
+                                                    (+{skillBuffs.MIN_DAMAGE?.toFixed(1) || 0} min, +{skillBuffs.MAX_DAMAGE?.toFixed(1) || 0} max)
+                                                </span>
+                                            )}
+                                            {bonuses && level > 0 && (
+                                                <span className={styles.skillBonus}> 
+                                                    (+{bonuses.MIN_DAMAGE} min, +{bonuses.MAX_DAMAGE} max per level, Lv.{level})
+                                                </span>
+                                            )}
                                         </Typography>
                                         <Typography>💥 {t('battle.critDamage')}: {Math.floor(baseDamage * (totalCritDamage / 100))}</Typography>
                                     </>

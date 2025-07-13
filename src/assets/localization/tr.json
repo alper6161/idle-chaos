@@ -152,7 +152,11 @@
     "counterAttack": "Karşı Saldırı",
     "doubleAttack": "Çifte Saldırı",
     "critChance": "Kritik Şans",
-    "critDamage": "Kritik Hasar"
+    "critDamage": "Kritik Hasar",
+    "levelBonuses": "Seviye Bonusları",
+    "attack": "Saldırı",
+    "minDamage": "Min Hasar",
+    "maxDamage": "Max Hasar"
   },
       "enemies": {
         "goblin": "Goblin",

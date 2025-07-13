@@ -149,7 +149,11 @@
     "counterAttack": "反击",
     "doubleAttack": "双重攻击",
     "critChance": "暴击率",
-    "critDamage": "暴击伤害"
+    "critDamage": "暴击伤害",
+    "levelBonuses": "等级奖励",
+    "attack": "攻击力",
+    "minDamage": "最小伤害",
+    "maxDamage": "最大伤害"
   },
   "enemies": {
     "goblin": "哥布林",

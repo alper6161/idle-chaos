@@ -23,7 +23,7 @@ import {
     LocalFireDepartment,
     AutoAwesome
 } from "@mui/icons-material";
-import { INITIAL_SKILLS } from "../utils/constants.js";
+import { INITIAL_SKILLS, SKILL_LEVEL_BONUSES } from "../utils/constants.js";
 import { getSkillIcon } from "../utils/common.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { getSkillInfo, getSkillData } from "../utils/skillExperience.js";
@@ -594,6 +594,22 @@ function Skills() {
                                     </div>
                                 </Box>
                             </Box>
+                            
+                            {/* Skill Level Bonuses */}
+                            {SKILL_LEVEL_BONUSES[selectedSkill] && (
+                                <>
+                                    <div className={styles.buffsTitle}>
+                                        {t('skills.levelBonuses')}
+                                    </div>
+                                    <Box className={styles.buffDetailItem}>
+                                        <div className={styles.buffDetailDescription}>
+                                            <div>⚔️ {t('skills.attack')}: +{SKILL_LEVEL_BONUSES[selectedSkill].ATK} per level</div>
+                                            <div>🗡️ {t('skills.minDamage')}: +{SKILL_LEVEL_BONUSES[selectedSkill].MIN_DAMAGE} per level</div>
+                                            <div>⚔️ {t('skills.maxDamage')}: +{SKILL_LEVEL_BONUSES[selectedSkill].MAX_DAMAGE} per level</div>
+                                        </div>
+                                    </Box>
+                                </>
+                            )}
                             
                             <div className={styles.buffsTitle}>
                                 {t('skills.availableBuffs')}

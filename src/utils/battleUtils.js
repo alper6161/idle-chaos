@@ -23,19 +23,27 @@ export const calculateHitChance = (attackerATK, defenderDEF, accuracyBonus = 0) 
     return Math.max(5, Math.min(95, baseChance));
 };
 
-export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0) => {
+export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}) => {
     // Ensure we have valid numbers
     const atk = Number(attackerATK) || 0;
     const def = Number(defenderDEF) || 0;
     const bonus = Number(damageRangeBonus) || 0;
+    
+    // Apply skill level bonuses
+    const minDamageBonus = skillBuffs.MIN_DAMAGE || 0;
+    const maxDamageBonus = skillBuffs.MAX_DAMAGE || 0;
     
     let baseDamage = atk - (def * 0.5);
     baseDamage = Math.max(1, baseDamage);
     
     // Calculate damage range (min and max)
     const variation = baseDamage * 0.15; // 15% variation
-    const minDamage = Math.floor(baseDamage - variation);
+    let minDamage = Math.floor(baseDamage - variation);
     let maxDamage = Math.floor(baseDamage + variation);
+    
+    // Apply skill level bonuses to damage range
+    minDamage += minDamageBonus;
+    maxDamage += maxDamageBonus;
     
     // Apply slash skill bonus to max damage
     maxDamage += bonus;
@@ -46,13 +54,13 @@ export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus 
     };
 };
 
-export const calculateDamage = (attackerATK, defenderDEF, damageRangeBonus = 0) => {
+export const calculateDamage = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}) => {
     // Ensure we have valid numbers
     const atk = Number(attackerATK) || 0;
     const def = Number(defenderDEF) || 0;
     const bonus = Number(damageRangeBonus) || 0;
     
-    const damageRange = calculateDamageRange(atk, def, bonus);
+    const damageRange = calculateDamageRange(atk, def, bonus, skillBuffs);
     
     // Random damage within the range
     const damage = Math.floor(
@@ -85,25 +93,20 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
     
     // Calculate skill buffs based on selected attack type only
     const skillBuffs = calculateSkillBuffsForAttackType(attackType);
-    const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
-    const damageRangeBonus = skillBuffs.DAMAGE_RANGE_BONUS || 0; // Slash skill gives damage range bonus
-    const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0; // Crush skill gives crit damage bonus
-    const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0; // Throwing skill gives attack speed
-    const critChanceBonus = skillBuffs.CRIT_CHANCE || 0; // Archery skill gives crit chance
-    const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+    const atkBonus = skillBuffs.ATK || 0;
     
-    // Apply ATK bonus from magic skills
+    // Apply ATK bonus from skill levels
     const effectiveATK = battle.player.ATK + atkBonus;
     
-    const hitChance = calculateHitChance(effectiveATK, battle.enemy.DEF, accuracyBonus);
+    const hitChance = calculateHitChance(effectiveATK, battle.enemy.DEF, 0);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
         const critRoll = Math.random() * 100;
-        const effectiveCritChance = (battle.player.CRIT_CHANCE || 5) + critChanceBonus;
+        const effectiveCritChance = (battle.player.CRIT_CHANCE || 5);
         const isCrit = critRoll <= effectiveCritChance;
         
-        let damage = calculateDamage(effectiveATK, battle.enemy.DEF, damageRangeBonus);
+        let damage = calculateDamage(effectiveATK, battle.enemy.DEF, 0, skillBuffs);
         
         // Apply damage buff
         damage = applyDamageMultiplier(damage);
@@ -112,8 +115,8 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
         const xpResult = awardBattleActionXP(attackType, damage, isCrit, true);
         
         if (isCrit) {
-            // Apply crush skill crit damage bonus
-            const totalCritDamage = (battle.player.CRIT_DAMAGE || 150) + critDamageBonus;
+            // Apply crit damage
+            const totalCritDamage = (battle.player.CRIT_DAMAGE || 150);
             damage = Math.floor(damage * (totalCritDamage / 100));
             const newEnemyHealth = Math.max(0, battle.enemy.currentHealth - damage);
             
@@ -176,7 +179,7 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= (battle.enemy.CRIT_CHANCE || 3);
         
-        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF, 0); // Enemies don't get skill bonuses
+        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF, 0, {}); // Enemies don't get skill bonuses
         
         // Award defense skill experience for taking damage
         const defenseXP = awardBattleActionXP('damage_taken', damage, isCrit, true);

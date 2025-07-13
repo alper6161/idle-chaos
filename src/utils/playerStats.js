@@ -1,5 +1,6 @@
 import { getBuffedPlayerStats } from './buffUtils.js';
 import { getSkillData } from './skillExperience.js';
+import { SKILL_LEVEL_BONUSES } from './constants.js';
 
 export const BASE_PLAYER_STATS = {
     ATK: 10,
@@ -145,54 +146,99 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
         return 0;
     };
 
+    // Helper function to calculate skill level bonuses
+    const calculateSkillLevelBonus = (skillName) => {
+        const skillBonus = SKILL_LEVEL_BONUSES[skillName];
+        if (!skillBonus) return { ATK: 0, MIN_DAMAGE: 0, MAX_DAMAGE: 0 };
+
+        // Find the skill level in all categories
+        let skillLevel = 0;
+        Object.values(skillData).forEach(category => {
+            if (category[skillName]) {
+                skillLevel = getSkillLevel(category[skillName]);
+            }
+        });
+
+        // Calculate bonuses based on level
+        return {
+            ATK: skillBonus.ATK * skillLevel,
+            MIN_DAMAGE: skillBonus.MIN_DAMAGE * skillLevel,
+            MAX_DAMAGE: skillBonus.MAX_DAMAGE * skillLevel
+        };
+    };
+
     // Only apply the bonus for the selected attack type
     switch (selectedAttackType) {
         case 'stab':
             if (skillData.melee?.stab) {
-                const stabLevel = getSkillLevel(skillData.melee.stab);
-                skillBuffs.ACCURACY_BONUS = stabLevel * 0.8; // +0.8% accuracy per level
+                // Apply skill level bonuses only
+                const stabBonus = calculateSkillLevelBonus('stab');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + stabBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + stabBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + stabBonus.MAX_DAMAGE;
             }
             break;
         case 'slash':
             if (skillData.melee?.slash) {
-                const slashLevel = getSkillLevel(skillData.melee.slash);
-                skillBuffs.DAMAGE_RANGE_BONUS = slashLevel * 0.5; // +0.5 max damage per level
+                // Apply skill level bonuses only
+                const slashBonus = calculateSkillLevelBonus('slash');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + slashBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + slashBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + slashBonus.MAX_DAMAGE;
             }
             break;
         case 'crush':
             if (skillData.melee?.crush) {
-                const crushLevel = getSkillLevel(skillData.melee.crush);
-                skillBuffs.CRIT_DAMAGE = crushLevel * 2; // +2% crit damage per level
+                // Apply skill level bonuses only
+                const crushBonus = calculateSkillLevelBonus('crush');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + crushBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + crushBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + crushBonus.MAX_DAMAGE;
             }
             break;
         case 'archery':
             if (skillData.ranged?.archery) {
-                const archeryLevel = getSkillLevel(skillData.ranged.archery);
-                skillBuffs.CRIT_CHANCE = archeryLevel * 0.4; // +0.4% crit per level
+                // Apply skill level bonuses only
+                const archeryBonus = calculateSkillLevelBonus('archery');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + archeryBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + archeryBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + archeryBonus.MAX_DAMAGE;
             }
             break;
         case 'throwing':
             if (skillData.ranged?.throwing) {
-                const throwingLevel = getSkillLevel(skillData.ranged.throwing);
-                skillBuffs.ATTACK_SPEED = throwingLevel * 0.05; // +0.05 attack speed per level
+                // Apply skill level bonuses only
+                const throwingBonus = calculateSkillLevelBonus('throwing');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + throwingBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + throwingBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + throwingBonus.MAX_DAMAGE;
             }
             break;
         case 'lightning':
             if (skillData.magic?.lightning) {
-                const lightningLevel = getSkillLevel(skillData.magic.lightning);
-                skillBuffs.ATK = lightningLevel * 0.4; // +0.4 ATK per level
+                // Apply skill level bonuses only
+                const lightningBonus = calculateSkillLevelBonus('lightning');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + lightningBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + lightningBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + lightningBonus.MAX_DAMAGE;
             }
             break;
         case 'fire':
             if (skillData.magic?.fire) {
-                const fireLevel = getSkillLevel(skillData.magic.fire);
-                skillBuffs.ATK = fireLevel * 0.4; // +0.4 ATK per level
+                // Apply skill level bonuses only
+                const fireBonus = calculateSkillLevelBonus('fire');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + fireBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + fireBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + fireBonus.MAX_DAMAGE;
             }
             break;
         case 'ice':
             if (skillData.magic?.ice) {
-                const iceLevel = getSkillLevel(skillData.magic.ice);
-                skillBuffs.ATK = iceLevel * 0.4; // +0.4 ATK per level
+                // Apply skill level bonuses only
+                const iceBonus = calculateSkillLevelBonus('ice');
+                skillBuffs.ATK = (skillBuffs.ATK || 0) + iceBonus.ATK;
+                skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + iceBonus.MIN_DAMAGE;
+                skillBuffs.MAX_DAMAGE = (skillBuffs.MAX_DAMAGE || 0) + iceBonus.MAX_DAMAGE;
             }
             break;
     }

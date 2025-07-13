@@ -152,7 +152,11 @@
     "counterAttack": "Counter Attack",
     "doubleAttack": "Double Attack",
     "critChance": "Crit Chance",
-    "critDamage": "Crit Damage"
+    "critDamage": "Crit Damage",
+    "levelBonuses": "Level Bonuses",
+    "attack": "Attack",
+    "minDamage": "Min Damage",
+    "maxDamage": "Max Damage"
   },
       "enemies": {
         "goblin": "Goblin",
