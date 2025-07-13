@@ -45,6 +45,7 @@ import {
     getAutoPotionSettings,
     saveAutoPotionSettings
 } from "../utils/potions.js";
+import { recordKill, isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
 
 function Battle({ player }) {
@@ -241,6 +242,21 @@ function Battle({ player }) {
         return 'Very Hard';
     };
 
+    // Achievement-based stat display functions
+    const getStatDisplay = (enemyId, statType, value) => {
+        const isUnlocked = isAchievementUnlocked(enemyId, getThresholdForStat(statType));
+        return isUnlocked ? value.toString() : "???";
+    };
+
+    const getThresholdForStat = (statType) => {
+        switch (statType) {
+            case 'hp': return 10;
+            case 'atk': return 25;
+            case 'def': return 50;
+            default: return 100;
+        }
+    };
+
     const renderLootTooltip = (enemy) => (
         <Box sx={{ p: 1 }}>
             <Typography variant="h6" sx={{ mb: 1 }}>
@@ -332,6 +348,9 @@ function Battle({ player }) {
                     localStorage.setItem("playerHealth", battleResult.playerFinalHealth.toString());
                     
                     if (battleResult.winner === 'player') {
+                        // Record achievement for enemy kill
+                        const achievementResult = recordKill(currentEnemy.id);
+                        
                         const lootResult = getLootDrop(currentEnemy.drops);
                         
                         const newLoot = [...lootResult.items];
@@ -347,19 +366,35 @@ function Battle({ player }) {
                         setLootBag(prev => [...prev, ...newLoot]);
                         saveLoot(lootResult.items);
                         
-                        // Add loot messages to battle log
+                        // Add loot and achievement messages to battle log
+                        const battleLogMessages = [
+                            {
+                                type: 'victory',
+                                message: `🎉 ${t('battle.playerWins')}! Enemy defeated!`
+                            }
+                        ];
+                        
+                        // Add achievement messages if any new achievements unlocked
+                        if (achievementResult.newAchievements.length > 0) {
+                            achievementResult.newAchievements.forEach(achievement => {
+                                battleLogMessages.push({
+                                    type: 'achievement',
+                                    message: `🏆 Achievement Unlocked: ${achievement.description}!`
+                                });
+                            });
+                        }
+                        
+                        // Add loot messages
+                        battleLogMessages.push(...newLoot.map(item => ({
+                            type: 'loot',
+                            message: `📦 Loot: ${item}`
+                        })));
+                        
                         const updatedBattle = {
                             ...newBattle,
                             battleLog: [
                                 ...newBattle.battleLog,
-                                {
-                                    type: 'victory',
-                                    message: `🎉 ${t('battle.playerWins')}! Enemy defeated!`
-                                },
-                                ...newLoot.map(item => ({
-                                    type: 'loot',
-                                    message: `📦 Loot: ${item}`
-                                }))
+                                ...battleLogMessages
                             ]
                         };
                         
@@ -503,13 +538,13 @@ function Battle({ player }) {
                                             
                                             <div className={styles.enemyStats}>
                                                 <Typography variant="body2">
-                                                    ❤️ HP: {enemy.maxHp}
+                                                    ❤️ HP: {getStatDisplay(enemy.id, 'hp', enemy.maxHp)}
                                                 </Typography>
                                                 <Typography variant="body2">
-                                                    ⚔️ ATK: {enemy.ATK}
+                                                    ⚔️ ATK: {getStatDisplay(enemy.id, 'atk', enemy.ATK)}
                                                 </Typography>
                                                 <Typography variant="body2">
-                                                    🛡️ DEF: {enemy.DEF}
+                                                    🛡️ DEF: {getStatDisplay(enemy.id, 'def', enemy.DEF)}
                                                 </Typography>
                                             </div>
                                             
@@ -671,7 +706,7 @@ function Battle({ player }) {
                         <>
                             <div className={styles.hpBarContainer}>
                                 <Typography className={styles.hpText}>
-                                    HP: {currentBattle?.enemy?.currentHealth || currentEnemy?.maxHp}/{currentBattle?.enemy?.maxHp || currentEnemy?.maxHp}
+                                    HP: {currentBattle?.enemy?.currentHealth || getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp)}/{getStatDisplay(currentEnemy?.id, 'hp', currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
                                 </Typography>
                                 <LinearProgress
                                     variant="determinate"

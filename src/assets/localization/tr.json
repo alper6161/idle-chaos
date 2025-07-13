@@ -208,5 +208,19 @@
         "healthPotions": "Can İksirleri",
         "autoOn": "Otomatik: AÇIK",
         "autoOff": "Otomatik: KAPALI"
+    },
+    "achievements": {
+        "title": "Başarılar",
+        "subtitle": "İlerlemeni takip et ve düşman sırlarını aç",
+        "totalKills": "Toplam Öldürme",
+        "kills": "Öldürme",
+        "next": "Sonraki",
+        "complete": "Tamamlandı",
+        "achievements": "Başarılar",
+        "noAchievements": "Henüz başarı açılmadı. Sırları açmak için savaşmaya devam et!",
+        "unlockHp": "Can açıldı",
+        "unlockAtk": "Saldırı açıldı",
+        "unlockDef": "Savunma açıldı",
+        "unlockAll": "Tüm istatistikler açıldı"
     }
 } 

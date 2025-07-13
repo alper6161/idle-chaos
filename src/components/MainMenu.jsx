@@ -84,6 +84,18 @@ function MainMenu() {
                     </NavLink>
                 </div>
 
+                            {/* Achievement Section */}
+                <div className={styles.group}>
+                    <div className={styles.groupTitle}>ACHIEVEMENTS</div>
+                    <NavLink
+                        to="/achievement"
+                        className={styles.achievementItem}
+                    >
+                        <span className={styles.achievementIcon}>🏆</span>
+                        <span className={styles.achievementLabel}>Achievements</span>
+                    </NavLink>
+                </div>
+
             {/* Skills Sections */}
             {Object.entries(skills).map(([category, subskills]) => (
                 <div key={category} className={styles.group}>

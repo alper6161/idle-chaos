@@ -205,5 +205,19 @@
         "healthPotions": "生命药水",
         "autoOn": "自动：开启",
         "autoOff": "自动：关闭"
+    },
+    "achievements": {
+        "title": "成就",
+        "subtitle": "追踪您的进度并解锁敌人秘密",
+        "totalKills": "总击杀数",
+        "kills": "击杀",
+        "next": "下一个",
+        "complete": "完成",
+        "achievements": "成就",
+        "noAchievements": "尚未解锁任何成就。继续战斗以解锁秘密！",
+        "unlockHp": "生命值已显示",
+        "unlockAtk": "攻击力已显示",
+        "unlockDef": "防御力已显示",
+        "unlockAll": "所有属性已显示"
     }
 } 

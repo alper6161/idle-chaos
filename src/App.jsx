@@ -5,6 +5,7 @@ import Skills from "./pages/Skills.jsx";
 import Battle from "./pages/Battle.jsx";
 import Equipment from "./pages/Equipment.jsx";
 import Store from "./pages/Store.jsx";
+import Achievement from "./pages/Achievement.jsx";
 import MainLayout from "./pages/MainLayout.jsx";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
                     <Route path="/battle" element={<Battle/>}/>
                     <Route path="/equipment" element={<Equipment/>}/>
                     <Route path="/store" element={<Store/>}/>
+                    <Route path="/achievement" element={<Achievement/>}/>
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

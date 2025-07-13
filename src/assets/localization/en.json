@@ -208,5 +208,19 @@
         "healthPotions": "Health Potions",
         "autoOn": "Auto: ON",
         "autoOff": "Auto: OFF"
+    },
+    "achievements": {
+        "title": "Achievements",
+        "subtitle": "Track your progress and unlock enemy secrets",
+        "totalKills": "Total Kills",
+        "kills": "Kills",
+        "next": "Next",
+        "complete": "Complete",
+        "achievements": "Achievements",
+        "noAchievements": "No achievements unlocked yet. Keep fighting to unlock secrets!",
+        "unlockHp": "HP revealed",
+        "unlockAtk": "ATK revealed",
+        "unlockDef": "DEF revealed",
+        "unlockAll": "All stats revealed"
     }
 } 
