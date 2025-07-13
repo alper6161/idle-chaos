@@ -187,14 +187,7 @@ function Battle({ player }) {
     const handleEnemySelect = (enemy) => {
         setCurrentEnemy(enemy);
         setBattleMode('battle');
-
-        // Her zaman güncel max HP'yi al
-        const currentPlayerStats = getPlayerStats();
-        setPlayerHealth(currentPlayerStats.HEALTH); // <-- Burası önemli
-
-        setTimeout(() => {
-            startRealTimeBattle(enemy, currentPlayerStats.HEALTH);
-        }, 100);
+        startRealTimeBattle(enemy);
     };
 
     const handleBackToSelection = () => {
@@ -403,32 +396,16 @@ function Battle({ player }) {
                             const STORAGE_KEY = 'idle-chaos-inventory';
                             const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                             
-                            console.log('Raw loot items:', equipmentLoot);
-                            console.log('Current inventory count:', currentInventory.length);
-                            
                             // Ekipmanları equipment object'lerine dönüştür
                             const newEquipment = convertLootBagToEquipment(equipmentLoot, currentEnemy);
-                            
-                            console.log('Converted equipment:', newEquipment);
                             
                             // Eşsiz ID'ye göre tekrar eklemeyi önle
                             const existingIds = new Set(currentInventory.map(item => item.id));
                             const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
                             
-                            console.log('🔍 Debug inventory:', {
-                                newEquipmentCount: newEquipment.length,
-                                existingIdsCount: existingIds.size,
-                                uniqueNewEquipmentCount: uniqueNewEquipment.length,
-                                newEquipmentIds: newEquipment.map(item => item.id),
-                                existingIds: Array.from(existingIds)
-                            });
-                            
                             if (uniqueNewEquipment.length > 0) {
                                 const updatedInventory = [...currentInventory, ...uniqueNewEquipment];
                                 localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedInventory));
-                                console.log('✅ Added equipment to inventory immediately:', uniqueNewEquipment);
-                            } else {
-                                console.log('❌ No unique equipment to add - all items already exist');
                             }
                         } catch (err) {
                             console.error('Inventory güncellenirken hata:', err);

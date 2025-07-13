@@ -214,8 +214,6 @@ const getRandomAdditionalStats = (equipmentType, rarity, level) => {
 
 export const generateEquipmentFromName = (equipmentName, enemy = null) => {
     try {
-        console.log('🔍 Generating equipment for:', equipmentName, 'from enemy:', enemy?.name);
-        
         if (!equipmentName || typeof equipmentName !== 'string') {
             console.warn('Invalid equipment name:', equipmentName);
             return null;
@@ -227,10 +225,6 @@ export const generateEquipmentFromName = (equipmentName, enemy = null) => {
             console.warn(`No template found for equipment: ${equipmentName}`);
             return null;
         }
-        
-        console.log('✅ Template found:', template);
-
-
 
         // Determine difficulty and generate level
         const difficulty = getEnemyDifficulty(enemy);
@@ -266,7 +260,7 @@ export const generateEquipmentFromName = (equipmentName, enemy = null) => {
 
         return equipment;
     } catch (error) {
-        console.error('Error in generateEquipmentFromName:', error);
+        console.error('Error generating equipment:', error);
         return null;
     }
 };
@@ -275,8 +269,6 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
     const equipment = [];
     
     try {
-        console.log('🔄 Converting loot bag to equipment:', lootBagItems);
-        
         // Ensure lootBagItems is an array
         if (!Array.isArray(lootBagItems)) {
             console.warn('lootBagItems is not an array:', lootBagItems);
