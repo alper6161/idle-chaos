@@ -403,8 +403,13 @@ function Battle({ player }) {
                             const STORAGE_KEY = 'idle-chaos-inventory';
                             const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                             
+                            console.log('Raw loot items:', equipmentLoot);
+                            console.log('Current inventory count:', currentInventory.length);
+                            
                             // Ekipmanları equipment object'lerine dönüştür
                             const newEquipment = convertLootBagToEquipment(equipmentLoot, currentEnemy);
+                            
+                            console.log('Converted equipment:', newEquipment);
                             
                             // Eşsiz ID'ye göre tekrar eklemeyi önle
                             const existingIds = new Set(currentInventory.map(item => item.id));

@@ -83,24 +83,71 @@ const generateItemLevel = (difficulty) => {
     return Math.floor(Math.random() * (levelRange.maxLevel - levelRange.minLevel + 1)) + levelRange.minLevel;
 };
 
-// Determine final rarity with difficulty bonus
-const determineRarity = (baseRarity, difficulty) => {
+// Determine rarity with RNG - every item can drop with any rarity
+const determineRarity = (difficulty) => {
     const difficultyConfig = DIFFICULTY_LEVELS[difficulty];
-    if (!difficultyConfig) return baseRarity;
+    const rarityBonus = difficultyConfig ? difficultyConfig.rarityBonus : 0;
     
-    const rarityUpgradeChance = difficultyConfig.rarityBonus;
-    const rand = Math.random();
+    // Base rarity chances
+    const rarityChances = {
+        common: 0.6,
+        uncommon: 0.25,
+        rare: 0.1,
+        epic: 0.04,
+        legendary: 0.01
+    };
     
-    // Chance to upgrade rarity based on difficulty
-    if (rand < rarityUpgradeChance) {
-        const rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
-        const currentIndex = rarityOrder.indexOf(baseRarity);
-        if (currentIndex < rarityOrder.length - 1) {
-            return rarityOrder[currentIndex + 1];
+    // Apply difficulty bonus to upgrade chances
+    if (rarityBonus > 0) {
+        const rand = Math.random();
+        if (rand < rarityBonus) {
+            // Upgrade rarity based on difficulty
+            const rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
+            const upgradeChances = {
+                common: 0.3,      // 30% chance to upgrade from common
+                uncommon: 0.25,   // 25% chance to upgrade from uncommon
+                rare: 0.2,        // 20% chance to upgrade from rare
+                epic: 0.15        // 15% chance to upgrade from epic
+            };
+            
+            // First determine base rarity
+            const baseRand = Math.random();
+            let cumulative = 0;
+            let selectedRarity = 'common';
+            
+            for (const [rarity, chance] of Object.entries(rarityChances)) {
+                cumulative += chance;
+                if (baseRand <= cumulative) {
+                    selectedRarity = rarity;
+                    break;
+                }
+            }
+            
+            // Then apply upgrade chance
+            const upgradeChance = upgradeChances[selectedRarity] || 0;
+            if (Math.random() < upgradeChance) {
+                const currentIndex = rarityOrder.indexOf(selectedRarity);
+                if (currentIndex < rarityOrder.length - 1) {
+                    return rarityOrder[currentIndex + 1];
+                }
+            }
+            
+            return selectedRarity;
         }
     }
     
-    return baseRarity;
+    // Normal RNG without difficulty bonus
+    const rand = Math.random();
+    let cumulative = 0;
+    
+    for (const [rarity, chance] of Object.entries(rarityChances)) {
+        cumulative += chance;
+        if (rand <= cumulative) {
+            return rarity;
+        }
+    }
+    
+    return 'common'; // Fallback
 };
 
 // Apply level scaling to stats
@@ -108,6 +155,20 @@ const applyLevelScaling = (baseStat, level, rarity) => {
     const rarityMultiplier = LEVEL_SCALING[rarity] || 1.0;
     const levelMultiplier = 1 + (level - 1) * 0.1; // 10% increase per level
     return Math.floor(baseStat * rarityMultiplier * levelMultiplier);
+};
+
+// Apply rarity scaling to base stats - higher rarity = higher base stats
+const applyRarityScaling = (baseStat, rarity) => {
+    const rarityMultipliers = {
+        common: 1.0,
+        uncommon: 1.3,
+        rare: 1.6,
+        epic: 2.0,
+        legendary: 2.5
+    };
+    
+    const multiplier = rarityMultipliers[rarity] || 1.0;
+    return Math.floor(baseStat * multiplier);
 };
 
 const applyStatVariation = (baseStat, rarity) => {
@@ -162,10 +223,19 @@ export const generateEquipmentFromName = (equipmentName, enemy = null) => {
             return null;
         }
 
+        // Check if this item can drop from this enemy
+        if (template.allowedEnemies && enemy) {
+            const enemyId = enemy.id || enemy.name?.toLowerCase();
+            if (!template.allowedEnemies.includes(enemyId)) {
+                console.warn(`Item ${equipmentName} cannot drop from enemy ${enemyId}`);
+                return null;
+            }
+        }
+
         // Determine difficulty and generate level
         const difficulty = getEnemyDifficulty(enemy);
         const itemLevel = generateItemLevel(difficulty);
-        const finalRarity = determineRarity(template.baseRarity, difficulty);
+        const finalRarity = determineRarity(difficulty);
 
         const equipment = {
             id: generateEquipmentId(),
@@ -181,9 +251,12 @@ export const generateEquipmentFromName = (equipmentName, enemy = null) => {
             equipment.weaponType = template.weaponType;
         }
 
-        // Apply base stats with level scaling and variation
+        // Apply base stats with rarity scaling, level scaling and variation
         Object.entries(template.baseStats).forEach(([stat, value]) => {
-            const scaledValue = applyLevelScaling(value, itemLevel, finalRarity);
+            // First apply rarity scaling to base stats
+            const rarityScaledValue = applyRarityScaling(value, finalRarity);
+            // Then apply level scaling
+            const scaledValue = applyLevelScaling(rarityScaledValue, itemLevel, finalRarity);
             equipment.stats[stat] = applyStatVariation(scaledValue, finalRarity);
         });
 
@@ -218,11 +291,22 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
                 // Handle both string and object items
                 let itemName;
                 if (typeof item === 'string') {
-                    itemName = item;
+                    // Clean the item name - remove emojis, symbols, and extra spaces
+                    itemName = item
+                        .replace(/[⚔️🛡️💍👑📦]/g, '') // Remove equipment emojis
+                        .replace(/[💰]/g, '') // Remove gold emoji
+                        .replace(/gold'a satıldı/g, '') // Remove Turkish gold sold text
+                        .trim(); // Remove extra spaces
                 } else if (item && typeof item === 'object' && item.name) {
                     itemName = item.name;
                 } else {
                     console.warn('Invalid item format:', item);
+                    return;
+                }
+                
+                // Skip empty item names
+                if (!itemName || itemName.length === 0) {
+                    console.warn('Empty item name after cleaning:', item);
                     return;
                 }
                 
@@ -231,7 +315,7 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
                 if (generatedEquipment) {
                     equipment.push(generatedEquipment);
                 } else {
-                    console.warn(`No template found for equipment: ${itemName}`);
+                    console.warn(`No template found for equipment: "${itemName}"`);
                 }
             } catch (itemError) {
                 console.error(`Error processing item ${index}:`, itemError);
