@@ -16,8 +16,9 @@ import {
     ListItemIcon,
     Divider
 } from "@mui/material";
-import { Close, Warning, Refresh, Language, Home } from "@mui/icons-material";
+import { Close, Warning, Refresh, Language, Home, Save } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
+import { saveCurrentGame } from "../utils/saveManager.js";
 
 function Settings({ open, onClose }) {
     const navigate = useNavigate();
@@ -61,6 +62,15 @@ function Settings({ open, onClose }) {
         setShowHomeConfirm(false);
         onClose();
         navigate("/");
+    };
+
+    const handleManualSave = () => {
+        const success = saveCurrentGame();
+        if (success) {
+            alert('Oyun başarıyla kaydedildi!');
+        } else {
+            alert('Kaydetme sırasında bir hata oluştu.');
+        }
     };
 
     return (
@@ -179,6 +189,32 @@ function Settings({ open, onClose }) {
                         </Typography>
                         
                         <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                startIcon={<Save />}
+                                onClick={handleManualSave}
+                                sx={{
+                                    backgroundColor: '#2196f3',
+                                    border: '2px solid #1976d2',
+                                    borderRadius: 0,
+                                    fontFamily: 'Press Start 2P, monospace',
+                                    fontSize: '0.7rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    textShadow: '1px 1px 0px #000',
+                                    boxShadow: '0 0 0 1px #000, 0 2px 0 0 #1976d2',
+                                    padding: '0.75rem 1rem',
+                                    '&:hover': {
+                                        backgroundColor: '#1976d2',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #1976d2'
+                                    }
+                                }}
+                            >
+                                Oyunu Kaydet
+                            </Button>
+                            
                             <Button
                                 variant="contained"
                                 color="success"

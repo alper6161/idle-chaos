@@ -50,6 +50,7 @@ import { recordKill, isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
+import { saveCurrentGame } from "../utils/saveManager.js";
 
 function Battle({ player }) {
     const [battleMode, setBattleMode] = useState('selection'); // 'selection' or 'battle'
@@ -119,6 +120,11 @@ function Battle({ player }) {
                 setTimeout(() => {
                     setLastPotionUsed(null);
                 }, 2000);
+                
+                // Auto save after potion use
+                setTimeout(() => {
+                    saveCurrentGame();
+                }, 500);
             }
         }
     };
@@ -510,7 +516,14 @@ function Battle({ player }) {
                         
                         setCurrentBattle(newBattle);
                         startEnemySpawnTimer();
+                        
+                        // Auto save after successful battle
+                        setTimeout(() => {
+                            saveCurrentGame();
+                        }, 1000);
                     } else if (battleResult.winner === 'enemy') {
+                        // Auto save before death
+                        saveCurrentGame();
                         showDeathDialog();
                     }
                     return prev;
