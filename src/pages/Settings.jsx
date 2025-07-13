@@ -76,8 +76,12 @@ function Settings({ open, onClose }) {
                         backgroundColor: '#2a2a4a',
                         border: '2px solid #4a4a6a',
                         borderRadius: 0,
-                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #2a2a4a'
+                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #2a2a4a',
+                        zIndex: 1300
                     }
+                }}
+                sx={{
+                    zIndex: 1300
                 }}
             >
                 <DialogTitle sx={{ 
@@ -87,7 +91,8 @@ function Settings({ open, onClose }) {
                     textShadow: '2px 2px 0px #000',
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    padding: '1rem'
                 }}>
                     {t('common.settings')}
                     <IconButton 
@@ -105,13 +110,15 @@ function Settings({ open, onClose }) {
                     color: '#e0e0e0',
                     fontFamily: 'Press Start 2P, monospace',
                     fontSize: '0.8rem',
-                    textShadow: '1px 1px 0px #000'
+                    textShadow: '1px 1px 0px #000',
+                    padding: '1rem'
                 }}>
                     <Box sx={{ mt: 2 }}>
                         <Typography variant="h6" gutterBottom sx={{ 
                             color: '#96ceb4',
                             fontSize: '0.9rem',
-                            textShadow: '1px 1px 0px #000'
+                            textShadow: '1px 1px 0px #000',
+                            mb: 2
                         }}>
                             {t('common.language')}
                         </Typography>
@@ -127,6 +134,7 @@ function Settings({ open, onClose }) {
                                         border: getCurrentLanguage() === lang.code ? '2px solid #96ceb4' : '2px solid transparent',
                                         borderRadius: 1,
                                         mb: 1,
+                                        padding: '0.75rem',
                                         '&:hover': {
                                             backgroundColor: 'rgba(150, 206, 180, 0.1)',
                                             borderColor: '#96ceb4'
@@ -164,12 +172,39 @@ function Settings({ open, onClose }) {
                         <Typography variant="h6" gutterBottom sx={{ 
                             color: '#ff6b6b',
                             fontSize: '0.9rem',
-                            textShadow: '1px 1px 0px #000'
+                            textShadow: '1px 1px 0px #000',
+                            mb: 2
                         }}>
                             {t('common.gameOptions')}
                         </Typography>
                         
-                        <Box sx={{ mt: 3 }}>
+                        <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Button
+                                variant="contained"
+                                color="success"
+                                startIcon={<Home />}
+                                onClick={handleHomeClick}
+                                sx={{
+                                    backgroundColor: '#96ceb4',
+                                    border: '2px solid #88c196',
+                                    borderRadius: 0,
+                                    fontFamily: 'Press Start 2P, monospace',
+                                    fontSize: '0.7rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    textShadow: '1px 1px 0px #000',
+                                    boxShadow: '0 0 0 1px #000, 0 2px 0 0 #88c196',
+                                    padding: '0.75rem 1rem',
+                                    '&:hover': {
+                                        backgroundColor: '#88c196',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #88c196'
+                                    }
+                                }}
+                            >
+                                {t('common.homeScreen')}
+                            </Button>
+                            
                             <Button
                                 variant="contained"
                                 color="error"
@@ -185,6 +220,7 @@ function Settings({ open, onClose }) {
                                     letterSpacing: '1px',
                                     textShadow: '1px 1px 0px #000',
                                     boxShadow: '0 0 0 1px #000, 0 2px 0 0 #ff4444',
+                                    padding: '0.75rem 1rem',
                                     '&:hover': {
                                         backgroundColor: '#ff4444',
                                         transform: 'translateY(-2px)',
@@ -198,7 +234,8 @@ function Settings({ open, onClose }) {
                             <Typography variant="body2" sx={{ 
                                 mt: 1,
                                 color: '#888',
-                                fontSize: '0.6rem'
+                                fontSize: '0.6rem',
+                                textAlign: 'center'
                             }}>
                                 {t('common.clearDataDescription')}
                             </Typography>
@@ -210,39 +247,6 @@ function Settings({ open, onClose }) {
                     padding: '1rem',
                     borderTop: '2px solid #4a4a6a'
                 }}>
-                    <Button 
-                        onClick={handleHomeClick}
-                        startIcon={<Home />}
-                        sx={{
-                            color: '#e0e0e0',
-                            fontFamily: 'Press Start 2P, monospace',
-                            fontSize: '0.7rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px',
-                            textShadow: '1px 1px 0px #000',
-                            '&:hover': {
-                                color: '#96ceb4'
-                            }
-                        }}
-                    >
-                        {t('common.homeScreen')}
-                    </Button>
-                    <Button 
-                        onClick={onClose}
-                        sx={{
-                            color: '#e0e0e0',
-                            fontFamily: 'Press Start 2P, monospace',
-                            fontSize: '0.7rem',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px',
-                            textShadow: '1px 1px 0px #000',
-                            '&:hover': {
-                                color: '#96ceb4'
-                            }
-                        }}
-                    >
-                        {t('common.cancel')}
-                    </Button>
                 </DialogActions>
             </Dialog>
 
@@ -257,8 +261,12 @@ function Settings({ open, onClose }) {
                         backgroundColor: '#2a2a4a',
                         border: '2px solid #ff6b6b',
                         borderRadius: 0,
-                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #ff6b6b'
+                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #ff6b6b',
+                        zIndex: 1400
                     }
+                }}
+                sx={{
+                    zIndex: 1400
                 }}
             >
                 <DialogTitle sx={{ 
@@ -268,7 +276,8 @@ function Settings({ open, onClose }) {
                     textShadow: '2px 2px 0px #000',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1,
+                    padding: '1rem'
                 }}>
                     <Warning sx={{ color: '#ff6b6b' }} />
                     {t('common.clearData')}
@@ -278,7 +287,8 @@ function Settings({ open, onClose }) {
                     color: '#e0e0e0',
                     fontFamily: 'Press Start 2P, monospace',
                     fontSize: '0.8rem',
-                    textShadow: '1px 1px 0px #000'
+                    textShadow: '1px 1px 0px #000',
+                    padding: '1rem'
                 }}>
                     <Alert severity="warning" sx={{ 
                         mt: 2,
@@ -296,7 +306,9 @@ function Settings({ open, onClose }) {
                 
                 <DialogActions sx={{ 
                     padding: '1rem',
-                    borderTop: '2px solid #ff6b6b'
+                    borderTop: '2px solid #ff6b6b',
+                    display: 'flex',
+                    justifyContent: 'space-between'
                 }}>
                     <Button 
                         onClick={handleResetCancel}
@@ -351,8 +363,12 @@ function Settings({ open, onClose }) {
                         backgroundColor: '#2a2a4a',
                         border: '2px solid #96ceb4',
                         borderRadius: 0,
-                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #96ceb4'
+                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #96ceb4',
+                        zIndex: 1400
                     }
+                }}
+                sx={{
+                    zIndex: 1400
                 }}
             >
                 <DialogTitle sx={{ 
@@ -362,7 +378,8 @@ function Settings({ open, onClose }) {
                     textShadow: '2px 2px 0px #000',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1,
+                    padding: '1rem'
                 }}>
                     <Home sx={{ color: '#96ceb4' }} />
                     {t('common.homeScreen')}
@@ -372,7 +389,8 @@ function Settings({ open, onClose }) {
                     color: '#e0e0e0',
                     fontFamily: 'Press Start 2P, monospace',
                     fontSize: '0.8rem',
-                    textShadow: '1px 1px 0px #000'
+                    textShadow: '1px 1px 0px #000',
+                    padding: '1rem'
                 }}>
                     <Alert severity="info" sx={{ 
                         mt: 2,
@@ -390,7 +408,9 @@ function Settings({ open, onClose }) {
                 
                 <DialogActions sx={{ 
                     padding: '1rem',
-                    borderTop: '2px solid #96ceb4'
+                    borderTop: '2px solid #96ceb4',
+                    display: 'flex',
+                    justifyContent: 'space-between'
                 }}>
                     <Button 
                         onClick={handleHomeCancel}
