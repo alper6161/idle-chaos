@@ -2,6 +2,7 @@
 // Handles skill experience gain based on battle actions
 
 import { INITIAL_SKILLS } from './constants.js';
+import { applyExperienceMultiplier } from './buffUtils.js';
 
 // Skill experience requirements (XP needed for each level)
 const SKILL_XP_REQUIREMENTS = {
@@ -218,7 +219,8 @@ export const calculateBattleActionXP = (action, damage = 0, isCritical = false, 
 
 // Award XP for battle actions
 export const awardBattleActionXP = (action, damage = 0, isCritical = false, isHit = true) => {
-    const xpAmount = calculateBattleActionXP(action, damage, isCritical, isHit);
+    const baseXP = calculateBattleActionXP(action, damage, isCritical, isHit);
+    const xpAmount = applyExperienceMultiplier(baseXP);
     const skillsToAward = BATTLE_ACTION_SKILLS[action] || [];
     
     let leveledUp = false;

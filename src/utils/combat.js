@@ -1,4 +1,4 @@
-import { applyDropRateMultiplier, applyGoldMultiplier, applyDamageMultiplier } from './buffUtils.js';
+import { applyGoldMultiplier, applyDamageMultiplier } from './buffUtils.js';
 
 export function getCombatStats(player, enemy) {
   const playerATK = player?.ATK || 10;
@@ -45,10 +45,7 @@ export function getLootDrop(drops) {
   // Apply drop rate and gold buffs using imported functions
   
   drops.forEach(drop => {
-    // Apply drop rate buff to increase drop chances
-    const buffedChance = applyDropRateMultiplier(drop.chance);
-    
-    if (Math.random() < buffedChance) {
+    if (Math.random() < drop.chance) {
       if (drop.type === "equipment") {
         items.push(drop.name);
       } else if (drop.type === "gold") {

@@ -44,8 +44,6 @@ export const getBuffMultiplier = (buffType) => {
     switch(buffType) {
         case 'gold':
             return 3; // +200% = 3x multiplier
-        case 'drop_rate':
-            return 1.5; // +50% = 1.5x multiplier
         case 'experience':
             return 2; // +100% = 2x multiplier
         case 'damage':
@@ -62,11 +60,6 @@ export const getBuffMultiplier = (buffType) => {
 export const applyGoldMultiplier = (goldAmount) => {
     const multiplier = getBuffMultiplier('gold');
     return Math.floor(goldAmount * multiplier);
-};
-
-export const applyDropRateMultiplier = (dropChance) => {
-    const multiplier = getBuffMultiplier('drop_rate');
-    return Math.min(1, dropChance * multiplier); // Cap at 100%
 };
 
 export const applyExperienceMultiplier = (expAmount) => {

@@ -37,18 +37,6 @@ import styles from "../assets/styles/Store.module.scss";
 
 const STORE_ITEMS = [
     {
-        id: 'rare_drop_boost',
-        name: 'Rare Drop Boost',
-        nameKey: 'store.rareDropBoost',
-        description: 'Increases rare item drop chance by 50%',
-        descriptionKey: 'store.rareDropBoostDesc',
-        icon: Diamond,
-        price: 500,
-        duration: 2 * 60 * 60 * 1000, // 2 hours in milliseconds
-        color: '#9c27b0',
-        type: 'drop_rate'
-    },
-    {
         id: 'exp_boost',
         name: 'Experience Boost',
         nameKey: 'store.expBoost',
