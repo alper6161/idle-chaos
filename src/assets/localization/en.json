@@ -39,7 +39,8 @@
     "currentEquipment": "Current Equipment",
     "newEquipment": "New Equipment",
     "noItemsFound": "No items found matching your criteria",
-    "inventory": "Inventory"
+    "inventory": "Inventory",
+    "close": "Close"
   },
   "battle": {
     "playerWins": "Player wins!",

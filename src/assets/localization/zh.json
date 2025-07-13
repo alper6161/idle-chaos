@@ -39,7 +39,8 @@
     "currentEquipment": "当前装备",
     "newEquipment": "新装备",
     "noItemsFound": "未找到符合您条件的物品",
-    "inventory": "背包"
+    "inventory": "背包",
+    "close": "关闭"
   },
   "battle": {
     "playerWins": "玩家获胜！",

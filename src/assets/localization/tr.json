@@ -39,7 +39,8 @@
     "currentEquipment": "Mevcut Ekipman",
     "newEquipment": "Yeni Ekipman",
     "noItemsFound": "Kriterlerinizle eşleşen eşya bulunamadı",
-    "inventory": "Envanter"
+    "inventory": "Envanter",
+    "close": "Kapat"
   },
   "battle": {
     "playerWins": "Oyuncu kazandı!",
