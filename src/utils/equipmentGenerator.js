@@ -46,6 +46,134 @@ const EQUIPMENT_TEMPLATES = {
         baseStats: { ATK: 22, CRIT_CHANCE: 15, CRIT_DAMAGE: 35, FIRE_DAMAGE: 12 }
     },
     
+    // NEW MELEE WEAPONS
+    "Wolf Fang Dagger": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "uncommon",
+        baseStats: { ATK: 7, CRIT_CHANCE: 10, ATTACK_SPEED: 0.3 }
+    },
+    "Zombie Hand Dagger": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "uncommon",
+        baseStats: { ATK: 6, CRIT_CHANCE: 8, POISON_DAMAGE: 5 }
+    },
+    "Bandit Dagger": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "rare",
+        baseStats: { ATK: 9, CRIT_CHANCE: 15, ATTACK_SPEED: 0.4 }
+    },
+    "Lizardman Spear": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "rare",
+        baseStats: { ATK: 11, CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
+    },
+    "Bee Stinger Dagger": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "uncommon",
+        baseStats: { ATK: 5, CRIT_CHANCE: 12, POISON_DAMAGE: 8 }
+    },
+    "Cultist Staff": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "rare",
+        baseStats: { ATK: 8, CRIT_CHANCE: 6, SHADOW_DAMAGE: 10 }
+    },
+    "Gargoyle Claw": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "epic",
+        baseStats: { ATK: 14, CRIT_CHANCE: 10, CRIT_DAMAGE: 18 }
+    },
+    "Harpy Talon": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "rare",
+        baseStats: { ATK: 10, CRIT_CHANCE: 12, ATTACK_SPEED: 0.4 }
+    },
+    "Minotaur Axe": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "epic",
+        baseStats: { ATK: 16, CRIT_CHANCE: 8, CRIT_DAMAGE: 25 }
+    },
+    "Wraith Blade": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "epic",
+        baseStats: { ATK: 13, CRIT_CHANCE: 10, SHADOW_DAMAGE: 15 }
+    },
+    "Werewolf Claw": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "epic",
+        baseStats: { ATK: 12, CRIT_CHANCE: 15, ATTACK_SPEED: 0.5 }
+    },
+    "Golem Fist": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "epic",
+        baseStats: { ATK: 18, CRIT_CHANCE: 6, CRIT_DAMAGE: 20 }
+    },
+    "Vampire Fang": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "epic",
+        baseStats: { ATK: 11, CRIT_CHANCE: 12, LIFE_STEAL: 8 }
+    },
+    "Chimera Claw": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "epic",
+        baseStats: { ATK: 15, CRIT_CHANCE: 10, CRIT_DAMAGE: 22 }
+    },
+    "Hydra Fang": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "legendary",
+        baseStats: { ATK: 20, CRIT_CHANCE: 12, POISON_DAMAGE: 20 }
+    },
+    "Demon Blade": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "legendary",
+        baseStats: { ATK: 24, CRIT_CHANCE: 15, FIRE_DAMAGE: 18 }
+    },
+    "Lich Staff": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "legendary",
+        baseStats: { ATK: 18, CRIT_CHANCE: 12, SHADOW_DAMAGE: 25 }
+    },
+    "Manticore Stinger": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "legendary",
+        baseStats: { ATK: 22, CRIT_CHANCE: 18, POISON_DAMAGE: 30 }
+    },
+    "Demon Lord Blade": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "legendary",
+        baseStats: { ATK: 28, CRIT_CHANCE: 20, FIRE_DAMAGE: 25 }
+    },
+    "Void Scythe": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "legendary",
+        baseStats: { ATK: 30, CRIT_CHANCE: 25, SHADOW_DAMAGE: 35 }
+    },
+    "Celestial Blade": {
+        type: "weapon",
+        weaponType: "melee",
+        rarity: "legendary",
+        baseStats: { ATK: 32, CRIT_CHANCE: 22, LIGHT_DAMAGE: 30 }
+    },
+    
     // Ranged Weapons
     "Rat Fang Bow": {
         type: "weapon",
@@ -82,6 +210,26 @@ const EQUIPMENT_TEMPLATES = {
         weaponType: "ranged",
         rarity: "legendary",
         baseStats: { ATK: 24, CRIT_CHANCE: 18, CRIT_DAMAGE: 40, ATTACK_SPEED: 0.5 }
+    },
+    
+    // NEW RANGED WEAPONS
+    "Bandit Bow": {
+        type: "weapon",
+        weaponType: "ranged",
+        rarity: "rare",
+        baseStats: { ATK: 10, CRIT_CHANCE: 12, ATTACK_SPEED: 0.3 }
+    },
+    "Demon Lord Bow": {
+        type: "weapon",
+        weaponType: "ranged",
+        rarity: "legendary",
+        baseStats: { ATK: 26, CRIT_CHANCE: 20, FIRE_DAMAGE: 20 }
+    },
+    "Celestial Bow": {
+        type: "weapon",
+        weaponType: "ranged",
+        rarity: "legendary",
+        baseStats: { ATK: 28, CRIT_CHANCE: 22, LIGHT_DAMAGE: 25 }
     },
     
     // Magic Weapons
@@ -122,6 +270,20 @@ const EQUIPMENT_TEMPLATES = {
         baseStats: { ATK: 23, CRIT_CHANCE: 16, CRIT_DAMAGE: 38, ATTACK_SPEED: 0.4 }
     },
     
+    // NEW MAGIC WEAPONS
+    "Demon Lord Staff": {
+        type: "weapon",
+        weaponType: "magic",
+        rarity: "legendary",
+        baseStats: { ATK: 25, CRIT_CHANCE: 18, FIRE_DAMAGE: 22 }
+    },
+    "Celestial Staff": {
+        type: "weapon",
+        weaponType: "magic",
+        rarity: "legendary",
+        baseStats: { ATK: 27, CRIT_CHANCE: 20, LIGHT_DAMAGE: 28 }
+    },
+    
     // Armor and Accessories
     "Slime Shield": {
         type: "shield",
@@ -142,6 +304,28 @@ const EQUIPMENT_TEMPLATES = {
         type: "chest",
         rarity: "legendary",
         baseStats: { DEF: 18, HEALTH: 60, FIRE_RESISTANCE: 25 }
+    },
+    
+    // NEW ARMOR AND ACCESSORIES
+    "Bat Wing Cloak": {
+        type: "cape",
+        rarity: "uncommon",
+        baseStats: { DEF: 3, DODGE: 15, ATTACK_SPEED: 0.2 }
+    },
+    "Wolf Hide Armor": {
+        type: "chest",
+        rarity: "uncommon",
+        baseStats: { DEF: 6, HEALTH: 20, DODGE: 5 }
+    },
+    "Lizardman Scale Armor": {
+        type: "chest",
+        rarity: "rare",
+        baseStats: { DEF: 10, HEALTH: 30, POISON_RESISTANCE: 15 }
+    },
+    "Dark Robe": {
+        type: "chest",
+        rarity: "rare",
+        baseStats: { DEF: 7, HEALTH: 25, SHADOW_RESISTANCE: 20 }
     }
 };
 
@@ -214,54 +398,93 @@ const getRandomAdditionalStats = (equipmentType, rarity) => {
 };
 
 export const generateEquipmentFromName = (equipmentName) => {
-    const template = EQUIPMENT_TEMPLATES[equipmentName];
-    
-    if (!template) {
-        console.warn(`No template found for equipment: ${equipmentName}`);
+    try {
+        if (!equipmentName || typeof equipmentName !== 'string') {
+            console.warn('Invalid equipment name:', equipmentName);
+            return null;
+        }
+        
+        const template = EQUIPMENT_TEMPLATES[equipmentName];
+        
+        if (!template) {
+            console.warn(`No template found for equipment: ${equipmentName}`);
+            return null;
+        }
+
+        const equipment = {
+            id: generateEquipmentId(),
+            name: equipmentName,
+            type: template.type,
+            rarity: template.rarity,
+            stats: {}
+        };
+
+        // Add weaponType if it exists
+        if (template.weaponType) {
+            equipment.weaponType = template.weaponType;
+        }
+
+        // Apply base stats with variation
+        Object.entries(template.baseStats).forEach(([stat, value]) => {
+            equipment.stats[stat] = applyStatVariation(value, template.rarity);
+        });
+
+        // Add random additional stats
+        const additionalStats = getRandomAdditionalStats(template.type, template.rarity);
+        Object.assign(equipment.stats, additionalStats);
+
+        return equipment;
+    } catch (error) {
+        console.error('Error in generateEquipmentFromName:', error);
         return null;
     }
-
-    const equipment = {
-        id: generateEquipmentId(),
-        name: equipmentName,
-        type: template.type,
-        rarity: template.rarity,
-        stats: {}
-    };
-
-    // Add weaponType if it exists
-    if (template.weaponType) {
-        equipment.weaponType = template.weaponType;
-    }
-
-    // Apply base stats with variation
-    Object.entries(template.baseStats).forEach(([stat, value]) => {
-        equipment.stats[stat] = applyStatVariation(value, template.rarity);
-    });
-
-    // Add random additional stats
-    const additionalStats = getRandomAdditionalStats(template.type, template.rarity);
-    Object.assign(equipment.stats, additionalStats);
-
-    return equipment;
 };
 
 export const convertLootBagToEquipment = (lootBagItems) => {
     const equipment = [];
     
-    lootBagItems.forEach(itemName => {
-        // Skip gold items
-        if (itemName.includes('💰') || itemName.includes('gold')) {
-            return;
+    try {
+        // Ensure lootBagItems is an array
+        if (!Array.isArray(lootBagItems)) {
+            console.warn('lootBagItems is not an array:', lootBagItems);
+            return equipment;
         }
         
-        const generatedEquipment = generateEquipmentFromName(itemName);
-        if (generatedEquipment) {
-            equipment.push(generatedEquipment);
-        }
-    });
-    
-    return equipment;
+        lootBagItems.forEach((item, index) => {
+            try {
+                // Skip gold items
+                if (typeof item === 'string' && (item.includes('💰') || item.includes('gold'))) {
+                    return;
+                }
+                
+                // Handle both string and object items
+                let itemName;
+                if (typeof item === 'string') {
+                    itemName = item;
+                } else if (item && typeof item === 'object' && item.name) {
+                    itemName = item.name;
+                } else {
+                    console.warn('Invalid item format:', item);
+                    return;
+                }
+                
+                const generatedEquipment = generateEquipmentFromName(itemName);
+                
+                if (generatedEquipment) {
+                    equipment.push(generatedEquipment);
+                } else {
+                    console.warn(`No template found for equipment: ${itemName}`);
+                }
+            } catch (itemError) {
+                console.error(`Error processing item ${index}:`, itemError);
+            }
+        });
+        
+        return equipment;
+    } catch (error) {
+        console.error('Error in convertLootBagToEquipment:', error);
+        return equipment;
+    }
 };
 
 export const clearProcessedLootBag = () => {

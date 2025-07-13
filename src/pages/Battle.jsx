@@ -229,17 +229,29 @@ function Battle({ player }) {
     };
 
     const getDifficultyColor = (enemy) => {
-        if (enemy.maxHp <= 25) return '#4caf50'; // Easy - Green
-        if (enemy.maxHp <= 50) return '#ff9800'; // Medium - Orange
-        if (enemy.maxHp <= 80) return '#f44336'; // Hard - Red
-        return '#9c27b0'; // Very Hard - Purple
+        // Easy enemies (HP <= 40)
+        if (enemy.maxHp <= 40) return '#4caf50'; // Easy - Green
+        // Normal enemies (HP 41-90)
+        if (enemy.maxHp <= 90) return '#ff9800'; // Normal - Orange
+        // Hard enemies (HP 91-130)
+        if (enemy.maxHp <= 130) return '#f44336'; // Hard - Red
+        // Very Hard enemies (HP 131-200)
+        if (enemy.maxHp <= 200) return '#9c27b0'; // Very Hard - Purple
+        // Impossible enemies (HP > 200)
+        return '#212121'; // Impossible - Dark Gray/Black
     };
 
     const getDifficultyText = (enemy) => {
-        if (enemy.maxHp <= 25) return 'Easy';
-        if (enemy.maxHp <= 50) return 'Medium';
-        if (enemy.maxHp <= 80) return 'Hard';
-        return 'Very Hard';
+        // Easy enemies (HP <= 40)
+        if (enemy.maxHp <= 40) return 'Easy';
+        // Normal enemies (HP 41-90)
+        if (enemy.maxHp <= 90) return 'Normal';
+        // Hard enemies (HP 91-130)
+        if (enemy.maxHp <= 130) return 'Hard';
+        // Very Hard enemies (HP 131-200)
+        if (enemy.maxHp <= 200) return 'Very Hard';
+        // Impossible enemies (HP > 200)
+        return 'Impossible';
     };
 
     // Achievement-based stat display functions
@@ -252,11 +264,20 @@ function Battle({ player }) {
         }
     };
 
+    // Helper to display enemy HP safely
+    const getEnemyHpDisplay = (enemyId, current, max) => {
+        return getStatDisplay(enemyId, 'hp', max) === "" ? "???" : `${current}/${max}`;
+    };
+
     const getThresholdForStat = (statType) => {
         switch (statType) {
             case 'hp': return 10;
             case 'atk': return 25;
             case 'def': return 50;
+            case 'attack_speed': return 25; // ATK ile birlikte açılsın
+            case 'crit_chance': return 25; // ATK ile birlikte açılsın
+            case 'crit_damage': return 25; // ATK ile birlikte açılsın
+            case 'hit_chance': return 25; // ATK ile birlikte açılsın
             default: return 100;
         }
     };
@@ -367,9 +388,31 @@ function Battle({ player }) {
                             setPlayerGold(newGold);
                         }
                         
-                        setLootBag(prev => [...prev, ...newLoot]);
+                        setLootBag(prev => {
+                            const updated = [...prev, ...newLoot];
+                            localStorage.setItem("lootBag", JSON.stringify(updated));
+                            return updated;
+                        });
                         saveLoot(lootResult.items);
-                        
+
+                        // --- INVENTORY'Yİ DE GÜNCELLE ---
+                        try {
+                            // Sadece ekipmanları inventory'ye ekle (gold item'ları hariç)
+                            const equipmentLoot = lootResult.items;
+                            const STORAGE_KEY = 'idle-chaos-inventory';
+                            const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                            // Eşsiz ID'ye göre tekrar eklemeyi önle
+                            const existingIds = new Set(currentInventory.map(item => item.id));
+                            const uniqueNewEquipment = equipmentLoot.filter(item => !existingIds.has(item.id));
+                            if (uniqueNewEquipment.length > 0) {
+                                const updatedInventory = [...currentInventory, ...uniqueNewEquipment];
+                                localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedInventory));
+                            }
+                        } catch (err) {
+                            console.error('Inventory güncellenirken hata:', err);
+                        }
+                        // --- SONU ---
+
                         // Add loot and achievement messages to battle log
                         const battleLogMessages = [
                             {
@@ -723,11 +766,11 @@ function Battle({ player }) {
                                         getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
                                     }`}
                                 >
-                                    HP: {currentBattle?.enemy?.currentHealth || getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp)}/{getStatDisplay(currentEnemy?.id, 'hp', currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
+                                    HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
                                 </Typography>
                                 <LinearProgress
                                     variant="determinate"
-                                    value={currentBattle ? (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100 : 100}
+                                    value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100) : 100}
                                     className={`${styles.progress} ${styles.enemyHpBar}`}
                                 />
                             </div>
@@ -1043,20 +1086,20 @@ function Battle({ player }) {
                                 🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
                             </Typography>
                             <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? "???" : `${currentBattle.enemy.currentHealth}/${currentBattle.enemy.maxHp}`}
+                                ❤️ {t('battle.health')}: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
                             </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ⚡ {t('battle.attackSpeed')}: {currentBattle.enemy.ATTACK_SPEED}
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ⚡ {t('battle.attackSpeed')}: {getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
                             </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🎯 {t('battle.criticalChance')}: {currentBattle.enemy.CRIT_CHANCE || 3}%
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🎯 {t('battle.criticalChance')}: {getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? "" : `${currentBattle.enemy.CRIT_CHANCE || 3}%`}
                             </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                💥 {t('battle.criticalDamage')}: {currentBattle.enemy.CRIT_DAMAGE || 120}%
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                💥 {t('battle.criticalDamage')}: {getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? "" : `${currentBattle.enemy.CRIT_DAMAGE || 120}%`}
                             </Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🎲 {t('battle.hitChance')}: {getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? "" : `${calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%`}
                             </Typography>
                             {(() => {
                                 const damageRange = calculateDamageRange(currentBattle.enemy.ATK, currentBattle.player.DEF);
@@ -1067,10 +1110,10 @@ function Battle({ player }) {
                                 return (
                                     <>
                                         <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ⚔️ {t('battle.baseDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "???" : `${damageRange.min}-${damageRange.max}`}
+                                            ⚔️ {t('battle.baseDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${damageRange.min}-${damageRange.max}`}
                                         </Typography>
                                         <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            💥 {t('battle.critDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "???" : `${critDamageRange.min}-${critDamageRange.max}`}
+                                            💥 {t('battle.critDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${critDamageRange.min}-${critDamageRange.max}`}
                                         </Typography>
                                     </>
                                 );
@@ -1085,7 +1128,7 @@ function Battle({ player }) {
                                 🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF)}
                             </Typography>
                             <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "???" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
+                                ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
                             </Typography>
                             <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
                                 ⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}
@@ -1097,7 +1140,7 @@ function Battle({ player }) {
                                 💥 {t('battle.criticalDamage')}: 120%
                             </Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
                                 🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
                             </Typography>
                             <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>

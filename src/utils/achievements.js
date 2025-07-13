@@ -4,6 +4,7 @@ const ACHIEVEMENT_STORAGE_KEY = 'idle-chaos-achievements';
 
 // Achievement thresholds for each enemy type
 const ACHIEVEMENT_THRESHOLDS = {
+    // EASY ENEMIES (6)
     goblin: [
         { kills: 10, reward: 'unlock_hp', description: 'Goblin HP revealed' },
         { kills: 25, reward: 'unlock_atk', description: 'Goblin ATK revealed' },
@@ -22,17 +23,49 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 50, reward: 'unlock_def', description: 'Slime DEF revealed' },
         { kills: 100, reward: 'unlock_all', description: 'All Slime stats revealed' }
     ],
+    spider: [
+        { kills: 10, reward: 'unlock_hp', description: 'Spider HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Spider ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Spider DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Spider stats revealed' }
+    ],
+    bat: [
+        { kills: 10, reward: 'unlock_hp', description: 'Bat HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Bat ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Bat DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Bat stats revealed' }
+    ],
     skeleton: [
         { kills: 10, reward: 'unlock_hp', description: 'Skeleton HP revealed' },
         { kills: 25, reward: 'unlock_atk', description: 'Skeleton ATK revealed' },
         { kills: 50, reward: 'unlock_def', description: 'Skeleton DEF revealed' },
         { kills: 100, reward: 'unlock_all', description: 'All Skeleton stats revealed' }
     ],
+
+    // NORMAL ENEMIES (10)
     orc: [
         { kills: 10, reward: 'unlock_hp', description: 'Orc HP revealed' },
         { kills: 25, reward: 'unlock_atk', description: 'Orc ATK revealed' },
         { kills: 50, reward: 'unlock_def', description: 'Orc DEF revealed' },
         { kills: 100, reward: 'unlock_all', description: 'All Orc stats revealed' }
+    ],
+    wolf: [
+        { kills: 10, reward: 'unlock_hp', description: 'Wolf HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Wolf ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Wolf DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Wolf stats revealed' }
+    ],
+    zombie: [
+        { kills: 10, reward: 'unlock_hp', description: 'Zombie HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Zombie ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Zombie DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Zombie stats revealed' }
+    ],
+    bandit: [
+        { kills: 10, reward: 'unlock_hp', description: 'Bandit HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Bandit ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Bandit DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Bandit stats revealed' }
     ],
     troll: [
         { kills: 10, reward: 'unlock_hp', description: 'Troll HP revealed' },
@@ -40,6 +73,128 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 50, reward: 'unlock_def', description: 'Troll DEF revealed' },
         { kills: 100, reward: 'unlock_all', description: 'All Troll stats revealed' }
     ],
+    lizardman: [
+        { kills: 10, reward: 'unlock_hp', description: 'Lizardman HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Lizardman ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Lizardman DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Lizardman stats revealed' }
+    ],
+    giant_bee: [
+        { kills: 10, reward: 'unlock_hp', description: 'Giant Bee HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Giant Bee ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Giant Bee DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Giant Bee stats revealed' }
+    ],
+    cultist: [
+        { kills: 10, reward: 'unlock_hp', description: 'Cultist HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Cultist ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Cultist DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Cultist stats revealed' }
+    ],
+    gargoyle: [
+        { kills: 10, reward: 'unlock_hp', description: 'Gargoyle HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Gargoyle ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Gargoyle DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Gargoyle stats revealed' }
+    ],
+    harpy: [
+        { kills: 10, reward: 'unlock_hp', description: 'Harpy HP revealed' },
+        { kills: 25, reward: 'unlock_atk', description: 'Harpy ATK revealed' },
+        { kills: 50, reward: 'unlock_def', description: 'Harpy DEF revealed' },
+        { kills: 100, reward: 'unlock_all', description: 'All Harpy stats revealed' }
+    ],
+
+    // HARD ENEMIES (6)
+    minotaur: [
+        { kills: 5, reward: 'unlock_hp', description: 'Minotaur HP revealed' },
+        { kills: 15, reward: 'unlock_atk', description: 'Minotaur ATK revealed' },
+        { kills: 30, reward: 'unlock_def', description: 'Minotaur DEF revealed' },
+        { kills: 50, reward: 'unlock_all', description: 'All Minotaur stats revealed' }
+    ],
+    wraith: [
+        { kills: 5, reward: 'unlock_hp', description: 'Wraith HP revealed' },
+        { kills: 15, reward: 'unlock_atk', description: 'Wraith ATK revealed' },
+        { kills: 30, reward: 'unlock_def', description: 'Wraith DEF revealed' },
+        { kills: 50, reward: 'unlock_all', description: 'All Wraith stats revealed' }
+    ],
+    werewolf: [
+        { kills: 5, reward: 'unlock_hp', description: 'Werewolf HP revealed' },
+        { kills: 15, reward: 'unlock_atk', description: 'Werewolf ATK revealed' },
+        { kills: 30, reward: 'unlock_def', description: 'Werewolf DEF revealed' },
+        { kills: 50, reward: 'unlock_all', description: 'All Werewolf stats revealed' }
+    ],
+    golem: [
+        { kills: 5, reward: 'unlock_hp', description: 'Golem HP revealed' },
+        { kills: 15, reward: 'unlock_atk', description: 'Golem ATK revealed' },
+        { kills: 30, reward: 'unlock_def', description: 'Golem DEF revealed' },
+        { kills: 50, reward: 'unlock_all', description: 'All Golem stats revealed' }
+    ],
+    vampire: [
+        { kills: 5, reward: 'unlock_hp', description: 'Vampire HP revealed' },
+        { kills: 15, reward: 'unlock_atk', description: 'Vampire ATK revealed' },
+        { kills: 30, reward: 'unlock_def', description: 'Vampire DEF revealed' },
+        { kills: 50, reward: 'unlock_all', description: 'All Vampire stats revealed' }
+    ],
+    chimera: [
+        { kills: 5, reward: 'unlock_hp', description: 'Chimera HP revealed' },
+        { kills: 15, reward: 'unlock_atk', description: 'Chimera ATK revealed' },
+        { kills: 30, reward: 'unlock_def', description: 'Chimera DEF revealed' },
+        { kills: 50, reward: 'unlock_all', description: 'All Chimera stats revealed' }
+    ],
+
+    // VERY HARD ENEMIES (4)
+    hydra: [
+        { kills: 3, reward: 'unlock_hp', description: 'Hydra HP revealed' },
+        { kills: 10, reward: 'unlock_atk', description: 'Hydra ATK revealed' },
+        { kills: 20, reward: 'unlock_def', description: 'Hydra DEF revealed' },
+        { kills: 30, reward: 'unlock_all', description: 'All Hydra stats revealed' }
+    ],
+    demon: [
+        { kills: 3, reward: 'unlock_hp', description: 'Demon HP revealed' },
+        { kills: 10, reward: 'unlock_atk', description: 'Demon ATK revealed' },
+        { kills: 20, reward: 'unlock_def', description: 'Demon DEF revealed' },
+        { kills: 30, reward: 'unlock_all', description: 'All Demon stats revealed' }
+    ],
+    lich: [
+        { kills: 3, reward: 'unlock_hp', description: 'Lich HP revealed' },
+        { kills: 10, reward: 'unlock_atk', description: 'Lich ATK revealed' },
+        { kills: 20, reward: 'unlock_def', description: 'Lich DEF revealed' },
+        { kills: 30, reward: 'unlock_all', description: 'All Lich stats revealed' }
+    ],
+    manticore: [
+        { kills: 3, reward: 'unlock_hp', description: 'Manticore HP revealed' },
+        { kills: 10, reward: 'unlock_atk', description: 'Manticore ATK revealed' },
+        { kills: 20, reward: 'unlock_def', description: 'Manticore DEF revealed' },
+        { kills: 30, reward: 'unlock_all', description: 'All Manticore stats revealed' }
+    ],
+
+    // IMPOSSIBLE ENEMIES (4)
+    ancient_dragon: [
+        { kills: 2, reward: 'unlock_hp', description: 'Ancient Dragon HP revealed' },
+        { kills: 5, reward: 'unlock_atk', description: 'Ancient Dragon ATK revealed' },
+        { kills: 10, reward: 'unlock_def', description: 'Ancient Dragon DEF revealed' },
+        { kills: 20, reward: 'unlock_all', description: 'All Ancient Dragon stats revealed' }
+    ],
+    archdemon: [
+        { kills: 2, reward: 'unlock_hp', description: 'Archdemon HP revealed' },
+        { kills: 5, reward: 'unlock_atk', description: 'Archdemon ATK revealed' },
+        { kills: 10, reward: 'unlock_def', description: 'Archdemon DEF revealed' },
+        { kills: 20, reward: 'unlock_all', description: 'All Archdemon stats revealed' }
+    ],
+    void_reaper: [
+        { kills: 2, reward: 'unlock_hp', description: 'Void Reaper HP revealed' },
+        { kills: 5, reward: 'unlock_atk', description: 'Void Reaper ATK revealed' },
+        { kills: 10, reward: 'unlock_def', description: 'Void Reaper DEF revealed' },
+        { kills: 20, reward: 'unlock_all', description: 'All Void Reaper stats revealed' }
+    ],
+    celestial_seraph: [
+        { kills: 2, reward: 'unlock_hp', description: 'Celestial Seraph HP revealed' },
+        { kills: 5, reward: 'unlock_atk', description: 'Celestial Seraph ATK revealed' },
+        { kills: 10, reward: 'unlock_def', description: 'Celestial Seraph DEF revealed' },
+        { kills: 20, reward: 'unlock_all', description: 'All Celestial Seraph stats revealed' }
+    ],
+
+    // LEGACY ENEMIES
     dragon: [
         { kills: 5, reward: 'unlock_hp', description: 'Dragon HP revealed' },
         { kills: 15, reward: 'unlock_atk', description: 'Dragon ATK revealed' },
@@ -51,12 +206,6 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 25, reward: 'unlock_atk', description: 'Ghost ATK revealed' },
         { kills: 50, reward: 'unlock_def', description: 'Ghost DEF revealed' },
         { kills: 100, reward: 'unlock_all', description: 'All Ghost stats revealed' }
-    ],
-    spider: [
-        { kills: 10, reward: 'unlock_hp', description: 'Spider HP revealed' },
-        { kills: 25, reward: 'unlock_atk', description: 'Spider ATK revealed' },
-        { kills: 50, reward: 'unlock_def', description: 'Spider DEF revealed' },
-        { kills: 100, reward: 'unlock_all', description: 'All Spider stats revealed' }
     ]
 };
 

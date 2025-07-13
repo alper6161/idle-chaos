@@ -5,7 +5,55 @@ export const saveGame = (game) => {
 
 export const getSkillIcon = (skill) => `/images/skills/${skill}.png`;
 
-export const getEnemyIcon = (enemy) => `/images/enemies/${enemy}.png`;
+export const getEnemyIcon = (enemyId) => {
+    const iconMap = {
+        // Existing enemies
+        goblin: "/images/enemies/goblin.png",
+        rat: "/images/enemies/rat.png",
+        slime: "/images/enemies/slime.png",
+        skeleton: "/images/enemies/skeleton.png",
+        orc: "/images/enemies/orc.png",
+        troll: "/images/enemies/troll.png",
+        dragon: "/images/enemies/dragon.png",
+        ghost: "/images/enemies/ghost.png",
+        spider: "/images/enemies/spider.png",
+        
+        // New Easy enemies
+        bat: "/images/enemies/bat.png",
+        
+        // New Normal enemies
+        wolf: "/images/enemies/wolf.png",
+        zombie: "/images/enemies/zombie.png",
+        bandit: "/images/enemies/bandit.png",
+        lizardman: "/images/enemies/lizardman.png",
+        giant_bee: "/images/enemies/giant_bee.png",
+        cultist: "/images/enemies/cultist.png",
+        gargoyle: "/images/enemies/gargoyle.png",
+        harpy: "/images/enemies/harpy.png",
+        
+        // New Hard enemies
+        minotaur: "/images/enemies/minotaur.png",
+        wraith: "/images/enemies/wraith.png",
+        werewolf: "/images/enemies/werewolf.png",
+        golem: "/images/enemies/golem.png",
+        vampire: "/images/enemies/vampire.png",
+        chimera: "/images/enemies/chimera.png",
+        
+        // New Very Hard enemies
+        hydra: "/images/enemies/hydra.png",
+        demon: "/images/enemies/demon.png",
+        lich: "/images/enemies/lich.png",
+        manticore: "/images/enemies/manticore.png",
+        
+        // New Impossible enemies
+        ancient_dragon: "/images/enemies/ancient_dragon.png",
+        archdemon: "/images/enemies/archdemon.png",
+        void_reaper: "/images/enemies/void_reaper.png",
+        celestial_seraph: "/images/enemies/celestial_seraph.png"
+    };
+    
+    return iconMap[enemyId] || "/images/enemies/goblin.png"; // Default fallback
+};
 
 export const getEnemyInitial = (enemyName) => enemyName.charAt(0).toUpperCase();
 

@@ -103,9 +103,30 @@ function Equipment() {
         loadFromStorage(STORAGE_KEYS.EQUIPPED_ITEMS, SAMPLE_EQUIPMENT)
     );
     const [selectedSlot, setSelectedSlot] = useState(null);
-    const [inventory, setInventory] = useState(() => 
-        loadFromStorage(STORAGE_KEYS.INVENTORY, SAMPLE_INVENTORY)
-    );
+    const [inventory, setInventory] = useState(() => {
+        const loadedInventory = loadFromStorage(STORAGE_KEYS.INVENTORY, SAMPLE_INVENTORY);
+        console.log('Loaded inventory:', loadedInventory); // DEBUG
+        
+        // Filter out invalid items
+        const validInventory = loadedInventory.filter(item => {
+            if (!item || typeof item !== 'object') {
+                console.warn('Invalid item found:', item);
+                return false;
+            }
+            if (!item.name || typeof item.name !== 'string') {
+                console.warn('Item without name found:', item);
+                return false;
+            }
+            if (!item.type || typeof item.type !== 'string') {
+                console.warn('Item without type found:', item);
+                return false;
+            }
+            return true;
+        });
+        
+        console.log('Valid inventory after filtering:', validInventory); // DEBUG
+        return validInventory;
+    });
     const [rarityFilter, setRarityFilter] = useState("all");
     const [typeFilter, setTypeFilter] = useState("all");
     const [replaceDialog, setReplaceDialog] = useState({
@@ -129,13 +150,18 @@ function Equipment() {
         const checkForNewLoot = () => {
             try {
                 const lootBag = JSON.parse(localStorage.getItem("lootBag") || "[]");
+                
                 if (lootBag.length > 0) {
+                    console.log('Processing lootBag items:', lootBag); // DEBUG
                     const newEquipment = convertLootBagToEquipment(lootBag);
-                    if (newEquipment.length > 0) {
+                    console.log('New equipment from loot:', newEquipment); // DEBUG
+                    
+                    if (newEquipment && newEquipment.length > 0) {
                         setInventory(prev => {
                             // Ensure unique IDs
                             const existingIds = new Set(prev.map(item => item.id));
                             const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
+                            console.log('Unique new equipment:', uniqueNewEquipment); // DEBUG
                             
                             // Mark new items for highlighting
                             if (uniqueNewEquipment.length > 0) {
@@ -146,15 +172,55 @@ function Equipment() {
                                 }, 5000);
                             }
                             
-                            return [...prev, ...uniqueNewEquipment];
+                            const updatedInventory = [...prev, ...uniqueNewEquipment];
+                            return updatedInventory;
                         });
                         clearProcessedLootBag(); // Clear loot bag after processing
                     }
                 }
             } catch (error) {
                 console.error('Error processing loot bag:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    lootBag: localStorage.getItem("lootBag")
+                });
             }
         };
+
+        // Clean inventory function
+        const cleanInventory = () => {
+            try {
+                const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVENTORY) || '[]');
+                
+                const validInventory = currentInventory.filter(item => {
+                    if (!item || typeof item !== 'object') {
+                        console.warn('Removing invalid item:', item);
+                        return false;
+                    }
+                    if (!item.name || typeof item.name !== 'string') {
+                        console.warn('Removing item without name:', item);
+                        return false;
+                    }
+                    if (!item.type || typeof item.type !== 'string') {
+                        console.warn('Removing item without type:', item);
+                        return false;
+                    }
+                    return true;
+                });
+                
+                if (validInventory.length !== currentInventory.length) {
+                    console.log('Cleaned inventory, removed', currentInventory.length - validInventory.length, 'invalid items');
+                    localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(validInventory));
+                    setInventory(validInventory);
+                }
+            } catch (error) {
+                console.error('Error cleaning inventory:', error);
+            }
+        };
+
+        // Clean inventory on mount
+        cleanInventory();
 
         // Check immediately and then every 2 seconds
         checkForNewLoot();
@@ -164,16 +230,15 @@ function Equipment() {
     }, []);
 
     // Clear old localStorage data to start fresh with weapon types
-    useEffect(() => {
-        const clearOldData = () => {
-            localStorage.removeItem(STORAGE_KEYS.INVENTORY);
-            localStorage.removeItem(STORAGE_KEYS.EQUIPPED_ITEMS);
-            console.log('Cleared old equipment data to start fresh with weapon types');
-        };
-        
-        // Uncomment the line below to clear old data (run once)
-        clearOldData();
-    }, []);
+    // useEffect(() => {
+    //     const clearOldData = () => {
+    //         localStorage.removeItem(STORAGE_KEYS.INVENTORY);
+    //         localStorage.removeItem(STORAGE_KEYS.EQUIPPED_ITEMS);
+    //         console.log('Cleared old equipment data to start fresh with weapon types');
+    //     };
+    //     // Uncomment the line below to clear old data (run once)
+    //     // clearOldData();
+    // }, []);
 
     const filteredInventory = inventory.filter(item => {
         const matchesRarity = rarityFilter === "all" || item.rarity === rarityFilter;
@@ -235,6 +300,7 @@ function Equipment() {
     };
 
     const getRarityColor = (rarity) => {
+        if (!rarity) return '#6b7280'; // Default to common if no rarity
         switch (rarity) {
             case "legendary": return "#ff6b35";
             case "epic": return "#b45af2";
@@ -246,6 +312,7 @@ function Equipment() {
     };
 
     const getRarityBorder = (rarity) => {
+        if (!rarity) return '#6b7280'; // Default to common if no rarity
         switch (rarity) {
             case "legendary": return "#ff6b35";
             case "epic": return "#b45af2";
@@ -287,6 +354,14 @@ function Equipment() {
     };
 
     const createComparisonTooltip = (inventoryItem) => {
+        // Güvenli kontroller ekle
+        if (!inventoryItem || !inventoryItem.name) {
+            console.warn('Invalid inventory item:', inventoryItem);
+            console.warn('Item type:', typeof inventoryItem);
+            console.warn('Item keys:', inventoryItem ? Object.keys(inventoryItem) : 'null/undefined');
+            return <div>Invalid item</div>;
+        }
+
         if (!selectedSlot || !equippedItems[selectedSlot]) {
             return (
                 <div className={styles.tooltipContent}>
@@ -295,7 +370,7 @@ function Equipment() {
                             {inventoryItem.name}
                         </Typography>
                         <Typography variant="caption" className={styles.tooltipRarity}>
-                            {inventoryItem.rarity.toUpperCase()}
+                            {(inventoryItem.rarity || 'common').toUpperCase()}
                         </Typography>
                         {inventoryItem.weaponType && (
                             <Typography variant="caption" className={styles.tooltipWeaponType}>
@@ -348,7 +423,7 @@ function Equipment() {
                         {inventoryItem.name}
                     </Typography>
                     <Typography variant="caption" className={styles.tooltipRarity}>
-                        {inventoryItem.rarity.toUpperCase()}
+                        {(inventoryItem.rarity || 'common').toUpperCase()}
                     </Typography>
                     {inventoryItem.weaponType && (
                         <Typography variant="caption" className={styles.tooltipWeaponType}>
@@ -397,11 +472,11 @@ function Equipment() {
             
             return (
                 <div style={{ maxWidth: '200px' }}>
-                    <Typography variant="body2" sx={{ color: getRarityColor(item.rarity), fontWeight: 'bold', mb: 1 }}>
+                    <Typography variant="body2" sx={{ color: getRarityColor(item.rarity || 'common'), fontWeight: 'bold', mb: 1 }}>
                         {item.name}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: getRarityColor(item.rarity), textTransform: 'uppercase', display: 'block', mb: 1 }}>
-                        {item.rarity}
+                    <Typography variant="caption" sx={{ color: getRarityColor(item.rarity || 'common'), textTransform: 'uppercase', display: 'block', mb: 1 }}>
+                        {item.rarity || 'common'}
                     </Typography>
                     {item.weaponType && (
                         <Typography variant="caption" sx={{ color: '#ffd700', textTransform: 'uppercase', display: 'block', mb: 1, fontWeight: 'bold' }}>
@@ -711,14 +786,14 @@ function Equipment() {
                                             onClick={() => handleEquipItem(item)}
                                         >
                                             <div className={styles.itemGlow} style={{
-                                                backgroundColor: `${getRarityColor(item.rarity)}20`,
-                                                boxShadow: `0 0 20px ${getRarityColor(item.rarity)}40`
+                                                backgroundColor: `${getRarityColor(item.rarity || 'common')}20`,
+                                                boxShadow: `0 0 20px ${getRarityColor(item.rarity || 'common')}40`
                                             }}></div>
                                             <div 
                                                 className={styles.itemContent}
                                                 style={{ 
-                                                    borderColor: getRarityBorder(item.rarity),
-                                                    boxShadow: `0 0 10px ${getRarityColor(item.rarity)}30`
+                                                    borderColor: getRarityBorder(item.rarity || 'common'),
+                                                    boxShadow: `0 0 10px ${getRarityColor(item.rarity || 'common')}30`
                                                 }}
                                             >
                                                 <div className={styles.itemHeader}>
@@ -735,9 +810,9 @@ function Equipment() {
                                                     <Typography 
                                                         variant="caption" 
                                                         className={styles.itemRarity}
-                                                        style={{ color: getRarityColor(item.rarity) }}
+                                                        style={{ color: getRarityColor(item.rarity || 'common') }}
                                                     >
-                                                        {item.rarity.toUpperCase()}
+                                                        {(item.rarity || 'common').toUpperCase()}
                                                     </Typography>
                                                     {item.weaponType && (
                                                         <Typography 
@@ -799,8 +874,8 @@ function Equipment() {
                                 <div 
                                     className={styles.dialogItem}
                                     style={{ 
-                                        borderColor: getRarityBorder(replaceDialog.currentItem.rarity),
-                                        boxShadow: `0 0 10px ${getRarityColor(replaceDialog.currentItem.rarity)}40`
+                                        borderColor: getRarityBorder(replaceDialog.currentItem.rarity || 'common'),
+                                        boxShadow: `0 0 10px ${getRarityColor(replaceDialog.currentItem.rarity || 'common')}40`
                                     }}
                                 >
                                     <div className={styles.dialogItemHeader}>
@@ -816,9 +891,9 @@ function Equipment() {
                                     <Typography 
                                         variant="caption" 
                                         className={styles.dialogItemRarity}
-                                        style={{ color: getRarityColor(replaceDialog.currentItem.rarity) }}
+                                        style={{ color: getRarityColor(replaceDialog.currentItem.rarity || 'common') }}
                                     >
-                                        {replaceDialog.currentItem.rarity.toUpperCase()}
+                                        {(replaceDialog.currentItem.rarity || 'common').toUpperCase()}
                                     </Typography>
                                     {replaceDialog.currentItem.stats && (
                                         <div className={styles.dialogItemStats}>
@@ -845,8 +920,8 @@ function Equipment() {
                                 <div 
                                     className={styles.dialogItem}
                                     style={{ 
-                                        borderColor: getRarityBorder(replaceDialog.newItem.rarity),
-                                        boxShadow: `0 0 10px ${getRarityColor(replaceDialog.newItem.rarity)}40`
+                                        borderColor: getRarityBorder(replaceDialog.newItem.rarity || 'common'),
+                                        boxShadow: `0 0 10px ${getRarityColor(replaceDialog.newItem.rarity || 'common')}40`
                                     }}
                                 >
                                     <div className={styles.dialogItemHeader}>
@@ -862,9 +937,9 @@ function Equipment() {
                                     <Typography 
                                         variant="caption" 
                                         className={styles.dialogItemRarity}
-                                        style={{ color: getRarityColor(replaceDialog.newItem.rarity) }}
+                                        style={{ color: getRarityColor(replaceDialog.newItem.rarity || 'common') }}
                                     >
-                                        {replaceDialog.newItem.rarity.toUpperCase()}
+                                        {(replaceDialog.newItem.rarity || 'common').toUpperCase()}
                                     </Typography>
                                     {replaceDialog.newItem.stats && (
                                         <div className={styles.dialogItemStats}>
