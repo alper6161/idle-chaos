@@ -180,7 +180,9 @@ function Battle({ player }) {
         const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
         
         setTimeout(() => {
-            startRealTimeBattle(currentEnemy, currentHealth);
+            if (currentEnemy) {
+                startRealTimeBattle(currentEnemy, currentHealth);
+            }
         }, 0);
     };
 
@@ -201,6 +203,11 @@ function Battle({ player }) {
     };
 
     const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
+        if (!enemy) {
+            console.warn('startRealTimeBattle called with null enemy');
+            return;
+        }
+        
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         
@@ -368,9 +375,9 @@ function Battle({ player }) {
                     
                     if (battleResult.winner === 'player') {
                         // Record achievement for enemy kill
-                        const achievementResult = recordKill(currentEnemy.id);
+                        const achievementResult = currentEnemy ? recordKill(currentEnemy.id) : { achievements: {}, newAchievements: [] };
                         
-                        const lootResult = getLootDrop(currentEnemy.drops);
+                        const lootResult = currentEnemy ? getLootDrop(currentEnemy.drops) : { items: [], gold: 0, goldItems: [] };
                         
                         const newLoot = [...lootResult.items];
                         
@@ -397,7 +404,7 @@ function Battle({ player }) {
                             const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
                             
                             // Ekipmanları equipment object'lerine dönüştür
-                            const newEquipment = convertLootBagToEquipment(equipmentLoot, currentEnemy);
+                            const newEquipment = currentEnemy ? convertLootBagToEquipment(equipmentLoot, currentEnemy) : [];
                             
                             // Eşsiz ID'ye göre tekrar eklemeyi önle
                             const existingIds = new Set(currentInventory.map(item => item.id));
@@ -1156,14 +1163,16 @@ function Battle({ player }) {
                 <div className={styles.section}>
                     <Typography variant="h6">{t('battle.possibleLoot')}</Typography>
                     <Divider />
-                    {currentEnemy?.drops.map((drop) => (
+                    {currentEnemy?.drops?.map((drop) => (
                         <Typography key={drop.name} className={drop.type === 'gold' ? styles.goldLoot : styles.equipmentLoot}>
                             {drop.name} - {(drop.chance * 100).toFixed(0)}%
                             {drop.type === 'gold' && (
                                 <span className={styles.goldValue}> (💰 {drop.value} Gold)</span>
                             )}
                         </Typography>
-                    ))}
+                    )) || (
+                        <Typography>{t('battle.noDropsAvailable')}</Typography>
+                    )}
                 </div>
 
                 {/* LOOT GAINED */}

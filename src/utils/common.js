@@ -55,7 +55,7 @@ export const getEnemyIcon = (enemyId) => {
     return iconMap[enemyId] || "/images/enemies/goblin.png"; // Default fallback
 };
 
-export const getEnemyInitial = (enemyName) => enemyName.charAt(0).toUpperCase();
+export const getEnemyInitial = (enemyName) => enemyName ? enemyName.charAt(0).toUpperCase() : '?';
 
 export const getCharacterIcon = (character) => `/images/characters/${character}.png`;
 
