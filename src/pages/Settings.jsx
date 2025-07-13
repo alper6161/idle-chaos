@@ -16,12 +16,13 @@ import {
     ListItemIcon,
     Divider
 } from "@mui/material";
-import { Close, Warning, Refresh, Language } from "@mui/icons-material";
+import { Close, Warning, Refresh, Language, Home } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 
 function Settings({ open, onClose }) {
     const navigate = useNavigate();
     const [showResetConfirm, setShowResetConfirm] = useState(false);
+    const [showHomeConfirm, setShowHomeConfirm] = useState(false);
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
 
     const handleHardReset = () => {
@@ -46,6 +47,20 @@ function Settings({ open, onClose }) {
     const handleResetConfirm = () => {
         setShowResetConfirm(false);
         handleHardReset();
+    };
+
+    const handleHomeClick = () => {
+        setShowHomeConfirm(true);
+    };
+
+    const handleHomeCancel = () => {
+        setShowHomeConfirm(false);
+    };
+
+    const handleHomeConfirm = () => {
+        setShowHomeConfirm(false);
+        onClose();
+        navigate("/");
     };
 
     return (
@@ -196,6 +211,23 @@ function Settings({ open, onClose }) {
                     borderTop: '2px solid #4a4a6a'
                 }}>
                     <Button 
+                        onClick={handleHomeClick}
+                        startIcon={<Home />}
+                        sx={{
+                            color: '#e0e0e0',
+                            fontFamily: 'Press Start 2P, monospace',
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            textShadow: '1px 1px 0px #000',
+                            '&:hover': {
+                                color: '#96ceb4'
+                            }
+                        }}
+                    >
+                        {t('common.homeScreen')}
+                    </Button>
+                    <Button 
                         onClick={onClose}
                         sx={{
                             color: '#e0e0e0',
@@ -300,6 +332,100 @@ function Settings({ open, onClose }) {
                                 backgroundColor: '#ff4444',
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 0 0 1px #000, 0 4px 0 0 #ff4444'
+                            }
+                        }}
+                    >
+                        {t('common.confirm')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Home Confirmation Dialog */}
+            <Dialog 
+                open={showHomeConfirm} 
+                onClose={handleHomeCancel}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        backgroundColor: '#2a2a4a',
+                        border: '2px solid #96ceb4',
+                        borderRadius: 0,
+                        boxShadow: '0 0 0 1px #000, 0 4px 0 0 #96ceb4'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ 
+                    color: '#96ceb4',
+                    fontFamily: 'Press Start 2P, monospace',
+                    fontSize: '1rem',
+                    textShadow: '2px 2px 0px #000',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                }}>
+                    <Home sx={{ color: '#96ceb4' }} />
+                    {t('common.homeScreen')}
+                </DialogTitle>
+                
+                <DialogContent sx={{ 
+                    color: '#e0e0e0',
+                    fontFamily: 'Press Start 2P, monospace',
+                    fontSize: '0.8rem',
+                    textShadow: '1px 1px 0px #000'
+                }}>
+                    <Alert severity="info" sx={{ 
+                        mt: 2,
+                        backgroundColor: 'rgba(150, 206, 180, 0.1)',
+                        border: '1px solid #96ceb4',
+                        '& .MuiAlert-message': {
+                            fontFamily: 'Press Start 2P, monospace',
+                            fontSize: '0.7rem',
+                            textShadow: '1px 1px 0px #000'
+                        }
+                    }}>
+                        {t('common.homeScreenConfirm')}
+                    </Alert>
+                </DialogContent>
+                
+                <DialogActions sx={{ 
+                    padding: '1rem',
+                    borderTop: '2px solid #96ceb4'
+                }}>
+                    <Button 
+                        onClick={handleHomeCancel}
+                        sx={{
+                            color: '#e0e0e0',
+                            fontFamily: 'Press Start 2P, monospace',
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            textShadow: '1px 1px 0px #000',
+                            '&:hover': {
+                                color: '#ff6b6b'
+                            }
+                        }}
+                    >
+                        {t('common.cancel')}
+                    </Button>
+                    <Button 
+                        onClick={handleHomeConfirm}
+                        variant="contained"
+                        color="success"
+                        sx={{
+                            backgroundColor: '#96ceb4',
+                            border: '2px solid #88c196',
+                            borderRadius: 0,
+                            fontFamily: 'Press Start 2P, monospace',
+                            fontSize: '0.7rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px',
+                            textShadow: '1px 1px 0px #000',
+                            boxShadow: '0 0 0 1px #000, 0 2px 0 0 #88c196',
+                            '&:hover': {
+                                backgroundColor: '#88c196',
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 0 0 1px #000, 0 4px 0 0 #88c196'
                             }
                         }}
                     >
