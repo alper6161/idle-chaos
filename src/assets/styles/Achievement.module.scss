@@ -641,20 +641,59 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.statLabel {
-  font-size: 0.9rem !important;
-  color: var(--text-secondary) !important;
-  font-weight: 400 !important;
-}
-
-.statValue {
-  font-family: 'Orbitron', monospace !important;
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-  color: var(--text-primary) !important;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  
+  // Hidden stat styling
+  &.hiddenStat {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.05);
+    opacity: 0.7;
+    
+    .statLabel {
+      color: #666 !important;
+      font-style: italic;
+    }
+    
+    .statValue {
+      color: #999 !important;
+      font-style: italic;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+      
+      &::before {
+        content: '🔒 ';
+        margin-right: 0.3rem;
+      }
+      
+      &::after {
+        content: '???';
+        color: #666;
+        font-weight: bold;
+      }
+    }
+  }
+  
+  // Revealed stat styling
+  &.revealedStat {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.1);
+    
+    .statLabel {
+      color: var(--text-primary) !important;
+      font-weight: 600;
+    }
+    
+    .statValue {
+      color: var(--gold) !important;
+      font-weight: 700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      
+      &::before {
+        content: '✅ ';
+        margin-right: 0.3rem;
+      }
+    }
+  }
 }
 
 .nextAchievement {

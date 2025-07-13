@@ -95,11 +95,10 @@ function Achievement() {
 
     const getStatDisplay = (enemyId, statType, value) => {
         const isUnlocked = isAchievementUnlocked(enemyId, getThresholdForStat(statType));
-        
         if (isUnlocked) {
             return value.toString();
         } else {
-            return "???";
+            return "";
         }
     };
 
@@ -201,19 +200,19 @@ function Achievement() {
                     </div>
 
                     <div className={styles.achievementStats}>
-                        <div className={styles.statRow}>
+                        <div className={`${styles.statRow} ${getStatDisplay(enemyId, 'hp', enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}`}>
                             <span className={styles.statLabel}>❤️ HP:</span>
                             <span className={styles.statValue}>
                                 {getStatDisplay(enemyId, 'hp', enemy.maxHp)}
                             </span>
                         </div>
-                        <div className={styles.statRow}>
+                        <div className={`${styles.statRow} ${getStatDisplay(enemyId, 'atk', enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}`}>
                             <span className={styles.statLabel}>⚔️ ATK:</span>
                             <span className={styles.statValue}>
                                 {getStatDisplay(enemyId, 'atk', enemy.ATK)}
                             </span>
                         </div>
-                        <div className={styles.statRow}>
+                        <div className={`${styles.statRow} ${getStatDisplay(enemyId, 'def', enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}`}>
                             <span className={styles.statLabel}>🛡️ DEF:</span>
                             <span className={styles.statValue}>
                                 {getStatDisplay(enemyId, 'def', enemy.DEF)}

@@ -245,7 +245,11 @@ function Battle({ player }) {
     // Achievement-based stat display functions
     const getStatDisplay = (enemyId, statType, value) => {
         const isUnlocked = isAchievementUnlocked(enemyId, getThresholdForStat(statType));
-        return isUnlocked ? value.toString() : "???";
+        if (isUnlocked) {
+            return value.toString();
+        } else {
+            return "";
+        }
     };
 
     const getThresholdForStat = (statType) => {
@@ -537,13 +541,22 @@ function Battle({ player }) {
                                             </Typography>
                                             
                                             <div className={styles.enemyStats}>
-                                                <Typography variant="body2">
+                                                <Typography 
+                                                    variant="body2" 
+                                                    className={getStatDisplay(enemy.id, 'hp', enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}
+                                                >
                                                     ❤️ HP: {getStatDisplay(enemy.id, 'hp', enemy.maxHp)}
                                                 </Typography>
-                                                <Typography variant="body2">
+                                                <Typography 
+                                                    variant="body2" 
+                                                    className={getStatDisplay(enemy.id, 'atk', enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}
+                                                >
                                                     ⚔️ ATK: {getStatDisplay(enemy.id, 'atk', enemy.ATK)}
                                                 </Typography>
-                                                <Typography variant="body2">
+                                                <Typography 
+                                                    variant="body2" 
+                                                    className={getStatDisplay(enemy.id, 'def', enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}
+                                                >
                                                     🛡️ DEF: {getStatDisplay(enemy.id, 'def', enemy.DEF)}
                                                 </Typography>
                                             </div>
@@ -705,7 +718,11 @@ function Battle({ player }) {
                     ) : (
                         <>
                             <div className={styles.hpBarContainer}>
-                                <Typography className={styles.hpText}>
+                                <Typography 
+                                    className={`${styles.hpText} ${
+                                        getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
+                                    }`}
+                                >
                                     HP: {currentBattle?.enemy?.currentHealth || getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp)}/{getStatDisplay(currentEnemy?.id, 'hp', currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
                                 </Typography>
                                 <LinearProgress
@@ -1019,14 +1036,28 @@ function Battle({ player }) {
                     <Divider />
                     {currentBattle ? (
                         <>
-                            <Typography>⚔️ {t('battle.attack')}: {currentBattle.enemy.ATK}</Typography>
-                            <Typography>🛡️ {t('battle.defense')}: {currentBattle.enemy.DEF}</Typography>
-                            <Typography>❤️ {t('battle.health')}: {currentBattle.enemy.currentHealth}/{currentBattle.enemy.maxHp}</Typography>
-                            <Typography>⚡ {t('battle.attackSpeed')}: {currentBattle.enemy.ATTACK_SPEED}</Typography>
-                            <Typography>🎯 {t('battle.criticalChance')}: {currentBattle.enemy.CRIT_CHANCE || 3}%</Typography>
-                            <Typography>💥 {t('battle.criticalDamage')}: {currentBattle.enemy.CRIT_DAMAGE || 120}%</Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? "???" : `${currentBattle.enemy.currentHealth}/${currentBattle.enemy.maxHp}`}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ⚡ {t('battle.attackSpeed')}: {currentBattle.enemy.ATTACK_SPEED}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🎯 {t('battle.criticalChance')}: {currentBattle.enemy.CRIT_CHANCE || 3}%
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                💥 {t('battle.criticalDamage')}: {currentBattle.enemy.CRIT_DAMAGE || 120}%
+                            </Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(currentBattle.enemy.ATK, currentBattle.player.DEF)}%</Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
+                            </Typography>
                             {(() => {
                                 const damageRange = calculateDamageRange(currentBattle.enemy.ATK, currentBattle.player.DEF);
                                 const critDamageRange = {
@@ -1035,24 +1066,46 @@ function Battle({ player }) {
                                 };
                                 return (
                                     <>
-                                        <Typography>⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}</Typography>
-                                        <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ {t('battle.baseDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "???" : `${damageRange.min}-${damageRange.max}`}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            💥 {t('battle.critDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "???" : `${critDamageRange.min}-${critDamageRange.max}`}
+                                        </Typography>
                                     </>
                                 );
                             })()}
                         </>
                     ) : (
                         <>
-                            <Typography>⚔️ {t('battle.attack')}: {currentEnemy?.ATK}</Typography>
-                            <Typography>🛡️ {t('battle.defense')}: {currentEnemy?.DEF}</Typography>
-                            <Typography>❤️ {t('battle.health')}: {currentEnemy?.maxHp}/{currentEnemy?.maxHp}</Typography>
-                            <Typography>⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}</Typography>
-                            <Typography>🎯 {t('battle.criticalChance')}: 3%</Typography>
-                            <Typography>💥 {t('battle.criticalDamage')}: 120%</Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK)}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF)}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "???" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🎯 {t('battle.criticalChance')}: 3%
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                💥 {t('battle.criticalDamage')}: 120%
+                            </Typography>
                             <Divider sx={{ my: 1 }} />
-                            <Typography>🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%</Typography>
-                            <Typography>⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0)}</Typography>
-                            <Typography>💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0) * 1.2)}</Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                ⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0)}
+                            </Typography>
+                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0) * 1.2)}
+                            </Typography>
                         </>
                     )}
                 </div>
