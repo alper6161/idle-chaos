@@ -199,37 +199,35 @@ const EQUIPMENT_TEMPLATES = {
         rarity: "rare",
         baseStats: { ATK: 11, CRIT_DAMAGE: 18, ATTACK_SPEED: 0.4 }
     },
-    "Dragon Bone Bow": {
-        type: "weapon",
-        weaponType: "ranged",
-        rarity: "epic",
-        baseStats: { ATK: 16, CRIT_CHANCE: 12, CRIT_DAMAGE: 25 }
-    },
-    "Spirit Hunter Bow": {
-        type: "weapon",
-        weaponType: "ranged",
-        rarity: "legendary",
-        baseStats: { ATK: 24, CRIT_CHANCE: 18, CRIT_DAMAGE: 40, ATTACK_SPEED: 0.5 }
-    },
-    
-    // NEW RANGED WEAPONS
     "Bandit Bow": {
         type: "weapon",
         weaponType: "ranged",
         rarity: "rare",
         baseStats: { ATK: 10, CRIT_CHANCE: 12, ATTACK_SPEED: 0.3 }
     },
+    "Spirit Hunter Bow": {
+        type: "weapon",
+        weaponType: "ranged",
+        rarity: "legendary",
+        baseStats: { ATK: 25, CRIT_CHANCE: 18, ATTACK_SPEED: 0.4 }
+    },
+    "Dragon Bone Bow": {
+        type: "weapon",
+        weaponType: "ranged",
+        rarity: "legendary",
+        baseStats: { ATK: 26, CRIT_CHANCE: 20, CRIT_DAMAGE: 40 }
+    },
     "Demon Lord Bow": {
         type: "weapon",
         weaponType: "ranged",
         rarity: "legendary",
-        baseStats: { ATK: 26, CRIT_CHANCE: 20, FIRE_DAMAGE: 20 }
+        baseStats: { ATK: 28, CRIT_CHANCE: 22, FIRE_DAMAGE: 20 }
     },
     "Celestial Bow": {
         type: "weapon",
         weaponType: "ranged",
         rarity: "legendary",
-        baseStats: { ATK: 28, CRIT_CHANCE: 22, LIGHT_DAMAGE: 25 }
+        baseStats: { ATK: 30, CRIT_CHANCE: 25, LIGHT_DAMAGE: 25 }
     },
     
     // Magic Weapons
@@ -237,19 +235,19 @@ const EQUIPMENT_TEMPLATES = {
         type: "weapon",
         weaponType: "magic",
         rarity: "common",
-        baseStats: { ATK: 4, CRIT_CHANCE: 4, ATTACK_SPEED: 0.3 }
+        baseStats: { ATK: 5, CRIT_CHANCE: 6, MANA_REGEN: 2 }
     },
     "Bone Wand": {
         type: "weapon",
         weaponType: "magic",
         rarity: "uncommon",
-        baseStats: { ATK: 7, CRIT_CHANCE: 6, CRIT_DAMAGE: 8 }
+        baseStats: { ATK: 7, CRIT_CHANCE: 8, SHADOW_DAMAGE: 8 }
     },
     "Spider Silk Staff": {
         type: "weapon",
         weaponType: "magic",
         rarity: "rare",
-        baseStats: { ATK: 10, CRIT_CHANCE: 8, ATTACK_SPEED: 0.4 }
+        baseStats: { ATK: 11, CRIT_CHANCE: 10, POISON_DAMAGE: 12 }
     },
     "Orc Shaman Staff": {
         type: "weapon",
@@ -269,8 +267,6 @@ const EQUIPMENT_TEMPLATES = {
         rarity: "legendary",
         baseStats: { ATK: 23, CRIT_CHANCE: 16, CRIT_DAMAGE: 38, ATTACK_SPEED: 0.4 }
     },
-    
-    // NEW MAGIC WEAPONS
     "Demon Lord Staff": {
         type: "weapon",
         weaponType: "magic",

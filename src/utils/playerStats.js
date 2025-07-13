@@ -5,7 +5,7 @@ export const BASE_PLAYER_STATS = {
     ATK: 10,
     DEF: 5,
     HEALTH: 100,
-    ATTACK_SPEED: 2.5,
+    ATTACK_SPEED: 100,
     CRIT_CHANCE: 5,
     CRIT_DAMAGE: 150
 };

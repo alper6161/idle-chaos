@@ -105,26 +105,32 @@ function Equipment() {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [inventory, setInventory] = useState(() => {
         const loadedInventory = loadFromStorage(STORAGE_KEYS.INVENTORY, SAMPLE_INVENTORY);
-        console.log('Loaded inventory:', loadedInventory); // DEBUG
         
         // Filter out invalid items
         const validInventory = loadedInventory.filter(item => {
             if (!item || typeof item !== 'object') {
-                console.warn('Invalid item found:', item);
+                console.warn('Removing invalid item:', item);
                 return false;
             }
             if (!item.name || typeof item.name !== 'string') {
-                console.warn('Item without name found:', item);
+                console.warn('Removing item without name:', item);
                 return false;
             }
             if (!item.type || typeof item.type !== 'string') {
-                console.warn('Item without type found:', item);
+                console.warn('Removing item without type:', item);
+                return false;
+            }
+            if (!item.rarity || typeof item.rarity !== 'string') {
+                console.warn('Removing item without rarity:', item);
+                return false;
+            }
+            if (!item.stats || typeof item.stats !== 'object') {
+                console.warn('Removing item without stats:', item);
                 return false;
             }
             return true;
         });
         
-        console.log('Valid inventory after filtering:', validInventory); // DEBUG
         return validInventory;
     });
     const [rarityFilter, setRarityFilter] = useState("all");
@@ -152,16 +158,13 @@ function Equipment() {
                 const lootBag = JSON.parse(localStorage.getItem("lootBag") || "[]");
                 
                 if (lootBag.length > 0) {
-                    console.log('Processing lootBag items:', lootBag); // DEBUG
                     const newEquipment = convertLootBagToEquipment(lootBag);
-                    console.log('New equipment from loot:', newEquipment); // DEBUG
                     
                     if (newEquipment && newEquipment.length > 0) {
                         setInventory(prev => {
                             // Ensure unique IDs
                             const existingIds = new Set(prev.map(item => item.id));
                             const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
-                            console.log('Unique new equipment:', uniqueNewEquipment); // DEBUG
                             
                             // Mark new items for highlighting
                             if (uniqueNewEquipment.length > 0) {
@@ -204,6 +207,14 @@ function Equipment() {
                     }
                     if (!item.type || typeof item.type !== 'string') {
                         console.warn('Removing item without type:', item);
+                        return false;
+                    }
+                    if (!item.rarity || typeof item.rarity !== 'string') {
+                        console.warn('Removing item without rarity:', item);
+                        return false;
+                    }
+                    if (!item.stats || typeof item.stats !== 'object') {
+                        console.warn('Removing item without stats:', item);
                         return false;
                     }
                     return true;

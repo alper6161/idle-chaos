@@ -47,6 +47,7 @@ import {
 } from "../utils/potions.js";
 import { recordKill, isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
+import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 
 function Battle({ player }) {
     const [battleMode, setBattleMode] = useState('selection'); // 'selection' or 'battle'
@@ -352,7 +353,7 @@ function Battle({ player }) {
                 const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
                 const effectiveAttackSpeed = prev.player.ATTACK_SPEED + attackSpeedBonus;
                 
-                const playerSpeed = Math.max(1, Math.min(5, effectiveAttackSpeed));
+                const playerSpeed = Math.max(1, effectiveAttackSpeed);
                 const enemySpeed = Math.max(1, Math.min(5, prev.enemy.ATTACK_SPEED));
                 let newBattle = updateBattleState(prev, playerSpeed, enemySpeed);
 
@@ -401,12 +402,18 @@ function Battle({ player }) {
                             const equipmentLoot = lootResult.items;
                             const STORAGE_KEY = 'idle-chaos-inventory';
                             const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                            
+                            // Ekipmanları equipment object'lerine dönüştür
+                            const newEquipment = convertLootBagToEquipment(equipmentLoot);
+                            
                             // Eşsiz ID'ye göre tekrar eklemeyi önle
                             const existingIds = new Set(currentInventory.map(item => item.id));
-                            const uniqueNewEquipment = equipmentLoot.filter(item => !existingIds.has(item.id));
+                            const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
+                            
                             if (uniqueNewEquipment.length > 0) {
                                 const updatedInventory = [...currentInventory, ...uniqueNewEquipment];
                                 localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedInventory));
+                                console.log('Added equipment to inventory immediately:', uniqueNewEquipment);
                             }
                         } catch (err) {
                             console.error('Inventory güncellenirken hata:', err);
