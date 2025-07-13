@@ -49,6 +49,7 @@ import {
 import { recordKill, isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
+import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
 
 function Battle({ player }) {
     const [battleMode, setBattleMode] = useState('selection'); // 'selection' or 'battle'
@@ -448,6 +449,24 @@ function Battle({ player }) {
                         }
                         // --- SONU ---
 
+                        // --- PET DROP LOGIC ---
+                        let petDropMessage = null;
+                        if (currentEnemy) {
+                            const pet = checkPetDrop(currentEnemy.id);
+                            if (pet) {
+                                const PETS_KEY = 'idle-chaos-pets';
+                                const ownedPets = JSON.parse(localStorage.getItem(PETS_KEY) || '[]');
+                                if (!ownedPets.includes(pet.id)) {
+                                    ownedPets.push(pet.id);
+                                    localStorage.setItem(PETS_KEY, JSON.stringify(ownedPets));
+                                    petDropMessage = `✨ PET FOUND: ${pet.icon} <b>${pet.name}</b>! (${pet.description})`;
+                                } else {
+                                    petDropMessage = `✨ PET FOUND (duplicate): ${pet.icon} <b>${pet.name}</b>! (Already owned)`;
+                                }
+                            }
+                        }
+                        // --- SONU ---
+
                         // Add loot and achievement messages to battle log
                         const battleLogMessages = [
                             {
@@ -471,6 +490,14 @@ function Battle({ player }) {
                             type: 'loot',
                             message: `📦 Loot: ${item}`
                         })));
+                        
+                        // Add pet drop message if any
+                        if (petDropMessage) {
+                            battleLogMessages.push({
+                                type: 'pet',
+                                message: petDropMessage
+                            });
+                        }
                         
                         const updatedBattle = {
                             ...newBattle,
@@ -1283,7 +1310,8 @@ function Battle({ player }) {
                                 log.type?.includes('miss') ? styles.miss :
                                 log.type?.includes('defeated') ? styles.defeat :
                                 log.type === 'victory' ? styles.victory :
-                                log.type === 'loot' ? styles.loot : ''
+                                log.type === 'loot' ? styles.loot :
+                                log.type === 'pet' ? styles.petDrop : ''
                             }`}
                             >
                                 {log.message}

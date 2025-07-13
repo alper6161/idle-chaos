@@ -7,6 +7,7 @@ import Equipment from "./pages/Equipment.jsx";
 import Store from "./pages/Store.jsx";
 import Achievement from "./pages/Achievement.jsx";
 import MainLayout from "./pages/MainLayout.jsx";
+import Pets from "./pages/Pets.jsx";
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/equipment" element={<Equipment/>}/>
                     <Route path="/store" element={<Store/>}/>
                     <Route path="/achievement" element={<Achievement/>}/>
+                    <Route path="/pets" element={<Pets />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

@@ -96,6 +96,18 @@ function MainMenu() {
                 </NavLink>
             </div>
 
+            {/* Pets Section */}
+            <div className={styles.group}>
+                <div className={styles.groupTitle}>PETS</div>
+                <NavLink
+                    to="/pets"
+                    className={styles.petsItem}
+                >
+                    <span className={styles.petsIcon}>🐾</span>
+                    <span className={styles.petsLabel}>Pets</span>
+                </NavLink>
+            </div>
+
             {/* Skills Sections */}
             {Object.entries(skills).map(([category, subskills]) => (
                 <div key={category} className={styles.group}>

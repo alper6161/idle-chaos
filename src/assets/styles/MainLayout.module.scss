@@ -334,6 +334,44 @@
           text-rendering: optimizeSpeed;
         }
       }
+
+      .petsItem {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        color: #00bfae;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.2s;
+        border: 2px solid #00bfae;
+        background: rgba(0, 191, 174, 0.1);
+        min-width: 0;
+        overflow: hidden;
+
+        &:hover {
+          background: rgba(0, 191, 174, 0.2);
+          transform: translateY(-1px);
+          box-shadow: 0 2px 8px rgba(0, 191, 174, 0.3);
+        }
+
+        .petsIcon {
+          font-size: 1.2rem;
+          flex-shrink: 0;
+        }
+
+        .petsLabel {
+          flex-grow: 1;
+          font-size: 0.8rem;
+          font-weight: bold;
+          text-shadow: 1px 1px 0px #000;
+          font-smooth: never;
+          -webkit-font-smoothing: none;
+          -moz-osx-font-smoothing: unset;
+          image-rendering: pixelated;
+          text-rendering: optimizeSpeed;
+        }
+      }
     }
 
     .divider {
