@@ -87,7 +87,8 @@
     "fightThisEnemy": "Fight This Enemy",
     "selectAttackType": "Select Attack Type",
     "possibleDrops": "Possible Drops",
-    "enemyDifficulty": "Enemy Difficulty"
+    "enemyDifficulty": "Enemy Difficulty",
+    "searchingForEnemy": "Searching for enemy..."
   },
   "equipment": {
     "equip": "Equip",

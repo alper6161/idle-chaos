@@ -87,7 +87,8 @@
     "fightThisEnemy": "Bu Düşmanla Savaş",
     "selectAttackType": "Saldırı Türü Seç",
     "possibleDrops": "Olası Ganimetler",
-    "enemyDifficulty": "Düşman Zorluğu"
+    "enemyDifficulty": "Düşman Zorluğu",
+    "searchingForEnemy": "Düşman aranıyor..."
   },
   "equipment": {
     "equip": "Tak",

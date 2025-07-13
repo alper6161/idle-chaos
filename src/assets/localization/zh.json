@@ -86,7 +86,8 @@
     "backToSelection": "返回选择",
     "fightThisEnemy": "与这个敌人战斗",
     "possibleDrops": "可能掉落",
-    "enemyDifficulty": "敌人难度"
+    "enemyDifficulty": "敌人难度",
+    "searchingForEnemy": "正在寻找敌人..."
   },
   "equipment": {
     "equip": "装备",

@@ -80,6 +80,9 @@ function Battle({ player }) {
         countdown: 15
     });
     
+    // Battle log visibility
+    const [battleLogVisible, setBattleLogVisible] = useState(true);
+    
     // Attack type selection
     const [selectedAttackType, setSelectedAttackType] = useState('stab');
     const [availableAttackTypes, setAvailableAttackTypes] = useState([]);
@@ -209,7 +212,11 @@ function Battle({ player }) {
             console.warn('startRealTimeBattle called with null enemy');
             return;
         }
-        
+        // Yeni savaş başlarken loga "Düşman aranıyor..." mesajı ekle
+        setBattleLog(prev => [
+            ...prev,
+            { type: 'info', message: t('battle.searchingForEnemy') }
+        ]);
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         
@@ -224,7 +231,7 @@ function Battle({ player }) {
             enemy: { ...enemy, currentHealth: enemy.maxHp },
             playerProgress: 0,
             enemyProgress: 0,
-            battleLog: []
+            battleLog: [] // Burası battleLog'u etkilemez, sadece currentBattle içindir
         });
         setIsBattleActive(true);
         setBattleResult(null);
@@ -499,15 +506,9 @@ function Battle({ player }) {
                             });
                         }
                         
-                        const updatedBattle = {
-                            ...newBattle,
-                            battleLog: [
-                                ...newBattle.battleLog,
-                                ...battleLogMessages
-                            ]
-                        };
+                        battleLogMessages.forEach(msg => setBattleLog(prev => [...prev, msg]));
                         
-                        setCurrentBattle(updatedBattle);
+                        setCurrentBattle(newBattle);
                         startEnemySpawnTimer();
                     } else if (battleResult.winner === 'enemy') {
                         showDeathDialog();
@@ -847,6 +848,87 @@ function Battle({ player }) {
                         </>
                     )}
                 </div>
+
+                {/* Battle Log - Toggleable Widget */}
+                {battleLogVisible && (
+                    <div className={styles.fighter}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="h6">{t('battle.battleLog')}</Typography>
+                            <Tooltip title={t('battle.closeBattleLog')} arrow>
+                                <IconButton
+                                    onClick={() => setBattleLogVisible(false)}
+                                    sx={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                        backgroundColor: 'transparent',
+                                        '&:hover': {
+                                            backgroundColor: 'rgba(106, 106, 138, 0.1)'
+                                        }
+                                    }}
+                                >
+                                    ❌
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                        <Divider />
+                        <Box className={styles.battleLog} sx={{ flex: 1 }}>
+                            {battleLog.map((log, idx) => (
+                                <div key={`battle-log-${idx}-${log.type}`}>
+                                    <Typography 
+                                        variant="body2" 
+                                        className={`${styles.battleLogItem} ${
+                                            log.type === 'player_attack' ? styles.playerAttack :
+                                            log.type === 'player_crit' ? styles.playerCrit :
+                                            log.type === 'enemy_attack' ? styles.enemyAttack :
+                                            log.type === 'enemy_crit' ? styles.enemyCrit :
+                                            log.type?.includes('miss') ? styles.miss :
+                                            log.type?.includes('defeated') ? styles.defeat :
+                                            log.type === 'victory' ? styles.victory :
+                                            log.type === 'loot' ? styles.loot :
+                                            log.type === 'pet' ? styles.petDrop :
+                                            log.type === 'info' ? styles.infoLog : ''
+                                        }`}
+                                    >
+                                        {log.message}
+                                    </Typography>
+                                    {log.skillXP && log.skillXP.skillsAwarded.length > 0 && (
+                                        <Typography 
+                                            variant="caption" 
+                                            className={styles.skillXPMessage}
+                                            style={{ color: '#4caf50', marginLeft: '10px' }}
+                                        >
+                                            ✨ +{log.skillXP.xpAwarded} XP to {log.skillXP.skillsAwarded.join(', ')}
+                                            {log.skillXP.leveledUp && ' 🎉 LEVEL UP!'}
+                                        </Typography>
+                                    )}
+                                </div>
+                            ))}
+                        </Box>
+                    </div>
+                )}
+                
+                {/* Show Battle Log Button - When battle log is hidden */}
+                {!battleLogVisible && currentBattle && (
+                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                        <Tooltip title={t('battle.showBattleLog')} arrow>
+                            <IconButton
+                                onClick={() => setBattleLogVisible(true)}
+                                sx={{
+                                    width: 32,
+                                    height: 32,
+                                    fontSize: '1.3rem',
+                                    color: '#e0e0e0',
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(106, 106, 138, 0.1)'
+                                    }
+                                }}
+                            >
+                                👁️
+                            </IconButton>
+                        </Tooltip>
+                    </div>
+                )}
             </div>
 
             {/* Potion System */}
@@ -1292,57 +1374,6 @@ function Battle({ player }) {
                     )}
                 </div>
             </div>
-
-            {/* Battle Log - Her zaman göster */}
-            <div className={styles.section}>
-                <Typography variant="h6">{t('battle.battleLog')}</Typography>
-                <Divider />
-                <Box className={styles.battleLog}>
-                    {currentBattle?.battleLog?.map((log, idx) => (
-                        <div key={`battle-log-${idx}-${log.type}`}>
-                            <Typography 
-                                variant="body2" 
-                                                            className={`${styles.battleLogItem} ${
-                                log.type === 'player_attack' ? styles.playerAttack :
-                                log.type === 'player_crit' ? styles.playerCrit :
-                                log.type === 'enemy_attack' ? styles.enemyAttack :
-                                log.type === 'enemy_crit' ? styles.enemyCrit :
-                                log.type?.includes('miss') ? styles.miss :
-                                log.type?.includes('defeated') ? styles.defeat :
-                                log.type === 'victory' ? styles.victory :
-                                log.type === 'loot' ? styles.loot :
-                                log.type === 'pet' ? styles.petDrop : ''
-                            }`}
-                            >
-                                {log.message}
-                            </Typography>
-                            {log.skillXP && log.skillXP.skillsAwarded.length > 0 && (
-                                <Typography 
-                                    variant="caption" 
-                                    className={styles.skillXPMessage}
-                                    style={{ color: '#4caf50', marginLeft: '10px' }}
-                                >
-                                    ✨ +{log.skillXP.xpAwarded} XP to {log.skillXP.skillsAwarded.join(', ')}
-                                    {log.skillXP.leveledUp && ' 🎉 LEVEL UP!'}
-                                </Typography>
-                            )}
-                        </div>
-                    ))}
-                </Box>
-            </div>
-
-            {/* Battle Result */}
-            {battleResult && (
-                <div className={styles.section}>
-                    <Typography variant="h6" color={battleResult.winner === 'player' ? 'success.main' : 'error.main'}>
-                        {battleResult.winner === 'player' ? t('battle.playerWins') : t('battle.enemyWins')}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {t('battle.playerFinalHp')}: {battleResult.playerFinalHealth} | 
-                        {t('battle.enemyFinalHp')}: {battleResult.enemyFinalHealth}
-                    </Typography>
-                </div>
-            )}
 
             {/* Death Dialog */}
             <Dialog 
