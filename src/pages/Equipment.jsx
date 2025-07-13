@@ -97,6 +97,31 @@ const saveToStorage = (key, data) => {
     }
 };
 
+// Calculate item sell value based on rarity and level
+const calculateItemValue = (item) => {
+    if (!item || !item.rarity || !item.level) return 0;
+    
+    // Base values per rarity
+    const baseValues = {
+        common: 10,
+        uncommon: 25,
+        rare: 60,
+        epic: 150,
+        legendary: 400
+    };
+    
+    // Level multiplier (higher level = more valuable)
+    const levelMultiplier = 1 + (item.level - 1) * 0.1;
+    
+    // Rarity multiplier
+    const rarityMultiplier = baseValues[item.rarity] || baseValues.common;
+    
+    // Calculate total value
+    const totalValue = Math.floor(rarityMultiplier * levelMultiplier);
+    
+    return totalValue;
+};
+
 function Equipment() {
     const { t } = useTranslate();
     const [equippedItems, setEquippedItems] = useState(() => {
@@ -198,6 +223,13 @@ function Equipment() {
         slot: null
     });
     const [newItemIds, setNewItemIds] = useState(new Set());
+    const [sellMode, setSellMode] = useState(false);
+    const [selectedItemsToSell, setSelectedItemsToSell] = useState(new Set());
+    const [sellDialog, setSellDialog] = useState({
+        open: false,
+        items: [],
+        totalValue: 0
+    });
 
     useEffect(() => {
         saveToStorage(STORAGE_KEYS.EQUIPPED_ITEMS, equippedItems);
@@ -384,6 +416,56 @@ function Equipment() {
 
     const handleUnselectSlot = () => {
         setSelectedSlot(null);
+    };
+
+    // Sell system functions
+    const toggleSellMode = () => {
+        setSellMode(!sellMode);
+        if (sellMode) {
+            setSelectedItemsToSell(new Set());
+        }
+    };
+
+    const toggleItemSelection = (itemId) => {
+        const newSelected = new Set(selectedItemsToSell);
+        if (newSelected.has(itemId)) {
+            newSelected.delete(itemId);
+        } else {
+            newSelected.add(itemId);
+        }
+        setSelectedItemsToSell(newSelected);
+    };
+
+    const handleSellItems = () => {
+        const itemsToSell = inventory.filter(item => selectedItemsToSell.has(item.id));
+        const totalValue = itemsToSell.reduce((sum, item) => sum + calculateItemValue(item), 0);
+        
+        setSellDialog({
+            open: true,
+            items: itemsToSell,
+            totalValue: totalValue
+        });
+    };
+
+    const confirmSell = () => {
+        // Remove items from inventory
+        const newInventory = inventory.filter(item => !selectedItemsToSell.has(item.id));
+        setInventory(newInventory);
+        saveToStorage(STORAGE_KEYS.INVENTORY, newInventory);
+        
+        // Add gold to player
+        const currentGold = parseInt(localStorage.getItem('playerGold') || '0');
+        const newGold = currentGold + sellDialog.totalValue;
+        localStorage.setItem('playerGold', newGold.toString());
+        
+        // Reset sell mode
+        setSellMode(false);
+        setSelectedItemsToSell(new Set());
+        setSellDialog({ open: false, items: [], totalValue: 0 });
+    };
+
+    const cancelSell = () => {
+        setSellDialog({ open: false, items: [], totalValue: 0 });
     };
 
     const getRarityColor = (rarity) => {
@@ -824,10 +906,34 @@ function Equipment() {
                 <div className={styles.inventorySection}>
                     <Paper className={styles.inventoryPanel}>
                         <div className={styles.panelHeader}>
-                            <FilterList className={styles.panelIcon} />
-                            <Typography variant="h6" className={styles.panelTitle}>
-                                {t('common.inventory')}
-                            </Typography>
+                            <div className={styles.panelTitleSection}>
+                                <FilterList className={styles.panelIcon} />
+                                <Typography variant="h6" className={styles.panelTitle}>
+                                    {t('common.inventory')}
+                                </Typography>
+                            </div>
+                            <div className={styles.panelActions}>
+                                <Button
+                                    variant={sellMode ? "contained" : "outlined"}
+                                    color={sellMode ? "error" : "primary"}
+                                    size="small"
+                                    onClick={toggleSellMode}
+                                    className={styles.sellButton}
+                                >
+                                    {sellMode ? "Cancel Sell" : "Sell Items"}
+                                </Button>
+                                {sellMode && selectedItemsToSell.size > 0 && (
+                                    <Button
+                                        variant="contained"
+                                        color="error"
+                                        size="small"
+                                        onClick={handleSellItems}
+                                        className={styles.confirmSellButton}
+                                    >
+                                        Sell ({selectedItemsToSell.size})
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                         
                         {/* Enhanced Filters */}
@@ -895,8 +1001,8 @@ function Equipment() {
                                         }}
                                     >
                                         <div 
-                                            className={`${styles.inventoryItem} ${newItemIds.has(item.id) ? styles.newItem : ''}`}
-                                            onClick={() => handleEquipItem(item)}
+                                            className={`${styles.inventoryItem} ${newItemIds.has(item.id) ? styles.newItem : ''} ${sellMode && selectedItemsToSell.has(item.id) ? styles.selectedForSell : ''}`}
+                                            onClick={() => sellMode ? toggleItemSelection(item.id) : handleEquipItem(item)}
                                         >
                                             <div className={styles.itemGlow} style={{
                                                 backgroundColor: `${getRarityColor(item.rarity || 'common')}20`,
@@ -1101,6 +1207,72 @@ function Equipment() {
                     </Button>
                     <Button onClick={handleReplaceConfirm} className={styles.confirmButton}>
                         {t('equipment.replace')}
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Sell Confirmation Dialog */}
+            <Dialog 
+                open={sellDialog.open} 
+                onClose={cancelSell}
+                maxWidth="md"
+                fullWidth
+                className={styles.sellDialog}
+            >
+                <DialogTitle className={styles.dialogTitle}>
+                    Confirm Sell Items
+                </DialogTitle>
+                <DialogContent className={styles.dialogContent}>
+                    <div className={styles.sellItemsList}>
+                        <Typography variant="h6" className={styles.dialogSectionTitle}>
+                            Items to Sell ({sellDialog.items.length})
+                        </Typography>
+                        {sellDialog.items.map((item, index) => (
+                            <div 
+                                key={`sell-${item.id}-${index}`}
+                                className={styles.sellItem}
+                                style={{ 
+                                    borderColor: getRarityBorder(item.rarity || 'common'),
+                                    boxShadow: `0 0 10px ${getRarityColor(item.rarity || 'common')}40`
+                                }}
+                            >
+                                <div className={styles.sellItemHeader}>
+                                    <img 
+                                        src={EQUIPMENT_SLOTS[item.type]?.icon || EQUIPMENT_SLOTS.weapon.icon} 
+                                        alt={item.type} 
+                                        className={styles.sellItemIcon} 
+                                    />
+                                    <div className={styles.sellItemInfo}>
+                                        <Typography variant="body1" className={styles.sellItemName}>
+                                            {item.name}
+                                        </Typography>
+                                        <Typography 
+                                            variant="caption" 
+                                            className={styles.sellItemRarity}
+                                            style={{ color: getRarityColor(item.rarity || 'common') }}
+                                        >
+                                            {(item.rarity || 'common').toUpperCase()} • iLvl {item.level}
+                                        </Typography>
+                                    </div>
+                                    <Typography variant="h6" className={styles.sellItemValue}>
+                                        💰 {calculateItemValue(item)}
+                                    </Typography>
+                                </div>
+                            </div>
+                        ))}
+                        <div className={styles.sellTotal}>
+                            <Typography variant="h5" className={styles.totalValue}>
+                                Total Value: 💰 {sellDialog.totalValue}
+                            </Typography>
+                        </div>
+                    </div>
+                </DialogContent>
+                <DialogActions className={styles.dialogActions}>
+                    <Button onClick={cancelSell} className={styles.cancelButton}>
+                        Cancel
+                    </Button>
+                    <Button onClick={confirmSell} className={styles.confirmButton} color="error">
+                        Sell Items
                     </Button>
                 </DialogActions>
             </Dialog>

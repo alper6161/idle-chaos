@@ -1702,4 +1702,177 @@
   .filterChips {
     justify-content: center;
   }
+}
+
+// Sell System Styles
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.panelTitleSection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panelActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.sellButton {
+  background: linear-gradient(135deg, var(--error) 0%, #e53e3e 100%) !important;
+  color: white !important;
+  border: 2px solid var(--error) !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #e53e3e 0%, var(--error) 100%) !important;
+    box-shadow: 0 0 20px rgba(245, 101, 101, 0.4) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+.confirmSellButton {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: white !important;
+  border: 2px solid #dc2626 !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  animation: sellPulse 2s ease-in-out infinite !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%) !important;
+    box-shadow: 0 0 25px rgba(220, 38, 38, 0.6) !important;
+  }
+}
+
+@keyframes sellPulse {
+  0%, 100% { 
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(220, 38, 38, 0.8), 0 0 35px rgba(220, 38, 38, 0.4);
+  }
+}
+
+.selectedForSell {
+  border: 3px solid var(--error) !important;
+  box-shadow: 0 0 20px rgba(245, 101, 101, 0.6) !important;
+  transform: scale(1.05) !important;
+  transition: all 0.3s ease !important;
+  
+  &::before {
+    content: '✓';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--error);
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 10;
+  }
+}
+
+.sellDialog {
+  .MuiDialog-paper {
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%) !important;
+    border: 2px solid var(--error) !important;
+    box-shadow: 0 0 30px rgba(245, 101, 101, 0.3) !important;
+  }
+}
+
+.sellItemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.sellItem {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(22, 33, 62, 0.6) 100%);
+  border-radius: 8px;
+  border: 2px solid;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.sellItemHeader {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.sellItemIcon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+.sellItemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sellItemName {
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  margin: 0 !important;
+}
+
+.sellItemRarity {
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  margin: 0 !important;
+}
+
+.sellItemValue {
+  font-weight: 700 !important;
+  color: var(--gold) !important;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+  margin: 0 !important;
+}
+
+.sellTotal {
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+  border-radius: 8px;
+  border: 2px solid var(--gold);
+  text-align: center;
+  margin-top: 15px;
+}
+
+.totalValue {
+  font-weight: 700 !important;
+  color: var(--gold) !important;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8) !important;
+  margin: 0 !important;
 } 
