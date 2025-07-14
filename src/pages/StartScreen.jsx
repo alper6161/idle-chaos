@@ -70,7 +70,6 @@ function StartScreen() {
 
   return (
     <div className={styles.startScreenContainer}>
-      <audio ref={audioRef} src="/sounds/sound.mp3" autoPlay loop />
       {/* Left scattered skill icons */}
       {leftIcons.map((icon, i) => (
         <img

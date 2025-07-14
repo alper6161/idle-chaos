@@ -9,6 +9,7 @@ import { useTranslate } from "../hooks/useTranslate";
 import MainMenu from "../components/MainMenu";
 import { saveCurrentGame } from "../utils/saveManager.js";
 import { Alert } from "@mui/material";
+import { useRef } from "react";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
@@ -16,6 +17,14 @@ function MainLayout() {
     const [activeBuffs, setActiveBuffs] = useState(getActiveBuffsInfo());
     const [showAutoSaveSuccess, setShowAutoSaveSuccess] = useState(false);
     const { t } = useTranslate();
+    const [musicVolume, setMusicVolume] = useState(() => {
+        const saved = localStorage.getItem('musicVolume');
+        return saved !== null ? parseFloat(saved) : 0.5;
+    });
+    const [musicMuted, setMusicMuted] = useState(() => {
+        const saved = localStorage.getItem('musicMuted');
+        return saved === 'true';
+    });
 
     const handleSettingsClick = () => {
         setSettingsOpen(true);
@@ -75,6 +84,10 @@ function MainLayout() {
             return () => clearTimeout(timer);
         }
     }, [showAutoSaveSuccess]);
+
+    useEffect(() => {
+        // This useEffect is no longer needed as music is handled globally
+    }, []);
 
     return (
         <div className={styles.layout}>
