@@ -20,6 +20,7 @@ import { Close, Warning, Refresh, Language, Home, Save } from "@mui/icons-materi
 import { useTranslate } from "../hooks/useTranslate";
 import { saveCurrentGame, getCurrentSlot, deleteSlot } from "../utils/saveManager.js";
 import { useEffect } from "react";
+import { SYSTEM_COLORS } from "../utils/common";
 
 const GAME_STATE_KEYS = [
     'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
@@ -494,7 +495,8 @@ function Settings({ open, onClose }) {
                         '& .MuiAlert-message': {
                             fontFamily: 'Press Start 2P, monospace',
                             fontSize: '0.7rem',
-                            textShadow: '1px 1px 0px #000'
+                            textShadow: '1px 1px 0px #000',
+                            color: SYSTEM_COLORS.TEXT.PRIMARY // Use system color
                         }
                     }}>
                         {t('common.homeScreenConfirm')}
