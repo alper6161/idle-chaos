@@ -46,7 +46,11 @@
     "close": "Close",
     "autoSaveSettings": "Auto Save Settings",
     "autoSaveInterval": "Save Interval:",
-    "exitGame": "Exit Game"
+    "exitGame": "Exit Game",
+    "soundSettings": "Sound Settings",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "music": "Music"
   },
   "story": {
     "welcome": "Welcome, warrior!",

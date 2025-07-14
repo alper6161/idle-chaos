@@ -46,7 +46,11 @@
     "close": "Kapat",
     "autoSaveSettings": "Otomatik Kayıt Ayarları",
     "autoSaveInterval": "Kayıt Sıklığı:",
-    "exitGame": "Oyundan Çık"
+    "exitGame": "Oyundan Çık",
+    "soundSettings": "Ses Ayarları",
+    "mute": "Sessiz",
+    "unmute": "Sesi Aç",
+    "music": "Müzik"
   },
   "story": {
     "welcome": "Hoş geldin, savaşçı!",

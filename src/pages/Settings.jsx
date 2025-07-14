@@ -16,7 +16,7 @@ import {
     ListItemIcon,
     Divider
 } from "@mui/material";
-import { Close, Warning, Refresh, Language, Home, Save } from "@mui/icons-material";
+import { Close, Warning, Refresh, Language, Home, Save, VolumeUp, VolumeOff } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 import { saveCurrentGame, getCurrentSlot, deleteSlot } from "../utils/saveManager.js";
 import { useEffect } from "react";
@@ -38,6 +38,14 @@ function Settings({ open, onClose }) {
         // localStorage'dan oku, yoksa 1 dakika (60 sn)
         const saved = localStorage.getItem('autoSaveInterval');
         return saved ? parseInt(saved) : 60;
+    });
+    const [musicVolume, setMusicVolume] = useState(() => {
+        const saved = localStorage.getItem('musicVolume');
+        return saved !== null ? parseFloat(saved) : 0.5;
+    });
+    const [musicMuted, setMusicMuted] = useState(() => {
+        const saved = localStorage.getItem('musicMuted');
+        return saved === 'true';
     });
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
 
@@ -86,6 +94,19 @@ function Settings({ open, onClose }) {
         } else {
             // Hata mesajı için de benzer şekilde eklenebilir
         }
+    };
+
+    const handleVolumeChange = (e) => {
+        const value = parseInt(e.target.value) / 100;
+        setMusicVolume(value);
+        localStorage.setItem('musicVolume', value);
+        window.dispatchEvent(new Event('music-settings-changed'));
+    };
+    const handleMuteToggle = () => {
+        const newMuted = !musicMuted;
+        setMusicMuted(newMuted);
+        localStorage.setItem('musicMuted', newMuted);
+        window.dispatchEvent(new Event('music-settings-changed'));
     };
 
     useEffect(() => {
@@ -211,6 +232,32 @@ function Settings({ open, onClose }) {
                         
                         <Divider sx={{ my: 3, borderColor: '#4a4a6a' }} />
 
+                        <Typography variant="h6" gutterBottom sx={{ 
+                            color: '#ffd700',
+                            fontSize: '0.9rem',
+                            textShadow: '1px 1px 0px #000',
+                            mb: 2
+                        }}>
+                            {t('common.soundSettings')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                            <IconButton onClick={handleMuteToggle} sx={{ color: '#ffd700' }}>
+                                {musicMuted ? <VolumeOff /> : <VolumeUp />}
+                            </IconButton>
+                            <input
+                                type="range"
+                                min={0}
+                                max={100}
+                                value={musicMuted ? 0 : Math.round(musicVolume * 100)}
+                                onChange={handleVolumeChange}
+                                style={{ width: 180 }}
+                                disabled={musicMuted}
+                            />
+                            <span style={{ fontFamily: 'Press Start 2P, monospace', fontSize: '0.7rem', color: '#ffd700', marginLeft: 8 }}>
+                                {musicMuted ? '0' : Math.round(musicVolume * 100)}%
+                            </span>
+                        </Box>
+                        
                         <Typography variant="h6" gutterBottom sx={{ 
                             color: '#ffd700',
                             fontSize: '0.9rem',

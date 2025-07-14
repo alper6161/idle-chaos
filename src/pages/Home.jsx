@@ -14,7 +14,7 @@ import {
     IconButton,
     Tooltip
 } from "@mui/material";
-import { Delete, Edit, PlayArrow } from "@mui/icons-material";
+import { Delete, Edit, PlayArrow, VolumeUp, VolumeOff } from "@mui/icons-material";
 import styles from "../assets/styles/Home.module.scss";
 import { useTranslate } from "../hooks/useTranslate";
 import StoryModal from "../components/StoryModal.jsx";
@@ -72,10 +72,30 @@ function Home() {
     const [renameDialog, setRenameDialog] = useState({ open: false, slot: null, name: '' });
     const [deleteDialog, setDeleteDialog] = useState({ open: false, slot: null });
     const { t } = useTranslate();
+    const [musicMuted, setMusicMuted] = useState(() => {
+        const saved = localStorage.getItem('musicMuted');
+        return saved === 'true';
+    });
 
     useEffect(() => {
         loadSaveSlots();
     }, []);
+
+    useEffect(() => {
+        const handler = () => {
+            const saved = localStorage.getItem('musicMuted');
+            setMusicMuted(saved === 'true');
+        };
+        window.addEventListener('music-settings-changed', handler);
+        return () => window.removeEventListener('music-settings-changed', handler);
+    }, []);
+
+    const handleMuteToggle = () => {
+        const newMuted = !musicMuted;
+        setMusicMuted(newMuted);
+        localStorage.setItem('musicMuted', newMuted);
+        window.dispatchEvent(new Event('music-settings-changed'));
+    };
 
     const loadSaveSlots = () => {
         const slots = getSaveSlots();
@@ -250,7 +270,30 @@ function Home() {
 
     return (
         <div className={styles.homeContainer}>
-            {/* Sağ üstte çıkış butonu */}
+            {/* Sağ üstte mute ve çıkış butonları */}
+            <IconButton
+                onClick={handleMuteToggle}
+                sx={{
+                    position: 'fixed',
+                    top: 16,
+                    right: 120,
+                    zIndex: 3000,
+                    background: '#222',
+                    color: '#ffd700',
+                    border: '2px solid #fff',
+                    borderRadius: 0,
+                    fontSize: '1.2rem',
+                    padding: '0.5rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 0 0 1px #000, 0 2px 0 0 #ffd700',
+                    textShadow: '1px 1px 0px #000',
+                    marginRight: 8,
+                    transition: 'all 0.2s',
+                    '&:hover': { background: '#ffd700', color: '#222' },
+                }}
+            >
+                {musicMuted ? <VolumeOff /> : <VolumeUp />}
+            </IconButton>
             <button
                 onClick={handleExitGame}
                 style={{

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../assets/styles/StartScreen.module.scss";
 
@@ -41,6 +41,24 @@ const rightSkillPositions = [
 
 function StartScreen() {
   const navigate = useNavigate();
+  const audioRef = useRef(null);
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem('musicVolume');
+    return saved !== null ? parseFloat(saved) : 0.5;
+  });
+  const [muted, setMuted] = useState(() => {
+    const saved = localStorage.getItem('musicMuted');
+    return saved === 'true';
+  });
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = muted ? 0 : volume;
+      audioRef.current.muted = muted;
+      audioRef.current.loop = true;
+      audioRef.current.play().catch(() => {});
+    }
+  }, [volume, muted]);
 
   const handleStart = () => {
     navigate("/home");
@@ -52,6 +70,7 @@ function StartScreen() {
 
   return (
     <div className={styles.startScreenContainer}>
+      <audio ref={audioRef} src="/sounds/sound.mp3" autoPlay loop />
       {/* Left scattered skill icons */}
       {leftIcons.map((icon, i) => (
         <img
