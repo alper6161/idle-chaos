@@ -45,7 +45,8 @@
     "inventory": "Inventory",
     "close": "Close",
     "autoSaveSettings": "Auto Save Settings",
-    "autoSaveInterval": "Save Interval:"
+    "autoSaveInterval": "Save Interval:",
+    "exitGame": "Exit Game"
   },
   "story": {
     "welcome": "Welcome, warrior!",

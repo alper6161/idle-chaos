@@ -56,6 +56,14 @@ const getTotalSkillLevel = (skillLevels) => {
     return total;
 };
 
+function handleExitGame() {
+    if (window && window.process && window.process.type) {
+        window.close();
+    } else {
+        alert("Çıkış fonksiyonu sadece uygulama modunda çalışır.");
+    }
+}
+
 function Home() {
     const navigate = useNavigate();
     const [saveSlots, setSaveSlots] = useState({});
@@ -242,6 +250,30 @@ function Home() {
 
     return (
         <div className={styles.homeContainer}>
+            {/* Sağ üstte çıkış butonu */}
+            <button
+                onClick={handleExitGame}
+                style={{
+                    position: 'fixed',
+                    top: 16,
+                    right: 24,
+                    zIndex: 3000,
+                    background: '#ff6b6b',
+                    color: '#fff',
+                    border: '2px solid #fff',
+                    borderRadius: 0,
+                    fontFamily: 'Press Start 2P, monospace',
+                    fontSize: '0.7rem',
+                    padding: '0.5rem 1.2rem',
+                    cursor: 'pointer',
+                    boxShadow: '0 0 0 1px #000, 0 2px 0 0 #ff6b6b',
+                    textShadow: '1px 1px 0px #000',
+                    letterSpacing: '1px',
+                    transition: 'all 0.2s',
+                }}
+            >
+                {t('common.exitGame')}
+            </button>
             <img
                 src="/images/logo.png"
                 alt={t('common.gameLogo')}

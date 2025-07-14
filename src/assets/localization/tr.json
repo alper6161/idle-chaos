@@ -45,7 +45,8 @@
     "inventory": "Envanter",
     "close": "Kapat",
     "autoSaveSettings": "Otomatik Kayıt Ayarları",
-    "autoSaveInterval": "Kayıt Sıklığı:"
+    "autoSaveInterval": "Kayıt Sıklığı:",
+    "exitGame": "Oyundan Çık"
   },
   "story": {
     "welcome": "Hoş geldin, savaşçı!",
