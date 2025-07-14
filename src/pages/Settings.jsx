@@ -35,7 +35,6 @@ function Settings({ open, onClose }) {
     const [showHomeConfirm, setShowHomeConfirm] = useState(false);
     const [showSaveSuccess, setShowSaveSuccess] = useState(false);
     const [autoSaveInterval, setAutoSaveInterval] = useState(() => {
-        // localStorage'dan oku, yoksa 1 dakika (60 sn)
         const saved = localStorage.getItem('autoSaveInterval');
         return saved ? parseInt(saved) : 60;
     });
@@ -50,13 +49,10 @@ function Settings({ open, onClose }) {
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
 
     const handleHardReset = () => {
-        // Sadece aktif slotu ve oyun state anahtarlarını sil
         const currentSlot = getCurrentSlot();
         deleteSlot(currentSlot);
         GAME_STATE_KEYS.forEach(key => localStorage.removeItem(key));
-        // Close the settings dialog
         onClose();
-        // Navigate to home page
         navigate("/");
     };
 
@@ -84,15 +80,15 @@ function Settings({ open, onClose }) {
     const handleHomeConfirm = () => {
         setShowHomeConfirm(false);
         onClose();
-        navigate("/");
+        navigate();
     };
 
     const handleManualSave = () => {
         const success = saveCurrentGame();
         if (success) {
-            setShowSaveSuccess(true); // <-- Alert aç
+            setShowSaveSuccess(true);
         } else {
-            // Hata mesajı için de benzer şekilde eklenebilir
+            // You can add an error message here if needed
         }
     };
 
@@ -116,7 +112,6 @@ function Settings({ open, onClose }) {
         }
     }, [showSaveSuccess]);
 
-    // Auto save interval değişince localStorage'a kaydet
     useEffect(() => {
         localStorage.setItem('autoSaveInterval', autoSaveInterval.toString());
     }, [autoSaveInterval]);

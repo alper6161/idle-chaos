@@ -53,7 +53,7 @@ import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
 import { saveCurrentGame } from "../utils/saveManager.js";
 
 function Battle({ player }) {
-    const [battleMode, setBattleMode] = useState('selection'); // 'selection' or 'battle'
+    const [battleMode, setBattleMode] = useState('selection');
     const [currentEnemy, setCurrentEnemy] = useState(null);
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
@@ -62,12 +62,10 @@ function Battle({ player }) {
 
     const [lootBag, setLootBag] = useState([]);
     const [playerGold, setPlayerGold] = useState(getGold());
-    
-    // Potion states
+    // Potion state
     const [potions, setPotions] = useState(getPotions());
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
     const [lastPotionUsed, setLastPotionUsed] = useState(null);
-    
     const [battleResult, setBattleResult] = useState(null);
     const [battleLog, setBattleLog] = useState([]);
     const [isBattleActive, setIsBattleActive] = useState(false);
@@ -75,16 +73,8 @@ function Battle({ player }) {
     const [damageDisplay, setDamageDisplay] = useState({ player: null, enemy: null });
     const [isWaitingForEnemy, setIsWaitingForEnemy] = useState(false);
     const [enemySpawnProgress, setEnemySpawnProgress] = useState(0);
-    
-    const [deathDialog, setDeathDialog] = useState({
-        open: false,
-        countdown: 15
-    });
-    
-    // Battle log visibility
+    const [deathDialog, setDeathDialog] = useState({ open: false, countdown: 15 });
     const [battleLogVisible, setBattleLogVisible] = useState(true);
-    
-    // Attack type selection
     const [selectedAttackType, setSelectedAttackType] = useState('stab');
     const [availableAttackTypes, setAvailableAttackTypes] = useState([]);
 
@@ -164,9 +154,8 @@ function Battle({ player }) {
     const respawnPlayer = () => {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
-        setPlayerHealth(currentPlayerStats.HEALTH); // <-- Güncel max HP
+        setPlayerHealth(currentPlayerStats.HEALTH);
         localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
-        
         setBattleMode('selection');
         setCurrentEnemy(null);
         setBattleResult(null);
@@ -218,26 +207,20 @@ function Battle({ player }) {
             console.warn('startRealTimeBattle called with null enemy');
             return;
         }
-        // Yeni savaş başlarken loga "Düşman aranıyor..." mesajı ekle
         setBattleLog(prev => [
             ...prev,
             { type: 'info', message: t('battle.searchingForEnemy') }
         ]);
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
-        
-        // Eğer mevcut HP, yeni max HP'den büyükse, max HP'ye eşitle
         const adjustedHealth = Math.min(health, currentPlayerStats.HEALTH);
-        
-        // Award HP experience for participating in battle
         const hpXP = awardBattleActionXP('battle_participation', 0, false, true);
-        
         setCurrentBattle({
             player: { ...currentPlayerStats, currentHealth: adjustedHealth },
             enemy: { ...enemy, currentHealth: enemy.maxHp },
             playerProgress: 0,
             enemyProgress: 0,
-            battleLog: [] // Burası battleLog'u etkilemez, sadece currentBattle içindir
+            battleLog: []
         });
         setIsBattleActive(true);
         setBattleResult(null);

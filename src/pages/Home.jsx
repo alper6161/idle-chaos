@@ -36,7 +36,7 @@ const GAME_STATE_KEYS = [
     'achievements', 'unlockedEnemies', 'gameData'
 ];
 
-// Skill seviyelerini toplayan yardımcı fonksiyon
+// Helper function to sum all skill levels
 const getTotalSkillLevel = (skillLevels) => {
     if (!skillLevels) return 0;
     let total = 0;
@@ -60,7 +60,7 @@ function handleExitGame() {
     if (window && window.process && window.process.type) {
         window.close();
     } else {
-        alert("Çıkış fonksiyonu sadece uygulama modunda çalışır.");
+        alert("Exit function only works in app mode.");
     }
 }
 
@@ -103,10 +103,10 @@ function Home() {
     };
 
     const handleNewGame = (slotNumber) => {
-        // Sadece ilgili slotu ve oyun state anahtarlarını sil
+        // Only delete the relevant slot and game state keys
         deleteSlot(slotNumber);
         GAME_STATE_KEYS.forEach(key => localStorage.removeItem(key));
-        // Skill seviyelerini baştan kaydet
+        // Reset skill levels
         localStorage.setItem('gameData', JSON.stringify(INITIAL_SKILLS));
         // Set current slot
         localStorage.setItem('idle-chaos-current-slot', slotNumber.toString());
@@ -183,12 +183,12 @@ function Home() {
                     <div className={styles.slotHeader}>
                         <Typography variant="h6" className={styles.slotName} sx={!slot?.name ? { color: '#fff' } : {}}>
                             {slot?.name || `Save ${slotNumber}`}
-                            {isCurrentSlot && <span className={styles.currentIndicator}> (Aktif)</span>}
+                            {isCurrentSlot && <span className={styles.currentIndicator}> (Active)</span>}
                         </Typography>
                         <div className={styles.slotActions}>
                             {hasData && (
                                 <>
-                                    <Tooltip title="Oyunu Devam Et">
+                                    <Tooltip title="Continue Game">
                                         <IconButton 
                                             onClick={() => handleContinue(slotNumber)}
                                             size="small"
@@ -197,7 +197,7 @@ function Home() {
                                             <PlayArrow />
                                         </IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Yeniden Adlandır">
+                                    <Tooltip title="Rename Slot">
                                         <IconButton 
                                             onClick={() => handleRename(slotNumber)}
                                             size="small"
@@ -206,7 +206,7 @@ function Home() {
                                             <Edit />
                                         </IconButton>
                                     </Tooltip>
-                                    <Tooltip title="Kaydı Sil">
+                                    <Tooltip title="Delete Slot">
                                         <IconButton 
                                             onClick={() => handleDelete(slotNumber)}
                                             size="small"
@@ -223,18 +223,18 @@ function Home() {
                     {hasData ? (
                         <div className={styles.slotInfo}>
                             <Typography variant="body2" color="textSecondary">
-                                Son Oynanma: {formatDate(slot?.lastPlayed)}
+                                Last Played: {formatDate(slot?.lastPlayed)}
                             </Typography>
                             <Typography variant="body2" color="textSecondary">
-                                Oluşturulma: {formatDate(slot?.createdAt)}
+                                Created At: {formatDate(slot?.createdAt)}
                             </Typography>
                             <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontWeight: 'bold', color: '#ffd700' }}>
-                                Toplam Skill Level: {totalSkillLevel !== null ? totalSkillLevel : "—"}
+                                Total Skill Level: {totalSkillLevel !== null ? totalSkillLevel : "—"}
                             </Typography>
                         </div>
                     ) : (
                         <Typography variant="body2" color="textSecondary">
-                            Boş Kayıt
+                            Empty Slot
                         </Typography>
                     )}
 
@@ -248,7 +248,7 @@ function Home() {
                                     '&:hover': { backgroundColor: '#45a049' }
                                 }}
                             >
-                                Devam Et
+                                Continue
                             </Button>
                         ) : (
                             <Button
@@ -259,7 +259,7 @@ function Home() {
                                     '&:hover': { backgroundColor: '#1976d2' }
                                 }}
                             >
-                                Yeni Oyun
+                                New Game
                             </Button>
                         )}
                     </div>
@@ -270,7 +270,7 @@ function Home() {
 
     return (
         <div className={styles.homeContainer}>
-            {/* Sağ üstte mute ve çıkış butonları */}
+            {/* Top right mute and exit buttons */}
             <IconButton
                 onClick={handleMuteToggle}
                 sx={{
@@ -327,11 +327,11 @@ function Home() {
             </div>
 
             <Typography variant="h4" className={styles.title}>
-                Kayıt Seçimi
+                Slot Selection
             </Typography>
 
             <Typography variant="body1" className={styles.subtitle}>
-                Bir kayıt seçin veya yeni bir oyun başlatın
+                Select a slot or start a new game
             </Typography>
 
             <div className={styles.saveSlotsContainer}>
@@ -344,12 +344,12 @@ function Home() {
 
             {/* Rename Dialog */}
             <Dialog open={renameDialog.open} onClose={() => setRenameDialog({ open: false, slot: null, name: '' })}>
-                <DialogTitle>Kayıt Adını Değiştir</DialogTitle>
+                <DialogTitle>Rename Slot</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
                         margin="dense"
-                        label="Kayıt Adı"
+                        label="Slot Name"
                         fullWidth
                         value={renameDialog.name}
                         onChange={(e) => setRenameDialog(prev => ({ ...prev, name: e.target.value }))}
@@ -357,28 +357,28 @@ function Home() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setRenameDialog({ open: false, slot: null, name: '' })}>
-                        İptal
+                        Cancel
                     </Button>
                     <Button onClick={handleRenameConfirm} variant="contained">
-                        Kaydet
+                        Save
                     </Button>
                 </DialogActions>
             </Dialog>
 
             {/* Delete Dialog */}
             <Dialog open={deleteDialog.open} onClose={() => setDeleteDialog({ open: false, slot: null })}>
-                <DialogTitle>Kaydı Sil</DialogTitle>
+                <DialogTitle>Delete Slot</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        Bu kaydı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+                        Are you sure you want to delete this slot? This action cannot be undone.
                     </Typography>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setDeleteDialog({ open: false, slot: null })}>
-                        İptal
+                        Cancel
                     </Button>
                     <Button onClick={handleDeleteConfirm} variant="contained" color="error">
-                        Sil
+                        Delete
                     </Button>
                 </DialogActions>
             </Dialog>
