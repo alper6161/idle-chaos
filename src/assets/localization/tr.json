@@ -43,7 +43,9 @@
     "newEquipment": "Yeni Ekipman",
     "noItemsFound": "Kriterlerinizle eşleşen eşya bulunamadı",
     "inventory": "Envanter",
-    "close": "Kapat"
+    "close": "Kapat",
+    "autoSaveSettings": "Otomatik Kayıt Ayarları",
+    "autoSaveInterval": "Kayıt Sıklığı:"
   },
   "story": {
     "welcome": "Hoş geldin, savaşçı!",

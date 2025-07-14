@@ -43,7 +43,9 @@
     "newEquipment": "New Equipment",
     "noItemsFound": "No items found matching your criteria",
     "inventory": "Inventory",
-    "close": "Close"
+    "close": "Close",
+    "autoSaveSettings": "Auto Save Settings",
+    "autoSaveInterval": "Save Interval:"
   },
   "story": {
     "welcome": "Welcome, warrior!",

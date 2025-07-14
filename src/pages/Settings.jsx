@@ -32,7 +32,12 @@ function Settings({ open, onClose }) {
     const navigate = useNavigate();
     const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [showHomeConfirm, setShowHomeConfirm] = useState(false);
-    const [showSaveSuccess, setShowSaveSuccess] = useState(false); // <-- Eklendi
+    const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+    const [autoSaveInterval, setAutoSaveInterval] = useState(() => {
+        // localStorage'dan oku, yoksa 1 dakika (60 sn)
+        const saved = localStorage.getItem('autoSaveInterval');
+        return saved ? parseInt(saved) : 60;
+    });
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
 
     const handleHardReset = () => {
@@ -88,6 +93,11 @@ function Settings({ open, onClose }) {
             return () => clearTimeout(timer);
         }
     }, [showSaveSuccess]);
+
+    // Auto save interval değişince localStorage'a kaydet
+    useEffect(() => {
+        localStorage.setItem('autoSaveInterval', autoSaveInterval.toString());
+    }, [autoSaveInterval]);
 
     return (
         <>
@@ -194,6 +204,39 @@ function Settings({ open, onClose }) {
                         </List>
                         
                         <Divider sx={{ my: 3, borderColor: '#4a4a6a' }} />
+
+                        <Typography variant="h6" gutterBottom sx={{ 
+                            color: '#ffd700',
+                            fontSize: '0.9rem',
+                            textShadow: '1px 1px 0px #000',
+                            mb: 2
+                        }}>
+                            {t('common.autoSaveSettings')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                            <Typography sx={{ fontSize: '0.8rem', minWidth: 120 }}>
+                                {t('common.autoSaveInterval')}
+                            </Typography>
+                            <select
+                                value={autoSaveInterval}
+                                onChange={e => setAutoSaveInterval(Number(e.target.value))}
+                                style={{
+                                    fontFamily: 'Press Start 2P, monospace',
+                                    fontSize: '0.8rem',
+                                    padding: '0.3rem 1rem',
+                                    borderRadius: 0,
+                                    border: '2px solid #4a4a6a',
+                                    background: '#222',
+                                    color: '#ffd700',
+                                    outline: 'none',
+                                }}
+                            >
+                                <option value={30}>30 sn</option>
+                                <option value={60}>1 dk</option>
+                                <option value={120}>2 dk</option>
+                                <option value={300}>5 dk</option>
+                            </select>
+                        </Box>
                         
                         <Typography variant="h6" gutterBottom sx={{ 
                             color: '#ff6b6b',

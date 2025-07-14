@@ -7,11 +7,14 @@ import { getGold, formatGold } from "../utils/gold.js";
 import { getActiveBuffsInfo } from "../utils/buffUtils.js";
 import { useTranslate } from "../hooks/useTranslate";
 import MainMenu from "../components/MainMenu";
+import { saveCurrentGame } from "../utils/saveManager.js";
+import { Alert } from "@mui/material";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [playerGold, setPlayerGold] = useState(getGold());
     const [activeBuffs, setActiveBuffs] = useState(getActiveBuffsInfo());
+    const [showAutoSaveSuccess, setShowAutoSaveSuccess] = useState(false);
     const { t } = useTranslate();
 
     const handleSettingsClick = () => {
@@ -34,6 +37,44 @@ function MainLayout() {
 
         return () => clearInterval(interval);
     }, []);
+
+    // Auto-save interval
+    useEffect(() => {
+        const getInterval = () => {
+            const saved = localStorage.getItem('autoSaveInterval');
+            return saved ? parseInt(saved) : 60;
+        };
+        let intervalId;
+        function startAutoSave() {
+            if (intervalId) clearInterval(intervalId);
+            const intervalSec = getInterval();
+            intervalId = setInterval(() => {
+                const success = saveCurrentGame();
+                if (success) {
+                    setShowAutoSaveSuccess(true);
+                }
+            }, intervalSec * 1000);
+        }
+        startAutoSave();
+        // Ayar değişirse tekrar başlat
+        const onStorage = (e) => {
+            if (e.key === 'autoSaveInterval') {
+                startAutoSave();
+            }
+        };
+        window.addEventListener('storage', onStorage);
+        return () => {
+            clearInterval(intervalId);
+            window.removeEventListener('storage', onStorage);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (showAutoSaveSuccess) {
+            const timer = setTimeout(() => setShowAutoSaveSuccess(false), 2500);
+            return () => clearTimeout(timer);
+        }
+    }, [showAutoSaveSuccess]);
 
     return (
         <div className={styles.layout}>
@@ -77,6 +118,27 @@ function MainLayout() {
                 open={settingsOpen} 
                 onClose={handleSettingsClose} 
             />
+            {/* Auto-save başarı popup */}
+            {showAutoSaveSuccess && (
+                <Alert 
+                    severity="success" 
+                    sx={{ 
+                        position: 'fixed', 
+                        top: 24, 
+                        left: '50%', 
+                        transform: 'translateX(-50%)', 
+                        zIndex: 2000,
+                        minWidth: 300,
+                        fontFamily: 'Press Start 2P, monospace',
+                        fontSize: '0.8rem',
+                        textAlign: 'center',
+                        boxShadow: '0 0 8px #000',
+                    }}
+                    onClose={() => setShowAutoSaveSuccess(false)}
+                >
+                    {t('settings.saveSuccess')}
+                </Alert>
+            )}
         </div>
     );
 }

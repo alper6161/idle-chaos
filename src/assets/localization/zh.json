@@ -43,7 +43,9 @@
     "newEquipment": "新装备",
     "noItemsFound": "未找到符合您条件的物品",
     "inventory": "背包",
-    "close": "关闭"
+    "close": "关闭",
+    "autoSaveSettings": "自动保存设置",
+    "autoSaveInterval": "保存间隔："
   },
   "story": {
     "welcome": "欢迎，战士！",
