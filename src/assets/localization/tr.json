@@ -266,5 +266,6 @@
         "unlocked": "Açılan",
         "total": "Toplam",
         "enemyAchievements": "Düşman Başarıları"
-    }
+    },
+    "settings.saveSuccess": "Oyun başarıyla kaydedildi!"
 } 

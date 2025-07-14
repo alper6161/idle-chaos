@@ -266,5 +266,6 @@
         "unlocked": "Unlocked",
         "total": "Total",
         "enemyAchievements": "Enemy Achievements"
-    }
+    },
+    "settings.saveSuccess": "Game saved successfully!"
 } 

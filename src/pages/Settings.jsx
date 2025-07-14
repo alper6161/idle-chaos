@@ -19,11 +19,13 @@ import {
 import { Close, Warning, Refresh, Language, Home, Save } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 import { saveCurrentGame } from "../utils/saveManager.js";
+import { useEffect } from "react";
 
 function Settings({ open, onClose }) {
     const navigate = useNavigate();
     const [showResetConfirm, setShowResetConfirm] = useState(false);
     const [showHomeConfirm, setShowHomeConfirm] = useState(false);
+    const [showSaveSuccess, setShowSaveSuccess] = useState(false); // <-- Eklendi
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
 
     const handleHardReset = () => {
@@ -67,11 +69,18 @@ function Settings({ open, onClose }) {
     const handleManualSave = () => {
         const success = saveCurrentGame();
         if (success) {
-            alert('Oyun başarıyla kaydedildi!');
+            setShowSaveSuccess(true); // <-- Alert aç
         } else {
-            alert('Kaydetme sırasında bir hata oluştu.');
+            // Hata mesajı için de benzer şekilde eklenebilir
         }
     };
+
+    useEffect(() => {
+        if (showSaveSuccess) {
+            const timer = setTimeout(() => setShowSaveSuccess(false), 2500);
+            return () => clearTimeout(timer);
+        }
+    }, [showSaveSuccess]);
 
     return (
         <>
@@ -489,6 +498,28 @@ function Settings({ open, onClose }) {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Kayıt başarılı popup */}
+            {showSaveSuccess && (
+                <Alert 
+                    severity="success" 
+                    sx={{ 
+                        position: 'fixed', 
+                        top: 24, 
+                        left: '50%', 
+                        transform: 'translateX(-50%)', 
+                        zIndex: 2000,
+                        minWidth: 300,
+                        fontFamily: 'Press Start 2P, monospace',
+                        fontSize: '0.8rem',
+                        textAlign: 'center',
+                        boxShadow: '0 0 8px #000',
+                    }}
+                    onClose={() => setShowSaveSuccess(false)}
+                >
+                    {t('settings.saveSuccess')}
+                </Alert>
+            )}
         </>
     );
 }

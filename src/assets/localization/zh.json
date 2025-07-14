@@ -263,5 +263,6 @@
         "unlocked": "已解锁",
         "total": "总计",
         "enemyAchievements": "敌人成就"
-    }
+    },
+    "settings.saveSuccess": "游戏已成功保存！"
 } 
