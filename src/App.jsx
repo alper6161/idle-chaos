@@ -8,13 +8,15 @@ import Store from "./pages/Store.jsx";
 import Achievement from "./pages/Achievement.jsx";
 import MainLayout from "./pages/MainLayout.jsx";
 import Pets from "./pages/Pets.jsx";
+import StartScreen from "./pages/StartScreen.jsx";
 
 function App() {
 
     return (
         <>
             <Routes>
-                <Route path="/" element={<Home/>}/>
+                <Route path="/" element={<StartScreen/>}/>
+                <Route path="/home" element={<Home/>}/>
                 <Route element={<MainLayout />}>
                     <Route path="/skills" element={<Skills/>}/>
                     <Route path="/battle" element={<Battle/>}/>
