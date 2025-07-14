@@ -68,10 +68,21 @@
     text-rendering: optimizeSpeed;
 }
 
-.saveSlotsGrid {
-    width: 100%;
-    max-width: 900px;
-    margin-top: 2rem;
+.saveSlotsContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  justify-items: center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.saveSlotCard {
+  width: 400px;
+  max-width: 90vw;
+  margin: 0 auto;
+  /* Diğer kart stilleri buraya eklenebilir */
 }
 
 .saveSlot {

@@ -18,8 +18,15 @@ import {
 } from "@mui/material";
 import { Close, Warning, Refresh, Language, Home, Save } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
-import { saveCurrentGame } from "../utils/saveManager.js";
+import { saveCurrentGame, getCurrentSlot, deleteSlot } from "../utils/saveManager.js";
 import { useEffect } from "react";
+
+const GAME_STATE_KEYS = [
+    'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
+    'inventory', 'equippedItems', 'lootBag', 'potions',
+    'autoPotionSettings', 'skillLevels', 'skillXP',
+    'achievements', 'unlockedEnemies', 'gameData'
+];
 
 function Settings({ open, onClose }) {
     const navigate = useNavigate();
@@ -29,12 +36,12 @@ function Settings({ open, onClose }) {
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
 
     const handleHardReset = () => {
-        // Clear all localStorage data
-        localStorage.clear();
-        
+        // Sadece aktif slotu ve oyun state anahtarlarını sil
+        const currentSlot = getCurrentSlot();
+        deleteSlot(currentSlot);
+        GAME_STATE_KEYS.forEach(key => localStorage.removeItem(key));
         // Close the settings dialog
         onClose();
-        
         // Navigate to home page
         navigate("/");
     };

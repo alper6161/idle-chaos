@@ -27,6 +27,34 @@ import {
     getSlotInfo,
     getCurrentSlot
 } from "../utils/saveManager.js";
+import { INITIAL_SKILLS } from "../utils/constants";
+
+const GAME_STATE_KEYS = [
+    'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
+    'inventory', 'equippedItems', 'lootBag', 'potions',
+    'autoPotionSettings', 'skillLevels', 'skillXP',
+    'achievements', 'unlockedEnemies', 'gameData'
+];
+
+// Skill seviyelerini toplayan yardımcı fonksiyon
+const getTotalSkillLevel = (skillLevels) => {
+    if (!skillLevels) return 0;
+    let total = 0;
+    console.log(skillLevels);
+    Object.values(skillLevels).forEach(category => {
+        if (typeof category === 'object' && category !== null) {
+            Object.values(category).forEach(skill => {
+                if (typeof skill === 'object' && skill !== null && typeof skill.level === 'number') {
+                    total += skill.level;
+                } else if (typeof skill === 'number') {
+                    total += skill;
+                }
+            });
+        }
+    });
+    console.log(total);
+    return total;
+};
 
 function Home() {
     const navigate = useNavigate();
@@ -47,12 +75,13 @@ function Home() {
     };
 
     const handleNewGame = (slotNumber) => {
-        // Clear localStorage for this slot
-        localStorage.clear();
-        
+        // Sadece ilgili slotu ve oyun state anahtarlarını sil
+        deleteSlot(slotNumber);
+        GAME_STATE_KEYS.forEach(key => localStorage.removeItem(key));
+        // Skill seviyelerini baştan kaydet
+        localStorage.setItem('gameData', JSON.stringify(INITIAL_SKILLS));
         // Set current slot
         localStorage.setItem('idle-chaos-current-slot', slotNumber.toString());
-        
         setSelectedSlot(slotNumber);
         setShowStoryModal(true);
     };
@@ -103,9 +132,10 @@ function Home() {
     };
 
     const renderSaveSlot = (slotNumber) => {
-        const slot = saveSlots[slotNumber];
+        const slot = saveSlots[slotNumber] || {};
         const hasData = hasSlotData(slotNumber);
         const isCurrentSlot = getCurrentSlot() === slotNumber;
+        const totalSkillLevel = slot?.data?.gameData ? getTotalSkillLevel(slot.data.gameData) : null;
 
         return (
             <Card 
@@ -170,6 +200,9 @@ function Home() {
                             <Typography variant="body2" color="textSecondary">
                                 Oluşturulma: {formatDate(slot?.createdAt)}
                             </Typography>
+                            <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontWeight: 'bold', color: '#ffd700' }}>
+                                Toplam Skill Level: {totalSkillLevel !== null ? totalSkillLevel : "—"}
+                            </Typography>
                         </div>
                     ) : (
                         <Typography variant="body2" color="textSecondary">
@@ -223,13 +256,13 @@ function Home() {
                 Bir kayıt seçin veya yeni bir oyun başlatın
             </Typography>
 
-            <Grid container spacing={3} className={styles.saveSlotsGrid}>
+            <div className={styles.saveSlotsContainer}>
                 {[1, 2, 3].map(slotNumber => (
-                    <Grid item xs={12} sm={4} key={slotNumber}>
+                    <div key={slotNumber} className={styles.saveSlotCard}>
                         {renderSaveSlot(slotNumber)}
-                    </Grid>
+                    </div>
                 ))}
-            </Grid>
+            </div>
 
             {/* Rename Dialog */}
             <Dialog open={renameDialog.open} onClose={() => setRenameDialog({ open: false, slot: null, name: '' })}>
