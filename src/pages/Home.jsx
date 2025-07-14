@@ -14,7 +14,7 @@ import {
     IconButton,
     Tooltip
 } from "@mui/material";
-import { Delete, Edit, PlayArrow, VolumeUp, VolumeOff } from "@mui/icons-material";
+import { Delete, Edit, PlayArrow, VolumeUp, VolumeOff, ExitToApp } from "@mui/icons-material";
 import styles from "../assets/styles/Home.module.scss";
 import { useTranslate } from "../hooks/useTranslate";
 import StoryModal from "../components/StoryModal.jsx";
@@ -276,47 +276,52 @@ function Home() {
                 sx={{
                     position: 'fixed',
                     top: 16,
-                    right: 120,
+                    right: 75,
                     zIndex: 3000,
                     background: '#222',
                     color: '#ffd700',
                     border: '2px solid #fff',
                     borderRadius: 0,
-                    fontSize: '1.2rem',
+                    fontSize: '1.5rem',
                     padding: '0.5rem',
                     cursor: 'pointer',
                     boxShadow: '0 0 0 1px #000, 0 2px 0 0 #ffd700',
                     textShadow: '1px 1px 0px #000',
-                    marginRight: 8,
                     transition: 'all 0.2s',
                     '&:hover': { background: '#ffd700', color: '#222' },
                 }}
             >
                 {musicMuted ? <VolumeOff /> : <VolumeUp />}
             </IconButton>
-            <button
+            <IconButton
                 onClick={handleExitGame}
-                style={{
+                sx={{
                     position: 'fixed',
                     top: 16,
-                    right: 24,
+                    right: 16,
                     zIndex: 3000,
                     background: '#ff6b6b',
                     color: '#fff',
                     border: '2px solid #fff',
                     borderRadius: 0,
                     fontFamily: 'Press Start 2P, monospace',
-                    fontSize: '0.7rem',
-                    padding: '0.5rem 1.2rem',
+                    fontSize: '1.2rem',
+                    padding: '0.5rem',
                     cursor: 'pointer',
                     boxShadow: '0 0 0 1px #000, 0 2px 0 0 #ff6b6b',
                     textShadow: '1px 1px 0px #000',
                     letterSpacing: '1px',
                     transition: 'all 0.2s',
+                    width: 48,
+                    height: 48,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    '&:hover': { background: '#fff', color: '#ff6b6b' },
                 }}
             >
-                {t('common.exitGame')}
-            </button>
+                <ExitToApp sx={{ fontSize: 28 }} />
+            </IconButton>
             <div className={styles.logoRow}>
                 <img src="/IdleChaosLogo.png" alt="Idle Chaos Logo" className={styles.logoImage} />
             </div>

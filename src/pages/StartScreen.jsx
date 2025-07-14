@@ -41,26 +41,13 @@ const rightSkillPositions = [
 
 function StartScreen() {
   const navigate = useNavigate();
-  const audioRef = useRef(null);
-  const [volume, setVolume] = useState(() => {
-    const saved = localStorage.getItem('musicVolume');
-    return saved !== null ? parseFloat(saved) : 0.5;
-  });
-  const [muted, setMuted] = useState(() => {
-    const saved = localStorage.getItem('musicMuted');
-    return saved === 'true';
-  });
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = muted ? 0 : volume;
-      audioRef.current.muted = muted;
-      audioRef.current.loop = true;
-      audioRef.current.play().catch(() => {});
-    }
-  }, [volume, muted]);
 
   const handleStart = () => {
+    // Try to start music on first user interaction
+    const audio = document.querySelector('audio');
+    if (audio) {
+      audio.play().catch(() => {});
+    }
     navigate("/home");
   };
 
