@@ -73,7 +73,7 @@ function StartScreen() {
         />
       ))}
       <div className={styles.logoArea}>
-        <h1 className={styles.title}>IDLE CHAOS</h1>
+        <img src="/IdleChaosLogo.png" alt="Idle Chaos Logo" className={styles.logoImage + ' ' + styles.logoFloat} />
         <div className={styles.charactersRow}>
           {characterImages.map((char, i) => (
             <img

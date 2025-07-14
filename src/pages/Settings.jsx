@@ -127,15 +127,20 @@ function Settings({ open, onClose }) {
                     fontSize: '1rem',
                     textShadow: '2px 2px 0px #000',
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
                     alignItems: 'center',
                     padding: '1rem'
                 }}>
+                    <img src="/IdleChaosLogo.png" alt="Idle Chaos Logo" style={{ width: 80, height: 'auto', marginBottom: 8, imageRendering: 'pixelated', filter: 'drop-shadow(2px 2px 0px #000)' }} />
                     {t('common.settings')}
                     <IconButton 
                         onClick={onClose}
                         sx={{ 
                             color: '#e0e0e0',
+                            position: 'absolute',
+                            right: 16,
+                            top: 16,
                             '&:hover': { color: '#ff6b6b' }
                         }}
                     >

@@ -180,4 +180,25 @@
   letter-spacing: 1px;
   opacity: 0.7;
   z-index: 2;
-} 
+}
+
+.logoImage {
+  display: block;
+  margin: 1vw auto 1.5rem auto;
+  width: 340px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 4px 0px #000);
+}
+
+.logoFloat {
+  animation: logoFloatAnim 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes logoFloatAnim {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-22px); }
+}
+
+/* Remove .title style */
+.title { display: none !important; } 

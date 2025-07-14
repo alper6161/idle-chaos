@@ -36,6 +36,14 @@ function MainMenu() {
 
     return (
         <aside className={styles.sidebar}>
+            <div className={styles.logoRow}>
+                <img
+                    src="/IdleChaosLogo.png"
+                    alt="Idle Chaos Logo"
+                    className={styles.logoImage + ' ' + styles.menuLogoImage}
+                    style={{ width: '100%', height: 'auto', objectFit: 'contain', maxWidth: '100%', maxHeight: 80 }}
+                />
+            </div>
             {/* Equipment Section */}
             <div className={styles.group}>
                 <div className={styles.groupTitle}>{t('common.equipment').toUpperCase()}</div>

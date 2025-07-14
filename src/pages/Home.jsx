@@ -161,7 +161,7 @@ function Home() {
             >
                 <CardContent>
                     <div className={styles.slotHeader}>
-                        <Typography variant="h6" className={styles.slotName}>
+                        <Typography variant="h6" className={styles.slotName} sx={!slot?.name ? { color: '#fff' } : {}}>
                             {slot?.name || `Save ${slotNumber}`}
                             {isCurrentSlot && <span className={styles.currentIndicator}> (Aktif)</span>}
                         </Typography>
@@ -274,11 +274,9 @@ function Home() {
             >
                 {t('common.exitGame')}
             </button>
-            <img
-                src="/images/logo.png"
-                alt={t('common.gameLogo')}
-                className={styles.logo}
-            />
+            <div className={styles.logoRow}>
+                <img src="/IdleChaosLogo.png" alt="Idle Chaos Logo" className={styles.logoImage} />
+            </div>
 
             <Typography variant="h4" className={styles.title}>
                 Kayıt Seçimi
