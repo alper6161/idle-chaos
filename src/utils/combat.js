@@ -64,10 +64,26 @@ export function getLootDrop(drops) {
   };
 }
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 export function saveLoot(loot) {
-  const current = JSON.parse(localStorage.getItem("lootBag") || "[]");
+  const currentSlot = getCurrentSlot();
+  const slotKey = getSlotKey("lootBag", currentSlot);
+  const current = JSON.parse(localStorage.getItem(slotKey) || "[]");
   const updated = [...current, ...loot];
-  localStorage.setItem("lootBag", JSON.stringify(updated));
+  localStorage.setItem(slotKey, JSON.stringify(updated));
 }
 
 export function battle(player, enemy) {

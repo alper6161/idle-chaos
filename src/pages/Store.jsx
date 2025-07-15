@@ -32,6 +32,20 @@ import {
 } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 import { getGold, setGold } from "../utils/gold";
+
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
 import { POTION_TYPES, addPotions, getPotions } from "../utils/potions.js";
 import styles from "../assets/styles/Store.module.scss";
 
@@ -123,7 +137,9 @@ function Store() {
 
     // Load active buffs from localStorage on component mount
     useEffect(() => {
-        const savedBuffs = localStorage.getItem('activeBuffs');
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey('activeBuffs', currentSlot);
+        const savedBuffs = localStorage.getItem(slotKey);
         if (savedBuffs) {
             const buffs = JSON.parse(savedBuffs);
             // Filter out expired buffs
@@ -134,7 +150,7 @@ function Store() {
                 }
             });
             setActiveBuffs(validBuffs);
-            localStorage.setItem('activeBuffs', JSON.stringify(validBuffs));
+            localStorage.setItem(slotKey, JSON.stringify(validBuffs));
         }
     }, []);
 
@@ -161,7 +177,9 @@ function Store() {
                 });
                 
                 if (hasChanges) {
-                    localStorage.setItem('activeBuffs', JSON.stringify(updated));
+                    const currentSlot = getCurrentSlot();
+                    const slotKey = getSlotKey('activeBuffs', currentSlot);
+                    localStorage.setItem(slotKey, JSON.stringify(updated));
                 }
                 
                 return updated;
@@ -217,7 +235,9 @@ function Store() {
             
             const updatedBuffs = { ...activeBuffs, [item.id]: newBuff };
             setActiveBuffs(updatedBuffs);
-            localStorage.setItem('activeBuffs', JSON.stringify(updatedBuffs));
+            const currentSlot = getCurrentSlot();
+            const slotKey = getSlotKey('activeBuffs', currentSlot);
+            localStorage.setItem(slotKey, JSON.stringify(updatedBuffs));
             
             setMessage({ 
                 show: true, 

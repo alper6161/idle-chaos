@@ -1,6 +1,11 @@
 // Achievement system for tracking enemy kills and unlocking achievements
 
-const ACHIEVEMENT_STORAGE_KEY = 'idle-chaos-achievements';
+import { getCurrentSlot } from './saveManager.js';
+
+const getAchievementStorageKey = () => {
+    const currentSlot = getCurrentSlot();
+    return `idle-chaos-achievements-slot-${currentSlot}`;
+};
 
 // Achievement thresholds for each enemy type
 const ACHIEVEMENT_THRESHOLDS = {
@@ -212,7 +217,8 @@ const ACHIEVEMENT_THRESHOLDS = {
 // Load achievements from localStorage
 export const loadAchievements = () => {
     try {
-        const stored = localStorage.getItem(ACHIEVEMENT_STORAGE_KEY);
+        const storageKey = getAchievementStorageKey();
+        const stored = localStorage.getItem(storageKey);
         return stored ? JSON.parse(stored) : {
             kills: {},
             unlocked: {},
@@ -231,7 +237,8 @@ export const loadAchievements = () => {
 // Save achievements to localStorage
 export const saveAchievements = (achievements) => {
     try {
-        localStorage.setItem(ACHIEVEMENT_STORAGE_KEY, JSON.stringify(achievements));
+        const storageKey = getAchievementStorageKey();
+        localStorage.setItem(storageKey, JSON.stringify(achievements));
     } catch (error) {
         console.error('Error saving achievements:', error);
     }

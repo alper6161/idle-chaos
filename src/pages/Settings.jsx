@@ -26,8 +26,14 @@ const GAME_STATE_KEYS = [
     'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
     'inventory', 'equippedItems', 'lootBag', 'potions',
     'autoPotionSettings', 'skillLevels', 'skillXP',
-    'achievements', 'unlockedEnemies', 'gameData'
+    'achievements', 'unlockedEnemies', 'gameData',
+    'idle-chaos-pets', 'idle-chaos-inventory'
 ];
+
+// Add achievement keys for all slots
+for (let i = 1; i <= 3; i++) {
+    GAME_STATE_KEYS.push(`idle-chaos-achievements-slot-${i}`);
+}
 
 function Settings({ open, onClose }) {
     const navigate = useNavigate();

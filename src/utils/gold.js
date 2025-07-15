@@ -1,12 +1,30 @@
-export const INITIAL_GOLD = 50;
+import { INITIAL_GOLD } from './constants.js';
+
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
 
 export const getGold = () => {
-    const savedGold = localStorage.getItem("playerGold");
+    const currentSlot = getCurrentSlot();
+    const slotKey = getSlotKey("playerGold", currentSlot);
+    const savedGold = localStorage.getItem(slotKey);
     return savedGold ? parseInt(savedGold) : INITIAL_GOLD;
 };
 
 export const saveGold = (amount) => {
-    localStorage.setItem("playerGold", amount.toString());
+    const currentSlot = getCurrentSlot();
+    const slotKey = getSlotKey("playerGold", currentSlot);
+    localStorage.setItem(slotKey, amount.toString());
 };
 
 export const addGold = (amount) => {

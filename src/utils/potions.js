@@ -42,13 +42,29 @@ export const POTION_TYPES = {
     }
 };
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 const POTIONS_STORAGE_KEY = 'idle-chaos-potions';
 const AUTO_POTION_STORAGE_KEY = 'idle-chaos-auto-potion';
 
 // Load potions from localStorage
 export const getPotions = () => {
     try {
-        const stored = localStorage.getItem(POTIONS_STORAGE_KEY);
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey(POTIONS_STORAGE_KEY, currentSlot);
+        const stored = localStorage.getItem(slotKey);
         return stored ? JSON.parse(stored) : {
             minor: 0,
             lesser: 0,
@@ -71,7 +87,9 @@ export const getPotions = () => {
 // Save potions to localStorage
 export const savePotions = (potions) => {
     try {
-        localStorage.setItem(POTIONS_STORAGE_KEY, JSON.stringify(potions));
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey(POTIONS_STORAGE_KEY, currentSlot);
+        localStorage.setItem(slotKey, JSON.stringify(potions));
     } catch (error) {
         console.error('Error saving potions:', error);
     }
@@ -103,7 +121,9 @@ export const usePotion = (potionType) => {
 // Get auto potion settings
 export const getAutoPotionSettings = () => {
     try {
-        const stored = localStorage.getItem(AUTO_POTION_STORAGE_KEY);
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey(AUTO_POTION_STORAGE_KEY, currentSlot);
+        const stored = localStorage.getItem(slotKey);
         return stored ? JSON.parse(stored) : {
             enabled: false,
             threshold: 40, // HP percentage
@@ -122,7 +142,9 @@ export const getAutoPotionSettings = () => {
 // Save auto potion settings
 export const saveAutoPotionSettings = (settings) => {
     try {
-        localStorage.setItem(AUTO_POTION_STORAGE_KEY, JSON.stringify(settings));
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey(AUTO_POTION_STORAGE_KEY, currentSlot);
+        localStorage.setItem(slotKey, JSON.stringify(settings));
     } catch (error) {
         console.error('Error saving auto potion settings:', error);
     }

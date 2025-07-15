@@ -45,15 +45,30 @@ function migrateSkillDataIfNeeded(skillData) {
 
 // Get current skill data from localStorage
 export const getSkillData = () => {
-    const saved = localStorage.getItem("gameData");
-    let data = saved ? JSON.parse(saved) : INITIAL_SKILLS;
-    data = migrateSkillDataIfNeeded(data);
-    return data;
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
+        const slotKey = `gameData_slot_${slotNumber}`;
+        const saved = localStorage.getItem(slotKey);
+        let data = saved ? JSON.parse(saved) : INITIAL_SKILLS;
+        data = migrateSkillDataIfNeeded(data);
+        return data;
+    } catch (error) {
+        console.error('Error getting skill data:', error);
+        return INITIAL_SKILLS;
+    }
 };
 
 // Save skill data to localStorage
 export const saveSkillData = (skillData) => {
-    localStorage.setItem("gameData", JSON.stringify(skillData));
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
+        const slotKey = `gameData_slot_${slotNumber}`;
+        localStorage.setItem(slotKey, JSON.stringify(skillData));
+    } catch (error) {
+        console.error('Error saving skill data:', error);
+    }
 };
 
 // Get skill level and XP
@@ -306,8 +321,16 @@ export const getAttackTypeFromWeapon = (equippedWeapon) => {
 
 // Get equipped weapon from localStorage
 export const getEquippedWeapon = () => {
-    const equippedItems = JSON.parse(localStorage.getItem("equippedItems") || "{}");
-    return equippedItems.weapon || null;
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
+        const slotKey = `equippedItems_slot_${slotNumber}`;
+        const equippedItems = JSON.parse(localStorage.getItem(slotKey) || "{}");
+        return equippedItems.weapon || null;
+    } catch (error) {
+        console.error('Error getting equipped weapon:', error);
+        return null;
+    }
 };
 
 // Get weapon type from equipped weapon

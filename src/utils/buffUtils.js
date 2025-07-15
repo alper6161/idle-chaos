@@ -3,9 +3,25 @@ import { getAutoPotionSettings, saveAutoPotionSettings } from './potions.js';
 // Buff Utility Functions
 // Manages active buffs purchased from the store and provides multipliers
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 export const getActiveBuffs = () => {
     try {
-        const savedBuffs = localStorage.getItem('activeBuffs');
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey('activeBuffs', currentSlot);
+        const savedBuffs = localStorage.getItem(slotKey);
         if (!savedBuffs) return {};
         
         const buffs = JSON.parse(savedBuffs);
@@ -20,7 +36,7 @@ export const getActiveBuffs = () => {
         
         // Update localStorage with valid buffs only
         if (Object.keys(validBuffs).length !== Object.keys(buffs).length) {
-            localStorage.setItem('activeBuffs', JSON.stringify(validBuffs));
+            localStorage.setItem(slotKey, JSON.stringify(validBuffs));
         }
         
         return validBuffs;

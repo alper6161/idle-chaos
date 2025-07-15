@@ -11,11 +11,27 @@ export const BASE_PLAYER_STATS = {
     CRIT_DAMAGE: 120
 };
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 const EQUIPPED_ITEMS_KEY = 'idle-chaos-equipped-items';
 
 export const getEquippedItems = () => {
     try {
-        const stored = localStorage.getItem(EQUIPPED_ITEMS_KEY);
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey(EQUIPPED_ITEMS_KEY, currentSlot);
+        const stored = localStorage.getItem(slotKey);
         return stored ? JSON.parse(stored) : {};
     } catch (error) {
         console.error('Error loading equipped items:', error);

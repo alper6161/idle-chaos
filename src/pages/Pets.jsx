@@ -3,12 +3,27 @@ import { PETS, getPetRarityColor, getPetRarityName } from "../utils/pets.js";
 import enemies from "../utils/enemies.js";
 import styles from "../assets/styles/Equipment.module.scss";
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 function Pets() {
   const [ownedPets, setOwnedPets] = useState([]);
 
   useEffect(() => {
-    const PETS_KEY = 'idle-chaos-pets';
-    const pets = JSON.parse(localStorage.getItem(PETS_KEY) || '[]');
+    const currentSlot = getCurrentSlot();
+    const slotKey = getSlotKey('idle-chaos-pets', currentSlot);
+    const pets = JSON.parse(localStorage.getItem(slotKey) || '[]');
     setOwnedPets(pets);
   }, []);
 

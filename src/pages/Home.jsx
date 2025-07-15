@@ -103,11 +103,34 @@ function Home() {
     };
 
     const handleNewGame = (slotNumber) => {
-        // Only delete the relevant slot and game state keys
+        // Delete the relevant slot
         deleteSlot(slotNumber);
+        
+        // Clear all global game state keys
         GAME_STATE_KEYS.forEach(key => localStorage.removeItem(key));
-        // Reset skill levels
-        localStorage.setItem('gameData', JSON.stringify(INITIAL_SKILLS));
+        
+        // Clear all slot-specific keys for this slot
+        const slotSpecificKeys = [
+            `idle-chaos-potions_slot_${slotNumber}`,
+            `idle-chaos-auto-potion_slot_${slotNumber}`,
+            `activeBuffs_slot_${slotNumber}`,
+            `lootBag_slot_${slotNumber}`,
+            `idle-chaos-equipped-items_slot_${slotNumber}`,
+            `idle-chaos-inventory_slot_${slotNumber}`,
+            `idle-chaos-pets_slot_${slotNumber}`,
+            `gameData_slot_${slotNumber}`,
+            `playerHealth_slot_${slotNumber}`,
+            `playerGold_slot_${slotNumber}`,
+            `selectedCharacter_slot_${slotNumber}`,
+            `idle-chaos-achievements-slot-${slotNumber}`
+        ];
+        
+        slotSpecificKeys.forEach(key => localStorage.removeItem(key));
+        
+        // Reset skill levels for this slot
+        const slotKey = `gameData_slot_${slotNumber}`;
+        localStorage.setItem(slotKey, JSON.stringify(INITIAL_SKILLS));
+        
         // Set current slot
         localStorage.setItem('idle-chaos-current-slot', slotNumber.toString());
         setSelectedSlot(slotNumber);

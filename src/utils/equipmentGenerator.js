@@ -323,6 +323,22 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
     }
 };
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 export const clearProcessedLootBag = () => {
-    localStorage.removeItem("lootBag");
+    const currentSlot = getCurrentSlot();
+    const slotKey = getSlotKey("lootBag", currentSlot);
+    localStorage.removeItem(slotKey);
 }; 

@@ -2,6 +2,9 @@
 const SAVE_SLOTS_KEY = 'idle-chaos-save-slots';
 const CURRENT_SLOT_KEY = 'idle-chaos-current-slot';
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
 // Save slot structure
 const createEmptySlot = (slotNumber) => ({
     slotNumber,
@@ -76,6 +79,39 @@ export const loadFromSlot = (slotNumber) => {
         // Set as current slot
         localStorage.setItem(CURRENT_SLOT_KEY, slotNumber.toString());
         
+        // Clear current localStorage data first
+        const keys = [
+            'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
+            'inventory', 'equippedItems', 'lootBag', 'potions',
+            'autoPotionSettings', 'skillLevels', 'skillXP',
+            'achievements', 'unlockedEnemies', 'gameData',
+            'idle-chaos-pets', 'idle-chaos-inventory'
+        ];
+        
+        // Clear achievement keys for all slots
+        for (let i = 1; i <= 3; i++) {
+            keys.push(`idle-chaos-achievements-slot-${i}`);
+        }
+        
+        // Clear slot-specific keys for all slots
+        for (let i = 1; i <= 3; i++) {
+            keys.push(`idle-chaos-potions_slot_${i}`);
+            keys.push(`idle-chaos-auto-potion_slot_${i}`);
+            keys.push(`activeBuffs_slot_${i}`);
+            keys.push(`lootBag_slot_${i}`);
+            keys.push(`idle-chaos-equipped-items_slot_${i}`);
+            keys.push(`idle-chaos-inventory_slot_${i}`);
+            keys.push(`idle-chaos-pets_slot_${i}`);
+            keys.push(`gameData_slot_${i}`);
+            keys.push(`playerHealth_slot_${i}`);
+            keys.push(`playerGold_slot_${i}`);
+            keys.push(`selectedCharacter_slot_${i}`);
+        }
+        
+        keys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
         // Load all game data from the slot
         if (slot.data) {
             Object.keys(slot.data).forEach(key => {
@@ -125,8 +161,29 @@ export const saveCurrentGame = () => {
             'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
             'inventory', 'equippedItems', 'lootBag', 'potions',
             'autoPotionSettings', 'skillLevels', 'skillXP',
-            'achievements', 'unlockedEnemies', 'gameData'
+            'achievements', 'unlockedEnemies', 'gameData',
+            'idle-chaos-pets', 'idle-chaos-inventory'
         ];
+        
+        // Add achievement keys for all slots
+        for (let i = 1; i <= 3; i++) {
+            keys.push(`idle-chaos-achievements-slot-${i}`);
+        }
+        
+        // Add slot-specific keys for all slots
+        for (let i = 1; i <= 3; i++) {
+            keys.push(`idle-chaos-potions_slot_${i}`);
+            keys.push(`idle-chaos-auto-potion_slot_${i}`);
+            keys.push(`activeBuffs_slot_${i}`);
+            keys.push(`lootBag_slot_${i}`);
+            keys.push(`idle-chaos-equipped-items_slot_${i}`);
+            keys.push(`idle-chaos-inventory_slot_${i}`);
+            keys.push(`idle-chaos-pets_slot_${i}`);
+            keys.push(`gameData_slot_${i}`);
+            keys.push(`playerHealth_slot_${i}`);
+            keys.push(`playerGold_slot_${i}`);
+            keys.push(`selectedCharacter_slot_${i}`);
+        }
         
         keys.forEach(key => {
             const value = localStorage.getItem(key);

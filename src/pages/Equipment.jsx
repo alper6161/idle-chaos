@@ -18,6 +18,20 @@ import { FilterList, Person, TrendingUp, Shield, LocalFireDepartment } from "@mu
 import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment, clearProcessedLootBag } from "../utils/equipmentGenerator";
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 const EQUIPMENT_SLOTS = {
     weapon: { name: "Weapon", icon: "/images/equipment/weapon.png", slot: "weapon", position: "left" },
     shield: { name: "Shield", icon: "/images/equipment/shield.png", slot: "shield", position: "right" },
@@ -81,7 +95,9 @@ const STORAGE_KEYS = {
 
 const loadFromStorage = (key, defaultValue) => {
     try {
-        const stored = localStorage.getItem(key);
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey(key, currentSlot);
+        const stored = localStorage.getItem(slotKey);
         return stored ? JSON.parse(stored) : defaultValue;
     } catch (error) {
         console.error(`Error loading ${key} from localStorage:`, error);
@@ -91,7 +107,9 @@ const loadFromStorage = (key, defaultValue) => {
 
 const saveToStorage = (key, data) => {
     try {
-        localStorage.setItem(key, JSON.stringify(data));
+        const currentSlot = getCurrentSlot();
+        const slotKey = getSlotKey(key, currentSlot);
+        localStorage.setItem(slotKey, JSON.stringify(data));
     } catch (error) {
         console.error(`Error saving ${key} to localStorage:`, error);
     }
@@ -243,7 +261,9 @@ function Equipment() {
     useEffect(() => {
         const checkForNewLoot = () => {
             try {
-                const lootBag = JSON.parse(localStorage.getItem("lootBag") || "[]");
+                const currentSlot = getCurrentSlot();
+                const slotKey = getSlotKey("lootBag", currentSlot);
+                const lootBag = JSON.parse(localStorage.getItem(slotKey) || "[]");
                 
                 if (lootBag.length > 0) {
                     const newEquipment = convertLootBagToEquipment(lootBag, null); // No enemy info available here, will use default difficulty
@@ -294,7 +314,7 @@ function Equipment() {
                 console.error('Error details:', {
                     message: error.message,
                     stack: error.stack,
-                    lootBag: localStorage.getItem("lootBag")
+                    lootBag: localStorage.getItem(getSlotKey("lootBag", getCurrentSlot()))
                 });
             }
         };
@@ -454,9 +474,11 @@ function Equipment() {
         saveToStorage(STORAGE_KEYS.INVENTORY, newInventory);
         
         // Add gold to player
-        const currentGold = parseInt(localStorage.getItem('playerGold') || '0');
+        const currentSlot = getCurrentSlot();
+        const goldSlotKey = getSlotKey('playerGold', currentSlot);
+        const currentGold = parseInt(localStorage.getItem(goldSlotKey) || '0');
         const newGold = currentGold + sellDialog.totalValue;
-        localStorage.setItem('playerGold', newGold.toString());
+        localStorage.setItem(goldSlotKey, newGold.toString());
         
         // Reset sell mode
         setSellMode(false);

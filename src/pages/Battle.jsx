@@ -52,6 +52,20 @@ import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
 import { saveCurrentGame } from "../utils/saveManager.js";
 
+// Helper function to get slot-specific key
+const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+// Get current slot number
+const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+};
+
 function Battle({ player }) {
     const [battleMode, setBattleMode] = useState('selection');
     const [currentEnemy, setCurrentEnemy] = useState(null);
@@ -97,7 +111,9 @@ function Battle({ player }) {
                 }));
                 
                 setPlayerHealth(newHealth);
-                localStorage.setItem("playerHealth", newHealth.toString());
+                const currentSlot = getCurrentSlot();
+                const healthSlotKey = getSlotKey("playerHealth", currentSlot);
+                localStorage.setItem(healthSlotKey, newHealth.toString());
                 
                 // Show potion used effect
                 setLastPotionUsed({
@@ -155,7 +171,9 @@ function Battle({ player }) {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         setPlayerHealth(currentPlayerStats.HEALTH);
-        localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
+        const currentSlot = getCurrentSlot();
+        const healthSlotKey = getSlotKey("playerHealth", currentSlot);
+        localStorage.setItem(healthSlotKey, currentPlayerStats.HEALTH.toString());
         setBattleMode('selection');
         setCurrentEnemy(null);
         setBattleResult(null);
@@ -175,7 +193,9 @@ function Battle({ player }) {
         setBattleResult(null);
         setCurrentBattle(null);
         
-        const savedHealth = localStorage.getItem("playerHealth");
+        const currentSlot = getCurrentSlot();
+        const healthSlotKey = getSlotKey("playerHealth", currentSlot);
+        const savedHealth = localStorage.getItem(healthSlotKey);
         const currentPlayerStats = getPlayerStats();
         const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
         
@@ -326,7 +346,9 @@ function Battle({ player }) {
     );
 
     useEffect(() => {
-        const savedCharacter = localStorage.getItem("selectedCharacter");
+        const currentSlot = getCurrentSlot();
+        const characterSlotKey = getSlotKey("selectedCharacter", currentSlot);
+        const savedCharacter = localStorage.getItem(characterSlotKey);
         if (savedCharacter) {
             setSelectedCharacter(savedCharacter);
         }
@@ -336,7 +358,9 @@ function Battle({ player }) {
         
         // Her zaman güncel max HP'yi kullan
         setPlayerHealth(currentPlayerStats.HEALTH);
-        localStorage.setItem("playerHealth", currentPlayerStats.HEALTH.toString());
+        const healthCurrentSlot = getCurrentSlot();
+        const healthSlotKey = getSlotKey("playerHealth", healthCurrentSlot);
+        localStorage.setItem(healthSlotKey, currentPlayerStats.HEALTH.toString());
     }, []);
 
     useEffect(() => {
@@ -397,7 +421,9 @@ function Battle({ player }) {
                     setBattleResult(battleResult);
                     
                     setPlayerHealth(battleResult.playerFinalHealth);
-                    localStorage.setItem("playerHealth", battleResult.playerFinalHealth.toString());
+                    const battleCurrentSlot = getCurrentSlot();
+                    const battleHealthSlotKey = getSlotKey("playerHealth", battleCurrentSlot);
+                    localStorage.setItem(battleHealthSlotKey, battleResult.playerFinalHealth.toString());
                     
                     if (battleResult.winner === 'player') {
                         // Record achievement for enemy kill
@@ -417,7 +443,9 @@ function Battle({ player }) {
                         
                         setLootBag(prev => {
                             const updated = [...prev, ...newLoot];
-                            localStorage.setItem("lootBag", JSON.stringify(updated));
+                            const currentSlot = getCurrentSlot();
+                            const slotKey = getSlotKey("lootBag", currentSlot);
+                            localStorage.setItem(slotKey, JSON.stringify(updated));
                             return updated;
                         });
                         saveLoot(lootResult.items);
@@ -426,8 +454,9 @@ function Battle({ player }) {
                         try {
                             // Sadece ekipmanları inventory'ye ekle (gold item'ları hariç)
                             const equipmentLoot = lootResult.items;
-                            const STORAGE_KEY = 'idle-chaos-inventory';
-                            const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                            const currentSlot = getCurrentSlot();
+                            const slotKey = getSlotKey('idle-chaos-inventory', currentSlot);
+                            const currentInventory = JSON.parse(localStorage.getItem(slotKey) || '[]');
                             
                             // Ekipmanları equipment object'lerine dönüştür
                             const newEquipment = currentEnemy ? convertLootBagToEquipment(equipmentLoot, currentEnemy) : [];
@@ -438,7 +467,7 @@ function Battle({ player }) {
                             
                             if (uniqueNewEquipment.length > 0) {
                                 const updatedInventory = [...currentInventory, ...uniqueNewEquipment];
-                                localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedInventory));
+                                localStorage.setItem(slotKey, JSON.stringify(updatedInventory));
                             }
                         } catch (err) {
                             console.error('Inventory güncellenirken hata:', err);
@@ -450,11 +479,12 @@ function Battle({ player }) {
                         if (currentEnemy) {
                             const pet = checkPetDrop(currentEnemy.id);
                             if (pet) {
-                                const PETS_KEY = 'idle-chaos-pets';
-                                const ownedPets = JSON.parse(localStorage.getItem(PETS_KEY) || '[]');
+                                const currentSlot = getCurrentSlot();
+                                const slotKey = getSlotKey('idle-chaos-pets', currentSlot);
+                                const ownedPets = JSON.parse(localStorage.getItem(slotKey) || '[]');
                                 if (!ownedPets.includes(pet.id)) {
                                     ownedPets.push(pet.id);
-                                    localStorage.setItem(PETS_KEY, JSON.stringify(ownedPets));
+                                    localStorage.setItem(slotKey, JSON.stringify(ownedPets));
                                     petDropMessage = `✨ PET FOUND: ${pet.icon} <b>${pet.name}</b>! (${pet.description})`;
                                 } else {
                                     petDropMessage = `✨ PET FOUND (duplicate): ${pet.icon} <b>${pet.name}</b>! (Already owned)`;
@@ -525,15 +555,20 @@ function Battle({ player }) {
     // playerStats değiştiğinde playerHealth'i de güncelle
     useEffect(() => {
         setPlayerHealth(playerStats.HEALTH);
-        localStorage.setItem("playerHealth", playerStats.HEALTH.toString());
+        const statsCurrentSlot = getCurrentSlot();
+        const statsHealthSlotKey = getSlotKey("playerHealth", statsCurrentSlot);
+        localStorage.setItem(statsHealthSlotKey, playerStats.HEALTH.toString());
     }, [playerStats.HEALTH]);
 
     // Update attack types when equipment changes
     useEffect(() => {
         const updateAttackTypes = () => {
             // Check both possible localStorage keys
-            const equippedItems1 = JSON.parse(localStorage.getItem("equippedItems") || "{}");
-            const equippedItems2 = JSON.parse(localStorage.getItem("idle-chaos-equipped-items") || "{}");
+            const currentSlot = getCurrentSlot();
+            const slotKey1 = getSlotKey("equippedItems", currentSlot);
+            const slotKey2 = getSlotKey("idle-chaos-equipped-items", currentSlot);
+            const equippedItems1 = JSON.parse(localStorage.getItem(slotKey1) || "{}");
+            const equippedItems2 = JSON.parse(localStorage.getItem(slotKey2) || "{}");
             
             const equippedWeapon = equippedItems1.weapon || equippedItems2.weapon;
             const weaponType = getWeaponType(equippedWeapon);
@@ -570,7 +605,9 @@ function Battle({ player }) {
     // Update auto potion settings when buffs change
     useEffect(() => {
         const checkAutoPotionBuff = () => {
-            const activeBuffs = JSON.parse(localStorage.getItem('activeBuffs') || '{}');
+            const currentSlot = getCurrentSlot();
+            const slotKey = getSlotKey('activeBuffs', currentSlot);
+            const activeBuffs = JSON.parse(localStorage.getItem(slotKey) || '{}');
             const autoPotionBuff = activeBuffs['auto_potion'];
             
             if (autoPotionBuff && autoPotionBuff.expiresAt > Date.now()) {
