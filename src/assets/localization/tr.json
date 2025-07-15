@@ -120,7 +120,10 @@
     "nextBoss": "Boss Yaklaşıyor",
     "noDropsAvailable": "Düşecek eşya yok.",
     "noLootYet": "Henüz loot yok.",
-    "lootGained": "Kazandığın Loot"
+    "lootGained": "Kazandığın Loot",
+    "battle.dungeonRestartIn": "Dungeon yeniden başlayacak ardından {{seconds}} saniye sonra.",
+    "leave": "Ayrıl",
+    "restart": "Tekrar Başla"
   },
   "equipment": {
     "equip": "Tak",

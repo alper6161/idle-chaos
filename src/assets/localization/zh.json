@@ -114,7 +114,10 @@
     "nextBoss": "Boss即将到来",
     "noDropsAvailable": "无可掉落物品。",
     "noLootYet": "尚未获得战利品。",
-    "lootGained": "获得的战利品"
+    "lootGained": "获得的战利品",
+    "battle.dungeonRestartIn": "地牢将在{{seconds}}秒后重新开始。",
+    "leave": "离开",
+    "restart": "重新开始"
   },
   "equipment": {
     "equip": "装备",
