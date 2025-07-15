@@ -51,7 +51,9 @@
     "mute": "Mute",
     "unmute": "Unmute",
     "music": "Music",
-    "loadError": "Error loading game!"
+    "loadError": "Error loading game!",
+    "collapse": "Collapse",
+    "expand": "Expand"
   },
   "story": {
     "welcome": "Welcome, warrior!",
@@ -100,7 +102,15 @@
     "showBattleLog": "Show Battle Log",
     "closeBattleLog": "Close Battle Log",
     "noDropsAvailable": "No drops available from this enemy",
-    "playerStats": "Player Stats"
+    "playerStats": "Player Stats",
+    "uniqueLocationLoot": "Unique Location Loot",
+    "locations": "Locations",
+    "dungeons": "Dungeons",
+    "fight": "Fight",
+    "dungeonChestRewards": "Dungeon Chest Rewards",
+    "enterDungeon": "Enter Dungeon",
+    "boss": "Boss",
+    "dropChance": "Drop Chance"
   },
   "equipment": {
     "equip": "Equip",

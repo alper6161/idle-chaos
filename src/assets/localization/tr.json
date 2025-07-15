@@ -51,7 +51,9 @@
     "mute": "Sessiz",
     "unmute": "Sesi Aç",
     "music": "Müzik",
-    "loadError": "Oyun yüklenirken bir hata oluştu!"
+    "loadError": "Oyun yüklenirken bir hata oluştu!",
+    "collapse": "Kapat",
+    "expand": "Aç"
   },
   "story": {
     "welcome": "Hoş geldin, savaşçı!",
@@ -100,7 +102,15 @@
     "showBattleLog": "Savaş Günlüğünü Göster",
     "closeBattleLog": "Savaş Günlüğünü Kapat",
     "noDropsAvailable": "Bu düşmandan düşecek ganimet yok",
-    "playerStats": "Oyuncu İstatistikleri"
+    "playerStats": "Oyuncu İstatistikleri",
+    "uniqueLocationLoot": "Benzersiz Lokasyon Eşyası",
+    "locations": "Bölgeler",
+    "dungeons": "Zindanlar",
+    "fight": "Savaş",
+    "dungeonChestRewards": "Zindan Sandığı Ödülleri",
+    "enterDungeon": "Zindana Gir",
+    "boss": "BOSS",
+    "dropChance": "Düşme Şansı"
   },
   "equipment": {
     "equip": "Tak",

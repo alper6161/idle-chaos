@@ -589,4 +589,228 @@ export const getRandomEnemy = () => {
 
 export const getEnemyById = (id) => Object.values(enemies).find(enemy => enemy.id === id);
 
+export const LOCATIONS = [
+  {
+    id: 'sewer',
+    name: 'Sewer',
+    description: 'Dark, damp tunnels crawling with vermin.',
+    enemies: ['rat', 'slime', 'bat'],
+    uniqueLoot: { id: 'sewer_ring', name: 'Sewer Ring', chance: 0.005 }
+  },
+  {
+    id: 'farmland',
+    name: 'Farmland',
+    description: 'Fields and barns plagued by wild creatures.',
+    enemies: ['goblin', 'wolf', 'giant_bee'],
+    uniqueLoot: { id: 'scarecrow_amulet', name: 'Scarecrow Amulet', chance: 0.005 }
+  },
+  {
+    id: 'forest',
+    name: 'Forest',
+    description: 'Dense woods hiding dangerous beasts.',
+    enemies: ['spider', 'werewolf'],
+    uniqueLoot: { id: 'ancient_leaf', name: 'Ancient Leaf', chance: 0.005 }
+  },
+  {
+    id: 'graveyard',
+    name: 'Graveyard',
+    description: 'Restless dead and haunting spirits.',
+    enemies: ['skeleton', 'wraith', 'lich'],
+    uniqueLoot: { id: 'cursed_skull', name: 'Cursed Skull', chance: 0.005 }
+  },
+  {
+    id: 'mountain_pass',
+    name: 'Mountain Pass',
+    description: 'Treacherous cliffs and monstrous brutes.',
+    enemies: ['orc', 'troll', 'minotaur', 'golem'],
+    uniqueLoot: { id: 'mountain_heart', name: 'Mountain Heart', chance: 0.005 }
+  },
+  {
+    id: 'dark_castle',
+    name: 'Dark Castle',
+    description: 'A cursed fortress of the undead.',
+    enemies: ['zombie', 'ghost', 'vampire'],
+    uniqueLoot: { id: 'vampire_cloak', name: 'Vampire Cloak', chance: 0.005 }
+  },
+  {
+    id: 'spider_nest',
+    name: 'Spider Nest',
+    description: 'Web-filled caverns teeming with spiders.',
+    enemies: [],
+    uniqueLoot: { id: 'silk_charm', name: 'Silk Charm', chance: 0.005 }
+  },
+  {
+    id: 'goblin_camp',
+    name: 'Goblin Camp',
+    description: 'A chaotic camp of goblins and their allies.',
+    enemies: ['bandit'],
+    uniqueLoot: { id: 'goblin_totem', name: 'Goblin Totem', chance: 0.005 }
+  },
+  {
+    id: 'swamp',
+    name: 'Swamp',
+    description: 'Murky waters and reptilian horrors.',
+    enemies: ['lizardman'],
+    uniqueLoot: { id: 'swamp_emerald', name: 'Swamp Emerald', chance: 0.005 }
+  },
+  {
+    id: 'ruins',
+    name: 'Ancient Ruins',
+    description: 'Crumbling stones and forgotten guardians.',
+    enemies: ['gargoyle', 'cultist'],
+    uniqueLoot: { id: 'ruined_relic', name: 'Ruined Relic', chance: 0.005 }
+  },
+  {
+    id: 'sky_cliffs',
+    name: 'Sky Cliffs',
+    description: 'High peaks and winged terrors.',
+    enemies: ['harpy', 'manticore', 'chimera'],
+    uniqueLoot: { id: 'sky_feather', name: 'Sky Feather', chance: 0.005 }
+  },
+  {
+    id: 'infernal_depths',
+    name: 'Infernal Depths',
+    description: 'Fiery pits and demonic overlords.',
+    enemies: ['demon', 'archdemon'],
+    uniqueLoot: { id: 'infernal_core', name: 'Infernal Core', chance: 0.005 }
+  },
+  {
+    id: 'abyssal_void',
+    name: 'Abyssal Void',
+    description: 'The edge of reality, home to the most dangerous beings.',
+    enemies: ['void_reaper', 'celestial_seraph'],
+    uniqueLoot: { id: 'void_essence', name: 'Void Essence', chance: 0.005 }
+  },
+  {
+    id: 'dragon_lair',
+    name: 'Dragon Lair',
+    description: 'The ultimate challenge, home to legendary dragons.',
+    enemies: ['ancient_dragon', 'hydra'],
+    uniqueLoot: { id: 'dragon_eye', name: 'Dragon Eye', chance: 0.005 }
+  }
+];
+
+export const DUNGEONS = [
+  {
+    id: 'ancient_catacombs',
+    name: 'Ancient Catacombs',
+    description: 'A maze of bones and restless spirits.',
+    enemies: ['skeleton', 'wraith', 'zombie', 'ghost'],
+    boss: 'lich',
+    chest: [
+      { id: 'bone_sword', name: 'Bone Sword', chance: 5 },
+      { id: 'ancient_coin', name: 'Ancient Coin', chance: 10 },
+      { id: 'catacomb_ring', name: 'Catacomb Ring', chance: 1 }
+    ]
+  },
+  {
+    id: 'infernal_abyss',
+    name: 'Infernal Abyss',
+    description: 'A fiery pit crawling with demons.',
+    enemies: ['demon', 'cultist', 'gargoyle'],
+    boss: 'archdemon',
+    chest: [
+      { id: 'infernal_blade', name: 'Infernal Blade', chance: 3 },
+      { id: 'demon_essence', name: 'Demon Essence', chance: 8 },
+      { id: 'abyssal_amulet', name: 'Abyssal Amulet', chance: 1 }
+    ]
+  },
+  {
+    id: 'sky_fortress',
+    name: 'Sky Fortress',
+    description: 'A floating castle ruled by winged beasts.',
+    enemies: ['harpy', 'manticore', 'chimera'],
+    boss: 'celestial_seraph',
+    chest: [
+      { id: 'sky_feather', name: 'Sky Feather', chance: 4 },
+      { id: 'seraph_staff', name: 'Seraph Staff', chance: 2 },
+      { id: 'fortress_cape', name: 'Fortress Cape', chance: 1 }
+    ]
+  },
+  {
+    id: 'swamp_temple',
+    name: 'Swamp Temple',
+    description: 'A sunken temple full of reptilian horrors.',
+    enemies: ['lizardman', 'giant_bee', 'werewolf'],
+    boss: 'minotaur',
+    chest: [
+      { id: 'swamp_emerald', name: 'Swamp Emerald', chance: 5 },
+      { id: 'temple_relic', name: 'Temple Relic', chance: 2 },
+      { id: 'minotaur_axe', name: 'Minotaur Axe', chance: 1 }
+    ]
+  },
+  {
+    id: 'dragons_den',
+    name: "Dragon's Den",
+    description: 'A lair of legendary dragons and their kin.',
+    enemies: ['hydra', 'vampire', 'golem'],
+    boss: 'ancient_dragon',
+    chest: [
+      { id: 'dragon_eye', name: 'Dragon Eye', chance: 2 },
+      { id: 'flame_sword', name: 'Flame Sword', chance: 3 },
+      { id: 'dragon_scale_armor', name: 'Dragon Scale Armor', chance: 1 }
+    ]
+  },
+  {
+    id: 'forgotten_ruins',
+    name: 'Forgotten Ruins',
+    description: 'Crumbling stones and ancient guardians.',
+    enemies: ['gargoyle', 'cultist', 'golem'],
+    boss: 'golem',
+    chest: [
+      { id: 'ruined_relic', name: 'Ruined Relic', chance: 4 },
+      { id: 'ancient_core', name: 'Ancient Core', chance: 2 },
+      { id: 'ruins_ring', name: 'Ruins Ring', chance: 1 }
+    ]
+  },
+  {
+    id: 'shadow_labyrinth',
+    name: 'Shadow Labyrinth',
+    description: 'A twisting maze of darkness and death.',
+    enemies: ['wraith', 'vampire', 'lich'],
+    boss: 'demon',
+    chest: [
+      { id: 'shadow_essence', name: 'Shadow Essence', chance: 5 },
+      { id: 'labyrinth_cloak', name: 'Labyrinth Cloak', chance: 2 },
+      { id: 'demon_blade', name: 'Demon Blade', chance: 1 }
+    ]
+  },
+  {
+    id: 'beast_arena',
+    name: 'Beast Arena',
+    description: 'A coliseum of monstrous beasts.',
+    enemies: ['wolf', 'troll', 'orc'],
+    boss: 'manticore',
+    chest: [
+      { id: 'beast_fang', name: 'Beast Fang', chance: 5 },
+      { id: 'arena_medal', name: 'Arena Medal', chance: 2 },
+      { id: 'manticore_stinger', name: 'Manticore Stinger', chance: 1 }
+    ]
+  },
+  {
+    id: 'void_rift',
+    name: 'Void Rift',
+    description: 'A tear in reality, home to the most dangerous beings.',
+    enemies: ['void_reaper', 'archdemon', 'hydra'],
+    boss: 'void_reaper',
+    chest: [
+      { id: 'void_essence', name: 'Void Essence', chance: 3 },
+      { id: 'rift_crystal', name: 'Rift Crystal', chance: 2 },
+      { id: 'reaper_scythe', name: 'Reaper Scythe', chance: 1 }
+    ]
+  },
+  {
+    id: 'celestial_tower',
+    name: 'Celestial Tower',
+    description: 'A tower reaching to the heavens, guarded by divine beings.',
+    enemies: ['celestial_seraph', 'harpy', 'chimera'],
+    boss: 'celestial_seraph',
+    chest: [
+      { id: 'celestial_blade', name: 'Celestial Blade', chance: 2 },
+      { id: 'tower_amulet', name: 'Tower Amulet', chance: 2 },
+      { id: 'seraph_wing', name: 'Seraph Wing', chance: 1 }
+    ]
+  }
+];
+
 export default enemies;

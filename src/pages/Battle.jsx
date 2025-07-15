@@ -17,11 +17,14 @@ import {
     Tooltip,
     Grid,
     IconButton,
-    Chip
+    Chip,
+    Tabs,
+    Tab,
 } from "@mui/material";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { LocalDrink } from "@mui/icons-material";
 import { getLootDrop, saveLoot } from "../utils/combat.js";
-import enemies from "../utils/enemies.js";
+import enemies, { LOCATIONS, DUNGEONS } from "../utils/enemies.js";
 import { getEnemyIcon, getSkillIcon, getCharacterIcon, getEnemyInitial, getCharacterName } from "../utils/common.js";
 import { SKILL_LEVEL_BONUSES } from "../utils/constants.js";
 import { 
@@ -91,6 +94,9 @@ function Battle({ player }) {
     const [battleLogVisible, setBattleLogVisible] = useState(true);
     const [selectedAttackType, setSelectedAttackType] = useState('stab');
     const [availableAttackTypes, setAvailableAttackTypes] = useState([]);
+    const [battleTab, setBattleTab] = useState('locations');
+    const [openLocations, setOpenLocations] = useState(() => LOCATIONS.map((_, i) => i === 0));
+    const [openDungeons, setOpenDungeons] = useState(() => DUNGEONS.map((_, i) => i === 0));
 
     // Potion usage function
     const handleUsePotion = (potionType) => {
@@ -545,6 +551,24 @@ function Battle({ player }) {
                         setTimeout(() => {
                             saveCurrentGame();
                         }, 1000);
+
+                        // Savaş sonucu işlenirken, eğer currentEnemy bir lokasyon düşmanı ise, uniqueLoot drop ihtimalini kontrol et
+                        if (currentEnemy) {
+                            const location = LOCATIONS.find(loc => loc.enemies.includes(currentEnemy.id));
+                            if (location && location.uniqueLoot) {
+                                if (Math.random() < location.uniqueLoot.chance) {
+                                    setLootBag(prev => {
+                                        const updated = [...prev, location.uniqueLoot.name];
+                                        const currentSlot = getCurrentSlot();
+                                        const slotKey = getSlotKey("lootBag", currentSlot);
+                                        localStorage.setItem(slotKey, JSON.stringify(updated));
+                                        return updated;
+                                    });
+                                    // Battle log'a ekle
+                                    setBattleLog(prev => [...prev, { type: 'loot', message: `✨ ${t('battle.uniqueLocationLoot')}: ${location.uniqueLoot.name}` }]);
+                                }
+                            }
+                        }
                     } else if (battleResult.winner === 'enemy') {
                         // Auto save before death
                         saveCurrentGame();
@@ -682,812 +706,982 @@ function Battle({ player }) {
         initializeSkillDataForCurrentSlot();
     }, []);
 
-    // Enemy Selection Screen
-    if (battleMode === 'selection') {
-        return (
-            <div className={styles.battleContainer}>
-                <div className={styles.enemySelectionHeader}>
-                    <Typography variant="h4" className={styles.selectionTitle}>
-                        {t('battle.selectEnemy')}
-                    </Typography>
-                    <Typography variant="h6" className={styles.selectionSubtitle}>
-                        {t('battle.choosYourOpponent')}
-                    </Typography>
-                </div>
+    // Example locations and monsters (static for now)
+    // Aşağıdaki LOCATIONS ve DUNGEONS sabitlerini tamamen kaldır:
+    // const LOCATIONS = [
+    //   {
+    //     name: 'Sewer',
+    //     monsters: [
+    //       { id: 'rat', name: 'Rat' },
+    //       { id: 'slime', name: 'Slime' },
+    //       { id: 'spider', name: 'Spider' },
+    //       { id: 'ghost', name: 'Ghost' }
+    //     ],
+    //     loot: [
+    //       { id: 'ring', name: 'Sewer Ring', chance: 0.5 }
+    //     ]
+    //   },
+    //   {
+    //     name: 'Farmland',
+    //     monsters: [
+    //       { id: 'goblin', name: 'Goblin' },
+    //       { id: 'orc', name: 'Orc' },
+    //       { id: 'skeleton', name: 'Skeleton' },
+    //       { id: 'troll', name: 'Troll' },
+    //       { id: 'dragon', name: 'Dragon' }
+    //     ],
+    //     loot: [
+    //       { id: 'cape', name: 'Farmland Cape', chance: 0.3 }
+    //     ]
+    //   }
+    // ];
 
-                <Grid container spacing={3} className={styles.enemyGrid}>
-                    {Object.values(enemies)
-                        .sort((a, b) => a.maxHp - b.maxHp) // Kolaydan zora sırala
-                        .map((enemy) => (
-                        <Grid key={enemy.id}>
-                            <Tooltip
-                                title={renderLootTooltip(enemy)}
-                                arrow
-                                placement="top"
-                                className={styles.enemyTooltip}
-                            >
-                                <Card className={styles.enemyCard}>
-                                    <CardActionArea onClick={() => handleEnemySelect(enemy)}>
-                                        <CardContent className={styles.enemyCardContent}>
-                                            <div className={styles.enemyAvatar}>
-                                                <Avatar 
-                                                    src={getEnemyIcon(enemy.id)} 
-                                                    className={styles.enemyImage}
-                                                    onError={(e) => {
-                                                        if (e.target && e.target.nextSibling) {
-                                                            e.target.style.display = 'none';
-                                                            e.target.nextSibling.style.display = 'flex';
-                                                        }
-                                                    }}
-                                                />
-                                                <div 
-                                                    className={styles.enemyAvatarFallback}
-                                                    style={{ display: 'none' }}
-                                                >
-                                                    {getEnemyInitial(enemy.name)}
-                                                </div>
-                                            </div>
-                                            
-                                            <Typography variant="h6" className={styles.enemyName}>
-                                                {enemy.name}
-                                            </Typography>
-                                            
-                                            <div className={styles.enemyStats}>
-                                                <Typography 
-                                                    variant="body2" 
-                                                    className={getStatDisplay(enemy.id, 'hp', enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}
-                                                >
-                                                    ❤️ HP: {getStatDisplay(enemy.id, 'hp', enemy.maxHp)}
-                                                </Typography>
-                                                <Typography 
-                                                    variant="body2" 
-                                                    className={getStatDisplay(enemy.id, 'atk', enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}
-                                                >
-                                                    ⚔️ ATK: {getStatDisplay(enemy.id, 'atk', enemy.ATK)}
-                                                </Typography>
-                                                <Typography 
-                                                    variant="body2" 
-                                                    className={getStatDisplay(enemy.id, 'def', enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}
-                                                >
-                                                    🛡️ DEF: {getStatDisplay(enemy.id, 'def', enemy.DEF)}
-                                                </Typography>
-                                            </div>
-                                            
-                                            <div 
-                                                className={styles.difficultyBadge}
-                                                style={{ backgroundColor: getDifficultyColor(enemy) }}
-                                            >
-                                                <Typography variant="caption">
-                                                    {getDifficultyText(enemy)}
-                                                </Typography>
-                                            </div>
-                                        </CardContent>
-                                    </CardActionArea>
-                                </Card>
-                            </Tooltip>
-                        </Grid>
-                    ))}
-                </Grid>
-            </div>
-        );
-    }
+    // Example dungeons and chest rewards (static for now)
+    // Aşağıdaki LOCATIONS ve DUNGEONS sabitlerini tamamen kaldır:
+    // const DUNGEONS = [
+    //   {
+    //     name: 'Ancient Catacombs',
+    //     stages: 7,
+    //     chest: [
+    //       { id: 'legendarySword', name: 'Legendary Sword', chance: 1 },
+    //       { id: 'armor', name: 'Ancient Armor', chance: 3 },
+    //       { id: 'ring', name: 'Mystic Ring', chance: 5 }
+    //     ]
+    //   },
+    //   {
+    //     name: 'Haunted Tower',
+    //     stages: 9,
+    //     chest: [
+    //       { id: 'cape', name: 'Ghostly Cape', chance: 2 },
+    //       { id: 'shield', name: 'Haunted Shield', chance: 4 },
+    //       { id: 'gloves', name: 'Specter Gloves', chance: 6 }
+    //     ]
+    //   }
+    // ];
+
+    const handleToggleLocation = (idx) => {
+        setOpenLocations((prev) => prev.map((open, i) => (i === idx ? !open : open)));
+    };
+    const handleToggleDungeon = (idx) => {
+        setOpenDungeons((prev) => prev.map((open, i) => (i === idx ? !open : open)));
+    };
 
     // Battle Screen
     return (
-        <div className={styles.battleContainer}>
-            <div className={styles.battleHeader}>
-                <Button 
-                    variant="outlined" 
-                    onClick={handleBackToSelection}
-                    className={styles.backButton}
-                >
-                    {t('battle.backToSelection')}
-                </Button>
-                <Typography variant="h5" className={styles.battleTitle}>
-                    {t('battle.fightThisEnemy')}: {currentEnemy?.name}
-                </Typography>
-            </div>
-
-
-
-            <div className={styles.fighters}>
-                {/* PLAYER */}
-                <div className={styles.fighter}>
-                    <Avatar src={getCharacterIcon(selectedCharacter)} className={styles.avatar} />
-                    <Typography variant="h6">{getCharacterName(selectedCharacter)}</Typography>
-                    
-                    {/* Damage Display */}
-                    {damageDisplay.player && (
-                        <Typography 
-                            variant="h4" 
-                            className={`${styles.damageDisplay} ${
-                                damageDisplay.player === 'MISS' ? styles.missDisplay : 
-                                damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
-                            }`}
-                        >
-                            {damageDisplay.player}
-                        </Typography>
-                    )}
-                    
-                    <div className={styles.hpBarContainer}>
-                        <Typography className={styles.hpText}>
-                            HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || playerStats.HEALTH}
-                        </Typography>
-                        <LinearProgress
-                            variant="determinate"
-                            value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : (playerHealth / playerStats.HEALTH) * 100}
-                            className={`${styles.progress} ${styles.playerHpBar}`}
-                        />
-                    </div>
-                    <div className={styles.attackBarContainer}>
-                        <LinearProgress
-                            variant="determinate"
-                            value={currentBattle?.playerProgress || 0}
-                            className={`${styles.progress} ${styles.attackBar}`}
-                            sx={{ height: '15px', borderRadius: '8px' }}
-                        />
-                    </div>
-                    
-                    {/* Attack Type Selection - Small */}
-                    {currentBattle && (
-                        <div className={styles.attackTypeSmall}>
-                            <Typography variant="caption" className={styles.attackTypeSmallTitle}>
-                                🎯 {t('battle.selectAttackType')}
-                            </Typography>
-                            <div className={styles.attackTypeSmallGrid}>
-                                {availableAttackTypes.map((attackType) => (
-                                    <Tooltip
-                                        key={attackType.type}
-                                        title={attackType.description}
-                                        arrow
-                                        placement="top"
-                                    >
-                                        <Button
-                                            variant="text"
-                                            className={`${styles.attackTypeSmallButton} ${
-                                                selectedAttackType === attackType.type ? styles.attackTypeSelected : ''
-                                            }`}
-                                            onClick={() => setSelectedAttackType(attackType.type)}
-                                        >
-                                            <span className={styles.attackTypeSmallIcon}>{attackType.icon}</span>
-                                        </Button>
-                                    </Tooltip>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {/* ENEMY */}
-                <div className={styles.fighter}>
-                    <Avatar 
-                        src={getEnemyIcon(currentEnemy?.id)} 
-                        className={styles.avatar}
-                        onError={(e) => {
-                            if (e.target && e.target.nextSibling) {
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'flex';
-                            }
+        <div className={styles.battlePageContainer}>
+            {battleMode === 'selection' && (
+                <>
+                    <Tabs
+                        value={battleTab}
+                        onChange={(e, v) => setBattleTab(v)}
+                        centered
+                        sx={{
+                            marginBottom: 2,
+                            background: '#3a3a5a',
+                            borderRadius: 2,
+                            minHeight: 48,
+                            '& .MuiTab-root': {
+                                color: '#e0e0e0',
+                                fontWeight: 600,
+                                fontSize: '1.1rem',
+                                minHeight: 48,
+                                transition: 'color 0.2s',
+                            },
+                            '& .Mui-selected': {
+                                color: '#ffd700',
+                                background: 'rgba(60,60,90,0.7)',
+                                borderRadius: 8,
+                            },
+                            '& .MuiTabs-indicator': {
+                                backgroundColor: '#ffd700',
+                                height: 4,
+                                borderRadius: 2,
+                            },
                         }}
-                    />
-                    <div 
-                        className={styles.avatarFallback}
-                        style={{ display: 'none' }}
                     >
-                        {getEnemyInitial(currentEnemy?.name)}
-                    </div>
-                    <Typography variant="h6">{currentEnemy?.name}</Typography>
-                    
-                    {/* Damage Display */}
-                    {damageDisplay.enemy && (
-                        <Typography 
-                            variant="h4" 
-                            className={`${styles.damageDisplay} ${
-                                damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
-                                damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
-                            }`}
-                        >
-                            {damageDisplay.enemy}
-                        </Typography>
-                    )}
-                    
-                    {/* Bekleme süresi gösterimi */}
-                    {isWaitingForEnemy ? (
-                        <div className={styles.enemySpawnContainer}>
-                            <Typography className={styles.spawnText}>
-                                Spawning Enemy...
-                            </Typography>
-                            <div className={styles.circularProgress}>
-                                <div 
-                                    className={styles.circularProgressBar}
-                                    style={{ '--progress': `${enemySpawnProgress}%` }}
-                                ></div>
-                                <div className={styles.circularProgressText}>
-                                    {Math.ceil((100 - enemySpawnProgress) / 20)}s
+                        <Tab label={t('battle.locations')} value="locations" />
+                        <Tab label={t('battle.dungeons')} value="dungeons" />
+                    </Tabs>
+                    {battleTab === 'locations' && (
+                        <div>
+                            {Array.isArray(LOCATIONS) && LOCATIONS.map((loc, idx) => (
+                                <div key={loc.id} style={{ marginBottom: 24, border: '1px solid #444', borderRadius: 8, padding: 12, background: 'rgba(0,0,0,0.08)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => handleToggleLocation(idx)}>
+                                        <Typography variant="h6" style={{ color: '#ffd700', marginBottom: 8 }}>{loc.name}</Typography>
+                                        <IconButton size="small" aria-label={openLocations[idx] ? t('common.collapse') : t('common.expand')} sx={{ color: '#ffd700' }}>
+                                            {openLocations[idx] ? <ExpandLess /> : <ExpandMore />}
+                                        </IconButton>
+                                    </div>
+                                    {openLocations[idx] && <>
+                                        <Typography variant="body2" style={{ color: '#bada55', marginBottom: 8 }}>{loc.description}</Typography>
+                                        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                                            {Array.isArray(loc.enemies) && loc.enemies.map((enemyId) => {
+                                                const enemy = Object.values(enemies).find(e => e.id === enemyId);
+                                                if (!enemy) return null;
+                                                return (
+                                                    <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, marginBottom: 8, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
+                                                        <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 4 }} />
+                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500 }}>{enemy.name}</Typography>
+                                                        <Button size="small" variant="contained" color="primary" style={{ marginTop: 4 }} onClick={() => handleEnemySelect(enemy)}>
+                                                            {t('battle.fight')}
+                                                        </Button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        {loc.uniqueLoot && (
+                                            <Tooltip
+                                                title={
+                                                    <div style={{ maxWidth: 220 }}>
+                                                        <Typography variant="body2" sx={{ color: '#ffd700', fontWeight: 'bold', mb: 1 }}>{loc.uniqueLoot.name}</Typography>
+                                                        {loc.uniqueLoot.rarity && (
+                                                            <Typography variant="caption" sx={{ color: '#b45af2', textTransform: 'uppercase', display: 'block', mb: 1 }}>{loc.uniqueLoot.rarity}</Typography>
+                                                        )}
+                                                        <Typography variant="caption" sx={{ color: '#fff', display: 'block', mb: 1 }}>{t('battle.uniqueLocationLoot')}</Typography>
+                                                        <Typography variant="caption" sx={{ color: '#ffd700', display: 'block' }}>{(loc.uniqueLoot.chance * 100).toFixed(2)}% {t('battle.dropChance')}</Typography>
+                                                    </div>
+                                                }
+                                                arrow
+                                                placement="top"
+                                                componentsProps={{
+                                                    tooltip: {
+                                                        sx: {
+                                                            backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                                                            border: '2px solid #ffd700',
+                                                            borderRadius: '8px',
+                                                            boxShadow: '0 0 20px #ffd70040',
+                                                            backdropFilter: 'blur(10px)',
+                                                            maxWidth: '250px'
+                                                        }
+                                                    },
+                                                    arrow: {
+                                                        sx: {
+                                                            color: '#ffd700'
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                <div style={{ marginTop: 10, background: 'rgba(0,0,0,0.18)', borderRadius: 6, padding: 8, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                                                    <span style={{ color: '#bada55', fontWeight: 500 }}>{t('battle.uniqueLocationLoot')}</span>
+                                                    <span style={{ color: '#fff' }}>{loc.uniqueLoot.name}</span>
+                                                    <span style={{ color: '#ffd700', fontSize: '0.95em' }}>{(loc.uniqueLoot.chance * 100).toFixed(2)}%</span>
+                                                </div>
+                                            </Tooltip>
+                                        )}
+                                    </>}
                                 </div>
-                            </div>
+                            ))}
                         </div>
-                    ) : (
-                        <>
-                            <div className={styles.hpBarContainer}>
-                                <Typography 
-                                    className={`${styles.hpText} ${
-                                        getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
-                                    }`}
-                                >
-                                    HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
-                                </Typography>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100) : 100}
-                                    className={`${styles.progress} ${styles.enemyHpBar}`}
-                                />
-                            </div>
-                            <div className={styles.attackBarContainer}>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={currentBattle?.enemyProgress || 0}
-                                    className={`${styles.progress} ${styles.attackBar}`}
-                                    sx={{ height: '15px', borderRadius: '8px' }}
-                                />
-                            </div>
-                        </>
                     )}
-                </div>
+                    {/* Dungeons sekmesi burada benzer şekilde olacak */}
+                    {battleTab === 'dungeons' && (
+                        <div>
+                            {Array.isArray(DUNGEONS) && DUNGEONS.map((dungeon, idx) => (
+                                <div key={dungeon.id} style={{ marginBottom: 24, border: '2px solid #b45af2', borderRadius: 10, padding: 16, background: 'rgba(30,0,60,0.13)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => handleToggleDungeon(idx)}>
+                                        <Typography variant="h6" style={{ color: '#b45af2', marginBottom: 8 }}>{dungeon.name}</Typography>
+                                        <IconButton size="small" aria-label={openDungeons[idx] ? t('common.collapse') : t('common.expand')} sx={{ color: '#ffd700' }}>
+                                            {openDungeons[idx] ? <ExpandLess /> : <ExpandMore />}
+                                        </IconButton>
+                                    </div>
+                                    {openDungeons[idx] && <>
+                                        <Typography variant="body2" style={{ color: '#fff', marginBottom: 6 }}>{dungeon.description}</Typography>
+                                        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8 }}>
+                                            {dungeon.enemies.map((enemyId) => {
+                                                const enemy = Object.values(enemies).find(e => e.id === enemyId);
+                                                if (!enemy) return null;
+                                                return (
+                                                    <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
+                                                        <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 2 }} />
+                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500 }}>{enemy.name}</Typography>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <div style={{ marginBottom: 8 }}>
+                                            <Typography variant="subtitle2" style={{ color: '#ffb300' }}>{t('battle.boss')}</Typography>
+                                            {(() => {
+                                                const boss = Object.values(enemies).find(e => e.id === dungeon.boss);
+                                                if (!boss) return null;
+                                                return (
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                                                        <img src={getEnemyIcon(boss.id)} alt={boss.name} style={{ width: 48, height: 48 }} />
+                                                        <Typography variant="body1" style={{ color: '#ff5252', fontWeight: 600 }}>{boss.name}</Typography>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                        <div style={{ marginTop: 8, background: 'rgba(0,0,0,0.18)', borderRadius: 6, padding: 8 }}>
+                                            <Typography variant="subtitle2" style={{ color: '#ffd700', marginBottom: 4 }}>
+                                                {t('battle.dungeonChestRewards')}
+                                            </Typography>
+                                            {dungeon.chest.map(reward => (
+                                                <Tooltip
+                                                    key={reward.id}
+                                                    title={
+                                                        <div style={{ maxWidth: 220 }}>
+                                                            <Typography variant="body2" sx={{ color: '#ffd700', fontWeight: 'bold', mb: 1 }}>{reward.name}</Typography>
+                                                            <Typography variant="caption" sx={{ color: '#fff', display: 'block', mb: 1 }}>{t('battle.dungeonChestRewards')}</Typography>
+                                                            <Typography variant="caption" sx={{ color: '#ffd700', display: 'block' }}>{reward.chance}% {t('battle.dropChance')}</Typography>
+                                                        </div>
+                                                    }
+                                                    arrow
+                                                    placement="top"
+                                                    componentsProps={{
+                                                        tooltip: {
+                                                            sx: {
+                                                                backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                                                                border: '2px solid #ffd700',
+                                                                borderRadius: '8px',
+                                                                boxShadow: '0 0 20px #ffd70040',
+                                                                backdropFilter: 'blur(10px)',
+                                                                maxWidth: '250px'
+                                                            }
+                                                        },
+                                                        arrow: {
+                                                            sx: {
+                                                                color: '#ffd700'
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, cursor: 'pointer' }}>
+                                                        <span style={{ color: '#fff' }}>{reward.name}</span>
+                                                        <span style={{ color: '#ffd700', fontSize: '0.85em' }}>{reward.chance}%</span>
+                                                    </div>
+                                                </Tooltip>
+                                            ))}
+                                        </div>
+                                        <Button size="medium" variant="contained" color="secondary" style={{ marginTop: 12 }}>
+                                            {t('battle.enterDungeon')}
+                                        </Button>
+                                    </>}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            )}
+            {battleMode === 'battle' && (
+                <>
+                    {/* Savaş arayüzü ve savaş logu burada olacak */}
+                    <div className={styles.battleContainer}>
+                        <div className={styles.battleHeader}>
+                            <Button 
+                                variant="outlined" 
+                                onClick={handleBackToSelection}
+                                className={styles.backButton}
+                            >
+                                {t('battle.backToSelection')}
+                            </Button>
+                            <Typography variant="h5" className={styles.battleTitle}>
+                                {t('battle.fightThisEnemy')}: {currentEnemy?.name}
+                            </Typography>
+                        </div>
 
-                {/* Battle Log - Toggleable Widget */}
-                {battleLogVisible && (
-                    <div className={styles.fighter}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                            <Typography variant="h6">{t('battle.battleLog')}</Typography>
-                            <Tooltip title={t('battle.closeBattleLog')} arrow>
-                                <IconButton
-                                    onClick={() => setBattleLogVisible(false)}
-                                    sx={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        right: 0,
-                                        backgroundColor: 'transparent',
-                                        '&:hover': {
-                                            backgroundColor: 'rgba(106, 106, 138, 0.1)'
+
+
+                        <div className={styles.fighters}>
+                            {/* PLAYER */}
+                            <div className={styles.fighter}>
+                                <Avatar src={getCharacterIcon(selectedCharacter)} className={styles.avatar} />
+                                <Typography variant="h6">{getCharacterName(selectedCharacter)}</Typography>
+                                
+                                {/* Damage Display */}
+                                {damageDisplay.player && (
+                                    <Typography 
+                                        variant="h4" 
+                                        className={`${styles.damageDisplay} ${
+                                            damageDisplay.player === 'MISS' ? styles.missDisplay : 
+                                            damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
+                                        }`}
+                                    >
+                                        {damageDisplay.player}
+                                    </Typography>
+                                )}
+                                
+                                <div className={styles.hpBarContainer}>
+                                    <Typography className={styles.hpText}>
+                                        HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || playerStats.HEALTH}
+                                    </Typography>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : (playerHealth / playerStats.HEALTH) * 100}
+                                        className={`${styles.progress} ${styles.playerHpBar}`}
+                                    />
+                                </div>
+                                <div className={styles.attackBarContainer}>
+                                    <LinearProgress
+                                        variant="determinate"
+                                        value={currentBattle?.playerProgress || 0}
+                                        className={`${styles.progress} ${styles.attackBar}`}
+                                        sx={{ height: '15px', borderRadius: '8px' }}
+                                    />
+                                </div>
+                                
+                                {/* Attack Type Selection - Small */}
+                                {currentBattle && (
+                                    <div className={styles.attackTypeSmall}>
+                                        <Typography variant="caption" className={styles.attackTypeSmallTitle}>
+                                            🎯 {t('battle.selectAttackType')}
+                                        </Typography>
+                                        <div className={styles.attackTypeSmallGrid}>
+                                            {availableAttackTypes.map((attackType) => (
+                                                <Tooltip
+                                                    key={attackType.type}
+                                                    title={attackType.description}
+                                                    arrow
+                                                    placement="top"
+                                                >
+                                                    <Button
+                                                        variant="text"
+                                                        className={`${styles.attackTypeSmallButton} ${
+                                                            selectedAttackType === attackType.type ? styles.attackTypeSelected : ''
+                                                        }`}
+                                                        onClick={() => setSelectedAttackType(attackType.type)}
+                                                    >
+                                                        <span className={styles.attackTypeSmallIcon}>{attackType.icon}</span>
+                                                    </Button>
+                                                </Tooltip>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ENEMY */}
+                            <div className={styles.fighter}>
+                                <Avatar 
+                                    src={getEnemyIcon(currentEnemy?.id)} 
+                                    className={styles.avatar}
+                                    onError={(e) => {
+                                        if (e.target && e.target.nextSibling) {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
                                         }
                                     }}
+                                />
+                                <div 
+                                    className={styles.avatarFallback}
+                                    style={{ display: 'none' }}
                                 >
-                                    ❌
-                                </IconButton>
-                            </Tooltip>
-                        </Box>
-                        <Divider />
-                        <Box className={styles.battleLog} sx={{ flex: 1 }}>
-                            {battleLog.map((log, idx) => {
-                                return (
-                                    <div key={`battle-log-${idx}-${log.type}`}>
-                                        <Typography 
-                                            variant="body2" 
-                                            className={`${styles.battleLogItem} ${
-                                                log.type === 'player_attack' ? styles.playerAttack :
-                                                log.type === 'player_crit' ? styles.playerCrit :
-                                                log.type === 'enemy_attack' ? styles.enemyAttack :
-                                                log.type === 'enemy_crit' ? styles.enemyCrit :
-                                                log.type?.includes('miss') ? styles.miss :
-                                                log.type?.includes('defeated') ? styles.defeat :
-                                                log.type === 'victory' ? styles.victory :
-                                                log.type === 'loot' ? styles.loot :
-                                                log.type === 'pet' ? styles.petDrop :
-                                                log.type === 'info' ? styles.infoLog : ''
-                                            }`}
-                                        >
-                                            {log.message}
-                                        </Typography>
-                                        {log.skillXP && log.skillXP.skillsAwarded.length > 0 && (
-                                            <Typography 
-                                                variant="caption" 
-                                                className={styles.skillXPMessage}
-                                                style={{ color: '#4caf50', marginLeft: '10px' }}
-                                            >
-                                                ✨ +{log.skillXP.xpAwarded} XP to {log.skillXP.skillsAwarded.join(', ')}
-                                                {log.skillXP.leveledUp && ' 🎉 LEVEL UP!'}
-                                            </Typography>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </Box>
-                    </div>
-                )}
-                
-                {/* Show Battle Log Button - When battle log is hidden */}
-                {!battleLogVisible && currentBattle && (
-                    <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-                        <Tooltip title={t('battle.showBattleLog')} arrow>
-                            <IconButton
-                                onClick={() => setBattleLogVisible(true)}
-                                sx={{
-                                    width: 32,
-                                    height: 32,
-                                    fontSize: '1.3rem',
-                                    color: '#e0e0e0',
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(106, 106, 138, 0.1)'
-                                    }
-                                }}
-                            >
-                                👁️
-                            </IconButton>
-                        </Tooltip>
-                    </div>
-                )}
-            </div>
-
-            {/* Potion System */}
-            {currentBattle && (
-                <div className={styles.potionSection}>
-                    <div className={styles.potionHeader}>
-                        <Typography variant="h6" className={styles.potionTitle}>
-                            <LocalDrink /> {t('potions.healthPotions')}
-                        </Typography>
-                        <Chip 
-                            label={autoPotionSettings.enabled ? t('potions.autoOn') : t('potions.autoOff')}
-                            color={autoPotionSettings.enabled ? "success" : "default"}
-                            size="small"
-                            className={styles.autoPotionChip}
-                        />
-                    </div>
-                    
-                    <div className={styles.potionGrid}>
-                        {Object.entries(POTION_TYPES).map(([key, potion]) => {
-                            const count = potions[potion.id] || 0;
-                            const canUse = count > 0 && currentBattle.player.currentHealth < currentBattle.player.HEALTH;
-                            
-                            return (
-                                <Button
-                                    key={potion.id}
-                                    variant="contained"
-                                    className={styles.potionButton}
-                                    disabled={!canUse}
-                                    onClick={() => handleUsePotion(potion.id)}
-                                    style={{
-                                        backgroundColor: potion.color,
-                                        border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',
-                                        boxShadow: lastPotionUsed?.type === potion.id ? '0 0 15px #ffd700' : 'none'
-                                    }}
-                                >
-                                    <div className={styles.potionContent}>
-                                        <Typography variant="caption" className={styles.potionName}>
-                                            {t(`potions.${potion.id}HealthPotion`)}
-                                        </Typography>
-                                        <Typography variant="body2" className={styles.potionHeal}>
-                                            +{potion.healAmount}
-                                        </Typography>
-                                        <Typography variant="caption" className={styles.potionCount}>
-                                            {count}
-                                        </Typography>
-                                    </div>
-                                </Button>
-                            );
-                        })}
-                    </div>
-                    
-                    {/* Potion Used Effect */}
-                    {lastPotionUsed && (
-                        <div className={styles.potionEffect}>
-                            <Typography variant="h4" className={styles.healText}>
-                                +{lastPotionUsed.healAmount} HP
-                            </Typography>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Widget Container - Yan yana düzenleme */}
-            <div className={styles.widgetContainer}>
-                {/* PLAYER STATS */}
-                <div className={styles.section}>
-                    <Typography variant="h6">{t('battle.playerStats')}</Typography>
-                    <Divider />
-                    {currentBattle ? (
-                        <>
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const atkBonus = skillBuffs.ATK || 0;
-                                const effectiveATK = currentBattle.player.ATK + atkBonus;
-                                return (
-                                    <Typography>
-                                        ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
-                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const defBonus = skillBuffs.DEF || 0;
-                                const effectiveDEF = currentBattle.player.DEF + defBonus;
-                                return (
-                                    <Typography>
-                                        🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
-                                        {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const healthBonus = skillBuffs.HEALTH || 0;
-                                const effectiveHealth = currentBattle.player.HEALTH + healthBonus;
-                                return (
-                                    <Typography>
-                                        ❤️ {t('battle.health')}: {currentBattle.player.currentHealth}/{effectiveHealth.toFixed(0)}
-                                        {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
-                                const effectiveAttackSpeed = currentBattle.player.ATTACK_SPEED + attackSpeedBonus;
-                                return (
-                                    <Typography>
-                                        ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
-                                        {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
-                                const effectiveCritChance = (currentBattle.player.CRIT_CHANCE || 5) + critChanceBonus;
-                                return (
-                                    <Typography>
-                                        🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
-                                        {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                const effectiveCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
+                                    {getEnemyInitial(currentEnemy?.name)}
+                                </div>
+                                <Typography variant="h6">{currentEnemy?.name}</Typography>
                                 
-
-                                
-                                return (
-                                    <Typography>
-                                        💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
-                                        {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            <Divider sx={{ my: 1 }} />
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
-                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
-                                const effectiveATK = currentBattle.player.ATK + atkBonus;
-                                const hitChance = calculateHitChance(effectiveATK, currentBattle.enemy.DEF, accuracyBonus);
-                                return (
-                                    <Typography>
-                                        🎲 {t('battle.hitChance')}: {hitChance}%
-                                        {accuracyBonus > 0 && <span className={styles.skillBonus}> (+{accuracyBonus.toFixed(1)}%)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const damageRangeBonus = skillBuffs ? skillBuffs.MIN_DAMAGE.toFixed(1) + ' - ' + skillBuffs.MAX_DAMAGE.toFixed(1) : 0;
-                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
-                                const effectiveATK = currentBattle.player.ATK + atkBonus;
-                                const damageRange = calculateDamageRange(effectiveATK, currentBattle.enemy.DEF, damageRangeBonus);
-                                const totalCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
-                                const critDamageRange = {
-                                    min: Math.floor(damageRange.min * (totalCritDamage / 100)),
-                                    max: Math.floor(damageRange.max * (totalCritDamage / 100))
-                                };
-                                return (
-                                    <>
-                                        <Typography>
-                                            ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
-                                            {damageRangeBonus && <span className={styles.skillBonus}> ({damageRangeBonus})</span>}
-                                        </Typography>
-                                        <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
-                                    </>
-                                );
-                            })()}
-                        </>
-                    ) : (
-                        <>
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const atkBonus = skillBuffs.ATK || 0;
-                                const effectiveATK = playerStats.ATK + atkBonus;
-                                const { level, bonuses } = getSelectedSkillInfo();
-                                
-                                return (
-                                    <Typography>
-                                        ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
-                                        {getEquipmentBonuses().ATK && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span>}
-                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
-                                        {bonuses && level > 0 && (
-                                            <span className={styles.skillBonus}> (+{bonuses.ATK} per level, Lv.{level})</span>
-                                        )}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const defBonus = skillBuffs.DEF || 0;
-                                const effectiveDEF = playerStats.DEF + defBonus;
-                                return (
-                                    <Typography>
-                                        🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
-                                        {getEquipmentBonuses().DEF && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span>}
-                                        {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const healthBonus = skillBuffs.HEALTH || 0;
-                                const effectiveHealth = playerStats.HEALTH + healthBonus;
-                                return (
-                                    <Typography>
-                                        ❤️ {t('battle.health')}: {playerHealth}/{effectiveHealth.toFixed(0)}
-                                        {getEquipmentBonuses().HEALTH && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span>}
-                                        {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
-                                const effectiveAttackSpeed = playerStats.ATTACK_SPEED + attackSpeedBonus;
-                                return (
-                                    <Typography>
-                                        ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
-                                        {getEquipmentBonuses().ATTACK_SPEED && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span>}
-                                        {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
-                                const effectiveCritChance = playerStats.CRIT_CHANCE + critChanceBonus;
-                                
-                                return (
-                                    <Typography>
-                                        🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
-                                        {getEquipmentBonuses().CRIT_CHANCE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span>}
-                                        {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                const effectiveCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
-                                
-                                return (
-                                    <Typography>
-                                        💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
-                                        {getEquipmentBonuses().CRIT_DAMAGE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span>}
-                                        {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            <Divider sx={{ my: 1 }} />
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const atkBonus = skillBuffs.ATK || 0;
-                                const effectiveATK = playerStats.ATK + atkBonus;
-                                const hitChance = calculateHitChance(effectiveATK, currentEnemy?.DEF || 0, 0);
-                                return (
-                                    <Typography>
-                                        🎲 {t('battle.hitChance')}: {hitChance}%
-                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)} ATK)</span>}
-                                    </Typography>
-                                );
-                            })()}
-                            {(() => {
-                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                const atkBonus = skillBuffs.ATK || 0;
-                                const effectiveATK = playerStats.ATK + atkBonus;
-                                const damageRange = calculateDamageRange(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
-                                const baseDamage = calculateDamage(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
-                                const totalCritDamage = playerStats.CRIT_DAMAGE;
-                                const { level, bonuses } = getSelectedSkillInfo();
-                                
-                                return (
-                                    <>
-                                        <Typography>
-                                            ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
-                                            {(skillBuffs.MIN_DAMAGE > 0 || skillBuffs.MAX_DAMAGE > 0) && (
-                                                <span className={styles.skillBonus}> 
-                                                    (+{skillBuffs.MIN_DAMAGE?.toFixed(1) || 0} min, +{skillBuffs.MAX_DAMAGE?.toFixed(1) || 0} max)
-                                                </span>
-                                            )}
-                                            {bonuses && level > 0 && (
-                                                <span className={styles.skillBonus}> 
-                                                    (+{bonuses.MIN_DAMAGE} min, +{bonuses.MAX_DAMAGE} max per level, Lv.{level})
-                                                </span>
-                                            )}
-                                        </Typography>
-                                        <Typography>💥 {t('battle.critDamage')}: {Math.floor(baseDamage * (totalCritDamage / 100))}</Typography>
-                                    </>
-                                );
-                            })()}
-                        </>
-                    )}
-                </div>
-
-                {/* ENEMY STATS */}
-                <div className={styles.section}>
-                    <Typography variant="h6">{t('battle.enemyStats')}</Typography>
-                    <Divider />
-                    {currentBattle ? (
-                        <>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ❤️ {t('battle.health')}: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ⚡ {t('battle.attackSpeed')}: {getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🎯 {t('battle.criticalChance')}: {getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? "" : `${currentBattle.enemy.CRIT_CHANCE || 3}%`}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                💥 {t('battle.criticalDamage')}: {getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? "" : `${currentBattle.enemy.CRIT_DAMAGE || 120}%`}
-                            </Typography>
-                            <Divider sx={{ my: 1 }} />
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🎲 {t('battle.hitChance')}: {getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? "" : `${calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%`}
-                            </Typography>
-                            {(() => {
-                                const damageRange = calculateDamageRange(currentBattle.enemy.ATK, currentBattle.player.DEF);
-                                const critDamageRange = {
-                                    min: Math.floor(damageRange.min * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100)),
-                                    max: Math.floor(damageRange.max * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100))
-                                };
-                                return (
-                                    <>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ⚔️ {t('battle.baseDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${damageRange.min}-${damageRange.max}`}
-                                        </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            💥 {t('battle.critDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${critDamageRange.min}-${critDamageRange.max}`}
-                                        </Typography>
-                                    </>
-                                );
-                            })()}
-                        </>
-                    ) : (
-                        <>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK)}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF)}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🎯 {t('battle.criticalChance')}: 3%
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                💥 {t('battle.criticalDamage')}: 120%
-                            </Typography>
-                            <Divider sx={{ my: 1 }} />
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                ⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0)}
-                            </Typography>
-                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0) * 1.2)}
-                            </Typography>
-                        </>
-                    )}
-                </div>
-
-                {/* LOOT TABLE */}
-                <div className={styles.section}>
-                    <Typography variant="h6">{t('battle.possibleLoot')}</Typography>
-                    <Divider />
-                    {currentEnemy?.drops?.map((drop) => (
-                        <Typography key={drop.name} className={drop.type === 'gold' ? styles.goldLoot : styles.equipmentLoot}>
-                            {drop.name} - {(drop.chance * 100).toFixed(0)}%
-                            {drop.type === 'gold' && (
-                                <span className={styles.goldValue}> (💰 {drop.value} Gold)</span>
-                            )}
-                        </Typography>
-                    )) || (
-                        <Typography>{t('battle.noDropsAvailable')}</Typography>
-                    )}
-                </div>
-
-                {/* LOOT GAINED */}
-                <div className={styles.section}>
-                    <Typography variant="h6">{t('battle.lootGained')}</Typography>
-                    <Divider />
-                    {lootBag.length === 0 ? (
-                        <Typography>{t('battle.noLootYet')}</Typography>
-                    ) : (
-                        <div className={styles.lootSymbolsContainer}>
-                            {lootBag.map((item, idx) => {
-                                const isGold = item.includes('💰');
-                                const isEquipment = item.includes('⚔️') || item.includes('🛡️') || item.includes('💍') || item.includes('👑');
-                                
-                                let symbol = '📦';
-                                let tooltipText = item;
-                                
-                                if (isGold) {
-                                    symbol = '💰';
-                                    tooltipText = `Gold: ${item.replace('💰', '').trim()}`;
-                                } else if (isEquipment) {
-                                    if (item.includes('⚔️')) symbol = '⚔️';
-                                    else if (item.includes('🛡️')) symbol = '🛡️';
-                                    else if (item.includes('💍')) symbol = '💍';
-                                    else if (item.includes('👑')) symbol = '👑';
-                                    else symbol = '⚔️';
-                                    tooltipText = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
-                                }
-                                
-                                return (
-                                    <Tooltip 
-                                        key={`loot-${idx}-${item}`} 
-                                        title={tooltipText}
-                                        arrow
-                                        placement="top"
+                                {/* Damage Display */}
+                                {damageDisplay.enemy && (
+                                    <Typography 
+                                        variant="h4" 
+                                        className={`${styles.damageDisplay} ${
+                                            damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
+                                            damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
+                                        }`}
                                     >
-                                        <div className={`${styles.lootSymbol} ${isGold ? styles.goldSymbol : styles.equipmentSymbol}`}>
-                                            {symbol}
+                                        {damageDisplay.enemy}
+                                    </Typography>
+                                )}
+                                
+                                {/* Bekleme süresi gösterimi */}
+                                {isWaitingForEnemy ? (
+                                    <div className={styles.enemySpawnContainer}>
+                                        <Typography className={styles.spawnText}>
+                                            Spawning Enemy...
+                                        </Typography>
+                                        <div className={styles.circularProgress}>
+                                            <div 
+                                                className={styles.circularProgressBar}
+                                                style={{ '--progress': `${enemySpawnProgress}%` }}
+                                            ></div>
+                                            <div className={styles.circularProgressText}>
+                                                {Math.ceil((100 - enemySpawnProgress) / 20)}s
+                                            </div>
                                         </div>
-                                    </Tooltip>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-            </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className={styles.hpBarContainer}>
+                                            <Typography 
+                                                className={`${styles.hpText} ${
+                                                    getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
+                                                }`}
+                                            >
+                                                HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
+                                            </Typography>
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100) : 100}
+                                                className={`${styles.progress} ${styles.enemyHpBar}`}
+                                            />
+                                        </div>
+                                        <div className={styles.attackBarContainer}>
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={currentBattle?.enemyProgress || 0}
+                                                className={`${styles.progress} ${styles.attackBar}`}
+                                                sx={{ height: '15px', borderRadius: '8px' }}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
 
-            {/* Death Dialog */}
-            <Dialog 
-                open={deathDialog.open} 
-                maxWidth="sm"
-                fullWidth
-                disableEscapeKeyDown
-            >
-                <DialogTitle className={styles.deathDialogTitle}>
-                    💀 {t('battle.youDied')} 💀
-                </DialogTitle>
-                <DialogContent className={styles.deathDialogContent}>
-                    <div className={styles.deathMessage}>
-                        <Typography variant="h5" className={styles.deathText}>
-                            {t('battle.playerDefeated')}
-                        </Typography>
-                        <Typography variant="body1" className={styles.respawnText}>
-                            {t('battle.respawnIn', { seconds: deathDialog.countdown })}
-                        </Typography>
-                        <div className={styles.respawnProgress}>
-                            <LinearProgress 
-                                variant="determinate" 
-                                value={((15 - deathDialog.countdown) / 15) * 100}
-                                className={styles.respawnBar}
-                            />
+                            {/* Battle Log - Toggleable Widget */}
+                            {battleLogVisible && (
+                                <div className={styles.fighter}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                        <Typography variant="h6">{t('battle.battleLog')}</Typography>
+                                        <Tooltip title={t('battle.closeBattleLog')} arrow>
+                                            <IconButton
+                                                onClick={() => setBattleLogVisible(false)}
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: 0,
+                                                    right: 0,
+                                                    backgroundColor: 'transparent',
+                                                    '&:hover': {
+                                                        backgroundColor: 'rgba(106, 106, 138, 0.1)'
+                                                    }
+                                                }}
+                                            >
+                                                ❌
+                                            </IconButton>
+                                        </Tooltip>
+                                    </Box>
+                                    <Divider />
+                                    <Box className={styles.battleLog} sx={{ flex: 1 }}>
+                                        {battleLog.map((log, idx) => {
+                                            return (
+                                                <div key={`battle-log-${idx}-${log.type}`}>
+                                                    <Typography 
+                                                        variant="body2" 
+                                                        className={`${styles.battleLogItem} ${
+                                                            log.type === 'player_attack' ? styles.playerAttack :
+                                                            log.type === 'player_crit' ? styles.playerCrit :
+                                                            log.type === 'enemy_attack' ? styles.enemyAttack :
+                                                            log.type === 'enemy_crit' ? styles.enemyCrit :
+                                                            log.type?.includes('miss') ? styles.miss :
+                                                            log.type?.includes('defeated') ? styles.defeat :
+                                                            log.type === 'victory' ? styles.victory :
+                                                            log.type === 'loot' ? styles.loot :
+                                                            log.type === 'pet' ? styles.petDrop :
+                                                            log.type === 'info' ? styles.infoLog : ''
+                                                        }`}
+                                                    >
+                                                        {log.message}
+                                                    </Typography>
+                                                    {log.skillXP && log.skillXP.skillsAwarded.length > 0 && (
+                                                        <Typography 
+                                                            variant="caption" 
+                                                            className={styles.skillXPMessage}
+                                                            style={{ color: '#4caf50', marginLeft: '10px' }}
+                                                        >
+                                                            ✨ +{log.skillXP.xpAwarded} XP to {log.skillXP.skillsAwarded.join(', ')}
+                                                            {log.skillXP.leveledUp && ' 🎉 LEVEL UP!'}
+                                                        </Typography>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </Box>
+                                </div>
+                            )}
+                            
+                            {/* Show Battle Log Button - When battle log is hidden */}
+                            {!battleLogVisible && currentBattle && (
+                                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                                    <Tooltip title={t('battle.showBattleLog')} arrow>
+                                        <IconButton
+                                            onClick={() => setBattleLogVisible(true)}
+                                            sx={{
+                                                width: 32,
+                                                height: 32,
+                                                fontSize: '1.3rem',
+                                                color: '#e0e0e0',
+                                                '&:hover': {
+                                                    backgroundColor: 'rgba(106, 106, 138, 0.1)'
+                                                }
+                                            }}
+                                        >
+                                            👁️
+                                        </IconButton>
+                                    </Tooltip>
+                                </div>
+                            )}
                         </div>
+
+                        {/* Potion System */}
+                        {currentBattle && (
+                            <div className={styles.potionSection}>
+                                <div className={styles.potionHeader}>
+                                    <Typography variant="h6" className={styles.potionTitle}>
+                                        <LocalDrink /> {t('potions.healthPotions')}
+                                    </Typography>
+                                    <Chip 
+                                        label={autoPotionSettings.enabled ? t('potions.autoOn') : t('potions.autoOff')}
+                                        color={autoPotionSettings.enabled ? "success" : "default"}
+                                        size="small"
+                                        className={styles.autoPotionChip}
+                                    />
+                                </div>
+                                
+                                <div className={styles.potionGrid}>
+                                    {Object.entries(POTION_TYPES).map(([key, potion]) => {
+                                        const count = potions[potion.id] || 0;
+                                        const canUse = count > 0 && currentBattle.player.currentHealth < currentBattle.player.HEALTH;
+                                        
+                                        return (
+                                            <Button
+                                                key={potion.id}
+                                                variant="contained"
+                                                className={styles.potionButton}
+                                                disabled={!canUse}
+                                                onClick={() => handleUsePotion(potion.id)}
+                                                style={{
+                                                    backgroundColor: potion.color,
+                                                    border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',
+                                                    boxShadow: lastPotionUsed?.type === potion.id ? '0 0 15px #ffd700' : 'none'
+                                                }}
+                                            >
+                                                <div className={styles.potionContent}>
+                                                    <Typography variant="caption" className={styles.potionName}>
+                                                        {t(`potions.${potion.id}HealthPotion`)}
+                                                    </Typography>
+                                                    <Typography variant="body2" className={styles.potionHeal}>
+                                                        +{potion.healAmount}
+                                                    </Typography>
+                                                    <Typography variant="caption" className={styles.potionCount}>
+                                                        {count}
+                                                    </Typography>
+                                                </div>
+                                            </Button>
+                                        );
+                                    })}
+                                </div>
+                                
+                                {/* Potion Used Effect */}
+                                {lastPotionUsed && (
+                                    <div className={styles.potionEffect}>
+                                        <Typography variant="h4" className={styles.healText}>
+                                            +{lastPotionUsed.healAmount} HP
+                                        </Typography>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Widget Container - Yan yana düzenleme */}
+                        <div className={styles.widgetContainer}>
+                            {/* PLAYER STATS */}
+                            <div className={styles.section}>
+                                <Typography variant="h6">{t('battle.playerStats')}</Typography>
+                                <Divider />
+                                {currentBattle ? (
+                                    <>
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const atkBonus = skillBuffs.ATK || 0;
+                                            const effectiveATK = currentBattle.player.ATK + atkBonus;
+                                            return (
+                                                <Typography>
+                                                    ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
+                                                    {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const defBonus = skillBuffs.DEF || 0;
+                                            const effectiveDEF = currentBattle.player.DEF + defBonus;
+                                            return (
+                                                <Typography>
+                                                    🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
+                                                    {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const healthBonus = skillBuffs.HEALTH || 0;
+                                            const effectiveHealth = currentBattle.player.HEALTH + healthBonus;
+                                            return (
+                                                <Typography>
+                                                    ❤️ {t('battle.health')}: {currentBattle.player.currentHealth}/{effectiveHealth.toFixed(0)}
+                                                    {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
+                                            const effectiveAttackSpeed = currentBattle.player.ATTACK_SPEED + attackSpeedBonus;
+                                            return (
+                                                <Typography>
+                                                    ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
+                                                    {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
+                                            const effectiveCritChance = (currentBattle.player.CRIT_CHANCE || 5) + critChanceBonus;
+                                            return (
+                                                <Typography>
+                                                    🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
+                                                    {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
+                                            const effectiveCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
+                                            
+
+                                            
+                                            return (
+                                                <Typography>
+                                                    💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
+                                                    {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        <Divider sx={{ my: 1 }} />
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
+                                            const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                            const effectiveATK = currentBattle.player.ATK + atkBonus;
+                                            const hitChance = calculateHitChance(effectiveATK, currentBattle.enemy.DEF, accuracyBonus);
+                                            return (
+                                                <Typography>
+                                                    🎲 {t('battle.hitChance')}: {hitChance}%
+                                                    {accuracyBonus > 0 && <span className={styles.skillBonus}> (+{accuracyBonus.toFixed(1)}%)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const damageRangeBonus = skillBuffs ? skillBuffs.MIN_DAMAGE.toFixed(1) + ' - ' + skillBuffs.MAX_DAMAGE.toFixed(1) : 0;
+                                            const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
+                                            const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
+                                            const effectiveATK = currentBattle.player.ATK + atkBonus;
+                                            const damageRange = calculateDamageRange(effectiveATK, currentBattle.enemy.DEF, damageRangeBonus);
+                                            const totalCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
+                                            const critDamageRange = {
+                                                min: Math.floor(damageRange.min * (totalCritDamage / 100)),
+                                                max: Math.floor(damageRange.max * (totalCritDamage / 100))
+                                            };
+                                            return (
+                                                <>
+                                                    <Typography>
+                                                        ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
+                                                        {damageRangeBonus && <span className={styles.skillBonus}> ({damageRangeBonus})</span>}
+                                                    </Typography>
+                                                    <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
+                                                </>
+                                            );
+                                        })()}
+                                    </>
+                                ) : (
+                                    <>
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const atkBonus = skillBuffs.ATK || 0;
+                                            const effectiveATK = playerStats.ATK + atkBonus;
+                                            const { level, bonuses } = getSelectedSkillInfo();
+                                            
+                                            return (
+                                                <Typography>
+                                                    ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
+                                                    {getEquipmentBonuses().ATK && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span>}
+                                                    {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
+                                                    {bonuses && level > 0 && (
+                                                        <span className={styles.skillBonus}> (+{bonuses.ATK} per level, Lv.{level})</span>
+                                                    )}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const defBonus = skillBuffs.DEF || 0;
+                                            const effectiveDEF = playerStats.DEF + defBonus;
+                                            return (
+                                                <Typography>
+                                                    🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
+                                                    {getEquipmentBonuses().DEF && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span>}
+                                                    {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const healthBonus = skillBuffs.HEALTH || 0;
+                                            const effectiveHealth = playerStats.HEALTH + healthBonus;
+                                            return (
+                                                <Typography>
+                                                    ❤️ {t('battle.health')}: {playerHealth}/{effectiveHealth.toFixed(0)}
+                                                    {getEquipmentBonuses().HEALTH && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span>}
+                                                    {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
+                                            const effectiveAttackSpeed = playerStats.ATTACK_SPEED + attackSpeedBonus;
+                                            return (
+                                                <Typography>
+                                                    ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
+                                                    {getEquipmentBonuses().ATTACK_SPEED && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span>}
+                                                    {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
+                                            const effectiveCritChance = playerStats.CRIT_CHANCE + critChanceBonus;
+                                            
+                                            return (
+                                                <Typography>
+                                                    🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
+                                                    {getEquipmentBonuses().CRIT_CHANCE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span>}
+                                                    {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
+                                            const effectiveCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
+                                            
+                                            return (
+                                                <Typography>
+                                                    💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
+                                                    {getEquipmentBonuses().CRIT_DAMAGE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span>}
+                                                    {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        <Divider sx={{ my: 1 }} />
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const atkBonus = skillBuffs.ATK || 0;
+                                            const effectiveATK = playerStats.ATK + atkBonus;
+                                            const hitChance = calculateHitChance(effectiveATK, currentEnemy?.DEF || 0, 0);
+                                            return (
+                                                <Typography>
+                                                    🎲 {t('battle.hitChance')}: {hitChance}%
+                                                    {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)} ATK)</span>}
+                                                </Typography>
+                                            );
+                                        })()}
+                                        {(() => {
+                                            const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
+                                            const atkBonus = skillBuffs.ATK || 0;
+                                            const effectiveATK = playerStats.ATK + atkBonus;
+                                            const damageRange = calculateDamageRange(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
+                                            const baseDamage = calculateDamage(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
+                                            const totalCritDamage = playerStats.CRIT_DAMAGE;
+                                            const { level, bonuses } = getSelectedSkillInfo();
+                                            
+                                            return (
+                                                <>
+                                                    <Typography>
+                                                        ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
+                                                        {(skillBuffs.MIN_DAMAGE > 0 || skillBuffs.MAX_DAMAGE > 0) && (
+                                                            <span className={styles.skillBonus}> 
+                                                                (+{skillBuffs.MIN_DAMAGE?.toFixed(1) || 0} min, +{skillBuffs.MAX_DAMAGE?.toFixed(1) || 0} max)
+                                                            </span>
+                                                        )}
+                                                        {bonuses && level > 0 && (
+                                                            <span className={styles.skillBonus}> 
+                                                                (+{bonuses.MIN_DAMAGE} min, +{bonuses.MAX_DAMAGE} max per level, Lv.{level})
+                                                            </span>
+                                                        )}
+                                                    </Typography>
+                                                    <Typography>💥 {t('battle.critDamage')}: {Math.floor(baseDamage * (totalCritDamage / 100))}</Typography>
+                                                </>
+                                            );
+                                        })()}
+                                    </>
+                                )}
+                            </div>
+
+                            {/* ENEMY STATS */}
+                            <div className={styles.section}>
+                                <Typography variant="h6">{t('battle.enemyStats')}</Typography>
+                                <Divider />
+                                {currentBattle ? (
+                                    <>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ❤️ {t('battle.health')}: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚡ {t('battle.attackSpeed')}: {getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎯 {t('battle.criticalChance')}: {getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? "" : `${currentBattle.enemy.CRIT_CHANCE || 3}%`}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            💥 {t('battle.criticalDamage')}: {getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? "" : `${currentBattle.enemy.CRIT_DAMAGE || 120}%`}
+                                        </Typography>
+                                        <Divider sx={{ my: 1 }} />
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎲 {t('battle.hitChance')}: {getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? "" : `${calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%`}
+                                        </Typography>
+                                        {(() => {
+                                            const damageRange = calculateDamageRange(currentBattle.enemy.ATK, currentBattle.player.DEF);
+                                            const critDamageRange = {
+                                                min: Math.floor(damageRange.min * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100)),
+                                                max: Math.floor(damageRange.max * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100))
+                                            };
+                                            return (
+                                                <>
+                                                    <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                        ⚔️ {t('battle.baseDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${damageRange.min}-${damageRange.max}`}
+                                                    </Typography>
+                                                    <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                        💥 {t('battle.critDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${critDamageRange.min}-${critDamageRange.max}`}
+                                                    </Typography>
+                                                </>
+                                            );
+                                        })()}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎯 {t('battle.criticalChance')}: 3%
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            💥 {t('battle.criticalDamage')}: 120%
+                                        </Typography>
+                                        <Divider sx={{ my: 1 }} />
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0) * 1.2)}
+                                        </Typography>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* LOOT TABLE */}
+                            <div className={styles.section}>
+                                <Typography variant="h6">{t('battle.possibleLoot')}</Typography>
+                                <Divider />
+                                {currentEnemy?.drops?.map((drop) => (
+                                    <Typography key={drop.name} className={drop.type === 'gold' ? styles.goldLoot : styles.equipmentLoot}>
+                                        {drop.name} - {(drop.chance * 100).toFixed(0)}%
+                                        {drop.type === 'gold' && (
+                                            <span className={styles.goldValue}> (💰 {drop.value} Gold)</span>
+                                        )}
+                                    </Typography>
+                                )) || (
+                                    <Typography>{t('battle.noDropsAvailable')}</Typography>
+                                )}
+                            </div>
+
+                            {/* LOOT GAINED */}
+                            <div className={styles.section}>
+                                <Typography variant="h6">{t('battle.lootGained')}</Typography>
+                                <Divider />
+                                {lootBag.length === 0 ? (
+                                    <Typography>{t('battle.noLootYet')}</Typography>
+                                ) : (
+                                    <div className={styles.lootSymbolsContainer}>
+                                        {lootBag.map((item, idx) => {
+                                            const isGold = item.includes('💰');
+                                            const isEquipment = item.includes('⚔️') || item.includes('🛡️') || item.includes('💍') || item.includes('👑');
+                                            
+                                            let symbol = '📦';
+                                            let tooltipText = item;
+                                            
+                                            if (isGold) {
+                                                symbol = '💰';
+                                                tooltipText = `Gold: ${item.replace('💰', '').trim()}`;
+                                            } else if (isEquipment) {
+                                                if (item.includes('⚔️')) symbol = '⚔️';
+                                                else if (item.includes('🛡️')) symbol = '🛡️';
+                                                else if (item.includes('💍')) symbol = '💍';
+                                                else if (item.includes('👑')) symbol = '👑';
+                                                else symbol = '⚔️';
+                                                tooltipText = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
+                                            }
+                                            
+                                            return (
+                                                <Tooltip 
+                                                    key={`loot-${idx}-${item}`} 
+                                                    title={tooltipText}
+                                                    arrow
+                                                    placement="top"
+                                                >
+                                                    <div className={`${styles.lootSymbol} ${isGold ? styles.goldSymbol : styles.equipmentSymbol}`}>
+                                                        {symbol}
+                                                    </div>
+                                                </Tooltip>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Death Dialog */}
+                        <Dialog 
+                            open={deathDialog.open} 
+                            maxWidth="sm"
+                            fullWidth
+                            disableEscapeKeyDown
+                        >
+                            <DialogTitle className={styles.deathDialogTitle}>
+                                💀 {t('battle.youDied')} 💀
+                            </DialogTitle>
+                            <DialogContent className={styles.deathDialogContent}>
+                                <div className={styles.deathMessage}>
+                                    <Typography variant="h5" className={styles.deathText}>
+                                        {t('battle.playerDefeated')}
+                                    </Typography>
+                                    <Typography variant="body1" className={styles.respawnText}>
+                                        {t('battle.respawnIn', { seconds: deathDialog.countdown })}
+                                    </Typography>
+                                    <div className={styles.respawnProgress}>
+                                        <LinearProgress 
+                                            variant="determinate" 
+                                            value={((15 - deathDialog.countdown) / 15) * 100}
+                                            className={styles.respawnBar}
+                                        />
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     </div>
-                </DialogContent>
-            </Dialog>
+                </>
+            )}
         </div>
     );
 }

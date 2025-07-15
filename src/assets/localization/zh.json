@@ -50,7 +50,9 @@
     "soundSettings": "声音设置",
     "mute": "静音",
     "unmute": "取消静音",
-    "music": "音乐"
+    "music": "音乐",
+    "collapse": "收起",
+    "expand": "展开"
   },
   "story": {
     "welcome": "欢迎，战士！",
@@ -94,7 +96,15 @@
     "fightThisEnemy": "与这个敌人战斗",
     "possibleDrops": "可能掉落",
     "enemyDifficulty": "敌人难度",
-    "searchingForEnemy": "正在寻找敌人..."
+    "searchingForEnemy": "正在寻找敌人...",
+    "uniqueLocationLoot": "独特地点掉落",
+    "locations": "地区",
+    "dungeons": "地下城",
+    "fight": "战斗",
+    "dungeonChestRewards": "地下城宝箱奖励",
+    "enterDungeon": "进入地下城",
+    "boss": "首领",
+    "dropChance": "掉落概率"
   },
   "equipment": {
     "equip": "装备",
