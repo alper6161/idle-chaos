@@ -5,6 +5,7 @@ import { INITIAL_SKILLS } from "../utils/constants";
 import { getSkillIcon } from "../utils/common.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { getSkillData } from "../utils/skillExperience.js";
+import { Tooltip } from "@mui/material";
 
 function MainMenu() {
     const { t } = useTranslate();
@@ -44,79 +45,47 @@ function MainMenu() {
                     style={{ width: '100%', height: 'auto', objectFit: 'contain', maxWidth: '100%', maxHeight: 80 }}
                 />
             </div>
-            {/* Equipment Section */}
-            <div className={styles.group}>
-                <div className={styles.groupTitle}>{t('common.equipment').toUpperCase()}</div>
-                <NavLink
-                    to="/equipment"
-                    className={styles.equipmentItem}
-                >
-                    <span className={styles.equipmentIcon}>🛡️</span>
-                    <span className={styles.equipmentLabel}>{t('common.equipment')}</span>
-                </NavLink>
+            
+            {/* Compact Main Menu Items */}
+            <div className={styles.compactMenu}>
+                <Tooltip title={t('common.equipment')} arrow placement="right">
+                    <NavLink to="/equipment" className={styles.compactMenuItem}>
+                        <span className={styles.compactMenuIcon}>🛡️</span>
+                    </NavLink>
+                </Tooltip>
+                
+                <Tooltip title={t('common.store')} arrow placement="right">
+                    <NavLink to="/store" className={styles.compactMenuItem}>
+                        <span className={styles.compactMenuIcon}>💰</span>
+                    </NavLink>
+                </Tooltip>
+                
+                <Tooltip title={t('skills.title')} arrow placement="right">
+                    <NavLink to="/skills" className={styles.compactMenuItem}>
+                        <span className={styles.compactMenuIcon}>🎯</span>
+                    </NavLink>
+                </Tooltip>
+                
+                <Tooltip title={t('common.battle')} arrow placement="right">
+                    <NavLink to="/battle" className={styles.compactMenuItem}>
+                        <span className={styles.compactMenuIcon}>⚔️</span>
+                    </NavLink>
+                </Tooltip>
+                
+                <Tooltip title="Achievements" arrow placement="right">
+                    <NavLink to="/achievement" className={styles.compactMenuItem}>
+                        <span className={styles.compactMenuIcon}>🏆</span>
+                    </NavLink>
+                </Tooltip>
+                
+                <Tooltip title="Pets" arrow placement="right">
+                    <NavLink to="/pets" className={styles.compactMenuItem}>
+                        <span className={styles.compactMenuIcon}>🐾</span>
+                    </NavLink>
+                </Tooltip>
             </div>
 
-            {/* Store Section */}
-            <div className={styles.group}>
-                <div className={styles.groupTitle}>{t('common.store').toUpperCase()}</div>
-                <NavLink
-                    to="/store"
-                    className={styles.storeItem}
-                >
-                    <span className={styles.storeIcon}>💰</span>
-                    <span className={styles.storeLabel}>{t('common.store')}</span>
-                </NavLink>
-            </div>
-
-            {/* Skills Section */}
-            <div className={styles.group}>
-                <div className={styles.groupTitle}>{t('skills.title')}</div>
-                <NavLink
-                    to="/skills"
-                    className={styles.skillsItem}
-                >
-                    <span className={styles.skillsIcon}>🎯</span>
-                    <span className={styles.skillsLabel}>{t('skills.title')}</span>
-                </NavLink>
-            </div>
-
-            {/* Battle Section */}
-            <div className={styles.group}>
-                <div className={styles.groupTitle}>{t('common.battle').toUpperCase()}</div>
-                <NavLink
-                    to="/battle"
-                    className={styles.battleItem}
-                >
-                    <span className={styles.battleIcon}>⚔️</span>
-                    <span className={styles.battleLabel}>{t('common.battle')}</span>
-                </NavLink>
-            </div>
-
-            {/* Achievement Section */}
-            <div className={styles.group}>
-                <div className={styles.groupTitle}>ACHIEVEMENTS</div>
-                <NavLink
-                    to="/achievement"
-                    className={styles.achievementItem}
-                >
-                    <span className={styles.achievementIcon}>🏆</span>
-                    <span className={styles.achievementLabel}>Achievements</span>
-                </NavLink>
-            </div>
-
-            {/* Pets Section */}
-            <div className={styles.group}>
-                <div className={styles.groupTitle}>PETS</div>
-                <NavLink
-                    to="/pets"
-                    className={styles.petsItem}
-                >
-                    <span className={styles.petsIcon}>🐾</span>
-                    <span className={styles.petsLabel}>Pets</span>
-                </NavLink>
-            </div>
-
-            {/* Skills Sections */}
+            {/* Skills Sections - Keep as is for skill levels */}
             {Object.entries(skills).map(([category, subskills]) => (
                 <div key={category} className={styles.group}>
                     <div className={styles.groupTitle}>{t(`skills.${category}`)}</div>
