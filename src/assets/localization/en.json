@@ -50,7 +50,8 @@
     "soundSettings": "Sound Settings",
     "mute": "Mute",
     "unmute": "Unmute",
-    "music": "Music"
+    "music": "Music",
+    "loadError": "Error loading game!"
   },
   "story": {
     "welcome": "Welcome, warrior!",
@@ -95,7 +96,10 @@
     "selectAttackType": "Select Attack Type",
     "possibleDrops": "Possible Drops",
     "enemyDifficulty": "Enemy Difficulty",
-    "searchingForEnemy": "Searching for enemy..."
+    "searchingForEnemy": "Searching for enemy...",
+    "showBattleLog": "Show Battle Log",
+    "closeBattleLog": "Close Battle Log",
+    "noDropsAvailable": "No drops available from this enemy"
   },
   "equipment": {
     "equip": "Equip",
@@ -272,7 +276,9 @@
         "overallProgress": "Overall Progress",
         "unlocked": "Unlocked",
         "total": "Total",
-        "enemyAchievements": "Enemy Achievements"
-    },
-    "settings.saveSuccess": "Game saved successfully!"
+            "enemyAchievements": "Enemy Achievements"
+  },
+  "settings": {
+    "saveSuccess": "Game saved successfully!"
+  }
 } 

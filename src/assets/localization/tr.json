@@ -50,7 +50,8 @@
     "soundSettings": "Ses Ayarları",
     "mute": "Sessiz",
     "unmute": "Sesi Aç",
-    "music": "Müzik"
+    "music": "Müzik",
+    "loadError": "Oyun yüklenirken bir hata oluştu!"
   },
   "story": {
     "welcome": "Hoş geldin, savaşçı!",
@@ -95,7 +96,10 @@
     "selectAttackType": "Saldırı Türü Seç",
     "possibleDrops": "Olası Ganimetler",
     "enemyDifficulty": "Düşman Zorluğu",
-    "searchingForEnemy": "Düşman aranıyor..."
+    "searchingForEnemy": "Düşman aranıyor...",
+    "showBattleLog": "Savaş Günlüğünü Göster",
+    "closeBattleLog": "Savaş Günlüğünü Kapat",
+    "noDropsAvailable": "Bu düşmandan düşecek ganimet yok"
   },
   "equipment": {
     "equip": "Tak",
@@ -272,7 +276,9 @@
         "overallProgress": "Genel İlerleme",
         "unlocked": "Açılan",
         "total": "Toplam",
-        "enemyAchievements": "Düşman Başarıları"
-    },
-    "settings.saveSuccess": "Oyun başarıyla kaydedildi!"
+            "enemyAchievements": "Düşman Başarıları"
+  },
+  "settings": {
+    "saveSuccess": "Oyun başarıyla kaydedildi!"
+  }
 } 
