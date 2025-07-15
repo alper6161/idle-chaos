@@ -40,9 +40,7 @@ const StoryModal = ({ open, onClose, characterImage }) => {
                                 border: '3px solid #4a4a6a',
                                 borderRadius: 0,
                                 boxShadow: '0 0 0 2px #000, 0 4px 0 0 #3a3a5a',
-                                imageRendering: 'pixelated',
-                                imageRendering: '-moz-crisp-edges',
-                                imageRendering: 'crisp-edges'
+                                imageRendering: 'pixelated'
                             }}
                         />
                     </Box>
