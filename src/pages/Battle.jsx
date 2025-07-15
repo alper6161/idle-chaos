@@ -338,7 +338,7 @@ function Battle({ player }) {
     const getStatDisplay = (enemyId, statType, value) => {
         const isUnlocked = isAchievementUnlocked(enemyId, getThresholdForStat(statType));
         if (isUnlocked) {
-            return value.toString();
+            return value !== undefined && value !== null ? value.toString() : "0";
         } else {
             return "";
         }
@@ -1607,13 +1607,25 @@ function Battle({ player }) {
                                 {currentBattle ? (
                                     <>
                                         <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
+                                            ⚔️ Attack: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎯 Attack Type: {getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? "" : `${currentBattle.enemy.ATTACK_TYPE || "Melee"}`}
                                         </Typography>
                                         <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
+                                            🛡️ Def: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🧙 Magic Def: {getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? "" : `${currentBattle.enemy.MAGIC_DEF || 0}`}
                                         </Typography>
                                         <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ❤️ {t('battle.health')}: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
+                                            ❤️ HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🛡️ Energy Shield: {getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? "" : `${currentBattle.enemy.ENERGY_SHIELD || 0}`}
+                                        </Typography>
+                                        <Typography className={getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ Base Damage: {getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? "" : `${currentBattle.enemy.BASE_DAMAGE_MIN || 0}-${currentBattle.enemy.BASE_DAMAGE_MAX || 0}`}
                                         </Typography>
                                         <Typography className={getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
                                             ⚡ {t('battle.attackSpeed')}: {getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
@@ -2246,13 +2258,25 @@ function Battle({ player }) {
                                     {currentBattle ? (
                                         <>
                                             <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
+                                                ⚔️ Attack: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
+                                            </Typography>
+                                            <Typography className={getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                🎯 Attack Type: {getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? "" : `${currentBattle.enemy.ATTACK_TYPE || "Melee"}`}
                                             </Typography>
                                             <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
+                                                🛡️ Def: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
+                                            </Typography>
+                                            <Typography className={getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                🧙 Magic Def: {getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? "" : `${currentBattle.enemy.MAGIC_DEF || 0}`}
                                             </Typography>
                                             <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ❤️ {t('battle.health')}: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
+                                                ❤️ HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
+                                            </Typography>
+                                            <Typography className={getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                🛡️ Energy Shield: {getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? "" : `${currentBattle.enemy.ENERGY_SHIELD || 0}`}
+                                            </Typography>
+                                            <Typography className={getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                ⚔️ Base Damage: {getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? "" : `${currentBattle.enemy.BASE_DAMAGE_MIN || 0}-${currentBattle.enemy.BASE_DAMAGE_MAX || 0}`}
                                             </Typography>
                                             <Typography className={getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
                                                 ⚡ {t('battle.attackSpeed')}: {getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
