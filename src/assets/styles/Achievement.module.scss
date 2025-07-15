@@ -659,11 +659,6 @@
       font-style: italic;
       text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
       
-      &::before {
-        content: '🔒 ';
-        margin-right: 0.3rem;
-      }
-      
       &::after {
         content: '???';
         color: #666;
@@ -688,10 +683,7 @@
       font-weight: 700;
       text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
       
-      &::before {
-        content: '✅ ';
-        margin-right: 0.3rem;
-      }
+
     }
   }
 }

@@ -991,7 +991,7 @@ function Battle({ player }) {
             <div className={styles.widgetContainer}>
                 {/* PLAYER STATS */}
                 <div className={styles.section}>
-                    <Typography variant="h6">{t('battle.health')}</Typography>
+                    <Typography variant="h6">{t('battle.playerStats')}</Typography>
                     <Divider />
                     {currentBattle ? (
                         <>

@@ -99,7 +99,8 @@
     "searchingForEnemy": "Düşman aranıyor...",
     "showBattleLog": "Savaş Günlüğünü Göster",
     "closeBattleLog": "Savaş Günlüğünü Kapat",
-    "noDropsAvailable": "Bu düşmandan düşecek ganimet yok"
+    "noDropsAvailable": "Bu düşmandan düşecek ganimet yok",
+    "playerStats": "Oyuncu İstatistikleri"
   },
   "equipment": {
     "equip": "Tak",

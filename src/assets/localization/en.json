@@ -99,7 +99,8 @@
     "searchingForEnemy": "Searching for enemy...",
     "showBattleLog": "Show Battle Log",
     "closeBattleLog": "Close Battle Log",
-    "noDropsAvailable": "No drops available from this enemy"
+    "noDropsAvailable": "No drops available from this enemy",
+    "playerStats": "Player Stats"
   },
   "equipment": {
     "equip": "Equip",
