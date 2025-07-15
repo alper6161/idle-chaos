@@ -1,11 +1,10 @@
 // Save Manager for Multiple Save Slots
+
 const SAVE_SLOTS_KEY = 'idle-chaos-save-slots';
 const CURRENT_SLOT_KEY = 'idle-chaos-current-slot';
 
-// Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Save slot structure
 const createEmptySlot = (slotNumber) => ({
     slotNumber,
     name: `Save ${slotNumber}`,
@@ -15,7 +14,6 @@ const createEmptySlot = (slotNumber) => ({
     data: null
 });
 
-// Get all save slots
 export const getSaveSlots = () => {
     try {
         const stored = localStorage.getItem(SAVE_SLOTS_KEY);
@@ -23,7 +21,6 @@ export const getSaveSlots = () => {
             return JSON.parse(stored);
         }
         
-        // Initialize with 3 empty slots
         const slots = {
             1: createEmptySlot(1),
             2: createEmptySlot(2),
@@ -42,7 +39,6 @@ export const getSaveSlots = () => {
     }
 };
 
-// Save data to a specific slot
 export const saveToSlot = (slotNumber, gameData) => {
     try {
         const slots = getSaveSlots();
@@ -56,7 +52,6 @@ export const saveToSlot = (slotNumber, gameData) => {
         slots[slotNumber] = slot;
         localStorage.setItem(SAVE_SLOTS_KEY, JSON.stringify(slots));
         
-        // Set as current slot
         localStorage.setItem(CURRENT_SLOT_KEY, slotNumber.toString());
         
         return true;
@@ -66,7 +61,6 @@ export const saveToSlot = (slotNumber, gameData) => {
     }
 };
 
-// Load data from a specific slot
 export const loadFromSlot = (slotNumber) => {
     try {
         const slots = getSaveSlots();
@@ -76,10 +70,8 @@ export const loadFromSlot = (slotNumber) => {
             return null;
         }
         
-        // Set as current slot
         localStorage.setItem(CURRENT_SLOT_KEY, slotNumber.toString());
         
-        // Clear current localStorage data first
         const keys = [
             'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
             'inventory', 'equippedItems', 'lootBag', 'potions',
@@ -88,12 +80,10 @@ export const loadFromSlot = (slotNumber) => {
             'idle-chaos-pets', 'idle-chaos-inventory'
         ];
         
-        // Clear achievement keys for all slots
         for (let i = 1; i <= 3; i++) {
             keys.push(`idle-chaos-achievements-slot-${i}`);
         }
         
-        // Clear slot-specific keys for all slots
         for (let i = 1; i <= 3; i++) {
             keys.push(`idle-chaos-potions_slot_${i}`);
             keys.push(`idle-chaos-auto-potion_slot_${i}`);
@@ -112,7 +102,6 @@ export const loadFromSlot = (slotNumber) => {
             localStorage.removeItem(key);
         });
         
-        // Load all game data from the slot
         if (slot.data) {
             Object.keys(slot.data).forEach(key => {
                 localStorage.setItem(key, JSON.stringify(slot.data[key]));
@@ -126,7 +115,6 @@ export const loadFromSlot = (slotNumber) => {
     }
 };
 
-// Delete a save slot
 export const deleteSlot = (slotNumber) => {
     try {
         const slots = getSaveSlots();
@@ -139,7 +127,6 @@ export const deleteSlot = (slotNumber) => {
     }
 };
 
-// Get current active slot
 export const getCurrentSlot = () => {
     try {
         const currentSlot = localStorage.getItem(CURRENT_SLOT_KEY);
@@ -150,13 +137,11 @@ export const getCurrentSlot = () => {
     }
 };
 
-// Save current game state to current slot
 export const saveCurrentGame = () => {
     try {
         const currentSlot = getCurrentSlot();
         const gameData = {};
         
-        // Collect all localStorage data
         const keys = [
             'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
             'inventory', 'equippedItems', 'lootBag', 'potions',
@@ -165,12 +150,10 @@ export const saveCurrentGame = () => {
             'idle-chaos-pets', 'idle-chaos-inventory'
         ];
         
-        // Add achievement keys for all slots
         for (let i = 1; i <= 3; i++) {
             keys.push(`idle-chaos-achievements-slot-${i}`);
         }
         
-        // Add slot-specific keys for all slots
         for (let i = 1; i <= 3; i++) {
             keys.push(`idle-chaos-potions_slot_${i}`);
             keys.push(`idle-chaos-auto-potion_slot_${i}`);
@@ -203,7 +186,6 @@ export const saveCurrentGame = () => {
     }
 };
 
-// Rename a save slot
 export const renameSlot = (slotNumber, newName) => {
     try {
         const slots = getSaveSlots();
@@ -219,13 +201,11 @@ export const renameSlot = (slotNumber, newName) => {
     }
 };
 
-// Check if a slot has data
 export const hasSlotData = (slotNumber) => {
     const slots = getSaveSlots();
     return slots[slotNumber]?.hasData || false;
 };
 
-// Get slot info
 export const getSlotInfo = (slotNumber) => {
     const slots = getSaveSlots();
     return slots[slotNumber] || createEmptySlot(slotNumber);

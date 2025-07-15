@@ -1,3 +1,5 @@
+// Game Constants
+
 export const INITIAL_SKILLS = {
     melee: {
         stab: { level: 1, xp: 0 },
@@ -35,62 +37,57 @@ export const INITIAL_SKILLS = {
     }
 };
 
-// Skill level artışları - Her skill level atladığında etki edecek değerler
 export const SKILL_LEVEL_BONUSES = {
-    // Melee Skills
     stab: {
-        ATK: 0.5,           // Her level için +0.5 ATK
-        MIN_DAMAGE: 0.3,     // Her level için +0.3 min damage
-        MAX_DAMAGE: 0.5      // Her level için +0.5 max damage
+        ATK: 0.5,
+        MIN_DAMAGE: 0.3,
+        MAX_DAMAGE: 0.5
     },
     slash: {
-        ATK: 0.8,           // Her level için +0.8 ATK
-        MIN_DAMAGE: 0.5,     // Her level için +0.5 min damage
-        MAX_DAMAGE: 0.8      // Her level için +0.8 max damage
+        ATK: 0.8,
+        MIN_DAMAGE: 0.5,
+        MAX_DAMAGE: 0.8
     },
     crush: {
-        ATK: 1.0,           // Her level için +1.0 ATK
-        MIN_DAMAGE: 0.7,     // Her level için +0.7 min damage
-        MAX_DAMAGE: 1.0      // Her level için +1.0 max damage
+        ATK: 1.0,
+        MIN_DAMAGE: 0.7,
+        MAX_DAMAGE: 1.0
     },
     
-    // Ranged Skills
     archery: {
-        ATK: 0.6,           // Her level için +0.6 ATK
-        MIN_DAMAGE: 0.4,     // Her level için +0.4 min damage
-        MAX_DAMAGE: 0.6      // Her level için +0.6 max damage
+        ATK: 0.6,
+        MIN_DAMAGE: 0.4,
+        MAX_DAMAGE: 0.6
     },
     throwing: {
-        ATK: 0.4,           // Her level için +0.4 ATK
-        MIN_DAMAGE: 0.3,     // Her level için +0.3 min damage
-        MAX_DAMAGE: 0.4      // Her level için +0.4 max damage
+        ATK: 0.4,
+        MIN_DAMAGE: 0.3,
+        MAX_DAMAGE: 0.4
     },
     poison: {
-        ATK: 0.5,           // Her level için +0.5 ATK
-        MIN_DAMAGE: 0.4,     // Her level için +0.4 min damage
-        MAX_DAMAGE: 0.5      // Her level için +0.5 max damage
+        ATK: 0.5,
+        MIN_DAMAGE: 0.4,
+        MAX_DAMAGE: 0.5
     },
     
-    // Magic Skills
     lightning: {
-        ATK: 0.7,           // Her level için +0.7 ATK
-        MIN_DAMAGE: 0.5,     // Her level için +0.5 min damage
-        MAX_DAMAGE: 0.7      // Her level için +0.7 max damage
+        ATK: 0.7,
+        MIN_DAMAGE: 0.5,
+        MAX_DAMAGE: 0.7
     },
     fire: {
-        ATK: 0.8,           // Her level için +0.8 ATK
-        MIN_DAMAGE: 0.6,     // Her level için +0.6 min damage
-        MAX_DAMAGE: 0.8      // Her level için +0.8 max damage
+        ATK: 0.8,
+        MIN_DAMAGE: 0.6,
+        MAX_DAMAGE: 0.8
     },
     ice: {
-        ATK: 0.6,           // Her level için +0.6 ATK
-        MIN_DAMAGE: 0.4,     // Her level için +0.4 min damage
-        MAX_DAMAGE: 0.6      // Her level için +0.6 max damage
+        ATK: 0.6,
+        MIN_DAMAGE: 0.4,
+        MAX_DAMAGE: 0.6
     },
     
-    // Defense Skills (Bu skill'ler attack değerlerini etkilemez)
     block: {
-        ATK: 0,             // Defense skill'leri attack değerlerini etkilemez
+        ATK: 0,
         MIN_DAMAGE: 0,
         MAX_DAMAGE: 0
     },
@@ -105,7 +102,6 @@ export const SKILL_LEVEL_BONUSES = {
         MAX_DAMAGE: 0
     },
     
-    // Utility Skills (Bu skill'ler attack değerlerini etkilemez)
     heal: {
         ATK: 0,
         MIN_DAMAGE: 0,
@@ -127,35 +123,34 @@ export const SKILL_LEVEL_BONUSES = {
         MAX_DAMAGE: 0
     },
     
-    // Advanced Skills
     lifeSteal: {
-        ATK: 0.3,           // Her level için +0.3 ATK
-        MIN_DAMAGE: 0.2,     // Her level için +0.2 min damage
-        MAX_DAMAGE: 0.3      // Her level için +0.3 max damage
+        ATK: 0.3,
+        MIN_DAMAGE: 0.2,
+        MAX_DAMAGE: 0.3
     },
     counterAttack: {
-        ATK: 0.4,           // Her level için +0.4 ATK
-        MIN_DAMAGE: 0.3,     // Her level için +0.3 min damage
-        MAX_DAMAGE: 0.4      // Her level için +0.4 max damage
+        ATK: 0.4,
+        MIN_DAMAGE: 0.3,
+        MAX_DAMAGE: 0.4
     },
     doubleAttack: {
-        ATK: 0.5,           // Her level için +0.5 ATK
-        MIN_DAMAGE: 0.4,     // Her level için +0.4 min damage
-        MAX_DAMAGE: 0.5      // Her level için +0.5 max damage
+        ATK: 0.5,
+        MIN_DAMAGE: 0.4,
+        MAX_DAMAGE: 0.5
     },
     critChance: {
-        ATK: 0.2,           // Her level için +0.2 ATK
-        MIN_DAMAGE: 0.1,     // Her level için +0.1 min damage
-        MAX_DAMAGE: 0.2      // Her level için +0.2 max damage
+        ATK: 0.2,
+        MIN_DAMAGE: 0.1,
+        MAX_DAMAGE: 0.2
     },
     critDamage: {
-        ATK: 0.3,           // Her level için +0.3 ATK
-        MIN_DAMAGE: 0.2,     // Her level için +0.2 min damage
-        MAX_DAMAGE: 0.3      // Her level için +0.3 max damage
+        ATK: 0.3,
+        MIN_DAMAGE: 0.2,
+        MAX_DAMAGE: 0.3
     },
     attackSpeed: {
-        ATK: 0.2,           // Her level için +0.2 ATK
-        MIN_DAMAGE: 0.1,     // Her level için +0.1 min damage
-        MAX_DAMAGE: 0.2      // Her level için +0.2 max damage
+        ATK: 0.2,
+        MIN_DAMAGE: 0.1,
+        MAX_DAMAGE: 0.2
     }
 };

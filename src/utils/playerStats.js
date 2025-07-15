@@ -1,3 +1,5 @@
+// Player Stats System
+
 import { getBuffedPlayerStats } from './buffUtils.js';
 import { getSkillData } from './skillExperience.js';
 import { SKILL_LEVEL_BONUSES } from './constants.js';
@@ -11,10 +13,8 @@ export const BASE_PLAYER_STATS = {
     CRIT_DAMAGE: 120
 };
 
-// Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Get current slot number
 const getCurrentSlot = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
@@ -46,7 +46,6 @@ export const calculateEquipmentStats = () => {
     Object.values(equippedItems).forEach(item => {
         if (item && item.stats) {
             Object.entries(item.stats).forEach(([stat, value]) => {
-                // HP'yi HEALTH olarak da ekle
                 const key = stat === "HP" ? "HEALTH" : stat;
                 totalStats[key] = (totalStats[key] || 0) + value;
             });
@@ -56,12 +55,10 @@ export const calculateEquipmentStats = () => {
     return totalStats;
 };
 
-// Calculate skill buffs based on skill levels
 export const calculateSkillBuffs = () => {
     const skillData = getSkillData();
     const skillBuffs = {};
 
-    // Helper function to get skill level safely
     const getSkillLevel = (skillObj) => {
         if (!skillObj) return 0;
         if (typeof skillObj === 'number') return skillObj;
@@ -69,92 +66,84 @@ export const calculateSkillBuffs = () => {
         return 0;
     };
 
-    // Melee skills
     if (skillData.melee?.stab) {
         const stabLevel = getSkillLevel(skillData.melee.stab);
-        skillBuffs.ACCURACY_BONUS = (skillBuffs.ACCURACY_BONUS || 0) + (stabLevel * 0.8); // +0.8% accuracy per level
+        skillBuffs.ACCURACY_BONUS = (skillBuffs.ACCURACY_BONUS || 0) + (stabLevel * 0.8);
     }
 
     if (skillData.melee?.slash) {
         const slashLevel = getSkillLevel(skillData.melee.slash);
-        skillBuffs.DAMAGE_RANGE_BONUS = (skillBuffs.DAMAGE_RANGE_BONUS || 0) + (slashLevel * 0.5); // +0.5 max damage per level
+        skillBuffs.DAMAGE_RANGE_BONUS = (skillBuffs.DAMAGE_RANGE_BONUS || 0) + (slashLevel * 0.5);
     }
 
     if (skillData.melee?.crush) {
         const crushLevel = getSkillLevel(skillData.melee.crush);
-        skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (crushLevel * 2); // +2% crit damage per level
+        skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (crushLevel * 2);
     }
 
-    // Ranged skills
     if (skillData.ranged?.archery) {
         const archeryLevel = getSkillLevel(skillData.ranged.archery);
-        skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (archeryLevel * 0.4); // +0.4% crit per level
+        skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (archeryLevel * 0.4);
     }
 
     if (skillData.ranged?.throwing) {
         const throwingLevel = getSkillLevel(skillData.ranged.throwing);
-        skillBuffs.ATTACK_SPEED = (skillBuffs.ATTACK_SPEED || 0) + (throwingLevel * 0.05); // +0.05 attack speed per level
+        skillBuffs.ATTACK_SPEED = (skillBuffs.ATTACK_SPEED || 0) + (throwingLevel * 0.05);
     }
 
-    // Magic skills
     if (skillData.magic?.lightning) {
         const lightningLevel = getSkillLevel(skillData.magic.lightning);
-        skillBuffs.ATK = (skillBuffs.ATK || 0) + (lightningLevel * 0.4); // +0.4 ATK per level
+        skillBuffs.ATK = (skillBuffs.ATK || 0) + (lightningLevel * 0.4);
     }
 
     if (skillData.magic?.fire) {
         const fireLevel = getSkillLevel(skillData.magic.fire);
-        skillBuffs.ATK = (skillBuffs.ATK || 0) + (fireLevel * 0.4); // +0.4 ATK per level
+        skillBuffs.ATK = (skillBuffs.ATK || 0) + (fireLevel * 0.4);
     }
 
     if (skillData.magic?.ice) {
         const iceLevel = getSkillLevel(skillData.magic.ice);
-        skillBuffs.ATK = (skillBuffs.ATK || 0) + (iceLevel * 0.4); // +0.4 ATK per level
+        skillBuffs.ATK = (skillBuffs.ATK || 0) + (iceLevel * 0.4);
     }
 
-    // Defense skills
     if (skillData.defence?.dodge) {
         const dodgeLevel = getSkillLevel(skillData.defence.dodge);
-        skillBuffs.DEF = (skillBuffs.DEF || 0) + (dodgeLevel * 0.2); // +0.2 DEF per level
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (dodgeLevel * 0.2);
     }
 
     if (skillData.defence?.block) {
         const blockLevel = getSkillLevel(skillData.defence.block);
-        skillBuffs.DEF = (skillBuffs.DEF || 0) + (blockLevel * 0.3); // +0.3 DEF per level
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (blockLevel * 0.3);
     }
 
     if (skillData.defence?.armor) {
         const armorLevel = getSkillLevel(skillData.defence.armor);
-        skillBuffs.DEF = (skillBuffs.DEF || 0) + (armorLevel * 0.4); // +0.4 DEF per level
-        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (armorLevel * 2); // +2 HP per level
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (armorLevel * 0.4);
+        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (armorLevel * 2);
     }
 
-    // Hitpool skills
     if (skillData.hitpool?.hp) {
         const hpLevel = getSkillLevel(skillData.hitpool.hp);
-        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3); // +3 HP per level
+        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3);
     }
 
-    // Utility skills
     if (skillData.utility?.critChance) {
         const critChanceLevel = getSkillLevel(skillData.utility.critChance);
-        skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5); // +0.5% crit per level
+        skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5);
     }
 
     if (skillData.utility?.critDamage) {
         const critDamageLevel = getSkillLevel(skillData.utility.critDamage);
-        skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1); // +1% crit damage per level
+        skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1);
     }
 
     return skillBuffs;
 };
 
-// Calculate skill buffs based on selected attack type only
 export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
     const skillData = getSkillData();
     const skillBuffs = {};
 
-    // Helper function to get skill level safely
     const getSkillLevel = (skillObj) => {
         if (!skillObj) return 0;
         if (typeof skillObj === 'number') return skillObj;
@@ -162,12 +151,10 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
         return 0;
     };
 
-    // Helper function to calculate skill level bonuses
     const calculateSkillLevelBonus = (skillName) => {
         const skillBonus = SKILL_LEVEL_BONUSES[skillName];
         if (!skillBonus) return { ATK: 0, MIN_DAMAGE: 0, MAX_DAMAGE: 0 };
 
-        // Find the skill level in all categories
         let skillLevel = 0;
         Object.values(skillData).forEach(category => {
             if (category[skillName]) {
@@ -175,7 +162,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             }
         });
 
-        // Calculate bonuses based on level
         return {
             ATK: skillBonus.ATK * skillLevel,
             MIN_DAMAGE: skillBonus.MIN_DAMAGE * skillLevel,
@@ -183,11 +169,9 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
         };
     };
 
-    // Only apply the bonus for the selected attack type
     switch (selectedAttackType) {
         case 'stab':
             if (skillData.melee?.stab) {
-                // Apply skill level bonuses only
                 const stabBonus = calculateSkillLevelBonus('stab');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + stabBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + stabBonus.MIN_DAMAGE;
@@ -196,7 +180,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
         case 'slash':
             if (skillData.melee?.slash) {
-                // Apply skill level bonuses only
                 const slashBonus = calculateSkillLevelBonus('slash');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + slashBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + slashBonus.MIN_DAMAGE;
@@ -205,7 +188,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
         case 'crush':
             if (skillData.melee?.crush) {
-                // Apply skill level bonuses only
                 const crushBonus = calculateSkillLevelBonus('crush');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + crushBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + crushBonus.MIN_DAMAGE;
@@ -214,7 +196,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
         case 'archery':
             if (skillData.ranged?.archery) {
-                // Apply skill level bonuses only
                 const archeryBonus = calculateSkillLevelBonus('archery');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + archeryBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + archeryBonus.MIN_DAMAGE;
@@ -223,7 +204,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
         case 'throwing':
             if (skillData.ranged?.throwing) {
-                // Apply skill level bonuses only
                 const throwingBonus = calculateSkillLevelBonus('throwing');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + throwingBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + throwingBonus.MIN_DAMAGE;
@@ -232,7 +212,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
         case 'lightning':
             if (skillData.magic?.lightning) {
-                // Apply skill level bonuses only
                 const lightningBonus = calculateSkillLevelBonus('lightning');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + lightningBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + lightningBonus.MIN_DAMAGE;
@@ -241,7 +220,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
         case 'fire':
             if (skillData.magic?.fire) {
-                // Apply skill level bonuses only
                 const fireBonus = calculateSkillLevelBonus('fire');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + fireBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + fireBonus.MIN_DAMAGE;
@@ -250,7 +228,6 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
         case 'ice':
             if (skillData.magic?.ice) {
-                // Apply skill level bonuses only
                 const iceBonus = calculateSkillLevelBonus('ice');
                 skillBuffs.ATK = (skillBuffs.ATK || 0) + iceBonus.ATK;
                 skillBuffs.MIN_DAMAGE = (skillBuffs.MIN_DAMAGE || 0) + iceBonus.MIN_DAMAGE;
@@ -259,40 +236,35 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
             break;
     }
 
-    // Defense skills are always active (not attack type specific)
     if (skillData.defence?.dodge) {
         const dodgeLevel = getSkillLevel(skillData.defence.dodge);
-        skillBuffs.DEF = (skillBuffs.DEF || 0) + (dodgeLevel * 0.2); // +0.2 DEF per level
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (dodgeLevel * 0.2);
     }
 
     if (skillData.defence?.block) {
         const blockLevel = getSkillLevel(skillData.defence.block);
-        skillBuffs.DEF = (skillBuffs.DEF || 0) + (blockLevel * 0.3); // +0.3 DEF per level
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (blockLevel * 0.3);
     }
 
     if (skillData.defence?.armor) {
         const armorLevel = getSkillLevel(skillData.defence.armor);
-        skillBuffs.DEF = (skillBuffs.DEF || 0) + (armorLevel * 0.4); // +0.4 DEF per level
-        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (armorLevel * 2); // +2 HP per level
+        skillBuffs.DEF = (skillBuffs.DEF || 0) + (armorLevel * 0.4);
+        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (armorLevel * 2);
     }
 
-    // Hitpool skills are always active
     if (skillData.hitpool?.hp) {
         const hpLevel = getSkillLevel(skillData.hitpool.hp);
-        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3); // +3 HP per level
+        skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3);
     }
 
-    // Utility skills are always active (but only for specific attack types)
-    // critChance skill is for archery only
     if (selectedAttackType === 'archery' && skillData.utility?.critChance) {
         const critChanceLevel = getSkillLevel(skillData.utility.critChance);
-        skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5); // +0.5% crit per level
+        skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5);
     }
 
-    // critDamage skill is for crush only
     if (selectedAttackType === 'crush' && skillData.utility?.critDamage) {
         const critDamageLevel = getSkillLevel(skillData.utility.critDamage);
-        skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1); // +1% crit damage per level
+        skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1);
     }
 
     return skillBuffs;
@@ -303,23 +275,18 @@ export const getPlayerStats = () => {
     const skillBuffs = calculateSkillBuffs();
     const finalStats = { ...BASE_PLAYER_STATS };
 
-    // Apply equipment stats
     Object.entries(equipmentStats).forEach(([stat, value]) => {
         if (finalStats.hasOwnProperty(stat)) {
             finalStats[stat] += value;
         }
     });
 
-    // Apply skill buffs
     Object.entries(skillBuffs).forEach(([stat, value]) => {
         if (finalStats.hasOwnProperty(stat)) {
             finalStats[stat] += value;
         }
     });
 
-    // Skill buffs are applied silently - no need to log every time
-
-    // Apply minimum/maximum limits
     finalStats.ATK = Math.max(1, finalStats.ATK);
     finalStats.DEF = Math.max(1, finalStats.DEF);
     finalStats.HEALTH = Math.max(10, finalStats.HEALTH);
@@ -327,7 +294,6 @@ export const getPlayerStats = () => {
     finalStats.CRIT_CHANCE = Math.max(0, Math.min(100, finalStats.CRIT_CHANCE));
     finalStats.CRIT_DAMAGE = Math.max(100, finalStats.CRIT_DAMAGE);
 
-    // Apply store buffs
     try {
         return getBuffedPlayerStats(finalStats);
     } catch (error) {
@@ -341,14 +307,12 @@ export const getEquipmentBonuses = () => {
     const skillBuffs = calculateSkillBuffs();
     const bonuses = {};
 
-    // Equipment bonuses
     Object.entries(equipmentStats).forEach(([stat, value]) => {
         if (BASE_PLAYER_STATS.hasOwnProperty(stat)) {
             bonuses[stat] = (bonuses[stat] || 0) + value;
         }
     });
 
-    // Skill bonuses
     Object.entries(skillBuffs).forEach(([stat, value]) => {
         if (BASE_PLAYER_STATS.hasOwnProperty(stat)) {
             bonuses[stat] = (bonuses[stat] || 0) + value;

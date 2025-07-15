@@ -1,4 +1,5 @@
 // Potion System
+
 export const POTION_TYPES = {
     MINOR: {
         id: 'minor',
@@ -42,10 +43,8 @@ export const POTION_TYPES = {
     }
 };
 
-// Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Get current slot number
 const getCurrentSlot = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
@@ -59,7 +58,6 @@ const getCurrentSlot = () => {
 const POTIONS_STORAGE_KEY = 'idle-chaos-potions';
 const AUTO_POTION_STORAGE_KEY = 'idle-chaos-auto-potion';
 
-// Load potions from localStorage
 export const getPotions = () => {
     try {
         const currentSlot = getCurrentSlot();
@@ -84,7 +82,6 @@ export const getPotions = () => {
     }
 };
 
-// Save potions to localStorage
 export const savePotions = (potions) => {
     try {
         const currentSlot = getCurrentSlot();
@@ -95,7 +92,6 @@ export const savePotions = (potions) => {
     }
 };
 
-// Add potions to inventory
 export const addPotions = (potionType, amount) => {
     const potions = getPotions();
     potions[potionType] = (potions[potionType] || 0) + amount;
@@ -103,7 +99,6 @@ export const addPotions = (potionType, amount) => {
     return potions;
 };
 
-// Use a potion
 export const usePotion = (potionType) => {
     const potions = getPotions();
     if (potions[potionType] > 0) {
@@ -118,7 +113,6 @@ export const usePotion = (potionType) => {
     return { success: false, healAmount: 0, remainingPotions: potions };
 };
 
-// Get auto potion settings
 export const getAutoPotionSettings = () => {
     try {
         const currentSlot = getCurrentSlot();
@@ -126,8 +120,8 @@ export const getAutoPotionSettings = () => {
         const stored = localStorage.getItem(slotKey);
         return stored ? JSON.parse(stored) : {
             enabled: false,
-            threshold: 40, // HP percentage
-            priority: ['major', 'superior', 'greater', 'lesser', 'minor'] // Use best potions first
+            threshold: 40,
+            priority: ['major', 'superior', 'greater', 'lesser', 'minor']
         };
     } catch (error) {
         console.error('Error loading auto potion settings:', error);
@@ -139,7 +133,6 @@ export const getAutoPotionSettings = () => {
     }
 };
 
-// Save auto potion settings
 export const saveAutoPotionSettings = (settings) => {
     try {
         const currentSlot = getCurrentSlot();
@@ -150,7 +143,6 @@ export const saveAutoPotionSettings = (settings) => {
     }
 };
 
-// Check if auto potion should be used
 export const shouldUseAutoPotion = (currentHP, maxHP) => {
     const settings = getAutoPotionSettings();
     if (!settings.enabled) return null;
@@ -159,7 +151,6 @@ export const shouldUseAutoPotion = (currentHP, maxHP) => {
     if (hpPercentage <= settings.threshold) {
         const potions = getPotions();
         
-        // Find the best available potion
         for (const potionType of settings.priority) {
             if (potions[potionType] > 0) {
                 return potionType;
@@ -170,13 +161,11 @@ export const shouldUseAutoPotion = (currentHP, maxHP) => {
     return null;
 };
 
-// Get total potion count
 export const getTotalPotions = () => {
     const potions = getPotions();
     return Object.values(potions).reduce((total, count) => total + count, 0);
 };
 
-// Get potion count by type
 export const getPotionCount = (potionType) => {
     const potions = getPotions();
     return potions[potionType] || 0;

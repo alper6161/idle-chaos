@@ -1,11 +1,11 @@
-// Pet System - Very rare drops with small combat bonuses
+// Pet System
+
 export const PETS = {
-    // Easy Pets (0.01% drop rate)
     goblin_pet: {
         id: 'goblin_pet',
         name: 'Goblin Companion',
         enemy: 'goblin',
-        dropRate: 0.0001, // 0.01%
+        dropRate: 0.0001,
         rarity: 'common',
         bonuses: {
             attack: 1,
@@ -41,12 +41,11 @@ export const PETS = {
         icon: '🟢'
     },
 
-    // Medium Pets (0.005% drop rate)
     skeleton_pet: {
         id: 'skeleton_pet',
         name: 'Skeleton Warrior',
         enemy: 'skeleton',
-        dropRate: 0.00005, // 0.005%
+        dropRate: 0.00005,
         rarity: 'uncommon',
         bonuses: {
             attack: 3,
@@ -85,12 +84,11 @@ export const PETS = {
         icon: '🕷️'
     },
 
-    // Hard Pets (0.002% drop rate)
     troll_pet: {
         id: 'troll_pet',
         name: 'Troll Guardian',
         enemy: 'troll',
-        dropRate: 0.00002, // 0.002%
+        dropRate: 0.00002,
         rarity: 'rare',
         bonuses: {
             health: 15,
@@ -129,12 +127,11 @@ export const PETS = {
         icon: '🐉'
     },
 
-    // Very Hard Pets (0.001% drop rate)
     bat_pet: {
         id: 'bat_pet',
         name: 'Cave Bat',
         enemy: 'bat',
-        dropRate: 0.00001, // 0.001%
+        dropRate: 0.00001,
         rarity: 'epic',
         bonuses: {
             attackSpeed: 4,
@@ -173,12 +170,11 @@ export const PETS = {
         icon: '🧟'
     },
 
-    // Hard Pets (0.0005% drop rate)
     bandit_pet: {
         id: 'bandit_pet',
         name: 'Desert Bandit',
         enemy: 'bandit',
-        dropRate: 0.000005, // 0.0005%
+        dropRate: 0.000005,
         rarity: 'epic',
         bonuses: {
             attack: 5,
@@ -217,12 +213,11 @@ export const PETS = {
         icon: '🐝'
     },
 
-    // Very Hard Pets (0.0002% drop rate)
     cultist_pet: {
         id: 'cultist_pet',
         name: 'Dark Cultist',
         enemy: 'cultist',
-        dropRate: 0.000002, // 0.0002%
+        dropRate: 0.000002,
         rarity: 'legendary',
         bonuses: {
             attack: 7,
@@ -261,12 +256,11 @@ export const PETS = {
         icon: '🦅'
     },
 
-    // Boss Pets (0.0001% drop rate)
     minotaur_pet: {
         id: 'minotaur_pet',
         name: 'Ancient Minotaur',
         enemy: 'minotaur',
-        dropRate: 0.000001, // 0.0001%
+        dropRate: 0.000001,
         rarity: 'legendary',
         bonuses: {
             attack: 12,
@@ -308,12 +302,11 @@ export const PETS = {
         icon: '🐺'
     },
 
-    // Elite Pets (0.00005% drop rate)
     golem_pet: {
         id: 'golem_pet',
         name: 'Iron Golem',
         enemy: 'golem',
-        dropRate: 0.0000005, // 0.00005%
+        dropRate: 0.0000005,
         rarity: 'mythic',
         bonuses: {
             defense: 12,
@@ -355,12 +348,11 @@ export const PETS = {
         icon: '🐲'
     },
 
-    // Boss Pets (0.00001% drop rate)
     hydra_pet: {
         id: 'hydra_pet',
         name: 'Nine-Headed Hydra',
         enemy: 'hydra',
-        dropRate: 0.0000001, // 0.00001%
+        dropRate: 0.0000001,
         rarity: 'mythic',
         bonuses: {
             attack: 20,
@@ -402,12 +394,11 @@ export const PETS = {
         icon: '💀'
     },
 
-    // Final Boss Pets (0.000005% drop rate)
     manticore_pet: {
         id: 'manticore_pet',
         name: 'Winged Manticore',
         enemy: 'manticore',
-        dropRate: 0.00000005, // 0.000005%
+        dropRate: 0.00000005,
         rarity: 'divine',
         bonuses: {
             attack: 30,
@@ -449,12 +440,11 @@ export const PETS = {
         icon: '👹'
     },
 
-    // Ultimate Pets (0.000001% drop rate)
     void_reaper_pet: {
         id: 'void_reaper_pet',
         name: 'Void Reaper',
         enemy: 'void_reaper',
-        dropRate: 0.00000001, // 0.000001%
+        dropRate: 0.00000001,
         rarity: 'divine',
         bonuses: {
             attack: 50,
@@ -483,17 +473,14 @@ export const PETS = {
     }
 };
 
-// Get pet by enemy name
 export function getPetByEnemy(enemyName) {
     return Object.values(PETS).find(pet => pet.enemy === enemyName);
 }
 
-// Get all pets for an enemy
 export function getPetsForEnemy(enemyName) {
     return Object.values(PETS).filter(pet => pet.enemy === enemyName);
 }
 
-// Check if pet drops from enemy
 export function checkPetDrop(enemyName) {
     const pet = getPetByEnemy(enemyName);
     if (!pet) return null;
@@ -505,7 +492,6 @@ export function checkPetDrop(enemyName) {
     return null;
 }
 
-// Get pet bonuses for equipped pets
 export function getPetBonuses(equippedPets) {
     const bonuses = {
         attack: 0,
@@ -544,7 +530,6 @@ export function getPetBonuses(equippedPets) {
     return bonuses;
 }
 
-// Get rarity color
 export function getPetRarityColor(rarity) {
     switch (rarity) {
         case 'common': return '#ffffff';
@@ -558,7 +543,6 @@ export function getPetRarityColor(rarity) {
     }
 }
 
-// Get rarity name
 export function getPetRarityName(rarity) {
     switch (rarity) {
         case 'common': return 'Common';

@@ -1,29 +1,6 @@
-/*
- * GOLD SYSTEM CONVERSION
- * ======================
- * 
- * All loot drops have been converted to a gold-based system where:
- * - Equipment items (weapons, armor) still drop as physical items
- * - All other items are converted to gold values based on their drop rates
- * 
- * GOLD VALUES BY DROP RATE:
- * - Rare items (10-15% chance): 18-25 gold
- * - Uncommon items (20-30% chance): 12-20 gold  
- * - Common items (40-50% chance): 5-10 gold
- * 
- * EQUIPMENT ITEMS (still drop as items):
- * - Rusty Sword (Goblin)
- * - Bone Sword (Skeleton)
- * - Orc Axe (Orc)
- * - Troll Club (Troll)
- * 
- * GOLD ITEMS (converted to gold):
- * - All consumables, crafting materials, and miscellaneous items
- * - Values balanced based on rarity and enemy strength
- */
+// Enemy Database
 
 const enemies = {
-    // EASY ENEMIES (6) - Level 1-10
     GOBLIN: {
         id: "goblin",
         name: "Goblin",
@@ -136,7 +113,6 @@ const enemies = {
         ]
     },
 
-    // NORMAL ENEMIES (10) - Level 11-30
     ORC: {
         id: "orc",
         name: "Orc Berserker",
@@ -322,7 +298,6 @@ const enemies = {
         ]
     },
 
-    // HARD ENEMIES (6) - Level 31-60
     MINOTAUR: {
         id: "minotaur",
         name: "Ancient Minotaur",
@@ -432,7 +407,6 @@ const enemies = {
         ]
     },
 
-    // VERY HARD ENEMIES (4) - Level 61-80
     HYDRA: {
         id: "hydra",
         name: "Nine-Headed Hydra",
@@ -506,7 +480,6 @@ const enemies = {
         ]
     },
 
-    // IMPOSSIBLE ENEMIES (4) - Level 81-100
     ANCIENT_DRAGON: {
         id: "ancient_dragon",
         name: "Ancient Dragon",
@@ -589,7 +562,6 @@ const enemies = {
         ]
     },
 
-    // LEGACY ENEMIES (keeping for compatibility)
     GHOST: {
         id: "ghost",
         name: "Wandering Ghost",

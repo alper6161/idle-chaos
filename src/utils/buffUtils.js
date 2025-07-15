@@ -1,12 +1,9 @@
+// Buff Utility Functions
+
 import { getAutoPotionSettings, saveAutoPotionSettings } from './potions.js';
 
-// Buff Utility Functions
-// Manages active buffs purchased from the store and provides multipliers
-
-// Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Get current slot number
 const getCurrentSlot = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
@@ -26,7 +23,6 @@ export const getActiveBuffs = () => {
         
         const buffs = JSON.parse(savedBuffs);
         
-        // Filter out expired buffs
         const validBuffs = {};
         Object.entries(buffs).forEach(([key, buff]) => {
             if (buff.expiresAt > Date.now()) {
@@ -34,7 +30,6 @@ export const getActiveBuffs = () => {
             }
         });
         
-        // Update localStorage with valid buffs only
         if (Object.keys(validBuffs).length !== Object.keys(buffs).length) {
             localStorage.setItem(slotKey, JSON.stringify(validBuffs));
         }
@@ -59,15 +54,15 @@ export const getBuffMultiplier = (buffType) => {
     
     switch(buffType) {
         case 'gold':
-            return 3; // +200% = 3x multiplier
+            return 3;
         case 'experience':
-            return 2; // +100% = 2x multiplier
+            return 2;
         case 'damage':
-            return 1.5; // +50% = 1.5x multiplier
+            return 1.5;
         case 'critical':
-            return 25; // +25% critical chance (flat addition)
+            return 25;
         case 'speed':
-            return 1.3; // +30% = 1.3x multiplier
+            return 1.3;
         default:
             return 1;
     }
@@ -90,7 +85,7 @@ export const applyDamageMultiplier = (damage) => {
 
 export const applyCriticalChanceBonus = (baseCritChance) => {
     const bonus = hasActiveBuff('critical') ? getBuffMultiplier('critical') : 0;
-    return Math.min(100, baseCritChance + bonus); // Cap at 100%
+    return Math.min(100, baseCritChance + bonus);
 };
 
 export const applySpeedMultiplier = (speed) => {
@@ -101,17 +96,14 @@ export const applySpeedMultiplier = (speed) => {
 export const getBuffedPlayerStats = (baseStats) => {
     const buffedStats = { ...baseStats };
     
-    // Apply damage buff
     if (hasActiveBuff('damage')) {
         buffedStats.ATK = Math.floor(buffedStats.ATK * getBuffMultiplier('damage'));
     }
     
-    // Apply critical chance buff
     if (hasActiveBuff('critical')) {
         buffedStats.CRIT_CHANCE = applyCriticalChanceBonus(buffedStats.CRIT_CHANCE);
     }
     
-    // Apply speed buff
     if (hasActiveBuff('speed')) {
         buffedStats.ATTACK_SPEED = applySpeedMultiplier(buffedStats.ATTACK_SPEED);
     }
@@ -141,10 +133,8 @@ export const getActiveBuffsInfo = () => {
     return buffsInfo;
 }; 
 
-// Auto Potion Buff Handler
 export const handleAutoPotionBuff = (buff) => {
     if (buff.id === 'auto_potion') {
-        // Enable auto potion when buff is activated
         const autoPotionSettings = getAutoPotionSettings();
         autoPotionSettings.enabled = true;
         saveAutoPotionSettings(autoPotionSettings);
@@ -158,7 +148,6 @@ export const handleAutoPotionBuff = (buff) => {
     return null;
 };
 
-// Get active auto potion status
 export const getActiveAutoPotion = () => {
     const activeBuffs = getActiveBuffs();
     const autoPotionBuff = activeBuffs.find(buff => buff.id === 'auto_potion');

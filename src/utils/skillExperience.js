@@ -1,10 +1,8 @@
 // Skill Experience System
-// Handles skill experience gain based on battle actions
 
 import { INITIAL_SKILLS } from './constants.js';
 import { applyExperienceMultiplier } from './buffUtils.js';
 
-// Skill experience requirements (XP needed for each level)
 const SKILL_XP_REQUIREMENTS = {
     1: 0,
     2: 50,
@@ -16,15 +14,12 @@ const SKILL_XP_REQUIREMENTS = {
     8: 350,
     9: 400,
     10: 450,
-    // ... continue for all levels up to 99
 };
 
-// Generate XP requirements for levels 11-99 (more reasonable progression)
 for (let level = 11; level <= 99; level++) {
     SKILL_XP_REQUIREMENTS[level] = SKILL_XP_REQUIREMENTS[level - 1] + (level * 25);
 }
 
-// --- MIGRATION: Convert old skill data to new format if needed ---
 function migrateSkillDataIfNeeded(skillData) {
     let migrated = false;
     const newData = {};
@@ -32,7 +27,6 @@ function migrateSkillDataIfNeeded(skillData) {
         newData[category] = {};
         Object.entries(skills).forEach(([skillName, value]) => {
             if (typeof value === 'number') {
-                // Old format: just level
                 newData[category][skillName] = { level: value, xp: 0 };
                 migrated = true;
             } else if (typeof value === 'object' && value !== null && 'level' in value && 'xp' in value) {
@@ -43,7 +37,6 @@ function migrateSkillDataIfNeeded(skillData) {
     return migrated ? newData : skillData;
 }
 
-// Get current skill data from localStorage
 export const getSkillData = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
@@ -59,7 +52,6 @@ export const getSkillData = () => {
     }
 };
 
-// Save skill data to localStorage
 export const saveSkillData = (skillData) => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
@@ -71,7 +63,6 @@ export const saveSkillData = (skillData) => {
     }
 };
 
-// Get skill level and XP
 export const getSkillInfo = (skillName) => {
     const skillData = getSkillData();
     let skillLevel = 1;
@@ -93,7 +84,6 @@ export const getSkillInfo = (skillName) => {
     };
 };
 
-// Add experience to a skill
 export const addSkillExperience = (skillName, xpAmount) => {
     const skillData = getSkillData();
     let skillUpdated = false;
@@ -102,7 +92,6 @@ export const addSkillExperience = (skillName, xpAmount) => {
             let { level, xp } = skills[skillName];
             xp += xpAmount;
             let newLevel = level;
-            // Level up as long as enough XP
             while (newLevel < 99 && xp >= (SKILL_XP_REQUIREMENTS[newLevel + 1] || Infinity)) {
                 newLevel++;
             }
@@ -116,39 +105,31 @@ export const addSkillExperience = (skillName, xpAmount) => {
     return skillUpdated;
 };
 
-// Battle action to skill mapping
 const BATTLE_ACTION_SKILLS = {
-    // Melee attacks
     'stab': ['stab', 'critChance'],
     'slash': ['slash', 'critDamage'],
     'crush': ['crush', 'critChance'],
     
-    // Ranged attacks
     'archery': ['archery', 'critChance'],
     'throwing': ['throwing', 'attackSpeed'],
     'poison': ['poison', 'lifeSteal'],
     
-    // Magic attacks
     'lightning': ['lightning', 'critDamage'],
     'fire': ['fire', 'critDamage'],
     'ice': ['ice', 'critDamage'],
     
-    // Defense actions
     'block': ['block', 'armor'],
     'dodge': ['dodge', 'armor'],
     'defend': ['armor', 'block', 'dodge'],
     
-    // Utility actions
     'heal': ['heal', 'hp'],
     'buff': ['buff', 'energy'],
     
-    // Passive gains
-    'battle_participation': ['hp', 'armor'], // Every battle gives HP and armor experience
-    'damage_taken': ['armor', 'block', 'dodge'], // Taking damage improves defense
-    'damage_dealt': ['critChance', 'critDamage'] // Dealing damage improves offense
+    'battle_participation': ['hp', 'armor'],
+    'damage_taken': ['armor', 'block', 'dodge'],
+    'damage_dealt': ['critChance', 'critDamage']
 };
 
-// Calculate XP based on battle action
 export const calculateBattleActionXP = (action, damage = 0, isCritical = false, isHit = true) => {
     let baseXP = 0;
     
@@ -206,33 +187,32 @@ export const calculateBattleActionXP = (action, damage = 0, isCritical = false, 
             break;
             
         case 'dodge':
-            baseXP = 10; // More XP for dodging
+            baseXP = 10;
             break;
             
         case 'defend':
-            baseXP = 8; // More XP for defending
+            baseXP = 8;
             break;
             
         case 'battle_participation':
-            baseXP = 5; // More XP for participating in battle (HP and armor)
+            baseXP = 5;
             break;
             
         case 'damage_taken':
-            baseXP = Math.floor(damage / 2); // More XP for taking damage (armor, block, dodge)
+            baseXP = Math.floor(damage / 2);
             break;
             
         case 'damage_dealt':
-            baseXP = Math.floor(damage / 4); // XP based on damage dealt
+            baseXP = Math.floor(damage / 4);
             break;
             
         default:
             baseXP = 5;
     }
     
-    return Math.max(1, baseXP); // Minimum 1 XP
+    return Math.max(1, baseXP);
 };
 
-// Award XP for battle actions
 export const awardBattleActionXP = (action, damage = 0, isCritical = false, isHit = true) => {
     const baseXP = calculateBattleActionXP(action, damage, isCritical, isHit);
     const xpAmount = applyExperienceMultiplier(baseXP);
@@ -254,15 +234,13 @@ export const awardBattleActionXP = (action, damage = 0, isCritical = false, isHi
     };
 };
 
-// Determine attack type based on equipped weapon
 export const getAttackTypeFromWeapon = (equippedWeapon) => {
     if (!equippedWeapon) {
-        return 'stab'; // Default attack
+        return 'stab';
     }
     
     const weaponName = equippedWeapon.name.toLowerCase();
     
-    // Melee weapons
     if (weaponName.includes('sword') || weaponName.includes('dagger') || weaponName.includes('blade')) {
         return 'stab';
     } 
@@ -275,7 +253,6 @@ export const getAttackTypeFromWeapon = (equippedWeapon) => {
         return 'crush';
     }
     
-    // Ranged weapons
     if (weaponName.includes('bow') || weaponName.includes('arrow')) {
         return 'archery';
     } 
@@ -284,9 +261,7 @@ export const getAttackTypeFromWeapon = (equippedWeapon) => {
         return 'throwing';
     }
     
-    // Magic weapons
     if (weaponName.includes('staff') || weaponName.includes('wand')) {
-        // Magic weapons - determine by weapon stats
         if (equippedWeapon.stats?.FIRE_DAMAGE) {
             return 'fire';
         }
@@ -296,10 +271,9 @@ export const getAttackTypeFromWeapon = (equippedWeapon) => {
         if (equippedWeapon.stats?.ICE_DAMAGE) {
             return 'ice';
         }
-        return 'lightning'; // Default magic
+        return 'lightning';
     }
     
-    // Special cases for specific weapons
     if (weaponName.includes('rusty sword') || weaponName.includes('bone sword')) {
         return 'stab';
     }
@@ -316,10 +290,9 @@ export const getAttackTypeFromWeapon = (equippedWeapon) => {
         return 'fire';
     }
     
-    return 'stab'; // Default
+    return 'stab';
 };
 
-// Get equipped weapon from localStorage
 export const getEquippedWeapon = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
@@ -333,21 +306,17 @@ export const getEquippedWeapon = () => {
     }
 };
 
-// Get weapon type from equipped weapon
 export const getWeaponType = (equippedWeapon) => {
     if (!equippedWeapon) {
-        return 'melee'; // Default to melee
+        return 'melee';
     }
     
-    // First check if weapon has weaponType property (new system)
     if (equippedWeapon.weaponType) {
         return equippedWeapon.weaponType;
     }
     
-    // Fallback to name-based detection (old system)
     const weaponName = equippedWeapon.name.toLowerCase();
     
-    // Melee weapons
     if (weaponName.includes('sword') || weaponName.includes('dagger') || weaponName.includes('blade') ||
         weaponName.includes('axe') || weaponName.includes('cleaver') || weaponName.includes('hammer') || 
         weaponName.includes('club') || weaponName.includes('mace') || weaponName.includes('rusty sword') || 
@@ -355,21 +324,18 @@ export const getWeaponType = (equippedWeapon) => {
         return 'melee';
     }
     
-    // Ranged weapons
     if (weaponName.includes('bow') || weaponName.includes('arrow') || weaponName.includes('throwing') || 
         weaponName.includes('knife')) {
         return 'ranged';
     }
     
-    // Magic weapons
     if (weaponName.includes('staff') || weaponName.includes('wand') || weaponName.includes('dragon flame sword')) {
         return 'magic';
     }
     
-    return 'melee'; // Default
+    return 'melee';
 };
 
-// Get available attack types based on weapon type
 export const getAvailableAttackTypes = (weaponType) => {
     switch (weaponType) {
         case 'melee':
@@ -399,12 +365,10 @@ export const getAvailableAttackTypes = (weaponType) => {
     }
 };
 
-// Debug function to test skill leveling
 export const debugSkillLeveling = (skillName) => {
     const skillInfo = getSkillInfo(skillName);
     console.log(`🔍 Debug - ${skillName}:`, skillInfo);
     
-    // Test adding XP
     const testXP = 50;
     const leveledUp = addSkillExperience(skillName, testXP);
     const newSkillInfo = getSkillInfo(skillName);
@@ -420,7 +384,6 @@ export const debugSkillLeveling = (skillName) => {
     return { leveledUp, oldLevel: skillInfo.level, newLevel: newSkillInfo.level };
 };
 
-// Debug function to check XP requirements
 export const debugXPRequirements = () => {
     console.log('🔍 XP Requirements for first 10 levels:');
     for (let level = 1; level <= 10; level++) {

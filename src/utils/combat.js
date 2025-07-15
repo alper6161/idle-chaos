@@ -1,3 +1,5 @@
+// Combat System
+
 import { applyGoldMultiplier, applyDamageMultiplier } from './buffUtils.js';
 
 export function getCombatStats(player, enemy) {
@@ -42,14 +44,11 @@ export function getLootDrop(drops) {
   const goldItems = [];
   let totalGold = 0;
   
-  // Apply drop rate and gold buffs using imported functions
-  
   drops.forEach(drop => {
     if (Math.random() < drop.chance) {
       if (drop.type === "equipment") {
         items.push(drop.name);
       } else if (drop.type === "gold") {
-        // Apply gold multiplier buff to increase gold value
         const buffedValue = applyGoldMultiplier(drop.value);
         goldItems.push({ name: drop.name, value: buffedValue });
         totalGold += buffedValue;
@@ -64,10 +63,8 @@ export function getLootDrop(drops) {
   };
 }
 
-// Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Get current slot number
 const getCurrentSlot = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
@@ -126,7 +123,6 @@ export function battle(player, enemy) {
         
         let damage = calculateDamage(playerFighter.ATK, enemyFighter.DEF);
         
-        // Apply damage buff
         damage = applyDamageMultiplier(damage);
         
         if (isCrit) {

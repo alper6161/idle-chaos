@@ -1,7 +1,5 @@
 // Centralized Items Database
-// Contains all equipment templates, drop configurations, and item management
 
-// Item Level Ranges by Rarity
 export const ITEM_LEVEL_RANGES = {
     common: { min: 1, max: 20 },
     uncommon: { min: 15, max: 35 },
@@ -10,11 +8,7 @@ export const ITEM_LEVEL_RANGES = {
     legendary: { min: 60, max: 100 }
 };
 
-// Equipment Templates Database
 export const EQUIPMENT_TEMPLATES = {
-    // === WEAPONS ===
-    
-    // Melee Weapons - Made harder
     "Rusty Sword": {
         type: "weapon",
         weaponType: "melee",
@@ -156,7 +150,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { ATK: 32, CRIT_CHANCE: 22, LIGHT_DAMAGE: 30 }
     },
     
-    // Ranged Weapons
     "Rat Fang Bow": {
         type: "weapon",
         weaponType: "ranged",
@@ -203,7 +196,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { ATK: 30, CRIT_CHANCE: 25, LIGHT_DAMAGE: 25 }
     },
     
-    // Magic Weapons
     "Rat Fang Staff": {
         type: "weapon",
         weaponType: "magic",
@@ -240,9 +232,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { ATK: 28, CRIT_CHANCE: 20, LIGHT_DAMAGE: 35 }
     },
     
-    // === ARMOR & ACCESSORIES ===
-    
-    // Shields - Made harder
     "Goblin Shield": {
         type: "shield",
         baseStats: { DEF: 2, BLOCK_CHANCE: 5 }
@@ -256,7 +245,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { DEF: 3, HEALTH: 12 }
     },
     
-    // Helmets - Made harder
     "Goblin Helmet": {
         type: "helmet",
         baseStats: { DEF: 1, HEALTH: 5 }
@@ -270,7 +258,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { DEF: 3, HEALTH: 10 }
     },
     
-    // Chest Armor - Made harder
     "Goblin Armor": {
         type: "chest",
         baseStats: { DEF: 3, HEALTH: 10 }
@@ -308,7 +295,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { DEF: 18, HEALTH: 60, FIRE_RESISTANCE: 25 }
     },
     
-    // Gloves
     "Goblin Gloves": {
         type: "gloves",
         baseStats: { DEF: 1, ATTACK_SPEED: 0.1 }
@@ -338,7 +324,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { DEF: 2, POISON_DAMAGE: 3 }
     },
     
-    // Rings
     "Goblin Ring": {
         type: "ring",
         baseStats: { CRIT_CHANCE: 3, CRIT_DAMAGE: 5 }
@@ -368,7 +353,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { CRIT_CHANCE: 4, POISON_DAMAGE: 5 }
     },
     
-    // Capes
     "Rat Pelt Cape": {
         type: "cape",
         baseStats: { DEF: 2, DODGE: 5 }
@@ -386,7 +370,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { DEF: 4, DODGE: 12, CRIT_CHANCE: 6 }
     },
     
-    // Boots
     "Slime Boots": {
         type: "boots",
         baseStats: { DEF: 2, DODGE: 8 }
@@ -400,7 +383,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { DEF: 2, DODGE: 8 }
     },
     
-    // Amulets
     "Slime Amulet": {
         type: "amulet",
         baseStats: { HEALTH: 10, MANA_REGEN: 1 }
@@ -414,16 +396,12 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 15, POISON_RESISTANCE: 15 }
     },
     
-    // === MISSING ITEMS FROM ENEMIES ===
-    
-    // Bat Items
     "Bat Fang Dagger": {
         type: "weapon",
         weaponType: "melee",
         baseStats: { ATK: 6, CRIT_CHANCE: 10, ATTACK_SPEED: 0.3 }
     },
     
-    // Bandit Items
     "Bandit Armor": {
         type: "chest",
         baseStats: { DEF: 9, HEALTH: 25, DODGE: 8 }
@@ -437,7 +415,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { DEF: 3, ATTACK_SPEED: 0.4, CRIT_CHANCE: 8 }
     },
     
-    // Troll Items
     "Troll Armor": {
         type: "chest",
         baseStats: { DEF: 12, HEALTH: 35, POISON_RESISTANCE: 20 }
@@ -455,7 +432,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 25, POISON_RESISTANCE: 25, ATTACK_SPEED: 0.3 }
     },
     
-    // Lizardman Items
     "Lizardman Gloves": {
         type: "gloves",
         baseStats: { DEF: 3, ATTACK_SPEED: 0.3, POISON_DAMAGE: 5 }
@@ -469,7 +445,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 20, POISON_RESISTANCE: 20, ATTACK_SPEED: 0.2 }
     },
     
-    // Bee Items
     "Bee Wing Cape": {
         type: "cape",
         baseStats: { DEF: 3, DODGE: 12, ATTACK_SPEED: 0.3 }
@@ -487,7 +462,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 15, POISON_DAMAGE: 5, ATTACK_SPEED: 0.3 }
     },
     
-    // Cultist Items
     "Cultist Gloves": {
         type: "gloves",
         baseStats: { DEF: 3, SHADOW_DAMAGE: 5, CRIT_CHANCE: 6 }
@@ -501,7 +475,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 20, SHADOW_RESISTANCE: 20, MANA_REGEN: 3 }
     },
     
-    // Gargoyle Items
     "Gargoyle Armor": {
         type: "chest",
         baseStats: { DEF: 14, HEALTH: 40, STONE_RESISTANCE: 25 }
@@ -519,7 +492,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 30, STONE_RESISTANCE: 30, DEF: 5 }
     },
     
-    // Harpy Items
     "Harpy Wing Cape": {
         type: "cape",
         baseStats: { DEF: 4, DODGE: 18, ATTACK_SPEED: 0.4 }
@@ -537,7 +509,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 25, ATTACK_SPEED: 0.4, DODGE: 8 }
     },
     
-    // Minotaur Items
     "Minotaur Armor": {
         type: "chest",
         baseStats: { DEF: 15, HEALTH: 45, CRIT_DAMAGE: 15 }
@@ -555,7 +526,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 35, CRIT_DAMAGE: 15, ATTACK_SPEED: 0.3 }
     },
     
-    // Wraith Items
     "Wraith Armor": {
         type: "chest",
         baseStats: { DEF: 13, HEALTH: 35, SHADOW_RESISTANCE: 25 }
@@ -573,7 +543,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 30, SHADOW_RESISTANCE: 30, MANA_REGEN: 4 }
     },
     
-    // Werewolf Items
     "Werewolf Armor": {
         type: "chest",
         baseStats: { DEF: 12, HEALTH: 40, ATTACK_SPEED: 0.3 }
@@ -587,9 +556,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { CRIT_CHANCE: 12, ATTACK_SPEED: 0.3, HEALTH: 18 }
     },
     
-    // === REMAINING MISSING ITEMS ===
-    
-    // Golem Items
     "Golem Armor": {
         type: "chest",
         baseStats: { DEF: 16, HEALTH: 50, STONE_RESISTANCE: 30 }
@@ -607,7 +573,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 35, STONE_RESISTANCE: 35, DEF: 6 }
     },
     
-    // Vampire Items
     "Vampire Armor": {
         type: "chest",
         baseStats: { DEF: 13, HEALTH: 40, LIFE_STEAL: 10 }
@@ -625,7 +590,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 30, LIFE_STEAL: 12, ATTACK_SPEED: 0.3 }
     },
     
-    // Chimera Items
     "Chimera Armor": {
         type: "chest",
         baseStats: { DEF: 14, HEALTH: 45, FIRE_RESISTANCE: 20 }
@@ -643,7 +607,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 35, FIRE_RESISTANCE: 25, ATTACK_SPEED: 0.3 }
     },
     
-    // Hydra Items
     "Hydra Armor": {
         type: "chest",
         baseStats: { DEF: 18, HEALTH: 60, POISON_RESISTANCE: 30 }
@@ -661,7 +624,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 40, POISON_RESISTANCE: 35, ATTACK_SPEED: 0.4 }
     },
     
-    // Demon Items
     "Demon Armor": {
         type: "chest",
         baseStats: { DEF: 20, HEALTH: 65, FIRE_RESISTANCE: 30 }
@@ -679,7 +641,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 45, FIRE_RESISTANCE: 35, ATTACK_SPEED: 0.4 }
     },
     
-    // Lich Items
     "Lich Armor": {
         type: "chest",
         baseStats: { DEF: 19, HEALTH: 60, SHADOW_RESISTANCE: 35 }
@@ -697,7 +658,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 40, SHADOW_RESISTANCE: 40, MANA_REGEN: 5 }
     },
     
-    // Manticore Items
     "Manticore Armor": {
         type: "chest",
         baseStats: { DEF: 21, HEALTH: 70, POISON_RESISTANCE: 25 }
@@ -715,7 +675,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 50, POISON_RESISTANCE: 30, ATTACK_SPEED: 0.4 }
     },
     
-    // Dragon Items
     "Dragon Bone Staff": {
         type: "weapon",
         weaponType: "magic",
@@ -739,7 +698,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 55, FIRE_RESISTANCE: 40, ATTACK_SPEED: 0.4 }
     },
     
-    // Demon Lord Items
     "Demon Lord Armor": {
         type: "chest",
         baseStats: { DEF: 25, HEALTH: 80, FIRE_RESISTANCE: 40 }
@@ -757,7 +715,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 60, FIRE_RESISTANCE: 45, ATTACK_SPEED: 0.5 }
     },
     
-    // Void Items
     "Void Armor": {
         type: "chest",
         baseStats: { DEF: 28, HEALTH: 90, SHADOW_RESISTANCE: 45 }
@@ -775,7 +732,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 70, SHADOW_RESISTANCE: 50, ATTACK_SPEED: 0.5 }
     },
     
-    // Celestial Items
     "Celestial Armor": {
         type: "chest",
         baseStats: { DEF: 30, HEALTH: 100, LIGHT_RESISTANCE: 50 }
@@ -793,7 +749,6 @@ export const EQUIPMENT_TEMPLATES = {
         baseStats: { HEALTH: 75, LIGHT_RESISTANCE: 55, ATTACK_SPEED: 0.5 }
     },
     
-    // Ghost Items
     "Ghost Gloves": {
         type: "gloves",
         baseStats: { DEF: 3, ATTACK_SPEED: 0.3, SHADOW_DAMAGE: 8 }
@@ -808,7 +763,6 @@ export const EQUIPMENT_TEMPLATES = {
     }
 };
 
-// Item Management Functions
 export const getItemTemplate = (itemName) => {
     return EQUIPMENT_TEMPLATES[itemName] || null;
 };

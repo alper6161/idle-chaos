@@ -1,9 +1,9 @@
+// Gold System
+
 import { INITIAL_GOLD } from './constants.js';
 
-// Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Get current slot number
 const getCurrentSlot = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');

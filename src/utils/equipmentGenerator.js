@@ -1,10 +1,7 @@
 // Equipment Generator System
-// Converts equipment names from combat drops into full equipment objects
-// Now supports item levels and rarity variations based on monster difficulty
 
 import { EQUIPMENT_TEMPLATES, ITEM_LEVEL_RANGES, addLevelToItem } from './items.js';
 
-// Difficulty-based item level ranges
 const DIFFICULTY_LEVELS = {
     EASY: { minLevel: 1, maxLevel: 10, rarityBonus: 0 },
     NORMAL: { minLevel: 11, maxLevel: 30, rarityBonus: 0.1 },
@@ -13,7 +10,6 @@ const DIFFICULTY_LEVELS = {
     IMPOSSIBLE: { minLevel: 81, maxLevel: 100, rarityBonus: 0.4 }
 };
 
-// Base rarity chances - Made harder
 const BASE_RARITY_CHANCES = {
     common: 0.8,
     uncommon: 0.15,
@@ -22,7 +18,6 @@ const BASE_RARITY_CHANCES = {
     legendary: 0.002
 };
 
-// Level scaling multipliers - Made harder
 const LEVEL_SCALING = {
     common: 0.8,
     uncommon: 1.0,
@@ -56,17 +51,15 @@ const ADDITIONAL_STATS_POOL = {
     ]
 };
 
-let equipmentCounter = 1000; // Start IDs from 1000 to avoid conflicts
+let equipmentCounter = 1000;
 
 const generateEquipmentId = () => {
-    // Use timestamp + counter to ensure unique IDs
     const timestamp = Date.now();
     const uniqueId = timestamp * 1000 + equipmentCounter;
     equipmentCounter++;
     return uniqueId;
 };
 
-// Determine difficulty based on enemy stats
 const getEnemyDifficulty = (enemy) => {
     if (!enemy) return 'EASY';
     
@@ -79,9 +72,7 @@ const getEnemyDifficulty = (enemy) => {
     return 'IMPOSSIBLE';
 };
 
-// Generate item level based on difficulty with minimum levels
 const generateItemLevel = (difficulty) => {
-    // Minimum levels per difficulty
     const minimumLevels = {
         EASY: 1,
         NORMAL: 10,
@@ -93,16 +84,13 @@ const generateItemLevel = (difficulty) => {
     const levelRange = DIFFICULTY_LEVELS[difficulty];
     if (!levelRange) return minimumLevels.EASY;
     
-    // Use minimum level if it's higher than the range minimum
     const minLevel = Math.max(levelRange.minLevel, minimumLevels[difficulty] || 1);
     const maxLevel = levelRange.maxLevel;
     
     return Math.floor(Math.random() * (maxLevel - minLevel + 1)) + minLevel;
 };
 
-// Determine rarity with RNG - difficulty affects rarity chances
 const determineRarity = (difficulty) => {
-    // Base rarity chances for EASY difficulty
     const baseRarityChances = {
         common: 0.7,
         uncommon: 0.2,
@@ -111,7 +99,6 @@ const determineRarity = (difficulty) => {
         legendary: 0.005
     };
     
-    // Difficulty-based rarity multipliers
     const difficultyMultipliers = {
         EASY: { common: 1.0, uncommon: 1.0, rare: 1.0, epic: 1.0, legendary: 1.0 },
         NORMAL: { common: 0.9, uncommon: 1.1, rare: 1.2, epic: 1.3, legendary: 1.4 },
@@ -122,7 +109,6 @@ const determineRarity = (difficulty) => {
     
     const multipliers = difficultyMultipliers[difficulty] || difficultyMultipliers.EASY;
     
-    // Apply difficulty multipliers to rarity chances
     const adjustedChances = {};
     let totalChance = 0;
     
@@ -133,13 +119,11 @@ const determineRarity = (difficulty) => {
         totalChance += adjustedChance;
     }
     
-    // Normalize chances to sum to 1
     const normalizedChances = {};
     for (const [rarity, chance] of Object.entries(adjustedChances)) {
         normalizedChances[rarity] = chance / totalChance;
     }
     
-    // Determine rarity using adjusted chances
     const rand = Math.random();
     let cumulative = 0;
     
@@ -150,17 +134,15 @@ const determineRarity = (difficulty) => {
         }
     }
     
-    return 'common'; // Fallback
+    return 'common';
 };
 
-// Apply level scaling to stats
 const applyLevelScaling = (baseStat, level, rarity) => {
     const rarityMultiplier = LEVEL_SCALING[rarity] || 1.0;
-    const levelMultiplier = 1 + (level - 1) * 0.1; // 10% increase per level
+    const levelMultiplier = 1 + (level - 1) * 0.1;
     return Math.floor(baseStat * rarityMultiplier * levelMultiplier);
 };
 
-// Apply rarity scaling to base stats - higher rarity = higher base stats
 const applyRarityScaling = (baseStat, rarity) => {
     const rarityMultipliers = {
         common: 0.8,
@@ -184,7 +166,6 @@ const getRandomAdditionalStats = (equipmentType, rarity, level) => {
     const additionalStats = {};
     const statsPool = ADDITIONAL_STATS_POOL[equipmentType === 'weapon' ? 'weapon' : 'armor'];
     
-    // Number of additional stats based on rarity - Made harder
     const additionalStatCount = {
         common: 0,
         uncommon: Math.random() < 0.2 ? 1 : 0,
@@ -198,7 +179,6 @@ const getRandomAdditionalStats = (equipmentType, rarity, level) => {
     for (let i = 0; i < count; i++) {
         const randomStat = statsPool[Math.floor(Math.random() * statsPool.length)];
         if (!additionalStats[randomStat.stat]) {
-            // Generate stat value based on rarity and level
             const baseValue = {
                 ATK: 3, DEF: 2, HEALTH: 10, CRIT_CHANCE: 3, CRIT_DAMAGE: 8,
                 ATTACK_SPEED: 0.2, LIFE_STEAL: 5, BLOCK_CHANCE: 5, DODGE: 3, RESISTANCE: 2
@@ -226,7 +206,6 @@ export const generateEquipmentFromName = (equipmentName, enemy = null) => {
             return null;
         }
 
-        // Determine difficulty and generate level
         const difficulty = getEnemyDifficulty(enemy);
         const itemLevel = generateItemLevel(difficulty);
         const finalRarity = determineRarity(difficulty);
@@ -240,21 +219,16 @@ export const generateEquipmentFromName = (equipmentName, enemy = null) => {
             stats: {}
         };
 
-        // Add weaponType if it exists
         if (template.weaponType) {
             equipment.weaponType = template.weaponType;
         }
 
-        // Apply base stats with rarity scaling, level scaling and variation
         Object.entries(template.baseStats).forEach(([stat, value]) => {
-            // First apply rarity scaling to base stats
             const rarityScaledValue = applyRarityScaling(value, finalRarity);
-            // Then apply level scaling
             const scaledValue = applyLevelScaling(rarityScaledValue, itemLevel, finalRarity);
             equipment.stats[stat] = applyStatVariation(scaledValue, finalRarity);
         });
 
-        // Add random additional stats
         const additionalStats = getRandomAdditionalStats(template.type, finalRarity, itemLevel);
         Object.assign(equipment.stats, additionalStats);
 
@@ -269,7 +243,6 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
     const equipment = [];
     
     try {
-        // Ensure lootBagItems is an array
         if (!Array.isArray(lootBagItems)) {
             console.warn('lootBagItems is not an array:', lootBagItems);
             return equipment;
@@ -277,20 +250,17 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
         
         lootBagItems.forEach((item, index) => {
             try {
-                // Skip gold items
                 if (typeof item === 'string' && (item.includes('💰') || item.includes('gold'))) {
                     return;
                 }
                 
-                // Handle both string and object items
                 let itemName;
                 if (typeof item === 'string') {
-                    // Clean the item name - remove emojis, symbols, and extra spaces
                     itemName = item
-                        .replace(/[⚔️🛡️💍👑📦]/g, '') // Remove equipment emojis
-                        .replace(/[💰]/g, '') // Remove gold emoji
-                        .replace(/gold'a satıldı/g, '') // Remove Turkish gold sold text
-                        .trim(); // Remove extra spaces
+                        .replace(/[⚔️🛡️💍👑📦]/g, '')
+                        .replace(/[💰]/g, '')
+                        .replace(/gold'a satıldı/g, '')
+                        .trim();
                 } else if (item && typeof item === 'object' && item.name) {
                     itemName = item.name;
                 } else {
@@ -298,7 +268,6 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
                     return;
                 }
                 
-                // Skip empty item names
                 if (!itemName || itemName.length === 0) {
                     console.warn('Empty item name after cleaning:', item);
                     return;
@@ -323,10 +292,8 @@ export const convertLootBagToEquipment = (lootBagItems, enemy = null) => {
     }
 };
 
-// Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Get current slot number
 const getCurrentSlot = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');

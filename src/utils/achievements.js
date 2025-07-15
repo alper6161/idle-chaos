@@ -7,9 +7,7 @@ const getAchievementStorageKey = () => {
     return `idle-chaos-achievements-slot-${currentSlot}`;
 };
 
-// Achievement thresholds for each enemy type
 const ACHIEVEMENT_THRESHOLDS = {
-    // EASY ENEMIES (6)
     goblin: [
         { kills: 10, reward: 'unlock_hp', description: 'Goblin HP revealed' },
         { kills: 25, reward: 'unlock_atk', description: 'Goblin ATK revealed' },
@@ -47,7 +45,6 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 100, reward: 'unlock_all', description: 'All Skeleton stats revealed' }
     ],
 
-    // NORMAL ENEMIES (10)
     orc: [
         { kills: 10, reward: 'unlock_hp', description: 'Orc HP revealed' },
         { kills: 25, reward: 'unlock_atk', description: 'Orc ATK revealed' },
@@ -109,7 +106,6 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 100, reward: 'unlock_all', description: 'All Harpy stats revealed' }
     ],
 
-    // HARD ENEMIES (6)
     minotaur: [
         { kills: 5, reward: 'unlock_hp', description: 'Minotaur HP revealed' },
         { kills: 15, reward: 'unlock_atk', description: 'Minotaur ATK revealed' },
@@ -147,7 +143,6 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 50, reward: 'unlock_all', description: 'All Chimera stats revealed' }
     ],
 
-    // VERY HARD ENEMIES (4)
     hydra: [
         { kills: 3, reward: 'unlock_hp', description: 'Hydra HP revealed' },
         { kills: 10, reward: 'unlock_atk', description: 'Hydra ATK revealed' },
@@ -173,7 +168,6 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 30, reward: 'unlock_all', description: 'All Manticore stats revealed' }
     ],
 
-    // IMPOSSIBLE ENEMIES (4)
     ancient_dragon: [
         { kills: 2, reward: 'unlock_hp', description: 'Ancient Dragon HP revealed' },
         { kills: 5, reward: 'unlock_atk', description: 'Ancient Dragon ATK revealed' },
@@ -199,7 +193,6 @@ const ACHIEVEMENT_THRESHOLDS = {
         { kills: 20, reward: 'unlock_all', description: 'All Celestial Seraph stats revealed' }
     ],
 
-    // LEGACY ENEMIES
     dragon: [
         { kills: 5, reward: 'unlock_hp', description: 'Dragon HP revealed' },
         { kills: 15, reward: 'unlock_atk', description: 'Dragon ATK revealed' },
@@ -214,7 +207,6 @@ const ACHIEVEMENT_THRESHOLDS = {
     ]
 };
 
-// Load achievements from localStorage
 export const loadAchievements = () => {
     try {
         const storageKey = getAchievementStorageKey();
@@ -234,7 +226,6 @@ export const loadAchievements = () => {
     }
 };
 
-// Save achievements to localStorage
 export const saveAchievements = (achievements) => {
     try {
         const storageKey = getAchievementStorageKey();
@@ -244,15 +235,12 @@ export const saveAchievements = (achievements) => {
     }
 };
 
-// Record a kill for a specific enemy
 export const recordKill = (enemyId) => {
     const achievements = loadAchievements();
     
-    // Increment kill count for this enemy
     achievements.kills[enemyId] = (achievements.kills[enemyId] || 0) + 1;
     achievements.totalKills = (achievements.totalKills || 0) + 1;
     
-    // Check for new achievements
     const thresholds = ACHIEVEMENT_THRESHOLDS[enemyId];
     if (thresholds) {
         const currentKills = achievements.kills[enemyId];
@@ -282,25 +270,21 @@ export const recordKill = (enemyId) => {
     return { achievements, newAchievements: [] };
 };
 
-// Get kill count for a specific enemy
 export const getKillCount = (enemyId) => {
     const achievements = loadAchievements();
     return achievements.kills[enemyId] || 0;
 };
 
-// Get total kill count
 export const getTotalKills = () => {
     const achievements = loadAchievements();
     return achievements.totalKills || 0;
 };
 
-// Check if a specific achievement is unlocked
 export const isAchievementUnlocked = (enemyId, killThreshold) => {
     const achievements = loadAchievements();
     return !!achievements.unlocked[`${enemyId}_${killThreshold}`];
 };
 
-// Get all unlocked achievements for an enemy
 export const getUnlockedAchievements = (enemyId) => {
     const achievements = loadAchievements();
     const unlocked = [];
@@ -318,7 +302,6 @@ export const getUnlockedAchievements = (enemyId) => {
     return unlocked.sort((a, b) => a.killThreshold - b.killThreshold);
 };
 
-// Get next achievement for an enemy
 export const getNextAchievement = (enemyId) => {
     const thresholds = ACHIEVEMENT_THRESHOLDS[enemyId];
     if (!thresholds) return null;
@@ -335,10 +318,9 @@ export const getNextAchievement = (enemyId) => {
         }
     }
     
-    return null; // All achievements unlocked
+    return null;
 };
 
-// Get all achievements data for display
 export const getAllAchievementsData = () => {
     const achievements = loadAchievements();
     const data = {};
@@ -359,7 +341,6 @@ export const getAllAchievementsData = () => {
     return data;
 };
 
-// Get achievement progress percentage
 export const getAchievementProgress = (enemyId) => {
     const currentKills = getKillCount(enemyId);
     const thresholds = ACHIEVEMENT_THRESHOLDS[enemyId];
