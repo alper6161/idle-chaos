@@ -38,9 +38,9 @@ import {
     createSpawnTimer 
 } from "../utils/battleUtils.js";
 import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements, getWeaponType, getAvailableAttackTypes, getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
-import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType } from "../utils/playerStats.js";
+import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType, getEquippedItems } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
-import { getGold, addGold, formatGold } from "../utils/gold.js";
+import { getGold, addGold, formatGold, subtractGold } from "../utils/gold.js";
 import { 
     POTION_TYPES, 
     getPotions, 
@@ -91,7 +91,7 @@ function Battle({ player }) {
     const [damageDisplay, setDamageDisplay] = useState({ player: null, enemy: null });
     const [isWaitingForEnemy, setIsWaitingForEnemy] = useState(false);
     const [enemySpawnProgress, setEnemySpawnProgress] = useState(0);
-    const [deathDialog, setDeathDialog] = useState({ open: false, countdown: 15 });
+    const [deathDialog, setDeathDialog] = useState({ open: false, countdown: 15, goldLost: 0, equipmentLost: [] });
     const [battleLogVisible, setBattleLogVisible] = useState(true);
     const [selectedAttackType, setSelectedAttackType] = useState('stab');
     const [availableAttackTypes, setAvailableAttackTypes] = useState([]);
@@ -160,9 +160,14 @@ function Battle({ player }) {
     };
 
     const showDeathDialog = () => {
+        // Apply death penalties
+        const penalties = applyDeathPenalties();
+        
         setDeathDialog({
             open: true,
-            countdown: 15
+            countdown: 15,
+            goldLost: penalties.goldLost,
+            equipmentLost: penalties.equipmentLost
         });
         
         const countdownInterval = setInterval(() => {
@@ -170,11 +175,43 @@ function Battle({ player }) {
                 if (prev.countdown <= 1) {
                     clearInterval(countdownInterval);
                     respawnPlayer();
-                    return { open: false, countdown: 15 };
+                    return { open: false, countdown: 15, goldLost: 0, equipmentLost: [] };
                 }
                 return { ...prev, countdown: prev.countdown - 1 };
             });
         }, 1000);
+    };
+
+    const applyDeathPenalties = () => {
+        const penalties = { goldLost: 0, equipmentLost: [] };
+        
+        // Gold loss - lose half of current gold
+        const currentGold = getGold();
+        const goldLoss = Math.floor(currentGold / 2);
+        if (goldLoss > 0) {
+            subtractGold(goldLoss);
+            penalties.goldLost = goldLoss;
+            setPlayerGold(getGold());
+        }
+        
+        // Equipment loss - random chance for each equipped item
+        const equippedItems = getEquippedItems();
+        const currentSlot = getCurrentSlot();
+        const equipmentSlotKey = getSlotKey('idle-chaos-equipped-items', currentSlot);
+        const updatedEquippedItems = { ...equippedItems };
+        
+        Object.entries(equippedItems).forEach(([slot, item]) => {
+            if (item && Math.random() < 0.25) { // 25% chance to lose each item
+                penalties.equipmentLost.push({ slot, item: item.name || item.type || 'Unknown Item' });
+                delete updatedEquippedItems[slot];
+            }
+        });
+        
+        if (penalties.equipmentLost.length > 0) {
+            localStorage.setItem(equipmentSlotKey, JSON.stringify(updatedEquippedItems));
+        }
+        
+        return penalties;
     };
 
     const respawnPlayer = () => {
@@ -1083,6 +1120,19 @@ function Battle({ player }) {
                             >
                                 {t('battle.backToSelection')}
                             </Button>
+                            
+                            {/* TEMPORARY: Test death button */}
+                            <Button 
+                                variant="contained" 
+                                color="error"
+                                onClick={() => {
+                                    setIsBattleActive(false);
+                                    showDeathDialog();
+                                }}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                🏴‍☠️ TEST: Die
+                            </Button>
                         </div>
                         {/* Render the full battle UI below the dungeon header */}
                         <div className={styles.battleContainer}>
@@ -1697,6 +1747,50 @@ function Battle({ player }) {
                     </div>
                 </>
             )}
+            {/* Death Dialog */}
+            <Dialog open={deathDialog.open} disableEscapeKeyDown>
+                <DialogTitle className={styles.deathDialogTitle}>
+                    ☠️ {t('battle.youDied')}
+                </DialogTitle>
+                <DialogContent className={styles.deathDialogContent}>
+                    <Typography variant="body1" sx={{ mb: 2 }}>
+                        {t('battle.deathMessage')}
+                    </Typography>
+                    
+                    {/* Death Penalties */}
+                    {(deathDialog.goldLost > 0 || deathDialog.equipmentLost.length > 0) && (
+                        <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(244, 67, 54, 0.1)', borderRadius: 1 }}>
+                            <Typography variant="h6" sx={{ mb: 1, color: '#f44336' }}>
+                                💀 {t('battle.deathPenalties')}
+                            </Typography>
+                            
+                            {deathDialog.goldLost > 0 && (
+                                <Typography variant="body2" sx={{ mb: 1 }}>
+                                    💰 {t('battle.goldLost', { amount: formatGold(deathDialog.goldLost) })}
+                                </Typography>
+                            )}
+                            
+                            {deathDialog.equipmentLost.length > 0 && (
+                                <Box>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        ⚔️ {t('battle.equipmentLost')}:
+                                    </Typography>
+                                    {deathDialog.equipmentLost.map((lost, index) => (
+                                        <Typography key={index} variant="body2" sx={{ ml: 2, color: '#f44336' }}>
+                                            • {lost.item} ({lost.slot})
+                                        </Typography>
+                                    ))}
+                                </Box>
+                            )}
+                        </Box>
+                    )}
+                    
+                    <Typography variant="body2" sx={{ textAlign: 'center', fontWeight: 'bold' }}>
+                        {t('battle.respawnIn', { seconds: deathDialog.countdown })}
+                    </Typography>
+                </DialogContent>
+            </Dialog>
+
             <Dialog open={exitWarningOpen} onClose={() => setExitWarningOpen(false)}>
                 <DialogTitle>{t('battle.dungeonExitWarningTitle')}</DialogTitle>
                 <DialogContent>{t('battle.dungeonExitWarning')}</DialogContent>
