@@ -41,10 +41,12 @@ export const getSkillData = () => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
         const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
-        const slotKey = `gameData_slot_${slotNumber}`;
+        const slotKey = `skillData_slot_${slotNumber}`;
+        
         const saved = localStorage.getItem(slotKey);
         let data = saved ? JSON.parse(saved) : INITIAL_SKILLS;
         data = migrateSkillDataIfNeeded(data);
+        
         return data;
     } catch (error) {
         console.error('Error getting skill data:', error);
@@ -56,7 +58,7 @@ export const saveSkillData = (skillData) => {
     try {
         const currentSlot = localStorage.getItem('idle-chaos-current-slot');
         const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
-        const slotKey = `gameData_slot_${slotNumber}`;
+        const slotKey = `skillData_slot_${slotNumber}`;
         localStorage.setItem(slotKey, JSON.stringify(skillData));
     } catch (error) {
         console.error('Error saving skill data:', error);
@@ -85,11 +87,14 @@ export const getSkillInfo = (skillName) => {
 };
 
 export const addSkillExperience = (skillName, xpAmount) => {
+    
     const skillData = getSkillData();
+    
     let skillUpdated = false;
     Object.entries(skillData).forEach(([category, skills]) => {
         if (skills[skillName]) {
             let { level, xp } = skills[skillName];
+            
             xp += xpAmount;
             let newLevel = level;
             while (newLevel < 99 && xp >= (SKILL_XP_REQUIREMENTS[newLevel + 1] || Infinity)) {
@@ -101,6 +106,7 @@ export const addSkillExperience = (skillName, xpAmount) => {
             skills[skillName] = { level: newLevel, xp };
         }
     });
+    
     saveSkillData(skillData);
     return skillUpdated;
 };
@@ -367,19 +373,10 @@ export const getAvailableAttackTypes = (weaponType) => {
 
 export const debugSkillLeveling = (skillName) => {
     const skillInfo = getSkillInfo(skillName);
-    console.log(`🔍 Debug - ${skillName}:`, skillInfo);
     
     const testXP = 50;
     const leveledUp = addSkillExperience(skillName, testXP);
     const newSkillInfo = getSkillInfo(skillName);
-    
-    console.log(`🔍 Debug - Added ${testXP} XP to ${skillName}:`, {
-        leveledUp,
-        oldLevel: skillInfo.level,
-        newLevel: newSkillInfo.level,
-        oldXP: skillInfo.xp,
-        newXP: newSkillInfo.xp
-    });
     
     return { leveledUp, oldLevel: skillInfo.level, newLevel: newSkillInfo.level };
 };
@@ -392,5 +389,26 @@ export const debugXPRequirements = () => {
             totalXP += SKILL_XP_REQUIREMENTS[l] || 0;
         }
         console.log(`Level ${level}: ${totalXP} total XP needed`);
+    }
+}; 
+
+export const initializeSkillDataForCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
+        const slotKey = `skillData_slot_${slotNumber}`;
+        
+        console.log('Initializing skill data for slot:', slotNumber);
+        
+        // Check if skill data already exists
+        const existing = localStorage.getItem(slotKey);
+        if (!existing) {
+            console.log('No existing skill data found, initializing with INITIAL_SKILLS');
+            localStorage.setItem(slotKey, JSON.stringify(INITIAL_SKILLS));
+        } else {
+            console.log('Existing skill data found:', existing);
+        }
+    } catch (error) {
+        console.error('Error initializing skill data:', error);
     }
 }; 

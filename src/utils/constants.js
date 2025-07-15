@@ -1,5 +1,7 @@
 // Game Constants
 
+export const INITIAL_GOLD = 100;
+
 export const INITIAL_SKILLS = {
     melee: {
         stab: { level: 1, xp: 0 },

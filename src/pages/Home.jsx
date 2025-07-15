@@ -119,6 +119,7 @@ function Home() {
             `idle-chaos-inventory_slot_${slotNumber}`,
             `idle-chaos-pets_slot_${slotNumber}`,
             `gameData_slot_${slotNumber}`,
+            `skillData_slot_${slotNumber}`,
             `playerHealth_slot_${slotNumber}`,
             `playerGold_slot_${slotNumber}`,
             `selectedCharacter_slot_${slotNumber}`,
@@ -127,9 +128,9 @@ function Home() {
         
         slotSpecificKeys.forEach(key => localStorage.removeItem(key));
         
-        // Reset skill levels for this slot
-        const slotKey = `gameData_slot_${slotNumber}`;
-        localStorage.setItem(slotKey, JSON.stringify(INITIAL_SKILLS));
+        // Initialize skill data for this slot
+        const skillDataKey = `skillData_slot_${slotNumber}`;
+        localStorage.setItem(skillDataKey, JSON.stringify(INITIAL_SKILLS));
         
         // Set current slot
         localStorage.setItem('idle-chaos-current-slot', slotNumber.toString());
@@ -186,7 +187,8 @@ function Home() {
         const slot = saveSlots[slotNumber] || {};
         const hasData = hasSlotData(slotNumber);
         const isCurrentSlot = getCurrentSlot() === slotNumber;
-        const totalSkillLevel = slot?.data?.gameData ? getTotalSkillLevel(slot.data.gameData) : null;
+        const skillData = slot?.data?.[`skillData_slot_${slotNumber}`];
+        const totalSkillLevel = skillData ? getTotalSkillLevel(skillData) : null;
 
         return (
             <Card 

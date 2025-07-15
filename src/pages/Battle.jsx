@@ -34,7 +34,7 @@ import {
     checkBattleResult, 
     createSpawnTimer 
 } from "../utils/battleUtils.js";
-import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements, getWeaponType, getAvailableAttackTypes, getSkillData } from "../utils/skillExperience.js";
+import { awardBattleActionXP, debugSkillLeveling, debugXPRequirements, getWeaponType, getAvailableAttackTypes, getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
 import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
 import { getGold, addGold, formatGold } from "../utils/gold.js";
@@ -223,25 +223,34 @@ function Battle({ player }) {
     };
 
     const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
+        
         if (!enemy) {
             console.warn('startRealTimeBattle called with null enemy');
             return;
         }
+        
         setBattleLog(prev => [
             ...prev,
             { type: 'info', message: t('battle.searchingForEnemy') }
         ]);
+        
         const currentPlayerStats = getPlayerStats();
+        
         setPlayerStats(currentPlayerStats);
         const adjustedHealth = Math.min(health, currentPlayerStats.HEALTH);
+        
         const hpXP = awardBattleActionXP('battle_participation', 0, false, true);
-        setCurrentBattle({
+        
+        const battleState = {
             player: { ...currentPlayerStats, currentHealth: adjustedHealth },
             enemy: { ...enemy, currentHealth: enemy.maxHp },
             playerProgress: 0,
             enemyProgress: 0,
             battleLog: []
-        });
+        };
+        
+        setCurrentBattle(battleState);
+        
         setIsBattleActive(true);
         setBattleResult(null);
         setDamageDisplay({ player: null, enemy: null });
@@ -317,14 +326,7 @@ function Battle({ player }) {
         
         const bonuses = SKILL_LEVEL_BONUSES[selectedAttackType];
         
-        // Debug logging
-        console.log('getSelectedSkillInfo:', {
-            selectedAttackType,
-            skillLevel,
-            bonuses,
-            hasBonuses: !!bonuses,
-            levelGreaterThanZero: skillLevel > 0
-        });
+
         
         return { level: skillLevel, bonuses };
     };
@@ -392,7 +394,9 @@ function Battle({ player }) {
     }, [playerStats, currentBattle]);
 
     useEffect(() => {
-        if (!isBattleActive || !currentBattle) return;
+        if (!isBattleActive || !currentBattle) {
+            return;
+        }
 
         const interval = setInterval(() => {
             setCurrentBattle(prev => {
@@ -525,9 +529,16 @@ function Battle({ player }) {
                             });
                         }
                         
+                        // Add messages to both battleLog state and currentBattle.battleLog
                         battleLogMessages.forEach(msg => setBattleLog(prev => [...prev, msg]));
                         
-                        setCurrentBattle(newBattle);
+                        // Update currentBattle with the new battle log entries
+                        const updatedBattle = {
+                            ...newBattle,
+                            battleLog: [...(newBattle.battleLog || []), ...battleLogMessages]
+                        };
+                        
+                        setCurrentBattle(updatedBattle);
                         startEnemySpawnTimer();
                         
                         // Auto save after successful battle
@@ -551,6 +562,43 @@ function Battle({ player }) {
 
         return () => clearInterval(interval);
     }, [isBattleActive, currentBattle, autoPotionSettings]);
+
+    // Synchronize currentBattle.battleLog with battleLog state
+    useEffect(() => {
+        if (currentBattle && currentBattle.battleLog) {
+            // Merge battle logs instead of overwriting
+            setBattleLog(prev => {
+                const currentBattleLog = currentBattle.battleLog || [];
+                
+                const mergedLog = [...prev];
+                
+                // Add new entries from currentBattle.battleLog that aren't already in prev
+                currentBattleLog.forEach(newEntry => {
+                    const exists = mergedLog.some(existingEntry => 
+                        existingEntry.type === newEntry.type && 
+                        existingEntry.message === newEntry.message &&
+                        existingEntry.damage === newEntry.damage
+                    );
+                    if (!exists) {
+                        mergedLog.push(newEntry);
+                    }
+                });
+                
+                return mergedLog;
+            });
+        }
+    }, [currentBattle?.battleLog]);
+
+    // Monitor battle state changes
+    useEffect(() => {
+    }, [isBattleActive]);
+
+    useEffect(() => {
+    }, [currentBattle]);
+
+    // Monitor battle mode changes
+    useEffect(() => {
+    }, [battleMode]);
 
     // playerStats değiştiğinde playerHealth'i de güncelle
     useEffect(() => {
@@ -628,6 +676,11 @@ function Battle({ player }) {
         
         return () => clearInterval(interval);
     }, [autoPotionSettings.enabled]);
+
+    // Initialize skill data for the current slot when the component mounts
+    useEffect(() => {
+        initializeSkillDataForCurrentSlot();
+    }, []);
 
     // Enemy Selection Screen
     if (battleMode === 'selection') {
@@ -906,37 +959,39 @@ function Battle({ player }) {
                         </Box>
                         <Divider />
                         <Box className={styles.battleLog} sx={{ flex: 1 }}>
-                            {battleLog.map((log, idx) => (
-                                <div key={`battle-log-${idx}-${log.type}`}>
-                                    <Typography 
-                                        variant="body2" 
-                                        className={`${styles.battleLogItem} ${
-                                            log.type === 'player_attack' ? styles.playerAttack :
-                                            log.type === 'player_crit' ? styles.playerCrit :
-                                            log.type === 'enemy_attack' ? styles.enemyAttack :
-                                            log.type === 'enemy_crit' ? styles.enemyCrit :
-                                            log.type?.includes('miss') ? styles.miss :
-                                            log.type?.includes('defeated') ? styles.defeat :
-                                            log.type === 'victory' ? styles.victory :
-                                            log.type === 'loot' ? styles.loot :
-                                            log.type === 'pet' ? styles.petDrop :
-                                            log.type === 'info' ? styles.infoLog : ''
-                                        }`}
-                                    >
-                                        {log.message}
-                                    </Typography>
-                                    {log.skillXP && log.skillXP.skillsAwarded.length > 0 && (
+                            {battleLog.map((log, idx) => {
+                                return (
+                                    <div key={`battle-log-${idx}-${log.type}`}>
                                         <Typography 
-                                            variant="caption" 
-                                            className={styles.skillXPMessage}
-                                            style={{ color: '#4caf50', marginLeft: '10px' }}
+                                            variant="body2" 
+                                            className={`${styles.battleLogItem} ${
+                                                log.type === 'player_attack' ? styles.playerAttack :
+                                                log.type === 'player_crit' ? styles.playerCrit :
+                                                log.type === 'enemy_attack' ? styles.enemyAttack :
+                                                log.type === 'enemy_crit' ? styles.enemyCrit :
+                                                log.type?.includes('miss') ? styles.miss :
+                                                log.type?.includes('defeated') ? styles.defeat :
+                                                log.type === 'victory' ? styles.victory :
+                                                log.type === 'loot' ? styles.loot :
+                                                log.type === 'pet' ? styles.petDrop :
+                                                log.type === 'info' ? styles.infoLog : ''
+                                            }`}
                                         >
-                                            ✨ +{log.skillXP.xpAwarded} XP to {log.skillXP.skillsAwarded.join(', ')}
-                                            {log.skillXP.leveledUp && ' 🎉 LEVEL UP!'}
+                                            {log.message}
                                         </Typography>
-                                    )}
-                                </div>
-                            ))}
+                                        {log.skillXP && log.skillXP.skillsAwarded.length > 0 && (
+                                            <Typography 
+                                                variant="caption" 
+                                                className={styles.skillXPMessage}
+                                                style={{ color: '#4caf50', marginLeft: '10px' }}
+                                            >
+                                                ✨ +{log.skillXP.xpAwarded} XP to {log.skillXP.skillsAwarded.join(', ')}
+                                                {log.skillXP.leveledUp && ' 🎉 LEVEL UP!'}
+                                            </Typography>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </Box>
                     </div>
                 )}
@@ -1145,9 +1200,6 @@ function Battle({ player }) {
                                 const atkBonus = skillBuffs.ATK || 0;
                                 const effectiveATK = playerStats.ATK + atkBonus;
                                 const { level, bonuses } = getSelectedSkillInfo();
-                                
-                                // Debug logging for display
-                                console.log('Display section:', { level, bonuses, condition: bonuses && level > 0 });
                                 
                                 return (
                                     <Typography>

@@ -73,11 +73,6 @@ export const loadFromSlot = (slotNumber) => {
         localStorage.setItem(CURRENT_SLOT_KEY, slotNumber.toString());
         
         const keys = [
-            'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
-            'inventory', 'equippedItems', 'lootBag', 'potions',
-            'autoPotionSettings', 'skillLevels', 'skillXP',
-            'achievements', 'unlockedEnemies', 'gameData',
-            'idle-chaos-pets', 'idle-chaos-inventory'
         ];
         
         for (let i = 1; i <= 3; i++) {
@@ -93,6 +88,7 @@ export const loadFromSlot = (slotNumber) => {
             keys.push(`idle-chaos-inventory_slot_${i}`);
             keys.push(`idle-chaos-pets_slot_${i}`);
             keys.push(`gameData_slot_${i}`);
+            keys.push(`skillData_slot_${i}`);
             keys.push(`playerHealth_slot_${i}`);
             keys.push(`playerGold_slot_${i}`);
             keys.push(`selectedCharacter_slot_${i}`);
@@ -143,11 +139,6 @@ export const saveCurrentGame = () => {
         const gameData = {};
         
         const keys = [
-            'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
-            'inventory', 'equippedItems', 'lootBag', 'potions',
-            'autoPotionSettings', 'skillLevels', 'skillXP',
-            'achievements', 'unlockedEnemies', 'gameData',
-            'idle-chaos-pets', 'idle-chaos-inventory'
         ];
         
         for (let i = 1; i <= 3; i++) {
@@ -163,6 +154,7 @@ export const saveCurrentGame = () => {
             keys.push(`idle-chaos-inventory_slot_${i}`);
             keys.push(`idle-chaos-pets_slot_${i}`);
             keys.push(`gameData_slot_${i}`);
+            keys.push(`skillData_slot_${i}`);
             keys.push(`playerHealth_slot_${i}`);
             keys.push(`playerGold_slot_${i}`);
             keys.push(`selectedCharacter_slot_${i}`);
