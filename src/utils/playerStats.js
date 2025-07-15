@@ -127,13 +127,13 @@ export const calculateSkillBuffs = () => {
         skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3);
     }
 
-    if (skillData.utility?.critChance) {
-        const critChanceLevel = getSkillLevel(skillData.utility.critChance);
+    if (skillData.holy?.critChance) {
+        const critChanceLevel = getSkillLevel(skillData.holy.critChance);
         skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5);
     }
 
-    if (skillData.utility?.critDamage) {
-        const critDamageLevel = getSkillLevel(skillData.utility.critDamage);
+    if (skillData.holy?.critDamage) {
+        const critDamageLevel = getSkillLevel(skillData.holy.critDamage);
         skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1);
     }
 
@@ -257,13 +257,13 @@ export const calculateSkillBuffsForAttackType = (selectedAttackType) => {
         skillBuffs.HEALTH = (skillBuffs.HEALTH || 0) + (hpLevel * 3);
     }
 
-    if (selectedAttackType === 'archery' && skillData.utility?.critChance) {
-        const critChanceLevel = getSkillLevel(skillData.utility.critChance);
+    if (selectedAttackType === 'archery' && skillData.holy?.critChance) {
+        const critChanceLevel = getSkillLevel(skillData.holy.critChance);
         skillBuffs.CRIT_CHANCE = (skillBuffs.CRIT_CHANCE || 0) + (critChanceLevel * 0.5);
     }
 
-    if (selectedAttackType === 'crush' && skillData.utility?.critDamage) {
-        const critDamageLevel = getSkillLevel(skillData.utility.critDamage);
+    if (selectedAttackType === 'crush' && skillData.holy?.critDamage) {
+        const critDamageLevel = getSkillLevel(skillData.holy.critDamage);
         skillBuffs.CRIT_DAMAGE = (skillBuffs.CRIT_DAMAGE || 0) + (critDamageLevel * 1);
     }
 

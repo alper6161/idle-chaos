@@ -25,10 +25,11 @@ export const INITIAL_SKILLS = {
         dodge: { level: 1, xp: 0 },
         armor: { level: 1, xp: 0 }
     },
-    utility: {
+    holy: {
         heal: { level: 1, xp: 0 },
         buff: { level: 1, xp: 0 },
-        debuff: { level: 1, xp: 0 }
+        debuff: { level: 1, xp: 0 },
+        shadow: { level: 1, xp: 0 }
     },
     advanced: {
         lifeSteal: { level: 1, xp: 0 },

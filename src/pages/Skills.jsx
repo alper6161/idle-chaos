@@ -127,7 +127,7 @@ const SKILL_BUFFS = {
         75: "Defense +45%, Health +30%, Damage reduction +20%, Block chance +10%",
         99: "⚔️ TITAN ARMOR: Defense +60%, Health +40%, Damage reduction +30%, Block chance +15%, Life regeneration +10%, ADAMANTINE SKIN (reflects 50% damage back)"
     },
-    // Utility skills
+    // Holy skills
     hp: {
         10: "Maximum health +20%",
         25: "Maximum health +35%, Health regeneration +10%",
@@ -135,7 +135,7 @@ const SKILL_BUFFS = {
         75: "Maximum health +65%, Health regeneration +30%, Auto-heal +25%, Damage reduction +10%",
         99: "💎 DIAMOND BODY: Maximum health +80%, Health regeneration +40%, Auto-heal +35%, Damage reduction +20%, Life steal +10%, IMMORTALITY (cannot die below 1 HP)"
     },
-    energy: {
+    energyShield: {
         10: "Maximum energy +20%",
         25: "Maximum energy +35%, Energy regeneration +15%",
         50: "Maximum energy +50%, Energy regeneration +25%, Auto-energy +20%",

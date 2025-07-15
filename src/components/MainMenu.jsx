@@ -102,7 +102,7 @@ function MainMenu() {
                         '#4caf50', // ranged - green
                         '#3b82f6', // magic - blue
                         '#b45af2', // defense - purple
-                        '#10b981', // utility - teal
+                        '#10b981', // holy - teal
                         '#ffd700', // advanced - gold
                     ];
                     const borderColor = categoryColors[idx % categoryColors.length];
@@ -118,7 +118,7 @@ function MainMenu() {
                                 {t(`skills.${category}`)}
                             </div>
                             {skillRows.map((row, rowIdx) => (
-                                <div key={rowIdx} style={{ display: 'flex', justifyContent: 'center', gap: 0, marginBottom: 2, width: '100%' }}>
+                                <div key={rowIdx} style={{ display: 'flex', justifyContent: 'center', gap: 0, marginBottom: rowIdx !== skillRows.length - 1 ? 8 : 2, width: '100%' }}>
                                     {Array.from({ length: 3 }).map((_, i) => {
                                         const skillPair = row[i];
                                         if (!skillPair) {
@@ -129,7 +129,7 @@ function MainMenu() {
                                         return (
                                             <Tooltip key={skill} title={t(`skills.${skill}`)} arrow placement="right">
                                                 <div className={styles.skillCategorySkill} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 0, cursor: 'pointer' }}>
-                                                    <img src={getSkillIcon(skill)} alt={skill} style={{ width: 18, height: 18, marginBottom: 2, filter: 'drop-shadow(1px 1px 0px #000)' }} />
+                                                    <img src={getSkillIcon(skill)} alt={skill} style={{ width: 28, height: 28, marginBottom: 8, filter: 'drop-shadow(1px 1px 0px #000)' }} />
                                                     <span className={styles.skillLevel} style={{ fontSize: '0.55rem', color: borderColor, fontWeight: 'bold', textShadow: '1px 1px 0px #000' }}>{skillObj.level}/99</span>
                                                 </div>
                                             </Tooltip>

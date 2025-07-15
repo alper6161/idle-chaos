@@ -146,7 +146,6 @@
     "hitpool": "Can Havuzu",
     "defence": "Savunma",
     "resistance": "Direnç",
-    "utility": "Yardımcı",
     "warrior": "SAVAŞÇI",
     "ranger": "AVCI",
     "wizard": "BÜYÜCÜ",
@@ -181,7 +180,8 @@
     "advanced": "Gelişmiş",
     "attackSpeed": "Saldırı Hızı",
     "energyShield": "Enerji Kalkanı",
-    "debuff": "Zayıflatma"
+    "debuff": "Zayıflatma",
+    "holy": "Kutsal"
   },
       "enemies": {
         "goblin": "Goblin",
