@@ -179,7 +179,9 @@
     "maxDamage": "Max Hasar",
     "defense": "Savunma",
     "advanced": "Gelişmiş",
-    "attackSpeed": "Saldırı Hızı"
+    "attackSpeed": "Saldırı Hızı",
+    "energyShield": "Enerji Kalkanı",
+    "debuff": "Zayıflatma"
   },
       "enemies": {
         "goblin": "Goblin",

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "../assets/styles/StartScreen.module.scss";
 
 const skillIcons = [
-  "archery", "armor", "block", "buff", "counterAttack", "critChance", "critDamage", "crush", "dodge", "doubleAttack", "energy", "fire", "heal", "hp", "ice", "lifeSteal", "lightning", "poison", "shadow", "slash", "stab", "throwing"
+  "archery", "armor", "block", "buff", "counterAttack", "critChance", "critDamage", "crush", "dodge", "doubleAttack", "energyShield", "fire", "heal", "hp", "ice", "lifeSteal", "lightning", "poison", "shadow", "slash", "stab", "throwing"
 ];
 const characterImages = [
   { src: "/images/characters/warrior.png", alt: "Warrior", className: styles.characterWarrior },
@@ -13,30 +13,30 @@ const characterImages = [
 
 // Generate random positions for left/right skill icons (fixed for each render)
 const leftSkillPositions = [
-  { top: '6%', left: '8%' },
-  { top: '18%', left: '13%' },
-  { top: '11%', left: '19%' },
-  { top: '29%', left: '7%' },
-  { top: '37%', left: '15%' },
-  { top: '46%', left: '10%' },
-  { top: '54%', left: '18%' },
-  { top: '63%', left: '12%' },
-  { top: '77%', left: '9%' },
-  { top: '85%', left: '21%' },
-  { top: '92%', left: '14%' }
+  { top: '4%', left: '6%' },
+  { top: '16%', left: '15%' },
+  { top: '10%', left: '23%' },
+  { top: '28%', left: '5%' },
+  { top: '38%', left: '18%' },
+  { top: '48%', left: '8%' },
+  { top: '58%', left: '20%' },
+  { top: '68%', left: '10%' },
+  { top: '80%', left: '7%' },
+  { top: '88%', left: '22%' },
+  { top: '92%', left: '12%' }
 ];
 const rightSkillPositions = [
-  { top: '9%', right: '10%' },
-  { top: '21%', right: '17%' },
-  { top: '15%', right: '8%' },
-  { top: '33%', right: '13%' },
-  { top: '41%', right: '6%' },
-  { top: '53%', right: '20%' },
-  { top: '66%', right: '11%' },
-  { top: '74%', right: '18%' },
-  { top: '83%', right: '7%' },
-  { top: '91%', right: '15%' },
-  { top: '59%', right: '13%' }
+  { top: '7%', right: '8%' },
+  { top: '19%', right: '18%' },
+  { top: '13%', right: '4%' },
+  { top: '31%', right: '12%' },
+  { top: '43%', right: '2%' },
+  { top: '57%', right: '22%' },
+  { top: '69%', right: '9%' },
+  { top: '78%', right: '19%' },
+  { top: '87%', right: '5%' },
+  { top: '89%', right: '16%' },
+  { top: '62%', right: '14%' }
 ];
 
 function StartScreen() {

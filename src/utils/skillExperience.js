@@ -129,7 +129,8 @@ const BATTLE_ACTION_SKILLS = {
     'defend': ['armor', 'block', 'dodge'],
     
     'heal': ['heal', 'hp'],
-    'buff': ['buff', 'energy'],
+    'buff': ['buff', 'energyShield'],
+    'debuff': ['debuff'],
     
     'battle_participation': ['hp', 'armor'],
     'damage_taken': ['armor', 'block', 'dodge'],

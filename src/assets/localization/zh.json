@@ -168,7 +168,9 @@
     "levelBonuses": "等级奖励",
     "attack": "攻击力",
     "minDamage": "最小伤害",
-    "maxDamage": "最大伤害"
+    "maxDamage": "最大伤害",
+    "energyShield": "能量护盾",
+    "debuff": "减益"
   },
   "enemies": {
     "goblin": "哥布林",

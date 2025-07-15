@@ -179,7 +179,9 @@
     "maxDamage": "Max Damage",
     "defense": "Defense",
     "advanced": "Advanced",
-    "attackSpeed": "Attack Speed"
+    "attackSpeed": "Attack Speed",
+    "energyShield": "Energy Shield",
+    "debuff": "Debuff"
   },
       "enemies": {
         "goblin": "Goblin",

@@ -19,6 +19,8 @@ export const INITIAL_SKILLS = {
         ice: { level: 1, xp: 0 }
     },
     defense: {
+        hp: { level: 1, xp: 0 },
+        energyShield: { level: 1, xp: 0 },
         block: { level: 1, xp: 0 },
         dodge: { level: 1, xp: 0 },
         armor: { level: 1, xp: 0 }
@@ -26,8 +28,7 @@ export const INITIAL_SKILLS = {
     utility: {
         heal: { level: 1, xp: 0 },
         buff: { level: 1, xp: 0 },
-        hp: { level: 1, xp: 0 },
-        energy: { level: 1, xp: 0 }
+        debuff: { level: 1, xp: 0 }
     },
     advanced: {
         lifeSteal: { level: 1, xp: 0 },
@@ -119,12 +120,6 @@ export const SKILL_LEVEL_BONUSES = {
         MIN_DAMAGE: 0,
         MAX_DAMAGE: 0
     },
-    energy: {
-        ATK: 0,
-        MIN_DAMAGE: 0,
-        MAX_DAMAGE: 0
-    },
-    
     lifeSteal: {
         ATK: 0.3,
         MIN_DAMAGE: 0.2,

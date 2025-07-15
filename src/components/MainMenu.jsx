@@ -7,6 +7,15 @@ import { useTranslate } from "../hooks/useTranslate";
 import { getSkillData } from "../utils/skillExperience.js";
 import { Tooltip } from "@mui/material";
 
+// Helper to chunk an array into groups of n
+function chunkArray(array, size) {
+    const result = [];
+    for (let i = 0; i < array.length; i += size) {
+        result.push(array.slice(i, i + size));
+    }
+    return result;
+}
+
 function MainMenu() {
     const { t } = useTranslate();
     const [skills, setSkills] = useState(INITIAL_SKILLS);
@@ -85,24 +94,53 @@ function MainMenu() {
                 </Tooltip>
             </div>
 
-            {/* Skills Sections - Keep as is for skill levels */}
-            {Object.entries(skills).map(([category, subskills]) => (
-                <div key={category} className={styles.group}>
-                    <div className={styles.groupTitle}>{t(`skills.${category}`)}</div>
-                    {typeof subskills === "object" &&
-                        Object.entries(subskills).map(([skill, skillObj]) => (
-                            <NavLink
-                                key={skill}
-                                to="/skills"
-                                className={styles.skillItem}
-                            >
-                                <img src={getSkillIcon(skill)} alt={skill} />
-                                <span className={styles.skillLabel}>{t(`skills.${skill}`)}</span>
-                                <span className={styles.skillLevel}>{t('common.level')}{skillObj.level}</span>
-                            </NavLink>
-                        ))}
-                </div>
-            ))}
+            {/* Skills Sections - Redesigned */}
+            <div className={styles.skillCategoriesMenu}>
+                {Object.entries(skills).map(([category, subskills], idx) => {
+                    const categoryColors = [
+                        '#ff8c00', // melee - orange
+                        '#4caf50', // ranged - green
+                        '#3b82f6', // magic - blue
+                        '#b45af2', // defense - purple
+                        '#10b981', // utility - teal
+                        '#ffd700', // advanced - gold
+                    ];
+                    const borderColor = categoryColors[idx % categoryColors.length];
+                    const skillEntries = Object.entries(subskills);
+                    const skillRows = chunkArray(skillEntries, 3);
+                    return (
+                        <div
+                            key={category}
+                            className={styles.skillCategoryCard}
+                            style={{ border: `2px solid ${borderColor}`, background: 'rgba(0,0,0,0.15)', borderRadius: 10, marginBottom: 10, padding: 8 }}
+                        >
+                            <div className={styles.skillCategoryTitle} style={{ color: borderColor, fontWeight: 'bold', fontSize: '0.75rem', marginBottom: 6, textAlign: 'center', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                {t(`skills.${category}`)}
+                            </div>
+                            {skillRows.map((row, rowIdx) => (
+                                <div key={rowIdx} style={{ display: 'flex', justifyContent: 'center', gap: 0, marginBottom: 2, width: '100%' }}>
+                                    {Array.from({ length: 3 }).map((_, i) => {
+                                        const skillPair = row[i];
+                                        if (!skillPair) {
+                                            // Empty slot for alignment
+                                            return <div key={i} style={{ flex: 1, minWidth: 0 }} />;
+                                        }
+                                        const [skill, skillObj] = skillPair;
+                                        return (
+                                            <Tooltip key={skill} title={t(`skills.${skill}`)} arrow placement="right">
+                                                <div className={styles.skillCategorySkill} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 0, cursor: 'pointer' }}>
+                                                    <img src={getSkillIcon(skill)} alt={skill} style={{ width: 18, height: 18, marginBottom: 2, filter: 'drop-shadow(1px 1px 0px #000)' }} />
+                                                    <span className={styles.skillLevel} style={{ fontSize: '0.55rem', color: borderColor, fontWeight: 'bold', textShadow: '1px 1px 0px #000' }}>{skillObj.level}/99</span>
+                                                </div>
+                                            </Tooltip>
+                                        );
+                                    })}
+                                </div>
+                            ))}
+                        </div>
+                    );
+                })}
+            </div>
         </aside>
     );
 }

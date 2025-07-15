@@ -28,6 +28,7 @@ import {
     getCurrentSlot
 } from "../utils/saveManager.js";
 import { INITIAL_SKILLS } from "../utils/constants";
+import { SYSTEM_COLORS } from "../utils/common";
 
 const GAME_STATE_KEYS = [
     'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
@@ -258,8 +259,8 @@ function Home() {
                             </Typography>
                         </div>
                     ) : (
-                        <Typography variant="body2" color="textSecondary">
-                            Empty Slot
+                        <Typography variant="body2" sx={{ color: SYSTEM_COLORS.TEXT.PRIMARY }}>
+                            {t('common.empty')}
                         </Typography>
                     )}
 
