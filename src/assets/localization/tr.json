@@ -175,7 +175,10 @@
     "levelBonuses": "Seviye Bonusları",
     "attack": "Saldırı",
     "minDamage": "Min Hasar",
-    "maxDamage": "Max Hasar"
+    "maxDamage": "Max Hasar",
+    "defense": "Savunma",
+    "advanced": "Gelişmiş",
+    "attackSpeed": "Saldırı Hızı"
   },
       "enemies": {
         "goblin": "Goblin",

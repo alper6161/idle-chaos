@@ -175,7 +175,10 @@
     "levelBonuses": "Level Bonuses",
     "attack": "Attack",
     "minDamage": "Min Damage",
-    "maxDamage": "Max Damage"
+    "maxDamage": "Max Damage",
+    "defense": "Defense",
+    "advanced": "Advanced",
+    "attackSpeed": "Attack Speed"
   },
       "enemies": {
         "goblin": "Goblin",

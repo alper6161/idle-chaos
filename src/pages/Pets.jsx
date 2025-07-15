@@ -64,14 +64,20 @@ function Pets() {
                 Drop Rate: <span style={{ color: '#ff6b6b' }}>{(pet.dropRate * 100).toFixed(5)}%</span>
               </div>
               <div style={{ fontSize: 12, color: '#96ceb4', marginBottom: 6 }}>
-                Bonuses:
-                <ul style={{ margin: 0, paddingLeft: 16 }}>
+                <div style={{ fontWeight: 'bold', marginBottom: 4 }}>Bonuses:</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
                   {Object.entries(pet.bonuses).map(([stat, value]) => (
-                    <li key={stat}>
+                    <span key={stat} style={{
+                      background: 'rgba(150, 206, 180, 0.2)',
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      border: '1px solid rgba(150, 206, 180, 0.3)',
+                      fontSize: '11px'
+                    }}>
                       <b>{stat}</b>: {value}
-                    </li>
+                    </span>
                   ))}
-                </ul>
+                </div>
               </div>
               {owned && (
                 <div style={{
