@@ -80,7 +80,7 @@ function Settings({ open, onClose }) {
     const handleHomeConfirm = () => {
         setShowHomeConfirm(false);
         onClose();
-        navigate();
+        navigate("/");
     };
 
     const handleManualSave = () => {

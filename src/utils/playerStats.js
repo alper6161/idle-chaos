@@ -3,12 +3,12 @@ import { getSkillData } from './skillExperience.js';
 import { SKILL_LEVEL_BONUSES } from './constants.js';
 
 export const BASE_PLAYER_STATS = {
-    ATK: 10,
-    DEF: 5,
-    HEALTH: 100,
+    ATK: 6,
+    DEF: 3,
+    HEALTH: 60,
     ATTACK_SPEED: 100,
-    CRIT_CHANCE: 5,
-    CRIT_DAMAGE: 150
+    CRIT_CHANCE: 3,
+    CRIT_DAMAGE: 120
 };
 
 const EQUIPPED_ITEMS_KEY = 'idle-chaos-equipped-items';

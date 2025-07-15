@@ -13,30 +13,30 @@ const DIFFICULTY_LEVELS = {
     IMPOSSIBLE: { minLevel: 81, maxLevel: 100, rarityBonus: 0.4 }
 };
 
-// Base rarity chances
+// Base rarity chances - Made harder
 const BASE_RARITY_CHANCES = {
-    common: 0.6,
-    uncommon: 0.25,
-    rare: 0.1,
-    epic: 0.04,
-    legendary: 0.01
+    common: 0.8,
+    uncommon: 0.15,
+    rare: 0.04,
+    epic: 0.008,
+    legendary: 0.002
 };
 
-// Level scaling multipliers
+// Level scaling multipliers - Made harder
 const LEVEL_SCALING = {
-    common: 1.0,
-    uncommon: 1.2,
-    rare: 1.5,
-    epic: 2.0,
-    legendary: 3.0
+    common: 0.8,
+    uncommon: 1.0,
+    rare: 1.3,
+    epic: 1.6,
+    legendary: 2.0
 };
 
 const STAT_VARIATIONS = {
-    common: { min: 0.8, max: 1.2 },
-    uncommon: { min: 0.9, max: 1.3 },
-    rare: { min: 1.0, max: 1.4 },
-    epic: { min: 1.1, max: 1.5 },
-    legendary: { min: 1.2, max: 1.6 }
+    common: { min: 0.6, max: 1.0 },
+    uncommon: { min: 0.7, max: 1.1 },
+    rare: { min: 0.8, max: 1.2 },
+    epic: { min: 0.9, max: 1.3 },
+    legendary: { min: 1.0, max: 1.4 }
 };
 
 const ADDITIONAL_STATS_POOL = {
@@ -163,14 +163,14 @@ const applyLevelScaling = (baseStat, level, rarity) => {
 // Apply rarity scaling to base stats - higher rarity = higher base stats
 const applyRarityScaling = (baseStat, rarity) => {
     const rarityMultipliers = {
-        common: 1.0,
-        uncommon: 1.3,
-        rare: 1.6,
-        epic: 2.0,
-        legendary: 2.5
+        common: 0.8,
+        uncommon: 1.0,
+        rare: 1.3,
+        epic: 1.6,
+        legendary: 2.0
     };
     
-    const multiplier = rarityMultipliers[rarity] || 1.0;
+    const multiplier = rarityMultipliers[rarity] || 0.8;
     return Math.floor(baseStat * multiplier);
 };
 
@@ -184,13 +184,13 @@ const getRandomAdditionalStats = (equipmentType, rarity, level) => {
     const additionalStats = {};
     const statsPool = ADDITIONAL_STATS_POOL[equipmentType === 'weapon' ? 'weapon' : 'armor'];
     
-    // Number of additional stats based on rarity
+    // Number of additional stats based on rarity - Made harder
     const additionalStatCount = {
         common: 0,
-        uncommon: Math.random() < 0.3 ? 1 : 0,
-        rare: Math.random() < 0.7 ? 1 : 0,
-        epic: Math.random() < 0.5 ? 2 : 1,
-        legendary: Math.random() < 0.8 ? 3 : 2
+        uncommon: Math.random() < 0.2 ? 1 : 0,
+        rare: Math.random() < 0.5 ? 1 : 0,
+        epic: Math.random() < 0.3 ? 2 : 1,
+        legendary: Math.random() < 0.6 ? 3 : 2
     };
 
     const count = additionalStatCount[rarity] || 0;

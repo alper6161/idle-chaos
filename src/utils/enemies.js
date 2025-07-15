@@ -33,14 +33,14 @@ const enemies = {
         ATTACK_SPEED: 2,
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/9/99/GoblinGreen.png/220px-GoblinGreen.png",
         drops: [
-            { name: "Rusty Sword", chance: 0.25, type: "equipment" },
-            { name: "Goblin Shield", chance: 0.20, type: "equipment" },
-            { name: "Goblin Helmet", chance: 0.15, type: "equipment" },
-            { name: "Goblin Armor", chance: 0.12, type: "equipment" },
-            { name: "Goblin Gloves", chance: 0.10, type: "equipment" },
-            { name: "Goblin Ring", chance: 0.08, type: "equipment" },
-            { name: "Gold Coin", chance: 0.5, type: "gold", value: 5 },
-            { name: "Goblin Ear", chance: 0.1, type: "gold", value: 18 }
+            { name: "Rusty Sword", chance: 0.15, type: "equipment" },
+            { name: "Goblin Shield", chance: 0.12, type: "equipment" },
+            { name: "Goblin Helmet", chance: 0.10, type: "equipment" },
+            { name: "Goblin Armor", chance: 0.08, type: "equipment" },
+            { name: "Goblin Gloves", chance: 0.06, type: "equipment" },
+            { name: "Goblin Ring", chance: 0.05, type: "equipment" },
+            { name: "Gold Coin", chance: 0.4, type: "gold", value: 3 },
+            { name: "Goblin Ear", chance: 0.08, type: "gold", value: 12 }
         ]
     },
     RAT: {
@@ -52,13 +52,13 @@ const enemies = {
         ATTACK_SPEED: 3,
         portrait: "https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/GiantRat.png/220px-GiantRat.png",
         drops: [
-            { name: "Rat Fang Dagger", chance: 0.20, type: "equipment" },
-            { name: "Rat Fang Bow", chance: 0.15, type: "equipment" },
-            { name: "Rat Hide Gloves", chance: 0.12, type: "equipment" },
-            { name: "Rat Tail Ring", chance: 0.10, type: "equipment" },
-            { name: "Rat Pelt Cape", chance: 0.08, type: "equipment" },
-            { name: "Rat Tail", chance: 0.4, type: "gold", value: 8 },
-            { name: "Rotten Cheese", chance: 0.2, type: "gold", value: 15 }
+            { name: "Rat Fang Dagger", chance: 0.12, type: "equipment" },
+            { name: "Rat Fang Bow", chance: 0.10, type: "equipment" },
+            { name: "Rat Hide Gloves", chance: 0.08, type: "equipment" },
+            { name: "Rat Tail Ring", chance: 0.06, type: "equipment" },
+            { name: "Rat Pelt Cape", chance: 0.05, type: "equipment" },
+            { name: "Rat Tail", chance: 0.3, type: "gold", value: 5 },
+            { name: "Rotten Cheese", chance: 0.15, type: "gold", value: 10 }
         ]
     },
     SLIME: {

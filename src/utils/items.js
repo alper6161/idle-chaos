@@ -14,36 +14,36 @@ export const ITEM_LEVEL_RANGES = {
 export const EQUIPMENT_TEMPLATES = {
     // === WEAPONS ===
     
-    // Melee Weapons
+    // Melee Weapons - Made harder
     "Rusty Sword": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 5, CRIT_CHANCE: 3 }
+        baseStats: { ATK: 3, CRIT_CHANCE: 2 }
     },
     "Rat Fang Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 4, CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
+        baseStats: { ATK: 2, CRIT_CHANCE: 5, ATTACK_SPEED: 0.2 }
     },
     "Bone Sword": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 8, CRIT_CHANCE: 5, CRIT_DAMAGE: 10 }
+        baseStats: { ATK: 5, CRIT_CHANCE: 3, CRIT_DAMAGE: 8 }
     },
     "Orc Axe": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 12, CRIT_DAMAGE: 15 }
+        baseStats: { ATK: 8, CRIT_DAMAGE: 12 }
     },
     "Spider Fang Blade": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 10, CRIT_CHANCE: 12, ATTACK_SPEED: 0.4 }
+        baseStats: { ATK: 7, CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
     },
     "Troll Club": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 15, CRIT_CHANCE: 8, CRIT_DAMAGE: 20 }
+        baseStats: { ATK: 10, CRIT_CHANCE: 6, CRIT_DAMAGE: 15 }
     },
     "Dragon Flame Sword": {
         type: "weapon",
@@ -242,46 +242,46 @@ export const EQUIPMENT_TEMPLATES = {
     
     // === ARMOR & ACCESSORIES ===
     
-    // Shields
+    // Shields - Made harder
     "Goblin Shield": {
         type: "shield",
-        baseStats: { DEF: 3, BLOCK_CHANCE: 8 }
+        baseStats: { DEF: 2, BLOCK_CHANCE: 5 }
     },
     "Slime Shield": {
         type: "shield",
-        baseStats: { DEF: 4, BLOCK_CHANCE: 10 }
+        baseStats: { DEF: 3, BLOCK_CHANCE: 7 }
     },
     "Slime Armor": {
         type: "chest",
-        baseStats: { DEF: 5, HEALTH: 18 }
+        baseStats: { DEF: 3, HEALTH: 12 }
     },
     
-    // Helmets
+    // Helmets - Made harder
     "Goblin Helmet": {
         type: "helmet",
-        baseStats: { DEF: 2, HEALTH: 8 }
+        baseStats: { DEF: 1, HEALTH: 5 }
     },
     "Bone Helmet": {
         type: "helmet",
-        baseStats: { DEF: 3, HEALTH: 12 }
+        baseStats: { DEF: 2, HEALTH: 8 }
     },
     "Orc Helmet": {
         type: "helmet",
-        baseStats: { DEF: 4, HEALTH: 15 }
+        baseStats: { DEF: 3, HEALTH: 10 }
     },
     
-    // Chest Armor
+    // Chest Armor - Made harder
     "Goblin Armor": {
         type: "chest",
-        baseStats: { DEF: 4, HEALTH: 15 }
+        baseStats: { DEF: 3, HEALTH: 10 }
     },
     "Bone Armor": {
         type: "chest",
-        baseStats: { DEF: 6, HEALTH: 20 }
+        baseStats: { DEF: 4, HEALTH: 15 }
     },
     "Orc Armor": {
         type: "chest",
-        baseStats: { DEF: 8, HEALTH: 25 }
+        baseStats: { DEF: 6, HEALTH: 18 }
     },
     "Wolf Hide Armor": {
         type: "chest",
