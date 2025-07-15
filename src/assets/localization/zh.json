@@ -104,7 +104,17 @@
     "dungeonChestRewards": "地下城宝箱奖励",
     "enterDungeon": "进入地下城",
     "boss": "首领",
-    "dropChance": "掉落概率"
+    "dropChance": "掉落概率",
+    "dungeonStage": "第{{stage}}/7关",
+    "dungeonExitWarningTitle": "退出地牢？",
+    "dungeonExitWarning": "如果你离开，将无法重新进入此地牢。确定要退出吗？",
+    "dungeonComplete": "地牢已完成！",
+    "dungeonCompleteDescription": "你已通关地牢。可以领取宝箱奖励！",
+    "nextEnemy": "下一个敌人",
+    "nextBoss": "Boss即将到来",
+    "noDropsAvailable": "无可掉落物品。",
+    "noLootYet": "尚未获得战利品。",
+    "lootGained": "获得的战利品"
   },
   "equipment": {
     "equip": "装备",

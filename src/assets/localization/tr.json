@@ -110,7 +110,17 @@
     "dungeonChestRewards": "Zindan Sandığı Ödülleri",
     "enterDungeon": "Zindana Gir",
     "boss": "BOSS",
-    "dropChance": "Düşme Şansı"
+    "dropChance": "Düşme Şansı",
+    "dungeonStage": "Aşama {{stage}}/7",
+    "dungeonExitWarningTitle": "Zindandan Çıkılsın mı?",
+    "dungeonExitWarning": "Çıkarsan bu zindana tekrar giremeyeceksin. Emin misin?",
+    "dungeonComplete": "Zindan Tamamlandı!",
+    "dungeonCompleteDescription": "Zindanı temizledin. Sandık ödülünü alabilirsin!",
+    "nextEnemy": "Sonraki Düşman",
+    "nextBoss": "Boss Yaklaşıyor",
+    "noDropsAvailable": "Düşecek eşya yok.",
+    "noLootYet": "Henüz loot yok.",
+    "lootGained": "Kazandığın Loot"
   },
   "equipment": {
     "equip": "Tak",

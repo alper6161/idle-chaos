@@ -54,6 +54,7 @@ import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
 import { saveCurrentGame } from "../utils/saveManager.js";
+import { getEnemyById } from "../utils/enemies.js";
 
 // Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
@@ -97,6 +98,8 @@ function Battle({ player }) {
     const [battleTab, setBattleTab] = useState('locations');
     const [openLocations, setOpenLocations] = useState(() => LOCATIONS.map((_, i) => i === 0));
     const [openDungeons, setOpenDungeons] = useState(() => DUNGEONS.map((_, i) => i === 0));
+    const [dungeonRun, setDungeonRun] = useState(null); // { dungeon, stages, currentStage, completed, chestAwarded }
+    const [exitWarningOpen, setExitWarningOpen] = useState(false);
 
     // Potion usage function
     const handleUsePotion = (potionType) => {
@@ -219,6 +222,10 @@ function Battle({ player }) {
     };
 
     const handleBackToSelection = () => {
+        if (dungeonRun && !dungeonRun.completed) {
+            setExitWarningOpen(true);
+            return;
+        }
         setBattleMode('selection');
         setCurrentEnemy(null);
         setBattleResult(null);
@@ -226,6 +233,7 @@ function Battle({ player }) {
         setIsBattleActive(false);
         setIsWaitingForEnemy(false);
         setEnemySpawnProgress(0);
+        setDungeonRun(null);
     };
 
     const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
@@ -766,6 +774,46 @@ function Battle({ player }) {
         setOpenDungeons((prev) => prev.map((open, i) => (i === idx ? !open : open)));
     };
 
+    const startDungeonRun = (dungeon) => {
+        const enemyPool = dungeon.enemies;
+        const stages = [];
+        for (let i = 0; i < 6; i++) {
+            const rand = enemyPool[Math.floor(Math.random() * enemyPool.length)];
+            stages.push(rand);
+        }
+        stages.push(dungeon.boss);
+        setDungeonRun({ dungeon, stages, currentStage: 0, completed: false, chestAwarded: false });
+        setBattleMode('dungeon');
+        const firstEnemy = Object.values(enemies).find(e => e.id === stages[0]);
+        setCurrentEnemy(firstEnemy);
+        setTimeout(() => startRealTimeBattle(firstEnemy), 0);
+    };
+    const handleDungeonEnemyDefeated = () => {
+        if (!dungeonRun) return;
+        if (dungeonRun.currentStage < 6) {
+            const nextStage = dungeonRun.currentStage + 1;
+            setDungeonRun(prev => ({ ...prev, currentStage: nextStage }));
+            const nextEnemy = Object.values(enemies).find(e => e.id === dungeonRun.stages[nextStage]);
+            setCurrentEnemy(nextEnemy);
+            setTimeout(() => startRealTimeBattle(nextEnemy), 0);
+        } else {
+            setDungeonRun(prev => ({ ...prev, completed: true }));
+            setBattleMode('dungeon-complete');
+        }
+    };
+
+    const confirmExitDungeon = () => {
+        setExitWarningOpen(false);
+        setBattleMode('selection');
+        setCurrentEnemy(null);
+        setBattleResult(null);
+        setCurrentBattle(null);
+        setIsBattleActive(false);
+        setIsWaitingForEnemy(false);
+        setEnemySpawnProgress(0);
+        setDungeonRun(null);
+    };
+
     // Battle Screen
     return (
         <div className={styles.battlePageContainer}>
@@ -952,7 +1000,7 @@ function Battle({ player }) {
                                                 </Tooltip>
                                             ))}
                                         </div>
-                                        <Button size="medium" variant="contained" color="secondary" style={{ marginTop: 12 }}>
+                                        <Button size="medium" variant="contained" color="secondary" style={{ marginTop: 12 }} onClick={() => startDungeonRun(dungeon)}>
                                             {t('battle.enterDungeon')}
                                         </Button>
                                     </>}
@@ -1682,6 +1730,221 @@ function Battle({ player }) {
                     </div>
                 </>
             )}
+            {battleMode === 'dungeon' && dungeonRun && (
+                <>
+                    <div className={styles.dungeonContainer}>
+                        <div className={styles.dungeonHeader}>
+                            <Typography variant="h6">{dungeonRun.dungeon.name}</Typography>
+                            <Typography variant="subtitle1">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
+                            <Button 
+                                variant="outlined" 
+                                onClick={handleBackToSelection}
+                                className={styles.backButton}
+                            >
+                                {t('battle.backToSelection')}
+                            </Button>
+                        </div>
+                        {/* Render the full battle UI below the dungeon header */}
+                        <div className={styles.battleContainer}>
+                            <div className={styles.fighters}>
+                                {/* PLAYER */}
+                                <div className={styles.fighter}>
+                                    <Avatar src={getCharacterIcon(selectedCharacter)} className={styles.avatar} />
+                                    <Typography variant="h6">{getCharacterName(selectedCharacter)}</Typography>
+                                    {damageDisplay.player && (
+                                        <Typography 
+                                            variant="h4" 
+                                            className={`${styles.damageDisplay} ${
+                                                damageDisplay.player === 'MISS' ? styles.missDisplay : 
+                                                damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
+                                            }`}
+                                        >
+                                            {damageDisplay.player}
+                                        </Typography>
+                                    )}
+                                    <div className={styles.hpBarContainer}>
+                                        <Typography className={styles.hpText}>
+                                            HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || playerStats.HEALTH}
+                                        </Typography>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : (playerHealth / playerStats.HEALTH) * 100}
+                                            className={`${styles.progress} ${styles.playerHpBar}`}
+                                        />
+                                    </div>
+                                    <div className={styles.attackBarContainer}>
+                                        <LinearProgress
+                                            variant="determinate"
+                                            value={currentBattle?.playerProgress || 0}
+                                            className={`${styles.progress} ${styles.attackBar}`}
+                                            sx={{ height: '15px', borderRadius: '8px' }}
+                                        />
+                                    </div>
+                                    {currentBattle && (
+                                        <div className={styles.attackTypeSmall}>
+                                            <Typography variant="caption" className={styles.attackTypeSmallTitle}>
+                                                🎯 {t('battle.selectAttackType')}
+                                            </Typography>
+                                            <div className={styles.attackTypeSmallGrid}>
+                                                {availableAttackTypes.map((attackType) => (
+                                                    <Tooltip
+                                                        key={attackType.type}
+                                                        title={attackType.description}
+                                                        arrow
+                                                        placement="top"
+                                                    >
+                                                        <Button
+                                                            variant="text"
+                                                            className={`${styles.attackTypeSmallButton} ${
+                                                                selectedAttackType === attackType.type ? styles.attackTypeSelected : ''
+                                                            }`}
+                                                            onClick={() => setSelectedAttackType(attackType.type)}
+                                                        >
+                                                            <span className={styles.attackTypeSmallIcon}>{attackType.icon}</span>
+                                                        </Button>
+                                                    </Tooltip>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                {/* ENEMY */}
+                                <div className={styles.fighter}>
+                                    <Avatar 
+                                        src={getEnemyIcon(currentEnemy?.id)} 
+                                        className={styles.avatar}
+                                        onError={(e) => {
+                                            if (e.target && e.target.nextSibling) {
+                                                e.target.style.display = 'none';
+                                                e.target.nextSibling.style.display = 'flex';
+                                            }
+                                        }}
+                                    />
+                                    <div 
+                                        className={styles.avatarFallback}
+                                        style={{ display: 'none' }}
+                                    >
+                                        {getEnemyInitial(currentEnemy?.name)}
+                                    </div>
+                                    <Typography variant="h6">{currentEnemy?.name}</Typography>
+                                    {damageDisplay.enemy && (
+                                        <Typography 
+                                            variant="h4" 
+                                            className={`${styles.damageDisplay} ${
+                                                damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
+                                                damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
+                                            }`}
+                                        >
+                                            {damageDisplay.enemy}
+                                        </Typography>
+                                    )}
+                                    {isWaitingForEnemy ? (
+                                        <div className={styles.enemySpawnContainer}>
+                                            <Typography className={styles.spawnText}>
+                                                Spawning Enemy...
+                                            </Typography>
+                                            <div className={styles.circularProgress}>
+                                                <div 
+                                                    className={styles.circularProgressBar}
+                                                    style={{ '--progress': `${enemySpawnProgress}%` }}
+                                                ></div>
+                                                <div className={styles.circularProgressText}>
+                                                    {Math.ceil((100 - enemySpawnProgress) / 20)}s
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className={styles.hpBarContainer}>
+                                                <Typography 
+                                                    className={`${styles.hpText} ${
+                                                        getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
+                                                    }`}
+                                                >
+                                                    HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
+                                                </Typography>
+                                                <LinearProgress
+                                                    variant="determinate"
+                                                    value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100) : 100}
+                                                    className={`${styles.progress} ${styles.enemyHpBar}`}
+                                                />
+                                            </div>
+                                            <div className={styles.attackBarContainer}>
+                                                <LinearProgress
+                                                    variant="determinate"
+                                                    value={currentBattle?.enemyProgress || 0}
+                                                    className={`${styles.progress} ${styles.attackBar}`}
+                                                    sx={{ height: '15px', borderRadius: '8px' }}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                                {/* Battle Log - Toggleable Widget */}
+                                {battleLogVisible && (
+                                    <div className={styles.fighter}>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                            <Typography variant="h6">{t('battle.battleLog')}</Typography>
+                                            <Tooltip title={t('battle.closeBattleLog')} arrow>
+                                                <IconButton
+                                                    onClick={() => setBattleLogVisible(false)}
+                                                    sx={{
+                                                        position: 'absolute',
+                                                        right: 8,
+                                                        top: 8,
+                                                        color: '#ffd700',
+                                                        background: 'rgba(0,0,0,0.18)',
+                                                        borderRadius: 2,
+                                                        '&:hover': { background: 'rgba(255,215,0,0.12)' }
+                                                    }}
+                                                    size="small"
+                                                >
+                                                    <ExpandLess />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Box>
+                                        <div className={styles.battleLog}>
+                                            {battleLog.length === 0 ? (
+                                                <Typography variant="body2" color="textSecondary">{t('battle.noBattleLog')}</Typography>
+                                            ) : (
+                                                battleLog.map((entry, idx) => (
+                                                    <Typography key={idx} variant="body2" className={styles[`${entry.type}Log`] || styles.battleLogEntry}>
+                                                        {entry.message}
+                                                    </Typography>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+            {battleMode === 'dungeon-complete' && (
+                <>
+                    {/* Dungeon Complete UI */}
+                    <div className={styles.dungeonCompleteContainer}>
+                        <Typography variant="h5">{t('battle.dungeonComplete')}</Typography>
+                        <Typography variant="body1">{t('battle.dungeonCompleteDescription')}</Typography>
+                        <Button 
+                            variant="outlined" 
+                            onClick={handleBackToSelection}
+                            className={styles.backButton}
+                        >
+                            {t('battle.backToSelection')}
+                        </Button>
+                    </div>
+                </>
+            )}
+            <Dialog open={exitWarningOpen} onClose={() => setExitWarningOpen(false)}>
+                <DialogTitle>{t('battle.dungeonExitWarningTitle')}</DialogTitle>
+                <DialogContent>{t('battle.dungeonExitWarning')}</DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setExitWarningOpen(false)}>{t('common.cancel')}</Button>
+                    <Button onClick={confirmExitDungeon} color="error">{t('common.exit')}</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }

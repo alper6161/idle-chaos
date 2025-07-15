@@ -110,7 +110,17 @@
     "dungeonChestRewards": "Dungeon Chest Rewards",
     "enterDungeon": "Enter Dungeon",
     "boss": "Boss",
-    "dropChance": "Drop Chance"
+    "dropChance": "Drop Chance",
+    "dungeonStage": "Stage {{stage}}/7",
+    "dungeonExitWarningTitle": "Exit Dungeon?",
+    "dungeonExitWarning": "You cannot re-enter this dungeon if you leave. Are you sure you want to exit?",
+    "dungeonComplete": "Dungeon Complete!",
+    "dungeonCompleteDescription": "You have cleared the dungeon. Claim your chest reward!",
+    "nextEnemy": "Next Enemy",
+    "nextBoss": "Boss Coming Soon",
+    "noDropsAvailable": "No drops available.",
+    "noLootYet": "No loot yet.",
+    "lootGained": "Loot Gained"
   },
   "equipment": {
     "equip": "Equip",
