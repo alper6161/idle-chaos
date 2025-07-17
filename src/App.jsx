@@ -1,5 +1,5 @@
 import './App.css'
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import {Navigate, Route, Routes} from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Skills from "./pages/Skills.jsx";

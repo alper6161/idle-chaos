@@ -32,7 +32,6 @@ function createWindow() {
   } else {
     // Production mode - load from built files
     const indexPath = path.join(__dirname, '../dist/index.html');
-    console.log('Loading file:', indexPath);
     mainWindow.loadFile(indexPath);
     // Open DevTools in production to debug
     mainWindow.webContents.openDevTools();

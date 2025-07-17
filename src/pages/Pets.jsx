@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { PETS, getPetRarityColor, getPetRarityName } from "../utils/pets.js";
 import enemies from "../utils/enemies.js";
 import styles from "../assets/styles/Equipment.module.scss";

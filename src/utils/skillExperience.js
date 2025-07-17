@@ -372,26 +372,7 @@ export const getAvailableAttackTypes = (weaponType) => {
     }
 };
 
-export const debugSkillLeveling = (skillName) => {
-    const skillInfo = getSkillInfo(skillName);
-    
-    const testXP = 50;
-    const leveledUp = addSkillExperience(skillName, testXP);
-    const newSkillInfo = getSkillInfo(skillName);
-    
-    return { leveledUp, oldLevel: skillInfo.level, newLevel: newSkillInfo.level };
-};
-
-export const debugXPRequirements = () => {
-    console.log('🔍 XP Requirements for first 10 levels:');
-    for (let level = 1; level <= 10; level++) {
-        let totalXP = 0;
-        for (let l = 1; l <= level; l++) {
-            totalXP += SKILL_XP_REQUIREMENTS[l] || 0;
-        }
-        console.log(`Level ${level}: ${totalXP} total XP needed`);
-    }
-}; 
+ 
 
 export const initializeSkillDataForCurrentSlot = () => {
     try {
@@ -399,15 +380,10 @@ export const initializeSkillDataForCurrentSlot = () => {
         const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
         const slotKey = `skillData_slot_${slotNumber}`;
         
-        console.log('Initializing skill data for slot:', slotNumber);
-        
         // Check if skill data already exists
         const existing = localStorage.getItem(slotKey);
         if (!existing) {
-            console.log('No existing skill data found, initializing with INITIAL_SKILLS');
             localStorage.setItem(slotKey, JSON.stringify(INITIAL_SKILLS));
-        } else {
-            console.log('Existing skill data found:', existing);
         }
     } catch (error) {
         console.error('Error initializing skill data:', error);

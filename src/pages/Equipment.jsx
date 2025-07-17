@@ -340,16 +340,7 @@ function Equipment() {
         return () => clearInterval(interval);
     }, []);
 
-    // Clear old localStorage data to start fresh with weapon types
-    // useEffect(() => {
-    //     const clearOldData = () => {
-    //         localStorage.removeItem(STORAGE_KEYS.INVENTORY);
-    //         localStorage.removeItem(STORAGE_KEYS.EQUIPPED_ITEMS);
-    //         console.log('Cleared old equipment data to start fresh with weapon types');
-    //     };
-    //     // Uncomment the line below to clear old data (run once)
-    //     // clearOldData();
-    // }, []);
+
 
     const filteredInventory = inventory.filter(item => {
         const matchesRarity = rarityFilter === "all" || item.rarity === rarityFilter;
