@@ -55,6 +55,7 @@ import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
 import { saveCurrentGame } from "../utils/saveManager.js";
 import { getEnemyById } from "../utils/enemies.js";
+import { LOOT_BAG_LIMIT } from "../utils/constants.js";
 
 // Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
@@ -103,6 +104,254 @@ function Battle({ player }) {
     const [dungeonCompleteDialog, setDungeonCompleteDialog] = useState({ open: false, countdown: 5 });
     const [chestDropDialog, setChestDropDialog] = useState({ open: false, item: null, dungeon: null });
     const [chestPreviewModal, setChestPreviewModal] = useState({ open: false, dungeon: null, chestItem: null });
+
+    // Calculate item sell value based on estimated rarity and level
+    const calculateItemSellValue = (itemName) => {
+        // Base values per estimated rarity (based on item name patterns)
+        const baseValues = {
+            common: 10,
+            uncommon: 25,
+            rare: 60,
+            epic: 150,
+            legendary: 400
+        };
+        
+        // Estimate rarity based on item name patterns
+        let rarity = 'common';
+        const itemLower = itemName.toLowerCase();
+        
+        if (itemLower.includes('legendary') || itemLower.includes('dragon') || itemLower.includes('celestial') || itemLower.includes('ancient') || itemLower.includes('void')) {
+            rarity = 'legendary';
+        } else if (itemLower.includes('epic') || itemLower.includes('demon') || itemLower.includes('infernal') || itemLower.includes('archdemon')) {
+            rarity = 'epic';
+        } else if (itemLower.includes('rare') || itemLower.includes('bone') || itemLower.includes('spider') || itemLower.includes('skeleton')) {
+            rarity = 'rare';
+        } else if (itemLower.includes('uncommon') || itemLower.includes('slime') || itemLower.includes('orc')) {
+            rarity = 'uncommon';
+        }
+        
+        // Deterministic level based on item name (same item = same level)
+        let hash = 0;
+        for (let i = 0; i < itemName.length; i++) {
+            const char = itemName.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        const estimatedLevel = Math.abs(hash % 50) + 1; // 1-50 range
+        const levelMultiplier = 1 + (estimatedLevel - 1) * 0.1;
+        
+        const rarityMultiplier = baseValues[rarity];
+        const totalValue = Math.floor(rarityMultiplier * levelMultiplier);
+        
+        return Math.max(5, totalValue); // Minimum 5 gold
+    };
+
+    // Take item from loot bag to inventory
+    const handleTakeItem = (itemName, index) => {
+        try {
+            // Remove from loot bag
+            setLootBag(prev => {
+                const updated = prev.filter((_, idx) => idx !== index);
+                const currentSlot = getCurrentSlot();
+                const slotKey = getSlotKey("lootBag", currentSlot);
+                localStorage.setItem(slotKey, JSON.stringify(updated));
+                return updated;
+            });
+
+            // Convert item to equipment and add to inventory
+            const equipment = convertLootBagToEquipment([itemName]);
+            if (equipment.length > 0) {
+                const currentSlot = getCurrentSlot();
+                const inventorySlotKey = getSlotKey('idle-chaos-inventory', currentSlot);
+                const currentInventory = JSON.parse(localStorage.getItem(inventorySlotKey) || '[]');
+                const updatedInventory = [...currentInventory, ...equipment];
+                localStorage.setItem(inventorySlotKey, JSON.stringify(updatedInventory));
+            }
+        } catch (err) {
+            console.error('Error taking item:', err);
+        }
+    };
+
+    // Sell item directly for gold
+    const handleSellItem = (itemName, index) => {
+        const sellValue = calculateItemSellValue(itemName);
+        
+        try {
+            // Remove from loot bag
+            setLootBag(prev => {
+                const updated = prev.filter((_, idx) => idx !== index);
+                const currentSlot = getCurrentSlot();
+                const slotKey = getSlotKey("lootBag", currentSlot);
+                localStorage.setItem(slotKey, JSON.stringify(updated));
+                return updated;
+            });
+
+            // Add gold
+            const newGold = addGold(sellValue);
+            setPlayerGold(newGold);
+        } catch (err) {
+            console.error('Error selling item:', err);
+        }
+    };
+
+    // Take all items to inventory
+    const handleTakeAll = () => {
+        try {
+            const itemsToConvert = [...lootBag];
+            
+            // Clear loot bag
+            setLootBag([]);
+            const currentSlot = getCurrentSlot();
+            const slotKey = getSlotKey("lootBag", currentSlot);
+            localStorage.setItem(slotKey, JSON.stringify([]));
+
+            // Convert all items to equipment and add to inventory
+            const equipment = convertLootBagToEquipment(itemsToConvert);
+            if (equipment.length > 0) {
+                const inventorySlotKey = getSlotKey('idle-chaos-inventory', currentSlot);
+                const currentInventory = JSON.parse(localStorage.getItem(inventorySlotKey) || '[]');
+                const updatedInventory = [...currentInventory, ...equipment];
+                localStorage.setItem(inventorySlotKey, JSON.stringify(updatedInventory));
+            }
+        } catch (err) {
+            console.error('Error taking all items:', err);
+        }
+    };
+
+    // Sell all items for gold
+    const handleSellAll = () => {
+        try {
+            let totalGold = 0;
+            lootBag.forEach(itemName => {
+                totalGold += calculateItemSellValue(itemName);
+            });
+            
+            // Clear loot bag
+            setLootBag([]);
+            const currentSlot = getCurrentSlot();
+            const slotKey = getSlotKey("lootBag", currentSlot);
+            localStorage.setItem(slotKey, JSON.stringify([]));
+
+            // Add total gold
+            const newGold = addGold(totalGold);
+            setPlayerGold(newGold);
+        } catch (err) {
+            console.error('Error selling all items:', err);
+        }
+    };
+
+    // Test function to kill enemy instantly
+    const handleKillEnemy = () => {
+        if (currentBattle && currentEnemy) {
+            // Set enemy health to 0 to trigger victory
+            const updatedBattle = {
+                ...currentBattle,
+                enemy: { ...currentBattle.enemy, currentHealth: 0 }
+            };
+            
+            setCurrentBattle(updatedBattle);
+            
+            // Force battle result check immediately
+            const battleResult = {
+                winner: 'player',
+                playerFinalHealth: currentBattle.player.currentHealth,
+                enemyFinalHealth: 0
+            };
+            
+            setIsBattleActive(false);
+            setBattleResult(battleResult);
+            
+            setPlayerHealth(battleResult.playerFinalHealth);
+            const battleCurrentSlot = getCurrentSlot();
+            const battleHealthSlotKey = getSlotKey("playerHealth", battleCurrentSlot);
+            localStorage.setItem(battleHealthSlotKey, battleResult.playerFinalHealth.toString());
+            
+            // Process victory rewards
+            const achievementResult = currentEnemy ? recordKill(currentEnemy.id) : { achievements: {}, newAchievements: [] };
+            
+            const lootResult = currentEnemy ? getLootDrop(currentEnemy.drops) : { items: [], gold: 0, goldItems: [] };
+            
+            // Only add equipment items to loot bag, not gold items
+            const newLoot = [...lootResult.items];
+            
+            // Auto-convert gold items directly without showing in loot bag
+            if (lootResult.goldItems && lootResult.goldItems.length > 0) {
+                const newGold = addGold(lootResult.gold);
+                setPlayerGold(newGold);
+            }
+            
+            // Add to loot bag with limit enforcement
+            setLootBag(prev => {
+                const availableSpace = LOOT_BAG_LIMIT - prev.length;
+                const itemsToAdd = newLoot.slice(0, availableSpace);
+                const updated = [...prev, ...itemsToAdd];
+                const currentSlot = getCurrentSlot();
+                const slotKey = getSlotKey("lootBag", currentSlot);
+                localStorage.setItem(slotKey, JSON.stringify(updated));
+                return updated;
+            });
+
+            // --- PET DROP LOGIC ---
+            let petDropMessage = null;
+            if (currentEnemy) {
+                const pet = checkPetDrop(currentEnemy.id);
+                if (pet) {
+                    const currentSlot = getCurrentSlot();
+                    const slotKey = getSlotKey('idle-chaos-pets', currentSlot);
+                    const ownedPets = JSON.parse(localStorage.getItem(slotKey) || '[]');
+                    if (!ownedPets.includes(pet.id)) {
+                        ownedPets.push(pet.id);
+                        localStorage.setItem(slotKey, JSON.stringify(ownedPets));
+                        petDropMessage = `✨ PET FOUND: ${pet.icon} <b>${pet.name}</b>! (${pet.description})`;
+                    } else {
+                        petDropMessage = `✨ PET FOUND (duplicate): ${pet.icon} <b>${pet.name}</b>! (Already owned)`;
+                    }
+                }
+            }
+
+            // Add loot and achievement messages to battle log
+            const battleLogMessages = [
+                {
+                    type: 'victory',
+                    message: `🎉 ${t('battle.playerWins')}! Enemy defeated!`
+                }
+            ];
+            
+            // Add achievement messages if any new achievements unlocked
+            if (achievementResult.newAchievements.length > 0) {
+                achievementResult.newAchievements.forEach(achievement => {
+                    battleLogMessages.push({
+                        type: 'achievement',
+                        message: `🏆 Achievement Unlocked: ${achievement.description}!`
+                    });
+                });
+            }
+            
+            // Add loot messages
+            battleLogMessages.push(...newLoot.map(item => ({
+                type: 'loot',
+                message: `📦 Loot: ${item}`
+            })));
+            
+            // Add pet message if found
+            if (petDropMessage) {
+                battleLogMessages.push({
+                    type: 'pet',
+                    message: petDropMessage
+                });
+            }
+            
+            setBattleLog(prev => [...prev, ...battleLogMessages]);
+            
+            // Handle dungeon progression
+            if (dungeonRun && !dungeonRun.completed) {
+                handleDungeonEnemyDefeated();
+            } else {
+                // Start enemy spawn timer for regular battles
+                startEnemySpawnTimer();
+            }
+        }
+    };
 
     // Potion usage function
     const handleUsePotion = (potionType) => {
@@ -493,48 +742,26 @@ function Battle({ player }) {
                         
                         const lootResult = currentEnemy ? getLootDrop(currentEnemy.drops) : { items: [], gold: 0, goldItems: [] };
                         
+                        // Only add equipment items to loot bag, not gold items
                         const newLoot = [...lootResult.items];
                         
+                        // Auto-convert gold items directly without showing in loot bag
                         if (lootResult.goldItems && lootResult.goldItems.length > 0) {
-                            lootResult.goldItems.forEach(goldItem => {
-                                newLoot.push(`💰 ${goldItem.name} ${goldItem.value} gold'a satıldı`);
-                            });
                             const newGold = addGold(lootResult.gold);
                             setPlayerGold(newGold);
                         }
                         
+                        // Add to loot bag with limit enforcement
                         setLootBag(prev => {
-                            const updated = [...prev, ...newLoot];
+                            const availableSpace = LOOT_BAG_LIMIT - prev.length;
+                            const itemsToAdd = newLoot.slice(0, availableSpace);
+                            const updated = [...prev, ...itemsToAdd];
                             const currentSlot = getCurrentSlot();
                             const slotKey = getSlotKey("lootBag", currentSlot);
                             localStorage.setItem(slotKey, JSON.stringify(updated));
                             return updated;
                         });
-                        saveLoot(lootResult.items);
-
-                        // --- INVENTORY'Yİ DE GÜNCELLE ---
-                        try {
-                            // Sadece ekipmanları inventory'ye ekle (gold item'ları hariç)
-                            const equipmentLoot = lootResult.items;
-                            const currentSlot = getCurrentSlot();
-                            const slotKey = getSlotKey('idle-chaos-inventory', currentSlot);
-                            const currentInventory = JSON.parse(localStorage.getItem(slotKey) || '[]');
-                            
-                            // Ekipmanları equipment object'lerine dönüştür
-                            const newEquipment = currentEnemy ? convertLootBagToEquipment(equipmentLoot, currentEnemy) : [];
-                            
-                            // Eşsiz ID'ye göre tekrar eklemeyi önle
-                            const existingIds = new Set(currentInventory.map(item => item.id));
-                            const uniqueNewEquipment = newEquipment.filter(item => !existingIds.has(item.id));
-                            
-                            if (uniqueNewEquipment.length > 0) {
-                                const updatedInventory = [...currentInventory, ...uniqueNewEquipment];
-                                localStorage.setItem(slotKey, JSON.stringify(updatedInventory));
-                            }
-                        } catch (err) {
-                            console.error('Inventory güncellenirken hata:', err);
-                        }
-                        // --- SONU ---
+                        // Don't auto-save loot to inventory anymore - player must manually take items
 
                         // --- PET DROP LOGIC ---
                         let petDropMessage = null;
@@ -1217,6 +1444,14 @@ function Battle({ player }) {
                         >
                             🏴‍☠️ TEST: Die
                         </Button>
+                        <Button 
+                            variant="contained" 
+                            color="success"
+                            onClick={handleKillEnemy}
+                            style={{ marginLeft: '8px' }}
+                        >
+                            ⚔️ TEST: Kill
+                        </Button>
                     </div>
                     <div className={styles.battleContainer}>
                         {/* Fighters Row */}
@@ -1796,81 +2031,178 @@ function Battle({ player }) {
 
                             {/* LOOT GAINED */}
                             <div className={styles.section}>
-                                <Typography variant="h6">{t('battle.lootGained')}</Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                                    <Typography variant="h6">{t('battle.lootGained')}</Typography>
+                                    <Typography variant="caption" sx={{ color: '#999' }}>
+                                        {lootBag.length}/{LOOT_BAG_LIMIT} {t('battle.items')}
+                                    </Typography>
+                                </Box>
                                 <Divider />
+                                
                                 {lootBag.length === 0 ? (
                                     <Typography>{t('battle.noLootYet')}</Typography>
                                 ) : (
-                                    <div className={styles.lootSymbolsContainer}>
-                                        {lootBag.map((item, idx) => {
-                                            const isGold = item.includes('💰');
-                                            const isEquipment = item.includes('⚔️') || item.includes('🛡️') || item.includes('💍') || item.includes('👑');
-                                            const isChest = item.includes('🎁') && item.includes('Chest');
-                                            
-                                            let symbol = '📦';
-                                            let tooltipContent = item;
-                                            let clickHandler = null;
-                                            
-                                            if (isChest) {
-                                                symbol = '🎁';
-                                                const dungeonName = item.replace('🎁 ', '').replace(' Chest', '');
-                                                const dungeon = DUNGEONS.find(d => d.name === dungeonName);
+                                    <>
+                                        {/* Bulk Action Buttons */}
+                                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                onClick={handleTakeAll}
+                                                sx={{
+                                                    fontFamily: 'Press Start 2P',
+                                                    fontSize: '0.6rem',
+                                                    px: 2,
+                                                    py: 0.5,
+                                                    background: 'linear-gradient(145deg, #4ade80 0%, #22c55e 100%)',
+                                                    color: '#000000',
+                                                    '&:hover': {
+                                                        background: 'linear-gradient(145deg, #22c55e 0%, #16a34a 100%)',
+                                                    }
+                                                }}
+                                            >
+                                                {t('battle.takeAll')}
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                size="small"
+                                                onClick={handleSellAll}
+                                                sx={{
+                                                    fontFamily: 'Press Start 2P',
+                                                    fontSize: '0.6rem',
+                                                    px: 2,
+                                                    py: 0.5,
+                                                    background: 'linear-gradient(145deg, #ffd700 0%, #f59e0b 100%)',
+                                                    color: '#000000',
+                                                    '&:hover': {
+                                                        background: 'linear-gradient(145deg, #f59e0b 0%, #d97706 100%)',
+                                                    }
+                                                }}
+                                            >
+                                                {t('battle.sellAll')}
+                                            </Button>
+                                        </Box>
+                                        
+                                        {/* Individual Items */}
+                                        <div className={styles.lootListContainer}>
+                                            {lootBag.map((item, idx) => {
+                                                const isChest = item.includes('🎁') && item.includes('Chest');
+                                                const sellValue = isChest ? 0 : calculateItemSellValue(item);
                                                 
-                                                if (dungeon && dungeon.chest) {
-                                                    tooltipContent = (
-                                                        <Box sx={{ p: 1 }}>
-                                                            <Typography variant="h6" sx={{ mb: 1, color: '#ffd700' }}>
-                                                                {dungeonName} Chest
-                                                            </Typography>
-                                                            <Typography variant="body2" sx={{ mb: 1, color: '#e0e0e0' }}>
-                                                                {t('battle.possibleDrops')}:
-                                                            </Typography>
-                                                            {dungeon.chest.map((chestItem, chestIdx) => (
-                                                                <Typography key={chestIdx} variant="body2" sx={{ mb: 0.5, color: '#ffffff' }}>
-                                                                    {chestItem.name} - {chestItem.chance}%
+                                                if (isChest) {
+                                                    // Render chest with existing logic
+                                                    const dungeonName = item.replace('🎁 ', '').replace(' Chest', '');
+                                                    const dungeon = DUNGEONS.find(d => d.name === dungeonName);
+                                                    
+                                                    let tooltipContent = item;
+                                                    if (dungeon && dungeon.chest) {
+                                                        tooltipContent = (
+                                                            <Box sx={{ p: 1 }}>
+                                                                <Typography variant="h6" sx={{ mb: 1, color: '#ffd700' }}>
+                                                                    {dungeonName} Chest
                                                                 </Typography>
-                                                            ))}
-                                                            <Typography variant="body2" sx={{ mt: 1, color: '#4ade80', fontStyle: 'italic' }}>
-                                                                Click to open!
-                                                            </Typography>
-                                                        </Box>
+                                                                <Typography variant="body2" sx={{ mb: 1, color: '#e0e0e0' }}>
+                                                                    {t('battle.possibleDrops')}:
+                                                                </Typography>
+                                                                {dungeon.chest.map((chestItem, chestIdx) => (
+                                                                    <Typography key={chestIdx} variant="body2" sx={{ mb: 0.5, color: '#ffffff' }}>
+                                                                        {chestItem.name} - {chestItem.chance}%
+                                                                    </Typography>
+                                                                ))}
+                                                                <Typography variant="body2" sx={{ mt: 1, color: '#4ade80', fontStyle: 'italic' }}>
+                                                                    Click to open!
+                                                                </Typography>
+                                                            </Box>
+                                                        );
+                                                    }
+                                                    
+                                                    return (
+                                                        <Tooltip 
+                                                            key={`loot-${idx}-${item}`} 
+                                                            title={tooltipContent}
+                                                            arrow
+                                                            placement="top"
+                                                        >
+                                                            <div 
+                                                                className={`${styles.lootSymbol} ${styles.chestSymbol}`}
+                                                                onClick={() => handleChestClick(item)}
+                                                                style={{ cursor: 'pointer' }}
+                                                            >
+                                                                🎁
+                                                            </div>
+                                                        </Tooltip>
                                                     );
                                                 }
-                                                clickHandler = () => handleChestClick(item);
-                                            } else if (isGold) {
-                                                symbol = '💰';
-                                                tooltipContent = `Gold: ${item.replace('💰', '').trim()}`;
-                                            } else if (isEquipment) {
-                                                if (item.includes('⚔️')) symbol = '⚔️';
-                                                else if (item.includes('🛡️')) symbol = '🛡️';
-                                                else if (item.includes('💍')) symbol = '💍';
-                                                else if (item.includes('👑')) symbol = '👑';
-                                                else symbol = '⚔️';
-                                                tooltipContent = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
-                                            }
-                                            
-                                            return (
-                                                <Tooltip 
-                                                    key={`loot-${idx}-${item}`} 
-                                                    title={tooltipContent}
-                                                    arrow
-                                                    placement="top"
-                                                >
-                                                    <div 
-                                                        className={`${styles.lootSymbol} ${
-                                                            isChest ? styles.chestSymbol : 
-                                                            isGold ? styles.goldSymbol : 
-                                                            styles.equipmentSymbol
-                                                        }`}
-                                                        onClick={clickHandler}
-                                                        style={{ cursor: isChest ? 'pointer' : 'default' }}
+                                                
+                                                return (
+                                                    <Box 
+                                                        key={`loot-${idx}-${item}`}
+                                                        sx={{ 
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            gap: 1, 
+                                                            p: 1, 
+                                                            mb: 1,
+                                                            background: 'rgba(255, 255, 255, 0.05)',
+                                                            borderRadius: 1,
+                                                            border: '1px solid rgba(255, 255, 255, 0.1)'
+                                                        }}
                                                     >
-                                                        {symbol}
-                                                    </div>
-                                                </Tooltip>
-                                            );
-                                        })}
-                                    </div>
+                                                        <Box sx={{ flex: 1 }}>
+                                                            <Typography variant="body2" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                                                📦 {item}
+                                                            </Typography>
+                                                            <Typography variant="caption" sx={{ color: '#ffd700', fontFamily: 'Press Start 2P', fontSize: '0.5rem' }}>
+                                                                {t('battle.sellValue')}: {formatGold(sellValue)}
+                                                            </Typography>
+                                                        </Box>
+                                                        <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="small"
+                                                                onClick={() => handleTakeItem(item, idx)}
+                                                                sx={{
+                                                                    fontFamily: 'Press Start 2P',
+                                                                    fontSize: '0.5rem',
+                                                                    minWidth: 'auto',
+                                                                    px: 1,
+                                                                    py: 0.5,
+                                                                    borderColor: '#4ade80',
+                                                                    color: '#4ade80',
+                                                                    '&:hover': {
+                                                                        borderColor: '#22c55e',
+                                                                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
+                                                                    }
+                                                                }}
+                                                            >
+                                                                {t('battle.take')}
+                                                            </Button>
+                                                            <Button
+                                                                variant="outlined"
+                                                                size="small"
+                                                                onClick={() => handleSellItem(item, idx)}
+                                                                sx={{
+                                                                    fontFamily: 'Press Start 2P',
+                                                                    fontSize: '0.5rem',
+                                                                    minWidth: 'auto',
+                                                                    px: 1,
+                                                                    py: 0.5,
+                                                                    borderColor: '#ffd700',
+                                                                    color: '#ffd700',
+                                                                    '&:hover': {
+                                                                        borderColor: '#f59e0b',
+                                                                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                                                                    }
+                                                                }}
+                                                            >
+                                                                {t('battle.sell')}
+                                                            </Button>
+                                                        </Box>
+                                                    </Box>
+                                                );
+                                            })}
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -1902,6 +2234,14 @@ function Battle({ player }) {
                                 style={{ marginLeft: '8px' }}
                             >
                                 🏴‍☠️ TEST: Die
+                            </Button>
+                            <Button 
+                                variant="contained" 
+                                color="success"
+                                onClick={handleKillEnemy}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                ⚔️ TEST: Kill
                             </Button>
                         </div>
                         {/* Render the full battle UI below the dungeon header */}

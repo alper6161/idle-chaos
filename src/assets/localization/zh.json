@@ -126,7 +126,13 @@
     "chestPreview": "{{dungeon}}宝箱",
     "chestContents": "该宝箱包含以下潜在奖励：",
     "openChest": "打开宝箱",
-    "chestItemTooltip": "点击打开宝箱看看你会得到什么！"
+    "chestItemTooltip": "点击打开宝箱看看你会得到什么！",
+    "items": "物品",
+    "takeAll": "全部拿取",
+    "sellAll": "全部出售",
+    "take": "拿取",
+    "sell": "出售",
+    "sellValue": "出售价值"
   },
   "equipment": {
     "equip": "装备",

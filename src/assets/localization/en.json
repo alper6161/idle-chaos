@@ -132,7 +132,13 @@
     "chestPreview": "{{dungeon}} Chest",
     "chestContents": "This chest contains the following potential rewards:",
     "openChest": "Open Chest",
-    "chestItemTooltip": "Click 'Open Chest' to see what you get!"
+    "chestItemTooltip": "Click 'Open Chest' to see what you get!",
+    "items": "items",
+    "takeAll": "Take All",
+    "sellAll": "Sell All",
+    "take": "Take",
+    "sell": "Sell",
+    "sellValue": "Sell Value"
   },
   "equipment": {
     "equip": "Equip",

@@ -327,6 +327,35 @@
   align-items: center;
 }
 
+// New Loot List Container
+.lootListContainer {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid #4a4a6a;
+  border-radius: 0;
+  
+  // Custom scrollbar for pixel art style
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #2a2a4a;
+    border: 1px solid #4a4a6a;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ffd700;
+    border: 1px solid #000;
+    
+    &:hover {
+      background: #ffed4e;
+    }
+  }
+}
+
 .lootSymbol {
   display: flex;
   align-items: center;

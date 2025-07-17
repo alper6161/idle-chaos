@@ -132,7 +132,13 @@
     "chestPreview": "{{dungeon}} Sandığı",
     "chestContents": "Bu sandık şu potansiyel ödülleri içeriyor:",
     "openChest": "Sandığı Aç",
-    "chestItemTooltip": "Ne alacağını görmek için 'Sandığı Aç'a tıkla!"
+    "chestItemTooltip": "Ne alacağını görmek için 'Sandığı Aç'a tıkla!",
+    "items": "eşya",
+    "takeAll": "Hepsini Al",
+    "sellAll": "Hepsini Sat",
+    "take": "Al",
+    "sell": "Sat",
+    "sellValue": "Satış Değeri"
   },
   "equipment": {
     "equip": "Tak",
