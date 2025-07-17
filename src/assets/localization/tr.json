@@ -88,6 +88,7 @@
     "possibleLoot": "Olası Ganimet",
     "lootGained": "Elde Edilen Ganimet",
     "noLootYet": "Henüz ganimet yok...",
+    "noBattleLog": "Henüz savaş aktivitesi yok...",
     "battleLog": "Savaş Günlüğü",
     "hitChance": "Vuruş Şansı",
     "baseDamage": "Temel Hasar",

@@ -87,6 +87,7 @@
     "possibleLoot": "可能掉落",
     "lootGained": "获得战利品",
     "noLootYet": "暂无战利品...",
+    "noBattleLog": "暂无战斗活动...",
     "battleLog": "战斗日志",
     "hitChance": "命中率",
     "baseDamage": "基础伤害",

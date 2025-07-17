@@ -229,6 +229,10 @@ function Battle({ player }) {
     };
 
     const startEnemySpawnTimer = () => {
+        setBattleLog(prev => [
+            ...prev,
+            { type: 'info', message: t('battle.searchingForEnemy') }
+        ]);
         createSpawnTimer(
             setIsWaitingForEnemy, 
             setEnemySpawnProgress, 
@@ -280,11 +284,6 @@ function Battle({ player }) {
             console.warn('startRealTimeBattle called with null enemy');
             return;
         }
-        
-        setBattleLog(prev => [
-            ...prev,
-            { type: 'info', message: t('battle.searchingForEnemy') }
-        ]);
         
         const currentPlayerStats = getPlayerStats();
         
@@ -1293,7 +1292,7 @@ function Battle({ player }) {
                                     </Box>
                                     <div className={styles.battleLog}>
                                         {battleLog.length === 0 ? (
-                                            <Typography variant="body2" color="textSecondary">{t('battle.noBattleLog')}</Typography>
+                                            <Typography variant="body2" sx={{ color: '#ffffff', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{t('battle.noBattleLog')}</Typography>
                                         ) : (
                                             battleLog.map((entry, idx) => (
                                                 <Typography key={idx} variant="body2" className={styles[`${entry.type}Log`] || styles.battleLogEntry}>
@@ -1944,7 +1943,7 @@ function Battle({ player }) {
                                         </Box>
                                         <div className={styles.battleLog}>
                                             {battleLog.length === 0 ? (
-                                                <Typography variant="body2" color="textSecondary">{t('battle.noBattleLog')}</Typography>
+                                                <Typography variant="body2" sx={{ color: '#ffffff', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{t('battle.noBattleLog')}</Typography>
                                             ) : (
                                                 battleLog.map((entry, idx) => (
                                                     <Typography key={idx} variant="body2" className={styles[`${entry.type}Log`] || styles.battleLogEntry}>

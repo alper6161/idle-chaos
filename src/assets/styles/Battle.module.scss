@@ -548,6 +548,98 @@
   }
 }
 
+// Battle Log Entry Types
+.player_attackLog {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.3;
+  margin: 0.2rem 0;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.15);
+  border-left: 3px solid #4ade80;
+  text-shadow: 0 0 4px rgba(74, 222, 128, 0.5);
+}
+
+.player_critLog {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  margin: 0.2rem 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.25);
+  border-left: 4px solid #ffd700;
+  font-weight: bold;
+  text-shadow: 0 0 8px #ffd700;
+  animation: critGlow 2s ease-in-out infinite;
+}
+
+.player_missLog {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.3;
+  margin: 0.2rem 0;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0;
+  color: #94a3b8;
+  background: rgba(148, 163, 184, 0.1);
+  border-left: 2px solid #94a3b8;
+}
+
+.enemy_attackLog {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.3;
+  margin: 0.2rem 0;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  border-left: 3px solid #ef4444;
+  text-shadow: 0 0 4px rgba(239, 68, 68, 0.5);
+}
+
+.enemy_critLog {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  margin: 0.2rem 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0;
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.25);
+  border-left: 4px solid #dc2626;
+  font-weight: bold;
+  text-shadow: 0 0 8px #dc2626;
+  animation: enemyCritGlow 2s ease-in-out infinite;
+}
+
+.enemy_missLog {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.3;
+  margin: 0.2rem 0;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0;
+  color: #6b7280;
+  background: rgba(107, 114, 128, 0.1);
+  border-left: 2px solid #6b7280;
+}
+
+.battleLogEntry {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.3;
+  margin: 0.2rem 0;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0;
+  color: #e5e7eb;
+  background: rgba(229, 231, 235, 0.05);
+}
+
 .skillXPMessage {
   font-family: 'Press Start 2P', monospace;
   font-size: 0.5rem;
@@ -663,6 +755,17 @@
   50% {
     text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
     box-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+}
+
+@keyframes enemyCritGlow {
+  0%, 100% {
+    text-shadow: 0 0 8px #dc2626;
+    box-shadow: 0 0 5px #dc2626;
+  }
+  50% {
+    text-shadow: 0 0 15px #dc2626, 0 0 25px #dc2626;
+    box-shadow: 0 0 10px #dc2626, 0 0 20px #dc2626;
   }
 }
 
