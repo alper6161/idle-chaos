@@ -122,7 +122,11 @@
     "lootGained": "获得的战利品",
     "battle.dungeonRestartIn": "地牢将在{{seconds}}秒后重新开始。",
     "leave": "离开",
-    "restart": "重新开始"
+    "restart": "重新开始",
+    "chestPreview": "{{dungeon}}宝箱",
+    "chestContents": "该宝箱包含以下潜在奖励：",
+    "openChest": "打开宝箱",
+    "chestItemTooltip": "点击打开宝箱看看你会得到什么！"
   },
   "equipment": {
     "equip": "装备",

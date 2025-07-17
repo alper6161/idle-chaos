@@ -101,6 +101,8 @@ function Battle({ player }) {
     const [dungeonRun, setDungeonRun] = useState(null); // { dungeon, stages, currentStage, completed, chestAwarded }
     const [exitWarningOpen, setExitWarningOpen] = useState(false);
     const [dungeonCompleteDialog, setDungeonCompleteDialog] = useState({ open: false, countdown: 5 });
+    const [chestDropDialog, setChestDropDialog] = useState({ open: false, item: null, dungeon: null });
+    const [chestPreviewModal, setChestPreviewModal] = useState({ open: false, dungeon: null, chestItem: null });
 
     // Potion usage function
     const handleUsePotion = (potionType) => {
@@ -850,6 +852,19 @@ function Battle({ player }) {
             setDungeonRun(prev => ({ ...prev, completed: true }));
             setIsBattleActive(false);
             setDungeonCompleteDialog({ open: true, countdown: 5 });
+            
+            // Add dungeon chest to loot bag
+            if (!dungeonRun.chestAwarded) {
+                setLootBag(prev => {
+                    const chestItem = `🎁 ${dungeonRun.dungeon.name} Chest`;
+                    const updated = [...prev, chestItem];
+                    const currentSlot = getCurrentSlot();
+                    const slotKey = getSlotKey("lootBag", currentSlot);
+                    localStorage.setItem(slotKey, JSON.stringify(updated));
+                    return updated;
+                });
+                setDungeonRun(prev => ({ ...prev, chestAwarded: true }));
+            }
         }
     };
 
@@ -863,6 +878,78 @@ function Battle({ player }) {
         setIsWaitingForEnemy(false);
         setEnemySpawnProgress(0);
         setDungeonRun(null);
+    };
+
+    const handleChestClick = (chestItem) => {
+        // Extract dungeon name from chest item
+        const dungeonName = chestItem.replace('🎁 ', '').replace(' Chest', '');
+        const dungeon = DUNGEONS.find(d => d.name === dungeonName);
+        
+        if (!dungeon || !dungeon.chest) return;
+        
+        // Show preview modal instead of immediately opening
+        setChestPreviewModal({
+            open: true,
+            dungeon: dungeon,
+            chestItem: chestItem
+        });
+    };
+
+    const handleOpenChest = () => {
+        const { dungeon, chestItem } = chestPreviewModal;
+        
+        if (!dungeon || !dungeon.chest) return;
+        
+        // Random selection based on chances
+        const totalChance = dungeon.chest.reduce((sum, item) => sum + item.chance, 0);
+        const random = Math.random() * totalChance;
+        let currentChance = 0;
+        let selectedItem = null;
+        
+        for (const item of dungeon.chest) {
+            currentChance += item.chance;
+            if (random <= currentChance) {
+                selectedItem = item;
+                break;
+            }
+        }
+        
+        if (!selectedItem) selectedItem = dungeon.chest[0]; // Fallback
+        
+        // Generate equipment from the selected item
+        const equipment = convertLootBagToEquipment([selectedItem.name]);
+        
+        if (equipment.length > 0) {
+            // Add to inventory
+            try {
+                const currentSlot = getCurrentSlot();
+                const inventorySlotKey = getSlotKey('idle-chaos-inventory', currentSlot);
+                const currentInventory = JSON.parse(localStorage.getItem(inventorySlotKey) || '[]');
+                const updatedInventory = [...currentInventory, ...equipment];
+                localStorage.setItem(inventorySlotKey, JSON.stringify(updatedInventory));
+            } catch (err) {
+                console.error('Error adding chest item to inventory:', err);
+            }
+            
+            // Close preview modal
+            setChestPreviewModal({ open: false, dungeon: null, chestItem: null });
+            
+            // Show drop dialog with result
+            setChestDropDialog({ 
+                open: true, 
+                item: equipment[0], 
+                dungeon: dungeon
+            });
+        }
+        
+        // Remove chest from loot bag
+        setLootBag(prev => {
+            const updated = prev.filter(item => item !== chestItem);
+            const currentSlot = getCurrentSlot();
+            const slotKey = getSlotKey("lootBag", currentSlot);
+            localStorage.setItem(slotKey, JSON.stringify(updated));
+            return updated;
+        });
     };
 
     // Add a useEffect to handle the countdown and auto-restart:
@@ -1718,30 +1805,66 @@ function Battle({ player }) {
                                         {lootBag.map((item, idx) => {
                                             const isGold = item.includes('💰');
                                             const isEquipment = item.includes('⚔️') || item.includes('🛡️') || item.includes('💍') || item.includes('👑');
+                                            const isChest = item.includes('🎁') && item.includes('Chest');
                                             
                                             let symbol = '📦';
-                                            let tooltipText = item;
+                                            let tooltipContent = item;
+                                            let clickHandler = null;
                                             
-                                            if (isGold) {
+                                            if (isChest) {
+                                                symbol = '🎁';
+                                                const dungeonName = item.replace('🎁 ', '').replace(' Chest', '');
+                                                const dungeon = DUNGEONS.find(d => d.name === dungeonName);
+                                                
+                                                if (dungeon && dungeon.chest) {
+                                                    tooltipContent = (
+                                                        <Box sx={{ p: 1 }}>
+                                                            <Typography variant="h6" sx={{ mb: 1, color: '#ffd700' }}>
+                                                                {dungeonName} Chest
+                                                            </Typography>
+                                                            <Typography variant="body2" sx={{ mb: 1, color: '#e0e0e0' }}>
+                                                                {t('battle.possibleDrops')}:
+                                                            </Typography>
+                                                            {dungeon.chest.map((chestItem, chestIdx) => (
+                                                                <Typography key={chestIdx} variant="body2" sx={{ mb: 0.5, color: '#ffffff' }}>
+                                                                    {chestItem.name} - {chestItem.chance}%
+                                                                </Typography>
+                                                            ))}
+                                                            <Typography variant="body2" sx={{ mt: 1, color: '#4ade80', fontStyle: 'italic' }}>
+                                                                Click to open!
+                                                            </Typography>
+                                                        </Box>
+                                                    );
+                                                }
+                                                clickHandler = () => handleChestClick(item);
+                                            } else if (isGold) {
                                                 symbol = '💰';
-                                                tooltipText = `Gold: ${item.replace('💰', '').trim()}`;
+                                                tooltipContent = `Gold: ${item.replace('💰', '').trim()}`;
                                             } else if (isEquipment) {
                                                 if (item.includes('⚔️')) symbol = '⚔️';
                                                 else if (item.includes('🛡️')) symbol = '🛡️';
                                                 else if (item.includes('💍')) symbol = '💍';
                                                 else if (item.includes('👑')) symbol = '👑';
                                                 else symbol = '⚔️';
-                                                tooltipText = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
+                                                tooltipContent = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
                                             }
                                             
                                             return (
                                                 <Tooltip 
                                                     key={`loot-${idx}-${item}`} 
-                                                    title={tooltipText}
+                                                    title={tooltipContent}
                                                     arrow
                                                     placement="top"
                                                 >
-                                                    <div className={`${styles.lootSymbol} ${isGold ? styles.goldSymbol : styles.equipmentSymbol}`}>
+                                                    <div 
+                                                        className={`${styles.lootSymbol} ${
+                                                            isChest ? styles.chestSymbol : 
+                                                            isGold ? styles.goldSymbol : 
+                                                            styles.equipmentSymbol
+                                                        }`}
+                                                        onClick={clickHandler}
+                                                        style={{ cursor: isChest ? 'pointer' : 'default' }}
+                                                    >
                                                         {symbol}
                                                     </div>
                                                 </Tooltip>
@@ -2369,30 +2492,66 @@ function Battle({ player }) {
                                             {lootBag.map((item, idx) => {
                                                 const isGold = item.includes('💰');
                                                 const isEquipment = item.includes('⚔️') || item.includes('🛡️') || item.includes('💍') || item.includes('👑');
+                                                const isChest = item.includes('🎁') && item.includes('Chest');
                                                 
                                                 let symbol = '📦';
-                                                let tooltipText = item;
+                                                let tooltipContent = item;
+                                                let clickHandler = null;
                                                 
-                                                if (isGold) {
+                                                if (isChest) {
+                                                    symbol = '🎁';
+                                                    const dungeonName = item.replace('🎁 ', '').replace(' Chest', '');
+                                                    const dungeon = DUNGEONS.find(d => d.name === dungeonName);
+                                                    
+                                                    if (dungeon && dungeon.chest) {
+                                                        tooltipContent = (
+                                                            <Box sx={{ p: 1 }}>
+                                                                <Typography variant="h6" sx={{ mb: 1, color: '#ffd700' }}>
+                                                                    {dungeonName} Chest
+                                                                </Typography>
+                                                                <Typography variant="body2" sx={{ mb: 1, color: '#e0e0e0' }}>
+                                                                    {t('battle.possibleDrops')}:
+                                                                </Typography>
+                                                                {dungeon.chest.map((chestItem, chestIdx) => (
+                                                                    <Typography key={chestIdx} variant="body2" sx={{ mb: 0.5, color: '#ffffff' }}>
+                                                                        {chestItem.name} - {chestItem.chance}%
+                                                                    </Typography>
+                                                                ))}
+                                                                <Typography variant="body2" sx={{ mt: 1, color: '#4ade80', fontStyle: 'italic' }}>
+                                                                    Click to open!
+                                                                </Typography>
+                                                            </Box>
+                                                        );
+                                                    }
+                                                    clickHandler = () => handleChestClick(item);
+                                                } else if (isGold) {
                                                     symbol = '💰';
-                                                    tooltipText = `Gold: ${item.replace('💰', '').trim()}`;
+                                                    tooltipContent = `Gold: ${item.replace('💰', '').trim()}`;
                                                 } else if (isEquipment) {
                                                     if (item.includes('⚔️')) symbol = '⚔️';
                                                     else if (item.includes('🛡️')) symbol = '🛡️';
                                                     else if (item.includes('💍')) symbol = '💍';
                                                     else if (item.includes('👑')) symbol = '👑';
                                                     else symbol = '⚔️';
-                                                    tooltipText = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
+                                                    tooltipContent = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
                                                 }
                                                 
                                                 return (
                                                     <Tooltip 
                                                         key={`loot-${idx}-${item}`} 
-                                                        title={tooltipText}
+                                                        title={tooltipContent}
                                                         arrow
                                                         placement="top"
                                                     >
-                                                        <div className={`${styles.lootSymbol} ${isGold ? styles.goldSymbol : styles.equipmentSymbol}`}>
+                                                        <div 
+                                                            className={`${styles.lootSymbol} ${
+                                                                isChest ? styles.chestSymbol : 
+                                                                isGold ? styles.goldSymbol : 
+                                                                styles.equipmentSymbol
+                                                            }`}
+                                                            onClick={clickHandler}
+                                                            style={{ cursor: isChest ? 'pointer' : 'default' }}
+                                                        >
                                                             {symbol}
                                                         </div>
                                                     </Tooltip>
@@ -2450,6 +2609,146 @@ function Battle({ player }) {
                 </DialogContent>
             </Dialog>
 
+            {/* Chest Preview Modal */}
+            {chestPreviewModal.open && (
+                <Dialog 
+                    open={chestPreviewModal.open} 
+                    onClose={() => setChestPreviewModal({ open: false, dungeon: null, chestItem: null })}
+                    maxWidth="md"
+                    sx={{
+                        '& .MuiDialog-paper': {
+                            background: 'linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%)',
+                            border: '3px solid #ffd700',
+                            borderRadius: 0,
+                            color: '#ffffff',
+                            fontFamily: 'Press Start 2P'
+                        }
+                    }}
+                >
+                    <DialogTitle sx={{ 
+                        textAlign: 'center', 
+                        color: '#ffd700', 
+                        fontFamily: 'Press Start 2P',
+                        fontSize: '1rem',
+                        borderBottom: '2px solid #ffd700',
+                        mb: 2
+                    }}>
+                        🎁 {t('battle.chestPreview', { dungeon: chestPreviewModal.dungeon?.name || '' })}
+                    </DialogTitle>
+                    <DialogContent sx={{ py: 3 }}>
+                        <Typography variant="body2" sx={{ 
+                            mb: 3, 
+                            textAlign: 'center',
+                            color: '#e0e0e0',
+                            fontFamily: 'Press Start 2P',
+                            fontSize: '0.7rem'
+                        }}>
+                            {t('battle.chestContents')}
+                        </Typography>
+                        
+                        {chestPreviewModal.dungeon?.chest && (
+                            <Grid container spacing={2}>
+                                {chestPreviewModal.dungeon.chest.map((item, index) => {
+                                    // Calculate percentage
+                                    const totalChance = chestPreviewModal.dungeon.chest.reduce((sum, chestItem) => sum + chestItem.chance, 0);
+                                    const percentage = ((item.chance / totalChance) * 100).toFixed(1);
+                                    
+                                    return (
+                                        <Grid item xs={12} sm={6} md={4} key={index}>
+                                            <Tooltip
+                                                title={
+                                                    <Box sx={{ p: 1 }}>
+                                                        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
+                                                            {item.name}
+                                                        </Typography>
+                                                        <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
+                                                            {t('battle.dropChance')}: {percentage}%
+                                                        </Typography>
+                                                        <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
+                                                            {t('battle.chestItemTooltip')}
+                                                        </Typography>
+                                                    </Box>
+                                                }
+                                                placement="top"
+                                                arrow
+                                            >
+                                                <Card sx={{ 
+                                                    background: 'rgba(255, 215, 0, 0.1)',
+                                                    border: '1px solid #ffd700',
+                                                    borderRadius: 0,
+                                                    cursor: 'help',
+                                                    transition: 'all 0.3s ease',
+                                                    '&:hover': {
+                                                        background: 'rgba(255, 215, 0, 0.2)',
+                                                        transform: 'scale(1.05)'
+                                                    }
+                                                }}>
+                                                    <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                                                        <Typography variant="body2" sx={{ 
+                                                            fontFamily: 'Press Start 2P',
+                                                            fontSize: '0.6rem',
+                                                            color: '#ffffff',
+                                                            mb: 1
+                                                        }}>
+                                                            {item.name}
+                                                        </Typography>
+                                                        <Typography variant="caption" sx={{ 
+                                                            color: '#4ade80',
+                                                            fontFamily: 'Press Start 2P',
+                                                            fontSize: '0.5rem'
+                                                        }}>
+                                                            {percentage}%
+                                                        </Typography>
+                                                    </CardContent>
+                                                </Card>
+                                            </Tooltip>
+                                        </Grid>
+                                    );
+                                })}
+                            </Grid>
+                        )}
+                    </DialogContent>
+                    <DialogActions sx={{ justifyContent: 'center', gap: 2, pb: 3 }}>
+                        <Button 
+                            onClick={() => setChestPreviewModal({ open: false, dungeon: null, chestItem: null })}
+                            sx={{
+                                fontFamily: 'Press Start 2P',
+                                fontSize: '0.7rem',
+                                px: 3,
+                                py: 1,
+                                background: 'linear-gradient(145deg, #6b7280 0%, #4b5563 100%)',
+                                color: '#ffffff',
+                                border: '2px solid #000000',
+                                borderRadius: 0,
+                                '&:hover': {
+                                    background: 'linear-gradient(145deg, #4b5563 0%, #374151 100%)',
+                                }
+                            }}
+                        >
+                            {t('common.cancel')}
+                        </Button>
+                        <Button 
+                            onClick={handleOpenChest}
+                            sx={{
+                                fontFamily: 'Press Start 2P',
+                                fontSize: '0.7rem',
+                                px: 3,
+                                py: 1,
+                                background: 'linear-gradient(145deg, #ffd700 0%, #f59e0b 100%)',
+                                color: '#000000',
+                                border: '2px solid #000000',
+                                borderRadius: 0,
+                                '&:hover': {
+                                    background: 'linear-gradient(145deg, #f59e0b 0%, #d97706 100%)',
+                                }
+                            }}
+                        >
+                            {t('battle.openChest')} 🎁
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
+
             <Dialog open={exitWarningOpen} onClose={() => setExitWarningOpen(false)}>
                 <DialogTitle>{t('battle.dungeonExitWarningTitle')}</DialogTitle>
                 <DialogContent>{t('battle.dungeonExitWarning')}</DialogContent>
@@ -2458,6 +2757,109 @@ function Battle({ player }) {
                     <Button onClick={confirmExitDungeon} color="error">{t('common.exit')}</Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Chest Drop Dialog */}
+            {chestDropDialog.open && (
+                <Dialog 
+                    open={chestDropDialog.open} 
+                    onClose={() => setChestDropDialog({ open: false, item: null, dungeon: null })}
+                    maxWidth="sm"
+                    sx={{
+                        '& .MuiDialog-paper': {
+                            background: 'linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%)',
+                            border: '3px solid #ffd700',
+                            borderRadius: 0,
+                            color: '#ffffff',
+                            fontFamily: 'Press Start 2P'
+                        }
+                    }}
+                >
+                    <DialogTitle sx={{ 
+                        textAlign: 'center', 
+                        color: '#ffd700', 
+                        fontFamily: 'Press Start 2P',
+                        fontSize: '1rem',
+                        borderBottom: '2px solid #ffd700',
+                        mb: 2
+                    }}>
+                        🎁 Chest Opened! 🎁
+                    </DialogTitle>
+                    <DialogContent sx={{ textAlign: 'center', py: 3 }}>
+                        {chestDropDialog.item && (
+                            <Box sx={{ 
+                                p: 3, 
+                                border: `2px solid ${chestDropDialog.item.rarity === 'legendary' ? '#ffd700' : 
+                                    chestDropDialog.item.rarity === 'epic' ? '#a855f7' :
+                                    chestDropDialog.item.rarity === 'rare' ? '#3b82f6' : '#6b7280'}`,
+                                background: `rgba(${chestDropDialog.item.rarity === 'legendary' ? '255, 215, 0' : 
+                                    chestDropDialog.item.rarity === 'epic' ? '168, 85, 247' :
+                                    chestDropDialog.item.rarity === 'rare' ? '59, 130, 246' : '107, 114, 128'}, 0.1)`,
+                                borderRadius: 0
+                            }}>
+                                <Typography variant="h5" sx={{ 
+                                    mb: 2, 
+                                    color: chestDropDialog.item.rarity === 'legendary' ? '#ffd700' : 
+                                        chestDropDialog.item.rarity === 'epic' ? '#a855f7' :
+                                        chestDropDialog.item.rarity === 'rare' ? '#3b82f6' : '#ffffff',
+                                    fontFamily: 'Press Start 2P',
+                                    fontSize: '1.2rem'
+                                }}>
+                                    {chestDropDialog.item.name}
+                                </Typography>
+                                <Typography variant="body1" sx={{ 
+                                    mb: 2, 
+                                    color: '#e0e0e0',
+                                    fontFamily: 'Press Start 2P',
+                                    fontSize: '0.8rem'
+                                }}>
+                                    Level {chestDropDialog.item.level} • {chestDropDialog.item.rarity.charAt(0).toUpperCase() + chestDropDialog.item.rarity.slice(1)}
+                                </Typography>
+                                {chestDropDialog.item.stats && (
+                                    <Box sx={{ mt: 2 }}>
+                                        <Typography variant="body2" sx={{ mb: 1, color: '#4ade80', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>
+                                            Stats:
+                                        </Typography>
+                                        {Object.entries(chestDropDialog.item.stats).map(([stat, value]) => (
+                                            <Typography key={stat} variant="body2" sx={{ color: '#ffffff', fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                                {stat}: +{value}
+                                            </Typography>
+                                        ))}
+                                    </Box>
+                                )}
+                                <Typography variant="body2" sx={{ 
+                                    mt: 2, 
+                                    color: '#4ade80',
+                                    fontFamily: 'Press Start 2P',
+                                    fontSize: '0.7rem',
+                                    fontStyle: 'italic'
+                                }}>
+                                    Added to inventory!
+                                </Typography>
+                            </Box>
+                        )}
+                    </DialogContent>
+                    <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+                        <Button 
+                            onClick={() => setChestDropDialog({ open: false, item: null, dungeon: null })}
+                            sx={{
+                                fontFamily: 'Press Start 2P',
+                                fontSize: '0.7rem',
+                                px: 3,
+                                py: 1,
+                                background: 'linear-gradient(145deg, #4ade80 0%, #22c55e 100%)',
+                                color: '#000000',
+                                border: '2px solid #000000',
+                                borderRadius: 0,
+                                '&:hover': {
+                                    background: 'linear-gradient(145deg, #22c55e 0%, #16a34a 100%)',
+                                }
+                            }}
+                        >
+                            Awesome!
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            )}
         </div>
     );
 }

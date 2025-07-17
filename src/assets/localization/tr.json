@@ -128,7 +128,11 @@
     "lootGained": "Kazandığın Loot",
     "battle.dungeonRestartIn": "Dungeon yeniden başlayacak ardından {{seconds}} saniye sonra.",
     "leave": "Ayrıl",
-    "restart": "Tekrar Başla"
+    "restart": "Tekrar Başla",
+    "chestPreview": "{{dungeon}} Sandığı",
+    "chestContents": "Bu sandık şu potansiyel ödülleri içeriyor:",
+    "openChest": "Sandığı Aç",
+    "chestItemTooltip": "Ne alacağını görmek için 'Sandığı Aç'a tıkla!"
   },
   "equipment": {
     "equip": "Tak",

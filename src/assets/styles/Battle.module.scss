@@ -374,6 +374,32 @@
   }
 }
 
+.chestSymbol {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+  cursor: pointer;
+  position: relative;
+  animation: chestGlow 2s ease-in-out infinite;
+  
+  &:hover {
+    background: rgba(255, 215, 0, 0.3);
+    border-color: #ffed4e;
+    color: #ffed4e;
+    transform: scale(1.15);
+    animation: chestPulse 0.5s ease-in-out;
+  }
+  
+  &::after {
+    content: '✨';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.8rem;
+    animation: sparkle 1.5s ease-in-out infinite;
+  }
+}
+
 .equipmentBonus {
   color: #96ceb4;
   font-weight: bold;
@@ -1432,6 +1458,42 @@
   }
   100% {
     transform: translateY(-50px);
+  }
+}
+
+@keyframes chestGlow {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 1px #000,
+      0 2px 0 0 rgba(0, 0, 0, 0.3),
+      0 0 5px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 1px #000,
+      0 2px 0 0 rgba(0, 0, 0, 0.3),
+      0 0 15px rgba(255, 215, 0, 0.6),
+      0 0 25px rgba(255, 215, 0, 0.3);
+  }
+}
+
+@keyframes chestPulse {
+  0%, 100% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.5;
+    transform: rotate(0deg) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(180deg) scale(1.2);
   }
 }
 
