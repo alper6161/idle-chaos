@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react-swc'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: './', // Important for Electron to load files correctly
+  base: '', // Empty base for Electron
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -12,7 +12,13 @@ export default defineConfig({
     target: 'esnext',
     minify: 'esbuild',
     // Generate source maps for debugging
-    sourcemap: true
+    sourcemap: true,
+    // Ensure relative paths work in Electron
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   },
   server: {
     port: 5173,
