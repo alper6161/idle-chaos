@@ -10,6 +10,8 @@ import MainMenu from "../components/MainMenu";
 import { saveCurrentGame } from "../utils/saveManager.js";
 import { Alert } from "@mui/material";
 import { useRef } from "react";
+import { useNotificationContext } from "../contexts/NotificationContext";
+import NotificationOverlay from "../components/NotificationOverlay";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
@@ -17,6 +19,7 @@ function MainLayout() {
     const [activeBuffs, setActiveBuffs] = useState(getActiveBuffsInfo());
     const [showAutoSaveSuccess, setShowAutoSaveSuccess] = useState(false);
     const { t } = useTranslate();
+    const { notifications, settings: notificationSettings } = useNotificationContext();
     const [musicVolume, setMusicVolume] = useState(() => {
         const saved = localStorage.getItem('musicVolume');
         return saved !== null ? parseFloat(saved) : 0.5;
@@ -152,6 +155,12 @@ function MainLayout() {
                     {t('settings.saveSuccess')}
                 </Alert>
             )}
+            
+            {/* Notification Overlay */}
+            <NotificationOverlay 
+                notifications={notifications} 
+                settings={notificationSettings} 
+            />
         </div>
     );
 }

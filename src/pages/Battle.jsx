@@ -56,6 +56,7 @@ import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
 import { saveCurrentGame } from "../utils/saveManager.js";
 import { getEnemyById } from "../utils/enemies.js";
 import { LOOT_BAG_LIMIT } from "../utils/constants.js";
+import { useNotificationContext } from "../contexts/NotificationContext";
 
 // Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
@@ -78,6 +79,14 @@ function Battle({ player }) {
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
     const [playerHealth, setPlayerHealth] = useState(playerStats.HEALTH);
     const { t } = useTranslate();
+    const { 
+        notifyItemDrop, 
+        notifyItemSale, 
+        notifyBulkSale, 
+        notifyChestOpened,
+        notifyAchievement,
+        notifyGoldGain
+    } = useNotificationContext();
 
     const [lootBag, setLootBag] = useState([]);
     const [playerGold, setPlayerGold] = useState(getGold());
@@ -189,6 +198,9 @@ function Battle({ player }) {
             // Add gold
             const newGold = addGold(sellValue);
             setPlayerGold(newGold);
+            
+            // Notify for item sale
+            notifyItemSale(itemName, sellValue, '💰');
         } catch (err) {
             console.error('Error selling item:', err);
         }
@@ -222,6 +234,7 @@ function Battle({ player }) {
     const handleSellAll = () => {
         try {
             let totalGold = 0;
+            const itemCount = lootBag.length;
             lootBag.forEach(itemName => {
                 totalGold += calculateItemSellValue(itemName);
             });
@@ -235,6 +248,11 @@ function Battle({ player }) {
             // Add total gold
             const newGold = addGold(totalGold);
             setPlayerGold(newGold);
+            
+            // Notify for bulk sale
+            if (itemCount > 0 && totalGold > 0) {
+                notifyBulkSale(itemCount, totalGold);
+            }
         } catch (err) {
             console.error('Error selling all items:', err);
         }
@@ -278,6 +296,11 @@ function Battle({ player }) {
             if (lootResult.goldItems && lootResult.goldItems.length > 0) {
                 const newGold = addGold(lootResult.gold);
                 setPlayerGold(newGold);
+                
+                // Notify for gold gains
+                if (lootResult.gold > 0) {
+                    notifyGoldGain(lootResult.gold, `${currentEnemy?.name || 'Enemy'} drops`);
+                }
             }
             
             // Add to loot bag with limit enforcement
@@ -288,6 +311,12 @@ function Battle({ player }) {
                 const currentSlot = getCurrentSlot();
                 const slotKey = getSlotKey("lootBag", currentSlot);
                 localStorage.setItem(slotKey, JSON.stringify(updated));
+                
+                // Notify for each item drop
+                itemsToAdd.forEach(itemName => {
+                    notifyItemDrop(itemName, '📦');
+                });
+                
                 return updated;
             });
 
@@ -324,6 +353,9 @@ function Battle({ player }) {
                         type: 'achievement',
                         message: `🏆 Achievement Unlocked: ${achievement.description}!`
                     });
+                    
+                    // Notify for achievement unlock
+                    notifyAchievement(achievement.description);
                 });
             }
             
@@ -749,6 +781,11 @@ function Battle({ player }) {
                         if (lootResult.goldItems && lootResult.goldItems.length > 0) {
                             const newGold = addGold(lootResult.gold);
                             setPlayerGold(newGold);
+                            
+                            // Notify for gold gains
+                            if (lootResult.gold > 0) {
+                                notifyGoldGain(lootResult.gold, `${currentEnemy?.name || 'Enemy'} drops`);
+                            }
                         }
                         
                         // Add to loot bag with limit enforcement
@@ -759,6 +796,12 @@ function Battle({ player }) {
                             const currentSlot = getCurrentSlot();
                             const slotKey = getSlotKey("lootBag", currentSlot);
                             localStorage.setItem(slotKey, JSON.stringify(updated));
+                            
+                            // Notify for each item drop
+                            itemsToAdd.forEach(itemName => {
+                                notifyItemDrop(itemName, '📦');
+                            });
+                            
                             return updated;
                         });
                         // Don't auto-save loot to inventory anymore - player must manually take items
@@ -797,6 +840,9 @@ function Battle({ player }) {
                                     type: 'achievement',
                                     message: `🏆 Achievement Unlocked: ${achievement.description}!`
                                 });
+                                
+                                // Notify for achievement unlock
+                                notifyAchievement(achievement.description);
                             });
                         }
                         
@@ -1160,6 +1206,9 @@ function Battle({ player }) {
             
             // Close preview modal
             setChestPreviewModal({ open: false, dungeon: null, chestItem: null });
+            
+            // Notify for chest opened
+            notifyChestOpened(equipment[0].name || selectedItem.name, dungeon.name);
             
             // Show drop dialog with result
             setChestDropDialog({ 

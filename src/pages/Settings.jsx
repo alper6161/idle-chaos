@@ -14,13 +14,21 @@ import {
     ListItem,
     ListItemText,
     ListItemIcon,
-    Divider
+    Divider,
+    Switch,
+    FormControl,
+    FormControlLabel,
+    Select,
+    MenuItem,
+    Slider,
+    Chip
 } from "@mui/material";
 import { Close, Warning, Refresh, Language, Home, Save, VolumeUp, VolumeOff } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 import { saveCurrentGame, getCurrentSlot, deleteSlot } from "../utils/saveManager.js";
 import { useEffect } from "react";
 import { SYSTEM_COLORS } from "../utils/common";
+import { useNotificationContext } from "../contexts/NotificationContext";
 
 const GAME_STATE_KEYS = [
     'playerHealth', 'playerGold', 'playerLevel', 'playerXP',
@@ -53,6 +61,7 @@ function Settings({ open, onClose }) {
         return saved === 'true';
     });
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
+    const { settings: notificationSettings, updateSettings: updateNotificationSettings, notifyItemDrop } = useNotificationContext();
 
     const handleHardReset = () => {
         const currentSlot = getCurrentSlot();
@@ -109,6 +118,27 @@ function Settings({ open, onClose }) {
         setMusicMuted(newMuted);
         localStorage.setItem('musicMuted', newMuted);
         window.dispatchEvent(new Event('music-settings-changed'));
+    };
+
+    // Notification settings handlers
+    const handleNotificationEnabledChange = (event) => {
+        updateNotificationSettings({ enabled: event.target.checked });
+    };
+
+    const handleNotificationPositionChange = (event) => {
+        updateNotificationSettings({ position: event.target.value });
+    };
+
+    const handleNotificationDurationChange = (event, value) => {
+        updateNotificationSettings({ duration: value });
+    };
+
+    const handleNotificationIconsChange = (event) => {
+        updateNotificationSettings({ showIcons: event.target.checked });
+    };
+
+    const handleTestNotification = () => {
+        notifyItemDrop('Test Sword', '⚔️');
     };
 
     useEffect(() => {
@@ -292,6 +322,164 @@ function Settings({ open, onClose }) {
                             </select>
                         </Box>
                         
+                        <Divider sx={{ my: 3, borderColor: '#4a4a6a' }} />
+
+                        <Typography variant="h6" gutterBottom sx={{ 
+                            color: '#a855f7',
+                            fontSize: '0.9rem',
+                            textShadow: '1px 1px 0px #000',
+                            mb: 2
+                        }}>
+                            📢 {t('common.notificationSettings')}
+                        </Typography>
+                        
+                        {/* Enable/Disable Notifications */}
+                        <Box sx={{ mb: 2 }}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={notificationSettings.enabled}
+                                        onChange={handleNotificationEnabledChange}
+                                        sx={{
+                                            '& .MuiSwitch-switchBase.Mui-checked': {
+                                                color: '#a855f7'
+                                            },
+                                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                                backgroundColor: '#a855f7'
+                                            }
+                                        }}
+                                    />
+                                }
+                                label={t('common.enableNotifications')}
+                                sx={{
+                                    '& .MuiFormControlLabel-label': {
+                                        fontFamily: 'Press Start 2P',
+                                        fontSize: '0.7rem',
+                                        color: '#e0e0e0'
+                                    }
+                                }}
+                            />
+                        </Box>
+
+                        {/* Notification Position */}
+                        <Box sx={{ mb: 2 }}>
+                            <Typography sx={{ fontSize: '0.7rem', mb: 1, color: '#e0e0e0' }}>
+                                📍 {t('common.notificationPosition')}
+                            </Typography>
+                            <FormControl fullWidth disabled={!notificationSettings.enabled}>
+                                <Select
+                                    value={notificationSettings.position}
+                                    onChange={handleNotificationPositionChange}
+                                    sx={{
+                                        fontFamily: 'Press Start 2P',
+                                        fontSize: '0.6rem',
+                                        color: '#e0e0e0',
+                                        '& .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#4a4a6a'
+                                        },
+                                        '& .MuiSelect-icon': {
+                                            color: '#a855f7'
+                                        }
+                                    }}
+                                >
+                                    <MenuItem value="top-left" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↖️ {t('common.topLeft')}
+                                    </MenuItem>
+                                    <MenuItem value="top-center" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ⬆️ {t('common.topCenter')}
+                                    </MenuItem>
+                                    <MenuItem value="top-right" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↗️ {t('common.topRight')}
+                                    </MenuItem>
+                                    <MenuItem value="bottom-left" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↙️ {t('common.bottomLeft')}
+                                    </MenuItem>
+                                    <MenuItem value="bottom-center" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ⬇️ {t('common.bottomCenter')}
+                                    </MenuItem>
+                                    <MenuItem value="bottom-right" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↘️ {t('common.bottomRight')}
+                                    </MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+
+                        {/* Notification Duration */}
+                        <Box sx={{ mb: 2 }}>
+                            <Typography sx={{ fontSize: '0.7rem', mb: 1, color: '#e0e0e0' }}>
+                                ⏱️ {t('common.notificationDuration')}: {notificationSettings.duration}ms
+                            </Typography>
+                            <Slider
+                                value={notificationSettings.duration}
+                                onChange={handleNotificationDurationChange}
+                                min={500}
+                                max={5000}
+                                step={100}
+                                disabled={!notificationSettings.enabled}
+                                sx={{
+                                    color: '#a855f7',
+                                    '& .MuiSlider-thumb': {
+                                        backgroundColor: '#a855f7'
+                                    },
+                                    '& .MuiSlider-track': {
+                                        backgroundColor: '#a855f7'
+                                    }
+                                }}
+                            />
+                        </Box>
+
+                        {/* Show Icons */}
+                        <Box sx={{ mb: 2 }}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={notificationSettings.showIcons}
+                                        onChange={handleNotificationIconsChange}
+                                        disabled={!notificationSettings.enabled}
+                                        sx={{
+                                            '& .MuiSwitch-switchBase.Mui-checked': {
+                                                color: '#a855f7'
+                                            },
+                                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                                backgroundColor: '#a855f7'
+                                            }
+                                        }}
+                                    />
+                                }
+                                label={t('common.showNotificationIcons')}
+                                sx={{
+                                    '& .MuiFormControlLabel-label': {
+                                        fontFamily: 'Press Start 2P',
+                                        fontSize: '0.7rem',
+                                        color: '#e0e0e0'
+                                    }
+                                }}
+                            />
+                        </Box>
+
+                        {/* Test Notification Button */}
+                        <Box sx={{ mb: 2 }}>
+                            <Button
+                                variant="outlined"
+                                onClick={handleTestNotification}
+                                disabled={!notificationSettings.enabled}
+                                sx={{
+                                    fontFamily: 'Press Start 2P',
+                                    fontSize: '0.6rem',
+                                    borderColor: '#a855f7',
+                                    color: '#a855f7',
+                                    '&:hover': {
+                                        borderColor: '#9333ea',
+                                        backgroundColor: 'rgba(168, 85, 247, 0.1)'
+                                    }
+                                }}
+                            >
+                                🧪 {t('common.testNotification')}
+                            </Button>
+                        </Box>
+                        
+                        <Divider sx={{ my: 3, borderColor: '#4a4a6a' }} />
+
                         <Typography variant="h6" gutterBottom sx={{ 
                             color: '#ff6b6b',
                             fontSize: '0.9rem',
