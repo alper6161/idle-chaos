@@ -8,7 +8,7 @@ export const BASE_PLAYER_STATS = {
     ATK: 6,
     DEF: 3,
     HEALTH: 60,
-    ATTACK_SPEED: 100,
+    ATTACK_SPEED: 2.0,
     CRIT_CHANCE: 3,
     CRIT_DAMAGE: 120
 };
