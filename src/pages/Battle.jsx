@@ -57,6 +57,7 @@ import { saveCurrentGame } from "../utils/saveManager.js";
 import { getEnemyById } from "../utils/enemies.js";
 import { LOOT_BAG_LIMIT } from "../utils/constants.js";
 import { useNotificationContext } from "../contexts/NotificationContext";
+import { useBattleContext } from "../contexts/BattleContext";
 
 // Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
@@ -74,10 +75,8 @@ const getCurrentSlot = () => {
 
 function Battle({ player }) {
     const [battleMode, setBattleMode] = useState('selection');
-    const [currentEnemy, setCurrentEnemy] = useState(null);
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
-    const [playerHealth, setPlayerHealth] = useState(playerStats.HEALTH);
     const { t } = useTranslate();
     const { 
         notifyItemDrop, 
@@ -88,23 +87,53 @@ function Battle({ player }) {
         notifyGoldGain
     } = useNotificationContext();
 
-    const [lootBag, setLootBag] = useState([]);
-    const [playerGold, setPlayerGold] = useState(getGold());
-    // Potion state
-    const [potions, setPotions] = useState(getPotions());
+    // Use global battle context instead of local state
+    const {
+        isBattleActive,
+        currentBattle,
+        currentEnemy,
+        selectedAttackType,
+        isWaitingForEnemy,
+        enemySpawnProgress,
+        battleLog,
+        damageDisplay,
+        availableAttackTypes,
+        lootBag,
+        playerGold,
+        potions,
+        playerHealth,
+        startBattle,
+        stopBattle,
+        setSelectedAttackType,
+        startEnemySpawnTimer,
+        setDamageDisplay,
+        setCurrentBattle,
+        setIsBattleActive,
+        setBattleLog,
+        handleUsePotion,
+        addToLootBag,
+        removeFromLootBag,
+        clearLootBag,
+        updatePlayerGold,
+        subtractPlayerGold,
+        setPlayerHealth
+    } = useBattleContext();
+
+    // Auto-switch to battle mode if battle is active
+    useEffect(() => {
+        if (isBattleActive && currentBattle && currentEnemy) {
+            setBattleMode('battle');
+        } else if (!isBattleActive && battleMode === 'battle') {
+            setBattleMode('selection');
+        }
+    }, [isBattleActive, currentBattle, currentEnemy, battleMode]);
+
+    // Local UI state only
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
     const [lastPotionUsed, setLastPotionUsed] = useState(null);
     const [battleResult, setBattleResult] = useState(null);
-    const [battleLog, setBattleLog] = useState([]);
-    const [isBattleActive, setIsBattleActive] = useState(false);
-    const [currentBattle, setCurrentBattle] = useState(null);
-    const [damageDisplay, setDamageDisplay] = useState({ player: null, enemy: null });
-    const [isWaitingForEnemy, setIsWaitingForEnemy] = useState(false);
-    const [enemySpawnProgress, setEnemySpawnProgress] = useState(0);
     const [deathDialog, setDeathDialog] = useState({ open: false, countdown: 15, goldLost: 0, equipmentLost: [] });
     const [battleLogVisible, setBattleLogVisible] = useState(true);
-    const [selectedAttackType, setSelectedAttackType] = useState('stab');
-    const [availableAttackTypes, setAvailableAttackTypes] = useState([]);
     const [battleTab, setBattleTab] = useState('locations');
     const [openLocations, setOpenLocations] = useState(() => LOCATIONS.map((_, i) => i === 0));
     const [openDungeons, setOpenDungeons] = useState(() => DUNGEONS.map((_, i) => i === 0));
@@ -159,13 +188,7 @@ function Battle({ player }) {
     const handleTakeItem = (itemName, index) => {
         try {
             // Remove from loot bag
-            setLootBag(prev => {
-                const updated = prev.filter((_, idx) => idx !== index);
-                const currentSlot = getCurrentSlot();
-                const slotKey = getSlotKey("lootBag", currentSlot);
-                localStorage.setItem(slotKey, JSON.stringify(updated));
-                return updated;
-            });
+            removeFromLootBag(index);
 
             // Convert item to equipment and add to inventory
             const equipment = convertLootBagToEquipment([itemName]);
@@ -187,17 +210,10 @@ function Battle({ player }) {
         
         try {
             // Remove from loot bag
-            setLootBag(prev => {
-                const updated = prev.filter((_, idx) => idx !== index);
-                const currentSlot = getCurrentSlot();
-                const slotKey = getSlotKey("lootBag", currentSlot);
-                localStorage.setItem(slotKey, JSON.stringify(updated));
-                return updated;
-            });
+            removeFromLootBag(index);
 
             // Add gold
-            const newGold = addGold(sellValue);
-            setPlayerGold(newGold);
+            updatePlayerGold(sellValue);
             
             // Notify for item sale
             notifyItemSale(itemName, sellValue, '💰');
@@ -212,14 +228,12 @@ function Battle({ player }) {
             const itemsToConvert = [...lootBag];
             
             // Clear loot bag
-            setLootBag([]);
-            const currentSlot = getCurrentSlot();
-            const slotKey = getSlotKey("lootBag", currentSlot);
-            localStorage.setItem(slotKey, JSON.stringify([]));
+            clearLootBag();
 
             // Convert all items to equipment and add to inventory
             const equipment = convertLootBagToEquipment(itemsToConvert);
             if (equipment.length > 0) {
+                const currentSlot = getCurrentSlot();
                 const inventorySlotKey = getSlotKey('idle-chaos-inventory', currentSlot);
                 const currentInventory = JSON.parse(localStorage.getItem(inventorySlotKey) || '[]');
                 const updatedInventory = [...currentInventory, ...equipment];
@@ -240,14 +254,10 @@ function Battle({ player }) {
             });
             
             // Clear loot bag
-            setLootBag([]);
-            const currentSlot = getCurrentSlot();
-            const slotKey = getSlotKey("lootBag", currentSlot);
-            localStorage.setItem(slotKey, JSON.stringify([]));
+            clearLootBag();
 
             // Add total gold
-            const newGold = addGold(totalGold);
-            setPlayerGold(newGold);
+            updatePlayerGold(totalGold);
             
             // Notify for bulk sale
             if (itemCount > 0 && totalGold > 0) {
@@ -280,9 +290,6 @@ function Battle({ player }) {
             setBattleResult(battleResult);
             
             setPlayerHealth(battleResult.playerFinalHealth);
-            const battleCurrentSlot = getCurrentSlot();
-            const battleHealthSlotKey = getSlotKey("playerHealth", battleCurrentSlot);
-            localStorage.setItem(battleHealthSlotKey, battleResult.playerFinalHealth.toString());
             
             // Process victory rewards
             const achievementResult = currentEnemy ? recordKill(currentEnemy.id) : { achievements: {}, newAchievements: [] };
@@ -294,8 +301,7 @@ function Battle({ player }) {
             
             // Auto-convert gold items directly without showing in loot bag
             if (lootResult.goldItems && lootResult.goldItems.length > 0) {
-                const newGold = addGold(lootResult.gold);
-                setPlayerGold(newGold);
+                updatePlayerGold(lootResult.gold);
                 
                 // Notify for gold gains
                 if (lootResult.gold > 0) {
@@ -304,20 +310,11 @@ function Battle({ player }) {
             }
             
             // Add to loot bag with limit enforcement
-            setLootBag(prev => {
-                const availableSpace = LOOT_BAG_LIMIT - prev.length;
-                const itemsToAdd = newLoot.slice(0, availableSpace);
-                const updated = [...prev, ...itemsToAdd];
-                const currentSlot = getCurrentSlot();
-                const slotKey = getSlotKey("lootBag", currentSlot);
-                localStorage.setItem(slotKey, JSON.stringify(updated));
-                
-                // Notify for each item drop
-                itemsToAdd.forEach(itemName => {
-                    notifyItemDrop(itemName, '📦');
-                });
-                
-                return updated;
+            const itemsToAdd = addToLootBag(newLoot);
+            
+            // Notify for each item drop
+            itemsToAdd.forEach(itemName => {
+                notifyItemDrop(itemName, '📦');
             });
 
             // --- PET DROP LOGIC ---
@@ -386,60 +383,32 @@ function Battle({ player }) {
     };
 
     // Potion usage function
-    const handleUsePotion = (potionType) => {
-        const result = usePotion(potionType);
+    const handleUsePotionLocal = (potionType) => {
+        const result = handleUsePotion(potionType);
         if (result.success) {
-            setPotions(result.remainingPotions);
+            // Show potion used effect
+            setLastPotionUsed({
+                type: potionType,
+                healAmount: result.healAmount,
+                timestamp: Date.now()
+            });
             
-            // Heal the player
-            if (currentBattle) {
-                const newHealth = Math.min(
-                    currentBattle.player.currentHealth + result.healAmount,
-                    currentBattle.player.HEALTH
-                );
-                
-                setCurrentBattle(prev => ({
-                    ...prev,
-                    player: { ...prev.player, currentHealth: newHealth }
-                }));
-                
-                setPlayerHealth(newHealth);
-                const currentSlot = getCurrentSlot();
-                const healthSlotKey = getSlotKey("playerHealth", currentSlot);
-                localStorage.setItem(healthSlotKey, newHealth.toString());
-                
-                // Show potion used effect
-                setLastPotionUsed({
-                    type: potionType,
-                    healAmount: result.healAmount,
-                    timestamp: Date.now()
-                });
-                
-                // Clear effect after 2 seconds
-                setTimeout(() => {
-                    setLastPotionUsed(null);
-                }, 2000);
-                
-                // Auto save after potion use
-                setTimeout(() => {
-                    saveCurrentGame();
-                }, 500);
-            }
+            // Clear effect after 2 seconds
+            setTimeout(() => {
+                setLastPotionUsed(null);
+            }, 2000);
+            
+            // Auto save after potion use
+            setTimeout(() => {
+                saveCurrentGame();
+            }, 500);
         }
     };
 
-    // Auto potion check
+    // Auto potion check (now handled in BattleContext)
     const checkAutoPotion = () => {
-        if (!currentBattle || !autoPotionSettings.enabled) return;
-        
-        const potionToUse = shouldUseAutoPotion(
-            currentBattle.player.currentHealth,
-            currentBattle.player.HEALTH
-        );
-        
-        if (potionToUse) {
-            handleUsePotion(potionToUse);
-        }
+        // This is now handled automatically in BattleContext
+        // Keeping this function for backward compatibility but it's not needed
     };
 
     const showDeathDialog = () => {
@@ -469,12 +438,11 @@ function Battle({ player }) {
         const penalties = { goldLost: 0, equipmentLost: [] };
         
         // Gold loss - lose half of current gold
-        const currentGold = getGold();
+        const currentGold = playerGold;
         const goldLoss = Math.floor(currentGold / 2);
         if (goldLoss > 0) {
-            subtractGold(goldLoss);
+            subtractPlayerGold(goldLoss);
             penalties.goldLost = goldLoss;
-            setPlayerGold(getGold());
         }
         
         // Equipment loss - random chance for each equipped item
@@ -501,49 +469,16 @@ function Battle({ player }) {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         setPlayerHealth(currentPlayerStats.HEALTH);
-        const currentSlot = getCurrentSlot();
-        const healthSlotKey = getSlotKey("playerHealth", currentSlot);
-        localStorage.setItem(healthSlotKey, currentPlayerStats.HEALTH.toString());
         setBattleMode('selection');
-        setCurrentEnemy(null);
         setBattleResult(null);
-        setCurrentBattle(null);
-        setIsBattleActive(false);
+        stopBattle();
     };
 
-    const startEnemySpawnTimer = () => {
-        setBattleLog(prev => [
-            ...prev,
-            { type: 'info', message: t('battle.searchingForEnemy') }
-        ]);
-        createSpawnTimer(
-            setIsWaitingForEnemy, 
-            setEnemySpawnProgress, 
-            spawnNewEnemy
-        );
-    };
-    
-    const spawnNewEnemy = () => {
-        setBattleResult(null);
-        setCurrentBattle(null);
-        
-        const currentSlot = getCurrentSlot();
-        const healthSlotKey = getSlotKey("playerHealth", currentSlot);
-        const savedHealth = localStorage.getItem(healthSlotKey);
-        const currentPlayerStats = getPlayerStats();
-        const currentHealth = savedHealth ? parseInt(savedHealth) : currentPlayerStats.HEALTH;
-        
-        setTimeout(() => {
-            if (currentEnemy) {
-                startRealTimeBattle(currentEnemy, currentHealth);
-            }
-        }, 0);
-    };
+    // startEnemySpawnTimer and spawnNewEnemy are now handled by global BattleContext
 
     const handleEnemySelect = (enemy) => {
-        setCurrentEnemy(enemy);
         setBattleMode('battle');
-        startRealTimeBattle(enemy);
+        startBattle(enemy, selectedAttackType);
     };
 
     const handleBackToSelection = () => {
@@ -552,12 +487,8 @@ function Battle({ player }) {
             return;
         }
         setBattleMode('selection');
-        setCurrentEnemy(null);
+        stopBattle();
         setBattleResult(null);
-        setCurrentBattle(null);
-        setIsBattleActive(false);
-        setIsWaitingForEnemy(false);
-        setEnemySpawnProgress(0);
         setDungeonRun(null);
     };
 
@@ -587,7 +518,6 @@ function Battle({ player }) {
         
         setIsBattleActive(true);
         setBattleResult(null);
-        setDamageDisplay({ player: null, enemy: null });
     };
 
     const getDifficultyColor = (enemy) => {
@@ -699,17 +629,12 @@ function Battle({ player }) {
         localStorage.setItem(healthSlotKey, currentPlayerStats.HEALTH.toString());
     }, []);
 
+    // Equipment changes are now managed in BattleContext
     useEffect(() => {
         const checkEquipmentChanges = () => {
             const currentPlayerStats = getPlayerStats();
             if (JSON.stringify(currentPlayerStats) !== JSON.stringify(playerStats)) {
                 setPlayerStats(currentPlayerStats);
-                if (currentBattle) {
-                    setCurrentBattle(prev => ({
-                        ...prev,
-                        player: { ...currentPlayerStats, currentHealth: Math.min(prev.player.currentHealth, currentPlayerStats.HEALTH) }
-                    }));
-                }
             }
         };
 
@@ -725,287 +650,16 @@ function Battle({ player }) {
             clearInterval(interval);
             window.removeEventListener('focus', handleFocus);
         };
-    }, [playerStats, currentBattle]);
+    }, [playerStats]);
 
-    useEffect(() => {
-        if (!isBattleActive || !currentBattle || dungeonCompleteDialog.open) {
-            return;
-        }
+    // Battle logic is now handled by the global BattleContext
+    // No need for local battle loop
 
-        const interval = setInterval(() => {
-            setCurrentBattle(prev => {
-                if (!prev) return prev;
-                
-                // Stop battle if dungeon complete dialog is open
-                if (dungeonCompleteDialog.open) {
-                    return prev;
-                }
+    // Battle log synchronization is now handled by global BattleContext
 
-                // Calculate skill buffs for attack speed
-                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
-                const effectiveAttackSpeed = prev.player.ATTACK_SPEED + attackSpeedBonus;
-                
-                const playerSpeed = Math.max(1, effectiveAttackSpeed);
-                const enemySpeed = Math.max(1, Math.min(5, prev.enemy.ATTACK_SPEED));
-                let newBattle = updateBattleState(prev, playerSpeed, enemySpeed);
+    // Player health is now managed in BattleContext
 
-                if (newBattle.playerProgress >= 100) {
-                    newBattle = processPlayerAttack(newBattle, setDamageDisplay, selectedAttackType);
-                }
-
-                if (newBattle.enemyProgress >= 100) {
-                    newBattle = processEnemyAttack(newBattle, setDamageDisplay);
-                }
-
-                const battleResult = checkBattleResult(newBattle);
-                if (battleResult) {
-                    setIsBattleActive(false);
-                    setBattleResult(battleResult);
-                    
-                    setPlayerHealth(battleResult.playerFinalHealth);
-                    const battleCurrentSlot = getCurrentSlot();
-                    const battleHealthSlotKey = getSlotKey("playerHealth", battleCurrentSlot);
-                    localStorage.setItem(battleHealthSlotKey, battleResult.playerFinalHealth.toString());
-                    
-                    if (battleResult.winner === 'player') {
-                        // Record achievement for enemy kill
-                        const achievementResult = currentEnemy ? recordKill(currentEnemy.id) : { achievements: {}, newAchievements: [] };
-                        
-                        const lootResult = currentEnemy ? getLootDrop(currentEnemy.drops) : { items: [], gold: 0, goldItems: [] };
-                        
-                        // Only add equipment items to loot bag, not gold items
-                        const newLoot = [...lootResult.items];
-                        
-                        // Auto-convert gold items directly without showing in loot bag
-                        if (lootResult.goldItems && lootResult.goldItems.length > 0) {
-                            const newGold = addGold(lootResult.gold);
-                            setPlayerGold(newGold);
-                            
-                            // Notify for gold gains
-                            if (lootResult.gold > 0) {
-                                notifyGoldGain(lootResult.gold, `${currentEnemy?.name || 'Enemy'} drops`);
-                            }
-                        }
-                        
-                        // Add to loot bag with limit enforcement
-                        setLootBag(prev => {
-                            const availableSpace = LOOT_BAG_LIMIT - prev.length;
-                            const itemsToAdd = newLoot.slice(0, availableSpace);
-                            const updated = [...prev, ...itemsToAdd];
-                            const currentSlot = getCurrentSlot();
-                            const slotKey = getSlotKey("lootBag", currentSlot);
-                            localStorage.setItem(slotKey, JSON.stringify(updated));
-                            
-                            // Notify for each item drop
-                            itemsToAdd.forEach(itemName => {
-                                notifyItemDrop(itemName, '📦');
-                            });
-                            
-                            return updated;
-                        });
-                        // Don't auto-save loot to inventory anymore - player must manually take items
-
-                        // --- PET DROP LOGIC ---
-                        let petDropMessage = null;
-                        if (currentEnemy) {
-                            const pet = checkPetDrop(currentEnemy.id);
-                            if (pet) {
-                                const currentSlot = getCurrentSlot();
-                                const slotKey = getSlotKey('idle-chaos-pets', currentSlot);
-                                const ownedPets = JSON.parse(localStorage.getItem(slotKey) || '[]');
-                                if (!ownedPets.includes(pet.id)) {
-                                    ownedPets.push(pet.id);
-                                    localStorage.setItem(slotKey, JSON.stringify(ownedPets));
-                                    petDropMessage = `✨ PET FOUND: ${pet.icon} <b>${pet.name}</b>! (${pet.description})`;
-                                } else {
-                                    petDropMessage = `✨ PET FOUND (duplicate): ${pet.icon} <b>${pet.name}</b>! (Already owned)`;
-                                }
-                            }
-                        }
-                        // --- SONU ---
-
-                        // Add loot and achievement messages to battle log
-                        const battleLogMessages = [
-                            {
-                                type: 'victory',
-                                message: `🎉 ${t('battle.playerWins')}! Enemy defeated!`
-                            }
-                        ];
-                        
-                        // Add achievement messages if any new achievements unlocked
-                        if (achievementResult.newAchievements.length > 0) {
-                            achievementResult.newAchievements.forEach(achievement => {
-                                battleLogMessages.push({
-                                    type: 'achievement',
-                                    message: `🏆 Achievement Unlocked: ${achievement.description}!`
-                                });
-                                
-                                // Notify for achievement unlock
-                                notifyAchievement(achievement.description);
-                            });
-                        }
-                        
-                        // Add loot messages
-                        battleLogMessages.push(...newLoot.map(item => ({
-                            type: 'loot',
-                            message: `📦 Loot: ${item}`
-                        })));
-                        
-                        // Add pet drop message if any
-                        if (petDropMessage) {
-                            battleLogMessages.push({
-                                type: 'pet',
-                                message: petDropMessage
-                            });
-                        }
-                        
-                        // Add messages to both battleLog state and currentBattle.battleLog
-                        battleLogMessages.forEach(msg => setBattleLog(prev => [...prev, msg]));
-                        
-                        // Update currentBattle with the new battle log entries
-                        const updatedBattle = {
-                            ...newBattle,
-                            battleLog: [...(newBattle.battleLog || []), ...battleLogMessages]
-                        };
-                        
-                        setCurrentBattle(updatedBattle);
-                        startEnemySpawnTimer();
-                        
-                        // Auto save after successful battle
-                        setTimeout(() => {
-                            saveCurrentGame();
-                        }, 1000);
-
-                        // Savaş sonucu işlenirken, eğer currentEnemy bir lokasyon düşmanı ise, uniqueLoot drop ihtimalini kontrol et
-                        if (currentEnemy) {
-                            const location = LOCATIONS.find(loc => loc.enemies.includes(currentEnemy.id));
-                            if (location && location.uniqueLoot) {
-                                if (Math.random() < location.uniqueLoot.chance) {
-                                    setLootBag(prev => {
-                                        const updated = [...prev, location.uniqueLoot.name];
-                                        const currentSlot = getCurrentSlot();
-                                        const slotKey = getSlotKey("lootBag", currentSlot);
-                                        localStorage.setItem(slotKey, JSON.stringify(updated));
-                                        return updated;
-                                    });
-                                    // Battle log'a ekle
-                                    setBattleLog(prev => [...prev, { type: 'loot', message: `✨ ${t('battle.uniqueLocationLoot')}: ${location.uniqueLoot.name}` }]);
-                                }
-                            }
-                        }
-                        // At the end of the player victory block, before startEnemySpawnTimer():
-                        if (battleMode === 'dungeon') {
-                            handleDungeonEnemyDefeated();
-                            // If dungeon is completed, stop the battle
-                            if (dungeonRun && dungeonRun.completed) {
-                                return prev;
-                            }
-                        }
-                    } else if (battleResult.winner === 'enemy') {
-                        // Auto save before death
-                        saveCurrentGame();
-                        showDeathDialog();
-                    }
-                    return prev;
-                }
-
-                return newBattle;
-            });
-            
-            // Check for auto potion usage
-            checkAutoPotion();
-        }, 200);
-
-        return () => clearInterval(interval);
-    }, [isBattleActive, currentBattle, autoPotionSettings, dungeonCompleteDialog.open]);
-
-    // Synchronize currentBattle.battleLog with battleLog state
-    useEffect(() => {
-        if (currentBattle && currentBattle.battleLog) {
-            // Merge battle logs instead of overwriting
-            setBattleLog(prev => {
-                const currentBattleLog = currentBattle.battleLog || [];
-                
-                const mergedLog = [...prev];
-                
-                // Add new entries from currentBattle.battleLog that aren't already in prev
-                currentBattleLog.forEach(newEntry => {
-                    const exists = mergedLog.some(existingEntry => 
-                        existingEntry.type === newEntry.type && 
-                        existingEntry.message === newEntry.message &&
-                        existingEntry.damage === newEntry.damage
-                    );
-                    if (!exists) {
-                        mergedLog.push(newEntry);
-                    }
-                });
-                
-                return mergedLog;
-            });
-        }
-    }, [currentBattle?.battleLog]);
-
-    // Monitor battle state changes
-    useEffect(() => {
-    }, [isBattleActive]);
-
-    useEffect(() => {
-    }, [currentBattle]);
-
-    // Monitor battle mode changes
-    useEffect(() => {
-    }, [battleMode]);
-
-    // playerStats değiştiğinde playerHealth'i de güncelle
-    useEffect(() => {
-        setPlayerHealth(playerStats.HEALTH);
-        const statsCurrentSlot = getCurrentSlot();
-        const statsHealthSlotKey = getSlotKey("playerHealth", statsCurrentSlot);
-        localStorage.setItem(statsHealthSlotKey, playerStats.HEALTH.toString());
-    }, [playerStats.HEALTH]);
-
-    // Update attack types when equipment changes
-    useEffect(() => {
-        const updateAttackTypes = () => {
-            // Check both possible localStorage keys
-            const currentSlot = getCurrentSlot();
-            const slotKey1 = getSlotKey("equippedItems", currentSlot);
-            const slotKey2 = getSlotKey("idle-chaos-equipped-items", currentSlot);
-            const equippedItems1 = JSON.parse(localStorage.getItem(slotKey1) || "{}");
-            const equippedItems2 = JSON.parse(localStorage.getItem(slotKey2) || "{}");
-            
-            const equippedWeapon = equippedItems1.weapon || equippedItems2.weapon;
-            const weaponType = getWeaponType(equippedWeapon);
-            const attackTypes = getAvailableAttackTypes(weaponType);
-            
-
-            
-            setAvailableAttackTypes(attackTypes);
-            
-            // If current selected attack type is not available, select the first one
-            if (!attackTypes.find(at => at.type === selectedAttackType)) {
-                setSelectedAttackType(attackTypes[0]?.type || 'stab');
-            }
-        };
-
-        updateAttackTypes();
-        
-        // Listen for equipment changes - check every 2 seconds
-        const interval = setInterval(updateAttackTypes, 2000);
-        
-        // Also listen for storage events (other tabs)
-        const handleStorageChange = () => {
-            updateAttackTypes();
-        };
-        
-        window.addEventListener('storage', handleStorageChange);
-        
-        return () => {
-            clearInterval(interval);
-            window.removeEventListener('storage', handleStorageChange);
-        };
-    }, [selectedAttackType]);
+    // Attack types are now managed in BattleContext
 
     // Update auto potion settings when buffs change
     useEffect(() => {
@@ -1510,15 +1164,14 @@ function Battle({ player }) {
                                 <Avatar src={getCharacterIcon(selectedCharacter)} className={styles.avatar} />
                                 <Typography variant="h6">{getCharacterName(selectedCharacter)}</Typography>
                                 {damageDisplay.player && (
-                                    <Typography 
-                                        variant="h4" 
+                                    <div 
                                         className={`${styles.damageDisplay} ${
                                             damageDisplay.player === 'MISS' ? styles.missDisplay : 
                                             damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
                                         }`}
                                     >
                                         {damageDisplay.player}
-                                    </Typography>
+                                    </div>
                                 )}
                                 <div className={styles.hpBarContainer}>
                                     <Typography className={styles.hpText}>
@@ -1586,15 +1239,14 @@ function Battle({ player }) {
                                 </div>
                                 <Typography variant="h6">{currentEnemy?.name}</Typography>
                                 {damageDisplay.enemy && (
-                                    <Typography 
-                                        variant="h4" 
+                                    <div 
                                         className={`${styles.damageDisplay} ${
                                             damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
                                             damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
                                         }`}
                                     >
                                         {damageDisplay.enemy}
-                                    </Typography>
+                                    </div>
                                 )}
                                 {isWaitingForEnemy ? (
                                     <div className={styles.enemySpawnContainer}>
@@ -1619,11 +1271,11 @@ function Battle({ player }) {
                                                     getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
                                                 }`}
                                             >
-                                                HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
+                                                HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHealth || currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
                                             </Typography>
                                             <LinearProgress
                                                 variant="determinate"
-                                                value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100) : 100}
+                                                value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / (currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp)) * 100) : 100}
                                                 className={`${styles.progress} ${styles.enemyHpBar}`}
                                             />
                                         </div>
@@ -1643,9 +1295,9 @@ function Battle({ player }) {
                                 <div className={styles.fighter}>
                                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                         <Typography variant="h6">{t('battle.battleLog')}</Typography>
-                                        <Tooltip title={t('battle.closeBattleLog')} arrow>
+                                        <Tooltip title={t('battle.clearBattleLog')} arrow>
                                             <IconButton
-                                                onClick={() => setBattleLogVisible(false)}
+                                                onClick={() => setBattleLog([])}
                                                 sx={{
                                                     position: 'absolute',
                                                     right: 8,
@@ -1657,7 +1309,7 @@ function Battle({ player }) {
                                                 }}
                                                 size="small"
                                             >
-                                                <ExpandLess />
+                                                <div style={{ fontSize: '1rem' }}>🗑️</div>
                                             </IconButton>
                                         </Tooltip>
                                     </Box>
@@ -1666,9 +1318,9 @@ function Battle({ player }) {
                                             <Typography variant="body2" sx={{ color: '#ffffff', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{t('battle.noBattleLog')}</Typography>
                                         ) : (
                                             battleLog.map((entry, idx) => (
-                                                <Typography key={idx} variant="body2" className={styles[`${entry.type}Log`] || styles.battleLogEntry}>
+                                                <div key={idx} className={styles[`${entry.type}Log`] || styles.battleLogEntry}>
                                                     {entry.message}
-                                                </Typography>
+                                                </div>
                                             ))
                                         )}
                                     </div>
@@ -1699,7 +1351,7 @@ function Battle({ player }) {
                                                 variant="contained"
                                                 className={styles.potionButton}
                                                 disabled={!canUse}
-                                                onClick={() => handleUsePotion(potion.id)}
+                                                onClick={() => handleUsePotionLocal(potion.id)}
                                                 style={{
                                                     backgroundColor: potion.color,
                                                     border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',
@@ -2302,15 +1954,14 @@ function Battle({ player }) {
                                     <Avatar src={getCharacterIcon(selectedCharacter)} className={styles.avatar} />
                                     <Typography variant="h6">{getCharacterName(selectedCharacter)}</Typography>
                                     {damageDisplay.player && (
-                                        <Typography 
-                                            variant="h4" 
+                                        <div 
                                             className={`${styles.damageDisplay} ${
                                                 damageDisplay.player === 'MISS' ? styles.missDisplay : 
                                                 damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
                                             }`}
                                         >
                                             {damageDisplay.player}
-                                        </Typography>
+                                        </div>
                                     )}
                                     <div className={styles.hpBarContainer}>
                                         <Typography className={styles.hpText}>
@@ -2377,17 +2028,16 @@ function Battle({ player }) {
                                         {getEnemyInitial(currentEnemy?.name)}
                                     </div>
                                     <Typography variant="h6">{currentEnemy?.name}</Typography>
-                                    {damageDisplay.enemy && (
-                                        <Typography 
-                                            variant="h4" 
-                                            className={`${styles.damageDisplay} ${
-                                                damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
-                                                damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
-                                            }`}
-                                        >
-                                            {damageDisplay.enemy}
-                                        </Typography>
-                                    )}
+                                                                    {damageDisplay.enemy && (
+                                    <div 
+                                        className={`${styles.damageDisplay} ${
+                                            damageDisplay.enemy === 'MISS' ? styles.missDisplay :
+                                            damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
+                                        }`}
+                                    >
+                                        {damageDisplay.enemy}
+                                    </div>
+                                )}
                                     {isWaitingForEnemy ? (
                                         <div className={styles.enemySpawnContainer}>
                                             <Typography className={styles.spawnText}>
@@ -2411,11 +2061,11 @@ function Battle({ player }) {
                                                         getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
                                                     }`}
                                                 >
-                                                    HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
+                                                    HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHealth || currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
                                                 </Typography>
                                                 <LinearProgress
                                                     variant="determinate"
-                                                    value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / currentBattle.enemy.maxHp) * 100) : 100}
+                                                    value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / (currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp)) * 100) : 100}
                                                     className={`${styles.progress} ${styles.enemyHpBar}`}
                                                 />
                                             </div>
@@ -2435,9 +2085,9 @@ function Battle({ player }) {
                                     <div className={styles.fighter}>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                                             <Typography variant="h6">{t('battle.battleLog')}</Typography>
-                                            <Tooltip title={t('battle.closeBattleLog')} arrow>
+                                            <Tooltip title={t('battle.clearBattleLog')} arrow>
                                                 <IconButton
-                                                    onClick={() => setBattleLogVisible(false)}
+                                                    onClick={() => setBattleLog([])}
                                                     sx={{
                                                         position: 'absolute',
                                                         right: 8,
@@ -2449,7 +2099,7 @@ function Battle({ player }) {
                                                     }}
                                                     size="small"
                                                 >
-                                                    <ExpandLess />
+                                                    <div style={{ fontSize: '1rem' }}>🗑️</div>
                                                 </IconButton>
                                             </Tooltip>
                                         </Box>
@@ -2457,11 +2107,11 @@ function Battle({ player }) {
                                             {battleLog.length === 0 ? (
                                                 <Typography variant="body2" sx={{ color: '#ffffff', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{t('battle.noBattleLog')}</Typography>
                                             ) : (
-                                                battleLog.map((entry, idx) => (
-                                                    <Typography key={idx} variant="body2" className={styles[`${entry.type}Log`] || styles.battleLogEntry}>
-                                                        {entry.message}
-                                                    </Typography>
-                                                ))
+                                                                                        battleLog.map((entry, idx) => (
+                                            <div key={idx} className={styles[`${entry.type}Log`] || styles.battleLogEntry}>
+                                                {entry.message}
+                                            </div>
+                                        ))
                                             )}
                                         </div>
                                     </div>
@@ -2491,7 +2141,7 @@ function Battle({ player }) {
                                                     variant="contained"
                                                     className={styles.potionButton}
                                                     disabled={!canUse}
-                                                    onClick={() => handleUsePotion(potion.id)}
+                                                    onClick={() => handleUsePotionLocal(potion.id)}
                                                     style={{
                                                         backgroundColor: potion.color,
                                                         border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',

@@ -101,6 +101,7 @@
     "noLootYet": "暂无战利品...",
     "noBattleLog": "暂无战斗活动...",
     "battleLog": "战斗日志",
+    "clearBattleLog": "清除战斗日志",
     "hitChance": "命中率",
     "baseDamage": "基础伤害",
     "critDamage": "暴击伤害",
@@ -142,6 +143,7 @@
     "items": "物品",
     "takeAll": "全部拿取",
     "sellAll": "全部出售",
+    "battleStarted": "战斗开始",
     "take": "拿取",
     "sell": "出售",
     "sellValue": "出售价值"

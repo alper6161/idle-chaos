@@ -3,7 +3,7 @@ import { Outlet } from "react-router-dom";
 import styles from "../assets/styles/MainLayout.module.scss";
 
 import SettingsDialog from "./Settings.jsx";
-import { getGold, formatGold } from "../utils/gold.js";
+import { formatGold } from "../utils/gold.js";
 import { getActiveBuffsInfo } from "../utils/buffUtils.js";
 import { useTranslate } from "../hooks/useTranslate";
 import MainMenu from "../components/MainMenu";
@@ -12,14 +12,15 @@ import { Alert } from "@mui/material";
 import { useRef } from "react";
 import { useNotificationContext } from "../contexts/NotificationContext";
 import NotificationOverlay from "../components/NotificationOverlay";
+import { useBattleContext } from "../contexts/BattleContext";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
-    const [playerGold, setPlayerGold] = useState(getGold());
     const [activeBuffs, setActiveBuffs] = useState(getActiveBuffsInfo());
     const [showAutoSaveSuccess, setShowAutoSaveSuccess] = useState(false);
     const { t } = useTranslate();
     const { notifications, settings: notificationSettings } = useNotificationContext();
+    const { playerGold } = useBattleContext();
     const [musicVolume, setMusicVolume] = useState(() => {
         const saved = localStorage.getItem('musicVolume');
         return saved !== null ? parseFloat(saved) : 0.5;
@@ -37,15 +38,14 @@ function MainLayout() {
         setSettingsOpen(false);
     };
 
-    // Update gold and buffs display when localStorage changes
+    // Update buffs display when localStorage changes
     useEffect(() => {
-        const updateGoldAndBuffs = () => {
-            setPlayerGold(getGold());
+        const updateBuffs = () => {
             setActiveBuffs(getActiveBuffsInfo());
         };
 
-        // Update gold and buffs every second (in case they change in other components)
-        const interval = setInterval(updateGoldAndBuffs, 1000);
+        // Update buffs every second (in case they change in other components)
+        const interval = setInterval(updateBuffs, 1000);
 
         return () => clearInterval(interval);
     }, []);

@@ -17,6 +17,7 @@ import {
 import { FilterList, Person, TrendingUp, Shield, LocalFireDepartment } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment, clearProcessedLootBag } from "../utils/equipmentGenerator";
+import { useBattleContext } from "../contexts/BattleContext";
 
 // Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
@@ -114,6 +115,7 @@ const calculateItemValue = (item) => {
 
 function Equipment() {
     const { t } = useTranslate();
+    const { lootBag, clearLootBag } = useBattleContext();
     const [equippedItems, setEquippedItems] = useState(() => {
         const loadedEquippedItems = loadFromStorage(STORAGE_KEYS.EQUIPPED_ITEMS, SAMPLE_EQUIPMENT);
         
@@ -231,14 +233,10 @@ function Equipment() {
 
     // Check for new equipment from battle loot and add to inventory
     useEffect(() => {
-        const checkForNewLoot = () => {
+        if (lootBag.length > 0) {
             try {
-                const currentSlot = getCurrentSlot();
-                const slotKey = getSlotKey("lootBag", currentSlot);
-                const lootBag = JSON.parse(localStorage.getItem(slotKey) || "[]");
                 
-                if (lootBag.length > 0) {
-                    const newEquipment = convertLootBagToEquipment(lootBag, null); // No enemy info available here, will use default difficulty
+                const newEquipment = convertLootBagToEquipment(lootBag, null); // No enemy info available here, will use default difficulty
                     
                     if (newEquipment && newEquipment.length > 0) {
                         setInventory(prev => {
@@ -278,21 +276,22 @@ function Equipment() {
                             const updatedInventory = [...prev, ...equipmentWithLevels];
                             return updatedInventory;
                         });
-                        clearProcessedLootBag(); // Clear loot bag after processing
+                        clearLootBag(); // Clear loot bag after processing using context function
                     }
-                }
             } catch (error) {
                 console.error('Error processing loot bag:', error);
                 console.error('Error details:', {
                     message: error.message,
                     stack: error.stack,
-                    lootBag: localStorage.getItem(getSlotKey("lootBag", getCurrentSlot()))
+                    lootBag: JSON.stringify(lootBag)
                 });
             }
-        };
+        }
+    }, [lootBag, clearLootBag]);
 
-        // Clean inventory function
-        const cleanInventory = () => {
+      // Clean inventory on mount
+      useEffect(() => {
+          const cleanInventory = () => {
             try {
                 const currentInventory = JSON.parse(localStorage.getItem(STORAGE_KEYS.INVENTORY) || '[]');
                 
@@ -331,14 +330,8 @@ function Equipment() {
         };
 
         // Clean inventory on mount
-        cleanInventory();
-
-        // Check immediately and then every 2 seconds
-        checkForNewLoot();
-        const interval = setInterval(checkForNewLoot, 2000);
-        
-        return () => clearInterval(interval);
-    }, []);
+                  cleanInventory();
+      }, []);
 
 
 

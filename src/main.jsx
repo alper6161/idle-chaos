@@ -5,11 +5,14 @@ import App from './App.jsx'
 import {BrowserRouter} from "react-router-dom";
 import './i18n.js'
 import { NotificationProvider } from './contexts/NotificationContext.jsx'
+import { BattleProvider } from './contexts/BattleContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <NotificationProvider>
-      <App />
+      <BattleProvider>
+        <App />
+      </BattleProvider>
     </NotificationProvider>
   </BrowserRouter>,
 )

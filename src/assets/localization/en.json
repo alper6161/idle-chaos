@@ -118,6 +118,7 @@
     "searchingForEnemy": "Searching for enemy...",
     "showBattleLog": "Show Battle Log",
     "closeBattleLog": "Close Battle Log",
+    "clearBattleLog": "Clear Battle Log",
     "noDropsAvailable": "No drops available from this enemy",
     "playerStats": "Player Stats",
     "uniqueLocationLoot": "Unique Location Loot",
@@ -148,6 +149,7 @@
     "items": "items",
     "takeAll": "Take All",
     "sellAll": "Sell All",
+    "battleStarted": "Battle started",
     "take": "Take",
     "sell": "Sell",
     "sellValue": "Sell Value"

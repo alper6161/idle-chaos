@@ -118,6 +118,7 @@
     "searchingForEnemy": "Düşman aranıyor...",
     "showBattleLog": "Savaş Günlüğünü Göster",
     "closeBattleLog": "Savaş Günlüğünü Kapat",
+    "clearBattleLog": "Savaş Günlüğünü Temizle",
     "noDropsAvailable": "Bu düşmandan düşecek ganimet yok",
     "playerStats": "Oyuncu İstatistikleri",
     "uniqueLocationLoot": "Benzersiz Lokasyon Eşyası",
@@ -148,6 +149,7 @@
     "items": "eşya",
     "takeAll": "Hepsini Al",
     "sellAll": "Hepsini Sat",
+    "battleStarted": "Savaş başladı",
     "take": "Al",
     "sell": "Sat",
     "sellValue": "Satış Değeri"
