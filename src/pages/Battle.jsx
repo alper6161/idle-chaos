@@ -106,42 +106,68 @@ function Battle({ player }) {
         stopBattle,
         setSelectedAttackType,
         startEnemySpawnTimer,
+        spawnNewEnemy,
         setDamageDisplay,
         setCurrentBattle,
+        setCurrentEnemy,
         setIsBattleActive,
         setBattleLog,
         handleUsePotion,
         addToLootBag,
         removeFromLootBag,
         clearLootBag,
+        setLootBag,
         updatePlayerGold,
         subtractPlayerGold,
-        setPlayerHealth
+        setPlayerHealth,
+        showDeathDialog,
+        respawnPlayer,
+        setDeathDialog,
+        deathDialog,
+        dungeonRun,
+        setDungeonRun,
+        setEnemiesData,
+        setDungeonCompleteCallback
     } = useBattleContext();
-
-    // Auto-switch to battle mode if battle is active
-    useEffect(() => {
-        if (isBattleActive && currentBattle && currentEnemy) {
-            setBattleMode('battle');
-        } else if (!isBattleActive && battleMode === 'battle') {
-            setBattleMode('selection');
-        }
-    }, [isBattleActive, currentBattle, currentEnemy, battleMode]);
 
     // Local UI state only
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
     const [lastPotionUsed, setLastPotionUsed] = useState(null);
     const [battleResult, setBattleResult] = useState(null);
-    const [deathDialog, setDeathDialog] = useState({ open: false, countdown: 15, goldLost: 0, equipmentLost: [] });
+    // Death dialog is now managed in BattleContext
     const [battleLogVisible, setBattleLogVisible] = useState(true);
     const [battleTab, setBattleTab] = useState('locations');
     const [openLocations, setOpenLocations] = useState(() => LOCATIONS.map((_, i) => i === 0));
     const [openDungeons, setOpenDungeons] = useState(() => DUNGEONS.map((_, i) => i === 0));
-    const [dungeonRun, setDungeonRun] = useState(null); // { dungeon, stages, currentStage, completed, chestAwarded }
     const [exitWarningOpen, setExitWarningOpen] = useState(false);
     const [dungeonCompleteDialog, setDungeonCompleteDialog] = useState({ open: false, countdown: 5 });
     const [chestDropDialog, setChestDropDialog] = useState({ open: false, item: null, dungeon: null });
     const [chestPreviewModal, setChestPreviewModal] = useState({ open: false, dungeon: null, chestItem: null });
+
+    // Auto-switch to battle mode if battle is active (but not during dungeon)
+    useEffect(() => {
+        // Don't auto-switch if we're in a dungeon
+        if (dungeonRun && !dungeonRun.completed) {
+            return;
+        }
+        
+        if (isBattleActive && currentBattle && currentEnemy) {
+            setBattleMode('battle');
+        } else if (!isBattleActive && battleMode === 'dungeon') {
+            // If no battle is active and we were in dungeon mode, go to selection
+            setBattleMode('selection');
+        }
+        // Note: Don't auto-switch from battle to selection for location battles
+        // This allows respawn to work correctly in location battles
+    }, [isBattleActive, currentBattle, currentEnemy, battleMode, dungeonRun]);
+
+    // Set enemies data and callbacks for BattleContext
+    useEffect(() => {
+        setEnemiesData(enemies);
+        setDungeonCompleteCallback(() => () => {
+            setDungeonCompleteDialog({ open: true, countdown: 5 });
+        });
+    }, [setEnemiesData, setDungeonCompleteCallback]);
 
     // Calculate item sell value based on estimated rarity and level
     const calculateItemSellValue = (itemName) => {
@@ -286,40 +312,47 @@ function Battle({ player }) {
                 enemyFinalHealth: 0
             };
             
-            setIsBattleActive(false);
-            setBattleResult(battleResult);
+            // Only stop battle if not in dungeon
+            if (!dungeonRun || dungeonRun.completed) {
+                setIsBattleActive(false);
+            }
             
+            setBattleResult(battleResult);
             setPlayerHealth(battleResult.playerFinalHealth);
             
             // Process victory rewards
             const achievementResult = currentEnemy ? recordKill(currentEnemy.id) : { achievements: {}, newAchievements: [] };
             
-            const lootResult = currentEnemy ? getLootDrop(currentEnemy.drops) : { items: [], gold: 0, goldItems: [] };
-            
-            // Only add equipment items to loot bag, not gold items
-            const newLoot = [...lootResult.items];
-            
-            // Auto-convert gold items directly without showing in loot bag
-            if (lootResult.goldItems && lootResult.goldItems.length > 0) {
-                updatePlayerGold(lootResult.gold);
+            // Only process loot if NOT in dungeon (dungeons only drop chest at the end)
+            let newLoot = [];
+            if (!dungeonRun || dungeonRun.completed) {
+                const lootResult = currentEnemy ? getLootDrop(currentEnemy.drops) : { items: [], gold: 0, goldItems: [] };
                 
-                // Notify for gold gains
-                if (lootResult.gold > 0) {
-                    notifyGoldGain(lootResult.gold, `${currentEnemy?.name || 'Enemy'} drops`);
+                // Only add equipment items to loot bag, not gold items
+                newLoot = [...lootResult.items];
+                
+                // Auto-convert gold items directly without showing in loot bag
+                if (lootResult.goldItems && lootResult.goldItems.length > 0) {
+                    updatePlayerGold(lootResult.gold);
+                    
+                    // Notify for gold gains
+                    if (lootResult.gold > 0) {
+                        notifyGoldGain(lootResult.gold, `${currentEnemy?.name || 'Enemy'} drops`);
+                    }
                 }
+                
+                // Add to loot bag with limit enforcement
+                const itemsToAdd = addToLootBag(newLoot);
+                
+                // Notify for each item drop
+                itemsToAdd.forEach(itemName => {
+                    notifyItemDrop(itemName, '📦');
+                });
             }
-            
-            // Add to loot bag with limit enforcement
-            const itemsToAdd = addToLootBag(newLoot);
-            
-            // Notify for each item drop
-            itemsToAdd.forEach(itemName => {
-                notifyItemDrop(itemName, '📦');
-            });
 
-            // --- PET DROP LOGIC ---
+            // --- PET DROP LOGIC (only in normal battles, not dungeons) ---
             let petDropMessage = null;
-            if (currentEnemy) {
+            if (currentEnemy && (!dungeonRun || dungeonRun.completed)) {
                 const pet = checkPetDrop(currentEnemy.id);
                 if (pet) {
                     const currentSlot = getCurrentSlot();
@@ -335,11 +368,13 @@ function Battle({ player }) {
                 }
             }
 
-            // Add loot and achievement messages to battle log
+            // Add battle log messages
             const battleLogMessages = [
                 {
                     type: 'victory',
-                    message: `🎉 ${t('battle.playerWins')}! Enemy defeated!`
+                    message: dungeonRun && !dungeonRun.completed 
+                        ? `🎉 ${currentEnemy?.name || 'Enemy'} defeated! Stage ${dungeonRun.currentStage + 1}/7 complete.`
+                        : `🎉 ${t('battle.playerWins')}! Enemy defeated!`
                 }
             ];
             
@@ -356,29 +391,26 @@ function Battle({ player }) {
                 });
             }
             
-            // Add loot messages
-            battleLogMessages.push(...newLoot.map(item => ({
-                type: 'loot',
-                message: `📦 Loot: ${item}`
-            })));
-            
-            // Add pet message if found
-            if (petDropMessage) {
-                battleLogMessages.push({
-                    type: 'pet',
-                    message: petDropMessage
-                });
+            // Add loot messages (only for non-dungeon battles)
+            if (!dungeonRun || dungeonRun.completed) {
+                battleLogMessages.push(...newLoot.map(item => ({
+                    type: 'loot',
+                    message: `📦 Loot: ${item}`
+                })));
+                
+                // Add pet message if found
+                if (petDropMessage) {
+                    battleLogMessages.push({
+                        type: 'pet',
+                        message: petDropMessage
+                    });
+                }
             }
             
             setBattleLog(prev => [...prev, ...battleLogMessages]);
             
-            // Handle dungeon progression
-            if (dungeonRun && !dungeonRun.completed) {
-                handleDungeonEnemyDefeated();
-            } else {
-                // Start enemy spawn timer for regular battles
-                startEnemySpawnTimer();
-            }
+            // Start enemy spawn timer for both dungeon and regular battles
+            startEnemySpawnTimer();
         }
     };
 
@@ -411,67 +443,20 @@ function Battle({ player }) {
         // Keeping this function for backward compatibility but it's not needed
     };
 
-    const showDeathDialog = () => {
-        // Apply death penalties
-        const penalties = applyDeathPenalties();
-        
-        setDeathDialog({
-            open: true,
-            countdown: 15,
-            goldLost: penalties.goldLost,
-            equipmentLost: penalties.equipmentLost
-        });
-        
-        const countdownInterval = setInterval(() => {
-            setDeathDialog(prev => {
-                if (prev.countdown <= 1) {
-                    clearInterval(countdownInterval);
-                    respawnPlayer();
-                    return { open: false, countdown: 15, goldLost: 0, equipmentLost: [] };
-                }
-                return { ...prev, countdown: prev.countdown - 1 };
-            });
-        }, 1000);
-    };
+    // showDeathDialog is now managed in BattleContext
 
-    const applyDeathPenalties = () => {
-        const penalties = { goldLost: 0, equipmentLost: [] };
-        
-        // Gold loss - lose half of current gold
-        const currentGold = playerGold;
-        const goldLoss = Math.floor(currentGold / 2);
-        if (goldLoss > 0) {
-            subtractPlayerGold(goldLoss);
-            penalties.goldLost = goldLoss;
-        }
-        
-        // Equipment loss - random chance for each equipped item
-        const equippedItems = getEquippedItems();
-        const currentSlot = getCurrentSlot();
-        const equipmentSlotKey = getSlotKey('idle-chaos-equipped-items', currentSlot);
-        const updatedEquippedItems = { ...equippedItems };
-        
-        Object.entries(equippedItems).forEach(([slot, item]) => {
-            if (item && Math.random() < 0.25) { // 25% chance to lose each item
-                penalties.equipmentLost.push({ slot, item: item.name || item.type || 'Unknown Item' });
-                delete updatedEquippedItems[slot];
-            }
-        });
-        
-        if (penalties.equipmentLost.length > 0) {
-            localStorage.setItem(equipmentSlotKey, JSON.stringify(updatedEquippedItems));
-        }
-        
-        return penalties;
-    };
+    // applyDeathPenalties is now managed in BattleContext
 
-    const respawnPlayer = () => {
-        const currentPlayerStats = getPlayerStats();
-        setPlayerStats(currentPlayerStats);
-        setPlayerHealth(currentPlayerStats.HEALTH);
-        setBattleMode('selection');
+    // respawnPlayer is now managed in BattleContext but we need local function for battle mode
+    const handleRespawn = () => {
+        // If in dungeon, go to selection. If in location battle, stay in battle mode
+        if (dungeonRun && !dungeonRun.completed) {
+            setBattleMode('selection');
+        } else {
+            setBattleMode('battle');
+        }
         setBattleResult(null);
-        stopBattle();
+        // Actual respawn logic is handled in BattleContext
     };
 
     // startEnemySpawnTimer and spawnNewEnemy are now handled by global BattleContext
@@ -492,33 +477,7 @@ function Battle({ player }) {
         setDungeonRun(null);
     };
 
-    const startRealTimeBattle = (enemy = currentEnemy, health = playerHealth) => {
-        
-        if (!enemy) {
-            console.warn('startRealTimeBattle called with null enemy');
-            return;
-        }
-        
-        const currentPlayerStats = getPlayerStats();
-        
-        setPlayerStats(currentPlayerStats);
-        const adjustedHealth = Math.min(health, currentPlayerStats.HEALTH);
-        
-        const hpXP = awardBattleActionXP('battle_participation', 0, false, true);
-        
-        const battleState = {
-            player: { ...currentPlayerStats, currentHealth: adjustedHealth },
-            enemy: { ...enemy, currentHealth: enemy.maxHp },
-            playerProgress: 0,
-            enemyProgress: 0,
-            battleLog: []
-        };
-        
-        setCurrentBattle(battleState);
-        
-        setIsBattleActive(true);
-        setBattleResult(null);
-    };
+    // startRealTimeBattle is no longer needed - using startBattle from BattleContext
 
     const getDifficultyColor = (enemy) => {
         // Easy enemies (HP <= 40)
@@ -764,47 +723,35 @@ function Battle({ player }) {
         setDungeonRun({ dungeon, stages, currentStage: 0, completed: false, chestAwarded: false });
         setBattleMode('dungeon');
         const firstEnemy = Object.values(enemies).find(e => e.id === stages[0]);
+        
+        // Set current enemy first, then start battle
         setCurrentEnemy(firstEnemy);
-        setTimeout(() => startRealTimeBattle(firstEnemy), 0);
-    };
-    const handleDungeonEnemyDefeated = () => {
-        if (!dungeonRun) return;
-        if (dungeonRun.currentStage < 6) {
-            const nextStage = dungeonRun.currentStage + 1;
-            setDungeonRun(prev => ({ ...prev, currentStage: nextStage }));
-            const nextEnemy = Object.values(enemies).find(e => e.id === dungeonRun.stages[nextStage]);
-            setCurrentEnemy(nextEnemy);
-            setTimeout(() => startRealTimeBattle(nextEnemy), 0);
-        } else {
-            setDungeonRun(prev => ({ ...prev, completed: true }));
-            setIsBattleActive(false);
-            setDungeonCompleteDialog({ open: true, countdown: 5 });
-            
-            // Add dungeon chest to loot bag
-            if (!dungeonRun.chestAwarded) {
-                setLootBag(prev => {
-                    const chestItem = `🎁 ${dungeonRun.dungeon.name} Chest`;
-                    const updated = [...prev, chestItem];
-                    const currentSlot = getCurrentSlot();
-                    const slotKey = getSlotKey("lootBag", currentSlot);
-                    localStorage.setItem(slotKey, JSON.stringify(updated));
-                    return updated;
-                });
-                setDungeonRun(prev => ({ ...prev, chestAwarded: true }));
+        
+        // Ensure battle is active for dungeon
+        setIsBattleActive(true);
+        
+        // Start first battle
+        setTimeout(() => {
+            if (firstEnemy) {
+                startBattle(firstEnemy, selectedAttackType);
             }
-        }
+        }, 100);
     };
+    // handleDungeonEnemyDefeated is now handled in BattleContext
 
     const confirmExitDungeon = () => {
         setExitWarningOpen(false);
         setBattleMode('selection');
-        setCurrentEnemy(null);
         setBattleResult(null);
+        
+        // Use BattleContext functions to clear state
+        setCurrentEnemy(null);
         setCurrentBattle(null);
         setIsBattleActive(false);
-        setIsWaitingForEnemy(false);
-        setEnemySpawnProgress(0);
         setDungeonRun(null);
+        
+        // Clear any ongoing battle
+        stopBattle();
     };
 
     const handleChestClick = (chestItem) => {
@@ -912,13 +859,14 @@ function Battle({ player }) {
                             <Button variant="outlined" color="secondary" onClick={() => {
                                 setDungeonCompleteDialog({ open: false, countdown: 5 });
                                 setBattleMode('selection');
-                                setCurrentEnemy(null);
                                 setBattleResult(null);
+                                
+                                // Use BattleContext functions
+                                setCurrentEnemy(null);
                                 setCurrentBattle(null);
                                 setIsBattleActive(false);
-                                setIsWaitingForEnemy(false);
-                                setEnemySpawnProgress(0);
                                 setDungeonRun(null);
+                                stopBattle();
                             }}>{t('battle.leave')}</Button>
                             <Button variant="contained" color="primary" onClick={() => {
                                 setDungeonCompleteDialog({ open: false, countdown: 5 });

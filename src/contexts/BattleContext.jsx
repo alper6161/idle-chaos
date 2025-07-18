@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useTranslate } from '../hooks/useTranslate';
 import { useNotificationContext } from './NotificationContext';
-import { getPlayerStats, calculateSkillBuffsForAttackType } from '../utils/playerStats';
+import { getPlayerStats, calculateSkillBuffsForAttackType, getEquippedItems } from '../utils/playerStats';
 import { getLootDrop } from '../utils/combat';
 import { recordKill } from '../utils/achievements';
 import { 
@@ -87,6 +87,17 @@ export const BattleProvider = ({ children }) => {
         return savedHealth ? Math.min(parseInt(savedHealth), playerStats.HEALTH) : playerStats.HEALTH;
     });
     const [availableAttackTypes, setAvailableAttackTypes] = useState([]);
+    
+    // Death Dialog State
+    const [deathDialog, setDeathDialog] = useState({
+        open: false,
+        countdown: 15,
+        goldLost: 0,
+        equipmentLost: []
+    });
+    
+    // Dungeon State
+    const [dungeonRun, setDungeonRun] = useState(null);
     
     // Refs for intervals
     const battleIntervalRef = useRef(null);
@@ -500,6 +511,9 @@ export const BattleProvider = ({ children }) => {
         setCurrentEnemy(null);
         setIsWaitingForEnemy(false);
         setEnemySpawnProgress(0);
+        
+        // Show death dialog
+        showDeathDialog();
     };
 
     const startEnemySpawnTimer = () => {
@@ -512,16 +526,86 @@ export const BattleProvider = ({ children }) => {
         setEnemySpawnProgress(0);
     };
 
+    // Store enemies data and other callbacks from Battle.jsx
+    const [enemiesData, setEnemiesData] = useState(null);
+    const [dungeonCompleteCallback, setDungeonCompleteCallback] = useState(null);
+
+    const handleDungeonEnemyDefeated = () => {
+        if (!dungeonRun || !enemiesData) return;
+        
+        if (dungeonRun.currentStage < 6) {
+            const nextStage = dungeonRun.currentStage + 1;
+            setDungeonRun(prev => ({ ...prev, currentStage: nextStage }));
+            const nextEnemy = Object.values(enemiesData).find(e => e.id === dungeonRun.stages[nextStage]);
+            
+            if (nextEnemy) {
+                // Set current enemy first, then start battle
+                setCurrentEnemy(nextEnemy);
+                
+                // Keep battle active during dungeon progression
+                setIsBattleActive(true);
+                
+                // Start next battle
+                setTimeout(() => {
+                    if (nextEnemy) {
+                        startBattle(nextEnemy, selectedAttackType);
+                    }
+                }, 100);
+            }
+                 } else {
+             setDungeonRun(prev => ({ ...prev, completed: true }));
+             setIsBattleActive(false);
+             
+             // Add dungeon chest to loot bag
+             if (!dungeonRun.chestAwarded) {
+                 const chestItem = `🎁 ${dungeonRun.dungeon.name} Chest`;
+                 setLootBag(prev => [...prev, chestItem]);
+                 setDungeonRun(prev => ({ ...prev, chestAwarded: true }));
+             }
+             
+             // Trigger dungeon complete callback
+             if (dungeonCompleteCallback) {
+                 dungeonCompleteCallback();
+             }
+         }
+    };
+
     const spawnNewEnemy = () => {
+        // Check if we're in a dungeon
+        if (dungeonRun && !dungeonRun.completed) {
+            handleDungeonEnemyDefeated();
+            return;
+        }
+        
+        // Location logic: spawn same enemy type
         if (!currentEnemy) return;
         
-        // Spawn same enemy type with full health
-        const newEnemy = { ...currentEnemy };
-        setCurrentEnemy(newEnemy);
+        const nextEnemy = { ...currentEnemy };
+        setCurrentEnemy(nextEnemy);
         
         // Small delay before starting next battle
         setTimeout(() => {
-            startBattle(newEnemy, selectedAttackType);
+            // Use the same health logic as startBattle
+            const enemyMaxHealth = nextEnemy.maxHp || nextEnemy.HEALTH;
+            const battleState = {
+                player: {
+                    ...getPlayerStats(),
+                    currentHealth: playerHealth,
+                    maxHealth: getPlayerStats().HEALTH
+                },
+                enemy: {
+                    ...nextEnemy,
+                    currentHealth: enemyMaxHealth,
+                    maxHealth: enemyMaxHealth,
+                    HEALTH: enemyMaxHealth
+                },
+                playerProgress: 0,
+                enemyProgress: 0,
+                battleLog: []
+            };
+            
+            setCurrentBattle(battleState);
+            setIsBattleActive(true);
         }, 500);
     };
 
@@ -620,6 +704,101 @@ export const BattleProvider = ({ children }) => {
         return newGold;
     };
 
+    // Death handling functions
+    const applyDeathPenalties = () => {
+        const penalties = { goldLost: 0, equipmentLost: [] };
+        
+        // Gold loss - lose half of current gold
+        const currentGold = playerGold;
+        const goldLoss = Math.floor(currentGold / 2);
+        if (goldLoss > 0) {
+            subtractPlayerGold(goldLoss);
+            penalties.goldLost = goldLoss;
+        }
+        
+        // Equipment loss - random chance for each equipped item
+        const equippedItems = getEquippedItems();
+        const currentSlot = getCurrentSlot();
+        const equipmentSlotKey = getSlotKey('idle-chaos-equipped-items', currentSlot);
+        const updatedEquippedItems = { ...equippedItems };
+        
+        Object.entries(equippedItems).forEach(([slot, item]) => {
+            if (item && Math.random() < 0.25) { // 25% chance to lose each item
+                penalties.equipmentLost.push({ slot, item: item.name || item.type || 'Unknown Item' });
+                delete updatedEquippedItems[slot];
+            }
+        });
+        
+        if (penalties.equipmentLost.length > 0) {
+            localStorage.setItem(equipmentSlotKey, JSON.stringify(updatedEquippedItems));
+        }
+        
+        return penalties;
+    };
+
+    const showDeathDialog = () => {
+        // Apply death penalties
+        const penalties = applyDeathPenalties();
+        
+        setDeathDialog({
+            open: true,
+            countdown: 15,
+            goldLost: penalties.goldLost,
+            equipmentLost: penalties.equipmentLost
+        });
+        
+        const countdownInterval = setInterval(() => {
+            setDeathDialog(prev => {
+                if (prev.countdown <= 1) {
+                    clearInterval(countdownInterval);
+                    respawnPlayer();
+                    return { open: false, countdown: 15, goldLost: 0, equipmentLost: [] };
+                }
+                return { ...prev, countdown: prev.countdown - 1 };
+            });
+        }, 1000);
+    };
+
+    const respawnPlayer = () => {
+        const currentPlayerStats = getPlayerStats();
+        setPlayerHealth(currentPlayerStats.HEALTH);
+        
+        // If was in dungeon, exit dungeon on death
+        if (dungeonRun && !dungeonRun.completed) {
+            // Clear all battle state and exit dungeon
+            setCurrentBattle(null);
+            setCurrentEnemy(null);
+            setIsBattleActive(false);
+            setIsWaitingForEnemy(false);
+            setEnemySpawnProgress(0);
+            setDungeonRun(null);
+        } else {
+            // For location battles, continue with same enemy after respawn
+            if (currentEnemy) {
+                // Reset battle state but keep current enemy
+                setCurrentBattle(null);
+                setIsBattleActive(false);
+                setIsWaitingForEnemy(false);
+                setEnemySpawnProgress(0);
+                
+                // Restart battle with same enemy after a short delay
+                setTimeout(() => {
+                    startBattle(currentEnemy, selectedAttackType);
+                }, 1000);
+            } else {
+                // No enemy to continue with, clear everything
+                setCurrentBattle(null);
+                setCurrentEnemy(null);
+                setIsBattleActive(false);
+                setIsWaitingForEnemy(false);
+                setEnemySpawnProgress(0);
+            }
+        }
+        
+        // Close death dialog
+        setDeathDialog({ open: false, countdown: 15, goldLost: 0, equipmentLost: [] });
+    };
+
     const value = {
         // Battle State
         isBattleActive,
@@ -637,14 +816,19 @@ export const BattleProvider = ({ children }) => {
         playerGold,
         potions,
         playerHealth,
+        deathDialog,
+        dungeonRun,
+        setDungeonRun,
         
         // Battle Actions
         startBattle,
         stopBattle,
         setSelectedAttackType,
         startEnemySpawnTimer,
+        spawnNewEnemy,
         setDamageDisplay,
         setCurrentBattle,
+        setCurrentEnemy,
         setIsBattleActive,
         setBattleLog,
         
@@ -653,9 +837,15 @@ export const BattleProvider = ({ children }) => {
         addToLootBag,
         removeFromLootBag,
         clearLootBag,
+        setLootBag,
         updatePlayerGold,
         subtractPlayerGold,
         setPlayerHealth,
+        showDeathDialog,
+        respawnPlayer,
+        setDeathDialog,
+        setEnemiesData,
+        setDungeonCompleteCallback,
         
         // Utilities
         saveBattleState,
