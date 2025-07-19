@@ -109,6 +109,7 @@
     "enemyFinalHp": "敌人最终生命值",
     "youDied": "您已死亡！",
     "selectEnemy": "选择敌人",
+    "selectBattle": "选择战斗",
     "choosYourOpponent": "选择您的对手",
     "backToSelection": "返回选择",
     "fightThisEnemy": "与这个敌人战斗",

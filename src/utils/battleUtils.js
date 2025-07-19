@@ -285,3 +285,155 @@ export const createSpawnTimer = (setIsWaitingForEnemy, setEnemySpawnProgress, on
     
     return timer;
 }; 
+
+// Helper functions moved from Battle.jsx
+
+/**
+ * Get difficulty color based on enemy HP
+ * @param {Object} enemy - Enemy object with maxHp property
+ * @returns {string} Color hex code
+ */
+export const getDifficultyColor = (enemy) => {
+    // Easy enemies (HP <= 40)
+    if (enemy.maxHp <= 40) return '#4caf50'; // Easy - Green
+    // Normal enemies (HP 41-90)
+    if (enemy.maxHp <= 90) return '#ff9800'; // Normal - Orange
+    // Hard enemies (HP 91-130)
+    if (enemy.maxHp <= 130) return '#f44336'; // Hard - Red
+    // Very Hard enemies (HP 131-200)
+    if (enemy.maxHp <= 200) return '#9c27b0'; // Very Hard - Purple
+    // Impossible enemies (HP > 200)
+    return '#212121'; // Impossible - Dark Gray/Black
+};
+
+/**
+ * Get difficulty text based on enemy HP
+ * @param {Object} enemy - Enemy object with maxHp property
+ * @returns {string} Difficulty text
+ */
+export const getDifficultyText = (enemy) => {
+    // Easy enemies (HP <= 40)
+    if (enemy.maxHp <= 40) return 'Easy';
+    // Normal enemies (HP 41-90)
+    if (enemy.maxHp <= 90) return 'Normal';
+    // Hard enemies (HP 91-130)
+    if (enemy.maxHp <= 130) return 'Hard';
+    // Very Hard enemies (HP 131-200)
+    if (enemy.maxHp <= 200) return 'Very Hard';
+    // Impossible enemies (HP > 200)
+    return 'Impossible';
+};
+
+/**
+ * Get threshold for achievement unlocking based on stat type
+ * @param {string} statType - Type of stat (hp, atk, def, etc.)
+ * @returns {number} Threshold value
+ */
+export const getThresholdForStat = (statType) => {
+    switch (statType) {
+        case 'hp': return 10;
+        case 'atk': return 25;
+        case 'def': return 50;
+        case 'attack_speed': return 25; 
+        case 'crit_chance': return 25;
+        case 'crit_damage': return 25;
+        case 'hit_chance': return 25;
+        default: return 100;
+    }
+};
+
+/**
+ * Get stat display value based on achievement unlock status
+ * @param {string} enemyId - Enemy ID for achievement check
+ * @param {string} statType - Type of stat
+ * @param {number} value - Stat value
+ * @param {Function} isAchievementUnlocked - Achievement check function
+ * @returns {string} Display value or empty string if locked
+ */
+export const getStatDisplay = (enemyId, statType, value, isAchievementUnlocked) => {
+    const isUnlocked = isAchievementUnlocked(enemyId, getThresholdForStat(statType));
+    if (isUnlocked) {
+        return value !== undefined && value !== null ? value.toString() : "0";
+    } else {
+        return "";
+    }
+};
+
+/**
+ * Get enemy HP display safely based on achievement unlock status
+ * @param {string} enemyId - Enemy ID for achievement check
+ * @param {number} current - Current HP
+ * @param {number} max - Max HP
+ * @param {Function} isAchievementUnlocked - Achievement check function
+ * @returns {string} HP display string
+ */
+export const getEnemyHpDisplay = (enemyId, current, max, isAchievementUnlocked) => {
+    return getStatDisplay(enemyId, 'hp', max, isAchievementUnlocked) === "" ? "???" : `${current}/${max}`;
+};
+
+/**
+ * Calculate item sell value based on estimated rarity and level
+ * @param {string} itemName - Name of the item
+ * @returns {number} Calculated sell value
+ */
+export const calculateItemSellValue = (itemName) => {
+    // Base values per estimated rarity (based on item name patterns)
+    const baseValues = {
+        common: 10,
+        uncommon: 25,
+        rare: 60,
+        epic: 150,
+        legendary: 400
+    };
+    
+    // Estimate rarity based on item name patterns
+    let rarity = 'common';
+    const itemLower = itemName.toLowerCase();
+    
+    if (itemLower.includes('legendary') || itemLower.includes('dragon') || itemLower.includes('celestial') || itemLower.includes('ancient') || itemLower.includes('void')) {
+        rarity = 'legendary';
+    } else if (itemLower.includes('epic') || itemLower.includes('demon') || itemLower.includes('infernal') || itemLower.includes('archdemon')) {
+        rarity = 'epic';
+    } else if (itemLower.includes('rare') || itemLower.includes('bone') || itemLower.includes('spider') || itemLower.includes('skeleton')) {
+        rarity = 'rare';
+    } else if (itemLower.includes('uncommon') || itemLower.includes('slime') || itemLower.includes('orc')) {
+        rarity = 'uncommon';
+    }
+    
+    // Deterministic level based on item name (same item = same level)
+    let hash = 0;
+    for (let i = 0; i < itemName.length; i++) {
+        const char = itemName.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+    }
+    const estimatedLevel = Math.abs(hash % 50) + 1; // 1-50 range
+    const levelMultiplier = 1 + (estimatedLevel - 1) * 0.1;
+    
+    const rarityMultiplier = baseValues[rarity];
+    const totalValue = Math.floor(rarityMultiplier * levelMultiplier);
+    
+    return Math.max(5, totalValue); // Minimum 5 gold
+};
+
+/**
+ * Get slot-specific key for localStorage
+ * @param {string} key - Base key name
+ * @param {number} slotNumber - Slot number
+ * @returns {string} Slot-specific key
+ */
+export const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
+
+/**
+ * Get current slot number from localStorage
+ * @returns {number} Current slot number (defaults to 1)
+ */
+export const getCurrentSlot = () => {
+    try {
+        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
+        return currentSlot ? parseInt(currentSlot) : 1;
+    } catch (error) {
+        console.error('Error getting current slot:', error);
+        return 1;
+    }
+}; 

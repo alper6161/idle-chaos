@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../assets/styles/Battle.module.scss";
 import {
     Typography,
@@ -18,13 +19,10 @@ import {
     Grid,
     IconButton,
     Chip,
-    Tabs,
-    Tab,
 } from "@mui/material";
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { LocalDrink } from "@mui/icons-material";
 import { getLootDrop, saveLoot } from "../utils/combat.js";
-import enemies, { LOCATIONS, DUNGEONS } from "../utils/enemies.js";
+import enemies from "../utils/enemies.js";
 import { getEnemyIcon, getSkillIcon, getCharacterIcon, getEnemyInitial, getCharacterName } from "../utils/common.js";
 import { SKILL_LEVEL_BONUSES } from "../utils/constants.js";
 import { 
@@ -35,7 +33,15 @@ import {
     processPlayerAttack, 
     processEnemyAttack, 
     checkBattleResult, 
-    createSpawnTimer 
+    createSpawnTimer,
+    getDifficultyColor,
+    getDifficultyText,
+    getThresholdForStat,
+    getStatDisplay,
+    getEnemyHpDisplay,
+    calculateItemSellValue,
+    getSlotKey,
+    getCurrentSlot
 } from "../utils/battleUtils.js";
 import { awardBattleActionXP, getWeaponType, getAvailableAttackTypes, getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
 import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType, getEquippedItems } from "../utils/playerStats.js";
@@ -49,7 +55,8 @@ import {
     getAutoPotionSettings,
     saveAutoPotionSettings
 } from "../utils/potions.js";
-import { recordKill, isAchievementUnlocked } from "../utils/achievements.js";
+import { recordKill } from "../utils/achievements.js";
+import { isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
@@ -60,22 +67,10 @@ import { useNotificationContext } from "../contexts/NotificationContext";
 import { useBattleContext } from "../contexts/BattleContext";
 import LootBag from "../components/LootBag";
 
-// Helper function to get slot-specific key
-const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
 
-// Get current slot number
-const getCurrentSlot = () => {
-    try {
-        const currentSlot = localStorage.getItem('idle-chaos-current-slot');
-        return currentSlot ? parseInt(currentSlot) : 1;
-    } catch (error) {
-        console.error('Error getting current slot:', error);
-        return 1;
-    }
-};
 
 function Battle({ player }) {
-    const [battleMode, setBattleMode] = useState('selection');
+    const navigate = useNavigate();
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
     const { t } = useTranslate();
@@ -137,32 +132,13 @@ function Battle({ player }) {
     const [battleResult, setBattleResult] = useState(null);
     // Death dialog is now managed in BattleContext
     const [battleLogVisible, setBattleLogVisible] = useState(true);
-    const [battleTab, setBattleTab] = useState('locations');
-    const [openLocations, setOpenLocations] = useState(() => LOCATIONS.map((_, i) => i === 0));
-    const [openDungeons, setOpenDungeons] = useState(() => DUNGEONS.map((_, i) => i === 0));
     const [exitWarningOpen, setExitWarningOpen] = useState(false);
     const [dungeonCompleteDialog, setDungeonCompleteDialog] = useState({ open: false, countdown: 5 });
     const [chestDropDialog, setChestDropDialog] = useState({ open: false, item: null, dungeon: null });
     const [chestPreviewModal, setChestPreviewModal] = useState({ open: false, dungeon: null, chestItem: null });
 
-    // Auto-switch to battle mode if battle is active (but not during dungeon)
-    useEffect(() => {
-        // Don't auto-switch if we're in a dungeon
-        if (dungeonRun && !dungeonRun.completed) {
-            return;
-        }
-        
-        if (isBattleActive && currentBattle && currentEnemy) {
-            setBattleMode('battle');
-        } else if (!isBattleActive && battleMode === 'dungeon' && (!dungeonRun || !dungeonRun.completed || !dungeonCompleteDialog.open)) {
-            // Only switch to selection if:
-            // - No dungeon is running, OR
-            // - Dungeon is completed AND dialog is not open
-            setBattleMode('selection');
-        }
-        // Note: Don't auto-switch from battle to selection for location battles
-        // This allows respawn to work correctly in location battles
-    }, [isBattleActive, currentBattle, currentEnemy, battleMode, dungeonRun, dungeonCompleteDialog.open]);
+    // Battle page is now dedicated to actual battle only
+    // Selection is handled in separate BattleSelection page
 
     // Set enemies data and callbacks for BattleContext
     useEffect(() => {
@@ -172,46 +148,7 @@ function Battle({ player }) {
         });
     }, [setEnemiesData, setDungeonCompleteCallback]);
 
-    // Calculate item sell value based on estimated rarity and level
-    const calculateItemSellValue = (itemName) => {
-        // Base values per estimated rarity (based on item name patterns)
-        const baseValues = {
-            common: 10,
-            uncommon: 25,
-            rare: 60,
-            epic: 150,
-            legendary: 400
-        };
-        
-        // Estimate rarity based on item name patterns
-        let rarity = 'common';
-        const itemLower = itemName.toLowerCase();
-        
-        if (itemLower.includes('legendary') || itemLower.includes('dragon') || itemLower.includes('celestial') || itemLower.includes('ancient') || itemLower.includes('void')) {
-            rarity = 'legendary';
-        } else if (itemLower.includes('epic') || itemLower.includes('demon') || itemLower.includes('infernal') || itemLower.includes('archdemon')) {
-            rarity = 'epic';
-        } else if (itemLower.includes('rare') || itemLower.includes('bone') || itemLower.includes('spider') || itemLower.includes('skeleton')) {
-            rarity = 'rare';
-        } else if (itemLower.includes('uncommon') || itemLower.includes('slime') || itemLower.includes('orc')) {
-            rarity = 'uncommon';
-        }
-        
-        // Deterministic level based on item name (same item = same level)
-        let hash = 0;
-        for (let i = 0; i < itemName.length; i++) {
-            const char = itemName.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32-bit integer
-        }
-        const estimatedLevel = Math.abs(hash % 50) + 1; // 1-50 range
-        const levelMultiplier = 1 + (estimatedLevel - 1) * 0.1;
-        
-        const rarityMultiplier = baseValues[rarity];
-        const totalValue = Math.floor(rarityMultiplier * levelMultiplier);
-        
-        return Math.max(5, totalValue); // Minimum 5 gold
-    };
+
 
     // Take item from loot bag to inventory
     const handleTakeItem = (itemName, index) => {
@@ -464,17 +401,13 @@ function Battle({ player }) {
 
     // startEnemySpawnTimer and spawnNewEnemy are now handled by global BattleContext
 
-    const handleEnemySelect = (enemy) => {
-        setBattleMode('battle');
-        startBattle(enemy, selectedAttackType);
-    };
-
     const handleBackToSelection = () => {
         if (dungeonRun && !dungeonRun.completed) {
             setExitWarningOpen(true);
             return;
         }
-        setBattleMode('selection');
+        // Navigate back to battle selection page
+        navigate('/battle-selection');
         stopBattle();
         setBattleResult(null);
         setDungeonRun(null);
@@ -482,59 +415,39 @@ function Battle({ player }) {
 
     // startRealTimeBattle is no longer needed - using startBattle from BattleContext
 
-    const getDifficultyColor = (enemy) => {
-        // Easy enemies (HP <= 40)
-        if (enemy.maxHp <= 40) return '#4caf50'; // Easy - Green
-        // Normal enemies (HP 41-90)
-        if (enemy.maxHp <= 90) return '#ff9800'; // Normal - Orange
-        // Hard enemies (HP 91-130)
-        if (enemy.maxHp <= 130) return '#f44336'; // Hard - Red
-        // Very Hard enemies (HP 131-200)
-        if (enemy.maxHp <= 200) return '#9c27b0'; // Very Hard - Purple
-        // Impossible enemies (HP > 200)
-        return '#212121'; // Impossible - Dark Gray/Black
+
+
+    // Helper function to call getStatDisplay with isAchievementUnlocked
+    const getStatDisplayWithAchievement = (enemyId, statType, value) => {
+        return getStatDisplay(enemyId, statType, value, isAchievementUnlocked);
     };
 
-    const getDifficultyText = (enemy) => {
-        // Easy enemies (HP <= 40)
-        if (enemy.maxHp <= 40) return 'Easy';
-        // Normal enemies (HP 41-90)
-        if (enemy.maxHp <= 90) return 'Normal';
-        // Hard enemies (HP 91-130)
-        if (enemy.maxHp <= 130) return 'Hard';
-        // Very Hard enemies (HP 131-200)
-        if (enemy.maxHp <= 200) return 'Very Hard';
-        // Impossible enemies (HP > 200)
-        return 'Impossible';
+    // Helper function to call getEnemyHpDisplay with isAchievementUnlocked
+    const getEnemyHpDisplayWithAchievement = (enemyId, current, max) => {
+        return getEnemyHpDisplay(enemyId, current, max, isAchievementUnlocked);
     };
 
-    // Achievement-based stat display functions
-    const getStatDisplay = (enemyId, statType, value) => {
-        const isUnlocked = isAchievementUnlocked(enemyId, getThresholdForStat(statType));
-        if (isUnlocked) {
-            return value !== undefined && value !== null ? value.toString() : "0";
-        } else {
-            return "";
-        }
-    };
-
-    // Helper to display enemy HP safely
-    const getEnemyHpDisplay = (enemyId, current, max) => {
-        return getStatDisplay(enemyId, 'hp', max) === "" ? "???" : `${current}/${max}`;
-    };
-
-    const getThresholdForStat = (statType) => {
-        switch (statType) {
-            case 'hp': return 10;
-            case 'atk': return 25;
-            case 'def': return 50;
-            case 'attack_speed': return 25; // ATK ile birlikte açılsın
-            case 'crit_chance': return 25; // ATK ile birlikte açılsın
-            case 'crit_damage': return 25; // ATK ile birlikte açılsın
-            case 'hit_chance': return 25; // ATK ile birlikte açılsın
-            default: return 100;
-        }
-    };
+    // Memoize spawn timer UI to prevent unnecessary re-renders
+    const spawnTimerUI = useMemo(() => {
+        if (!isWaitingForEnemy) return null;
+        
+        return (
+            <div className={styles.enemySpawnContainer}>
+                <Typography className={styles.spawnText}>
+                    {t('battle.searchingForEnemy')}
+                </Typography>
+                <div className={styles.circularProgress}>
+                    <div 
+                        className={styles.circularProgressBar}
+                        style={{ '--progress': `${enemySpawnProgress}%` }}
+                    ></div>
+                    <div className={styles.circularProgressText}>
+                        {Math.ceil((100 - enemySpawnProgress) / 20)}s
+                    </div>
+                </div>
+            </div>
+        );
+    }, [isWaitingForEnemy, enemySpawnProgress, t]);
 
     // Get selected skill level and bonuses
     const getSelectedSkillInfo = () => {
@@ -591,7 +504,6 @@ function Battle({ player }) {
         localStorage.setItem(healthSlotKey, currentPlayerStats.HEALTH.toString());
     }, []);
 
-    // Equipment changes are now managed in BattleContext
     useEffect(() => {
         const checkEquipmentChanges = () => {
             const currentPlayerStats = getPlayerStats();
@@ -614,16 +526,6 @@ function Battle({ player }) {
         };
     }, [playerStats]);
 
-    // Battle logic is now handled by the global BattleContext
-    // No need for local battle loop
-
-    // Battle log synchronization is now handled by global BattleContext
-
-    // Player health is now managed in BattleContext
-
-    // Attack types are now managed in BattleContext
-
-    // Update auto potion settings when buffs change
     useEffect(() => {
         const checkAutoPotionBuff = () => {
             const currentSlot = getCurrentSlot();
@@ -655,91 +557,8 @@ function Battle({ player }) {
         initializeSkillDataForCurrentSlot();
     }, []);
 
-    // Example locations and monsters (static for now)
-    // Aşağıdaki LOCATIONS ve DUNGEONS sabitlerini tamamen kaldır:
-    // const LOCATIONS = [
-    //   {
-    //     name: 'Sewer',
-    //     monsters: [
-    //       { id: 'rat', name: 'Rat' },
-    //       { id: 'slime', name: 'Slime' },
-    //       { id: 'spider', name: 'Spider' },
-    //       { id: 'ghost', name: 'Ghost' }
-    //     ],
-    //     loot: [
-    //       { id: 'ring', name: 'Sewer Ring', chance: 0.5 }
-    //     ]
-    //   },
-    //   {
-    //     name: 'Farmland',
-    //     monsters: [
-    //       { id: 'goblin', name: 'Goblin' },
-    //       { id: 'orc', name: 'Orc' },
-    //       { id: 'skeleton', name: 'Skeleton' },
-    //       { id: 'troll', name: 'Troll' },
-    //       { id: 'dragon', name: 'Dragon' }
-    //     ],
-    //     loot: [
-    //       { id: 'cape', name: 'Farmland Cape', chance: 0.3 }
-    //     ]
-    //   }
-    // ];
 
-    // Example dungeons and chest rewards (static for now)
-    // Aşağıdaki LOCATIONS ve DUNGEONS sabitlerini tamamen kaldır:
-    // const DUNGEONS = [
-    //   {
-    //     name: 'Ancient Catacombs',
-    //     stages: 7,
-    //     chest: [
-    //       { id: 'legendarySword', name: 'Legendary Sword', chance: 1 },
-    //       { id: 'armor', name: 'Ancient Armor', chance: 3 },
-    //       { id: 'ring', name: 'Mystic Ring', chance: 5 }
-    //     ]
-    //   },
-    //   {
-    //     name: 'Haunted Tower',
-    //     stages: 9,
-    //     chest: [
-    //       { id: 'cape', name: 'Ghostly Cape', chance: 2 },
-    //       { id: 'shield', name: 'Haunted Shield', chance: 4 },
-    //       { id: 'gloves', name: 'Specter Gloves', chance: 6 }
-    //     ]
-    //   }
-    // ];
-
-    const handleToggleLocation = (idx) => {
-        setOpenLocations((prev) => prev.map((open, i) => (i === idx ? !open : open)));
-    };
-    const handleToggleDungeon = (idx) => {
-        setOpenDungeons((prev) => prev.map((open, i) => (i === idx ? !open : open)));
-    };
-
-    const startDungeonRun = (dungeon) => {
-        const enemyPool = dungeon.enemies;
-        const stages = [];
-        for (let i = 0; i < 6; i++) {
-            const rand = enemyPool[Math.floor(Math.random() * enemyPool.length)];
-            stages.push(rand);
-        }
-        stages.push(dungeon.boss);
-        setDungeonRun({ dungeon, stages, currentStage: 0, completed: false, chestAwarded: false });
-        setBattleMode('dungeon');
-        const firstEnemy = Object.values(enemies).find(e => e.id === stages[0]);
-        
-        // Set current enemy first, then start battle
-        setCurrentEnemy(firstEnemy);
-        
-        // Ensure battle is active for dungeon
-        setIsBattleActive(true);
-        
-        // Start first battle
-        setTimeout(() => {
-            if (firstEnemy) {
-                startBattle(firstEnemy, selectedAttackType);
-            }
-        }, 100);
-    };
+    // Selection functions moved to BattleSelection.jsx
     // handleDungeonEnemyDefeated is now handled in BattleContext
 
     const confirmExitDungeon = () => {
@@ -922,205 +741,12 @@ function Battle({ player }) {
                     </DialogContent>
                 </Dialog>
             )}
-            {battleMode === 'selection' && (
-                <>
-                    <Tabs
-                        value={battleTab}
-                        onChange={(e, v) => setBattleTab(v)}
-                        centered
-                        sx={{
-                            marginBottom: 2,
-                            background: '#3a3a5a',
-                            borderRadius: 2,
-                            minHeight: 48,
-                            '& .MuiTab-root': {
-                                color: '#e0e0e0',
-                                fontFamily: 'Press Start 2P',
-                                fontWeight: 600,
-                                fontSize: '0.8rem',
-                                minHeight: 48,
-                                transition: 'color 0.2s',
-                            },
-                            '& .Mui-selected': {
-                                color: '#ffd700',
-                                background: 'rgba(60,60,90,0.7)',
-                                borderRadius: 8,
-                            },
-                            '& .MuiTabs-indicator': {
-                                backgroundColor: '#ffd700',
-                                height: 4,
-                                borderRadius: 2,
-                            },
-                        }}
-                    >
-                        <Tab label={t('battle.locations')} value="locations" />
-                        <Tab label={t('battle.dungeons')} value="dungeons" />
-                    </Tabs>
-                    {battleTab === 'locations' && (
-                        <div>
-                            {Array.isArray(LOCATIONS) && LOCATIONS.map((loc, idx) => (
-                                <div key={loc.id} style={{ marginBottom: 24, border: '1px solid #444', borderRadius: 8, padding: 12, background: 'rgba(0,0,0,0.08)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => handleToggleLocation(idx)}>
-                                        <Typography variant="h6" style={{ color: '#ffd700', marginBottom: 8, fontFamily: 'Press Start 2P', fontSize: '0.9rem' }}>{loc.name}</Typography>
-                                        <IconButton size="small" aria-label={openLocations[idx] ? t('common.collapse') : t('common.expand')} sx={{ color: '#ffd700' }}>
-                                            {openLocations[idx] ? <ExpandLess /> : <ExpandMore />}
-                                        </IconButton>
-                                    </div>
-                                    {openLocations[idx] && <>
-                                        <Typography variant="body2" style={{ color: '#bada55', marginBottom: 8, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{loc.description}</Typography>
-                                        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                                            {Array.isArray(loc.enemies) && loc.enemies.map((enemyId) => {
-                                                const enemy = Object.values(enemies).find(e => e.id === enemyId);
-                                                if (!enemy) return null;
-                                                return (
-                                                    <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, marginBottom: 8, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
-                                                        <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 4 }} />
-                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{enemy.name}</Typography>
-                                                        <Button size="small" variant="contained" color="primary" style={{ marginTop: 4, fontFamily: 'Press Start 2P', fontSize: '0.5rem' }} onClick={() => handleEnemySelect(enemy)}>
-                                                            {t('battle.fight')}
-                                                        </Button>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                        {loc.uniqueLoot && (
-                                            <Tooltip
-                                                title={
-                                                    <div style={{ maxWidth: 220 }}>
-                                                        <Typography variant="body2" sx={{ color: '#ffd700', fontWeight: 'bold', mb: 1 }}>{loc.uniqueLoot.name}</Typography>
-                                                        {loc.uniqueLoot.rarity && (
-                                                            <Typography variant="caption" sx={{ color: '#b45af2', textTransform: 'uppercase', display: 'block', mb: 1 }}>{loc.uniqueLoot.rarity}</Typography>
-                                                        )}
-                                                        <Typography variant="caption" sx={{ color: '#fff', display: 'block', mb: 1 }}>{t('battle.uniqueLocationLoot')}</Typography>
-                                                        <Typography variant="caption" sx={{ color: '#ffd700', display: 'block' }}>{(loc.uniqueLoot.chance * 100).toFixed(2)}% {t('battle.dropChance')}</Typography>
-                                                    </div>
-                                                }
-                                                arrow
-                                                placement="top"
-                                                componentsProps={{
-                                                    tooltip: {
-                                                        sx: {
-                                                            backgroundColor: 'rgba(26, 26, 46, 0.95)',
-                                                            border: '2px solid #ffd700',
-                                                            borderRadius: '8px',
-                                                            boxShadow: '0 0 20px #ffd70040',
-                                                            backdropFilter: 'blur(10px)',
-                                                            maxWidth: '250px'
-                                                        }
-                                                    },
-                                                    arrow: {
-                                                        sx: {
-                                                            color: '#ffd700'
-                                                        }
-                                                    }
-                                                }}
-                                            >
-                                                <div style={{ marginTop: 10, background: 'rgba(0,0,0,0.18)', borderRadius: 6, padding: 8, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                                                    <span style={{ color: '#bada55', fontWeight: 500 }}>{t('battle.uniqueLocationLoot')}</span>
-                                                    <span style={{ color: '#fff' }}>{loc.uniqueLoot.name}</span>
-                                                    <span style={{ color: '#ffd700', fontSize: '0.95em' }}>{(loc.uniqueLoot.chance * 100).toFixed(2)}%</span>
-                                                </div>
-                                            </Tooltip>
-                                        )}
-                                    </>}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                    {/* Dungeons sekmesi burada benzer şekilde olacak */}
-                    {battleTab === 'dungeons' && (
-                        <div>
-                            {Array.isArray(DUNGEONS) && DUNGEONS.map((dungeon, idx) => (
-                                <div key={dungeon.id} style={{ marginBottom: 24, border: '2px solid #b45af2', borderRadius: 10, padding: 16, background: 'rgba(30,0,60,0.13)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => handleToggleDungeon(idx)}>
-                                        <Typography variant="h6" style={{ color: '#ffd700', marginBottom: 8, fontFamily: 'Press Start 2P', fontSize: '0.9rem' }}>{dungeon.name}</Typography>
-                                        <IconButton size="small" aria-label={openDungeons[idx] ? t('common.collapse') : t('common.expand')} sx={{ color: '#ffd700' }}>
-                                            {openDungeons[idx] ? <ExpandLess /> : <ExpandMore />}
-                                        </IconButton>
-                                    </div>
-                                    {openDungeons[idx] && <>
-                                        <Typography variant="body2" style={{ color: '#fff', marginBottom: 6, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{dungeon.description}</Typography>
-                                        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8 }}>
-                                            {dungeon.enemies.map((enemyId) => {
-                                                const enemy = Object.values(enemies).find(e => e.id === enemyId);
-                                                if (!enemy) return null;
-                                                return (
-                                                    <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
-                                                        <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 2 }} />
-                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{enemy.name}</Typography>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                        <div style={{ marginBottom: 8 }}>
-                                            <Typography variant="subtitle2" style={{ color: '#ffd700', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{t('battle.boss')}</Typography>
-                                            {(() => {
-                                                const boss = Object.values(enemies).find(e => e.id === dungeon.boss);
-                                                if (!boss) return null;
-                                                return (
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
-                                                        <img src={getEnemyIcon(boss.id)} alt={boss.name} style={{ width: 48, height: 48 }} />
-                                                        <Typography variant="body1" style={{ color: '#ff5252', fontWeight: 600, fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{boss.name}</Typography>
-                                                    </div>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div style={{ marginTop: 8, background: 'rgba(0,0,0,0.18)', borderRadius: 6, padding: 8 }}>
-                                            <Typography variant="subtitle2" style={{ color: '#ffd700', marginBottom: 4, fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>
-                                                {t('battle.dungeonChestRewards')}
-                                            </Typography>
-                                            {dungeon.chest.map(reward => (
-                                                <Tooltip
-                                                    key={reward.id}
-                                                    title={
-                                                        <div style={{ maxWidth: 220 }}>
-                                                            <Typography variant="body2" sx={{ color: '#ffd700', fontWeight: 'bold', mb: 1 }}>{reward.name}</Typography>
-                                                            <Typography variant="caption" sx={{ color: '#fff', display: 'block', mb: 1 }}>{t('battle.dungeonChestRewards')}</Typography>
-                                                            <Typography variant="caption" sx={{ color: '#ffd700', display: 'block' }}>{reward.chance}% {t('battle.dropChance')}</Typography>
-                                                        </div>
-                                                    }
-                                                    arrow
-                                                    placement="top"
-                                                    componentsProps={{
-                                                        tooltip: {
-                                                            sx: {
-                                                                backgroundColor: 'rgba(26, 26, 46, 0.95)',
-                                                                border: '2px solid #ffd700',
-                                                                borderRadius: '8px',
-                                                                boxShadow: '0 0 20px #ffd70040',
-                                                                backdropFilter: 'blur(10px)',
-                                                                maxWidth: '250px'
-                                                            }
-                                                        },
-                                                        arrow: {
-                                                            sx: {
-                                                                color: '#ffd700'
-                                                            }
-                                                        }
-                                                    }}
-                                                >
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2, cursor: 'pointer' }}>
-                                                        <span style={{ color: '#fff' }}>{reward.name}</span>
-                                                        <span style={{ color: '#ffd700', fontSize: '0.85em' }}>{reward.chance}%</span>
-                                                    </div>
-                                                </Tooltip>
-                                            ))}
-                                        </div>
-                                        <Button size="medium" variant="contained" color="secondary" style={{ marginTop: 12, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }} onClick={() => startDungeonRun(dungeon)}>
-                                            {t('battle.enterDungeon')}
-                                        </Button>
-                                    </>}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </>
-            )}
-            {/* Normal Battle UI */}
-            {(battleMode === 'battle' || (battleMode === 'dungeon' && dungeonRun)) && (
+
+            {/* Battle UI - show during battle, dungeon, or waiting for enemy */}
+            {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
                 <>
                     {/* Header Section - Different for Battle vs Dungeon */}
-                    {battleMode === 'battle' ? (
+                    {!dungeonRun ? (
                         <div className={styles.battleHeader}>
                             <Button 
                                 variant="outlined" 
@@ -1319,34 +945,19 @@ function Battle({ player }) {
                                         {damageDisplay.enemy}
                                     </div>
                                 )}
-                                {isWaitingForEnemy ? (
-                                    <div className={styles.enemySpawnContainer}>
-                                        <Typography className={styles.spawnText}>
-                                            Spawning Enemy...
-                                        </Typography>
-                                        <div className={styles.circularProgress}>
-                                            <div 
-                                                className={styles.circularProgressBar}
-                                                style={{ '--progress': `${enemySpawnProgress}%` }}
-                                            ></div>
-                                            <div className={styles.circularProgressText}>
-                                                {Math.ceil((100 - enemySpawnProgress) / 20)}s
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
+                                {spawnTimerUI || (
                                     <>
                                         <div className={styles.hpBarContainer}>
                                             <Typography 
                                                 className={`${styles.hpText} ${
-                                                    getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
+                                                    getStatDisplayWithAchievement(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
                                                 }`}
                                             >
-                                                HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHealth || currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
+                                                HP: {getEnemyHpDisplayWithAchievement(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHealth || currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
                                             </Typography>
                                             <LinearProgress
                                                 variant="determinate"
-                                                value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / (currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp)) * 100) : 100}
+                                                value={currentBattle ? (getStatDisplayWithAchievement(currentEnemy?.id, 'hp', currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / (currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp)) * 100) : 100}
                                                 className={`${styles.progress} ${styles.enemyHpBar}`}
                                             />
                                         </div>
@@ -1699,39 +1310,39 @@ function Battle({ player }) {
                                 <Divider />
                                 {currentBattle ? (
                                     <>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ⚔️ Attack: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ Attack: {getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🎯 Attack Type: {getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? "" : `${currentBattle.enemy.ATTACK_TYPE || "Melee"}`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎯 Attack Type: {getStatDisplayWithAchievement(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? "" : `${currentBattle.enemy.ATTACK_TYPE || "Melee"}`}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🛡️ Def: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🛡️ Def: {getStatDisplayWithAchievement(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🧙 Magic Def: {getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? "" : `${currentBattle.enemy.MAGIC_DEF || 0}`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🧙 Magic Def: {getStatDisplayWithAchievement(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? "" : `${currentBattle.enemy.MAGIC_DEF || 0}`}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ❤️ HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ❤️ HP: {getEnemyHpDisplayWithAchievement(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🛡️ Energy Shield: {getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? "" : `${currentBattle.enemy.ENERGY_SHIELD || 0}`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🛡️ Energy Shield: {getStatDisplayWithAchievement(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? "" : `${currentBattle.enemy.ENERGY_SHIELD || 0}`}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ⚔️ Base Damage: {getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? "" : `${currentBattle.enemy.BASE_DAMAGE_MIN || 0}-${currentBattle.enemy.BASE_DAMAGE_MAX || 0}`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ Base Damage: {getStatDisplayWithAchievement(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? "" : `${currentBattle.enemy.BASE_DAMAGE_MIN || 0}-${currentBattle.enemy.BASE_DAMAGE_MAX || 0}`}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ⚡ {t('battle.attackSpeed')}: {getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚡ {t('battle.attackSpeed')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🎯 {t('battle.criticalChance')}: {getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? "" : `${currentBattle.enemy.CRIT_CHANCE || 3}%`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎯 {t('battle.criticalChance')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? "" : `${currentBattle.enemy.CRIT_CHANCE || 3}%`}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            💥 {t('battle.criticalDamage')}: {getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? "" : `${currentBattle.enemy.CRIT_DAMAGE || 120}%`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            💥 {t('battle.criticalDamage')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? "" : `${currentBattle.enemy.CRIT_DAMAGE || 120}%`}
                                         </Typography>
                                         <Divider sx={{ my: 1 }} />
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🎲 {t('battle.hitChance')}: {getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? "" : `${calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🎲 {t('battle.hitChance')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'hit_chance', 0) === "" ? "" : `${calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%`}
                                         </Typography>
                                         {(() => {
                                             const damageRange = calculateDamageRange(currentBattle.enemy.ATK, currentBattle.player.DEF);
@@ -1741,11 +1352,11 @@ function Battle({ player }) {
                                             };
                                             return (
                                                 <>
-                                                    <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                        ⚔️ {t('battle.baseDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${damageRange.min}-${damageRange.max}`}
+                                                    <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                        ⚔️ {t('battle.baseDamage')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${damageRange.min}-${damageRange.max}`}
                                                     </Typography>
-                                                    <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                        💥 {t('battle.critDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${critDamageRange.min}-${critDamageRange.max}`}
+                                                    <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                                        💥 {t('battle.critDamage')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${critDamageRange.min}-${critDamageRange.max}`}
                                                     </Typography>
                                                 </>
                                             );
@@ -1753,32 +1364,32 @@ function Battle({ player }) {
                                     </>
                                 ) : (
                                     <>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK)}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ⚔️ {t('battle.attack')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK)}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF)}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'def', currentEnemy?.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            🛡️ {t('battle.defense')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'def', currentEnemy?.DEF)}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                            ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                            ❤️ {t('battle.health')}: {getStatDisplayWithAchievement(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
                                             ⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
                                             🎯 {t('battle.criticalChance')}: 3%
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
                                             💥 {t('battle.criticalDamage')}: 120%
                                         </Typography>
                                         <Divider sx={{ my: 1 }} />
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
                                             🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
                                             ⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0)}
                                         </Typography>
-                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
+                                        <Typography className={getStatDisplayWithAchievement(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
                                             💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0) * 1.2)}
                                         </Typography>
                                     </>

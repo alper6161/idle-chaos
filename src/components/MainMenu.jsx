@@ -75,8 +75,8 @@ function MainMenu() {
                     </NavLink>
                 </Tooltip>
                 
-                <Tooltip title={t('common.battle')} arrow placement="right">
-                    <NavLink to="/battle" className={styles.compactMenuItem}>
+                                        <Tooltip title={t('common.battle')} arrow placement="right">
+                            <NavLink to="/battle-selection" className={styles.compactMenuItem}>
                         <span className={styles.compactMenuIcon}>⚔️</span>
                     </NavLink>
                 </Tooltip>

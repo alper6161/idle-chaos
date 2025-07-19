@@ -187,16 +187,20 @@ export const BattleProvider = ({ children }) => {
 
         spawnIntervalRef.current = setInterval(() => {
             setEnemySpawnProgress(prev => {
-                const newProgress = prev + 2; // 2% per interval
+                const newProgress = prev + 1; // 1% per interval for smoother progress
                 if (newProgress >= 100) {
+                    // Batch state updates to prevent flicker
                     setIsWaitingForEnemy(false);
                     setEnemySpawnProgress(0);
-                    spawnNewEnemy();
+                    // Use requestAnimationFrame to ensure smooth transition
+                    requestAnimationFrame(() => {
+                        spawnNewEnemy();
+                    });
                     return 0;
                 }
                 return newProgress;
             });
-        }, 100); // 100ms for smooth progress
+        }, 50); // 50ms for smoother progress (5 seconds total)
 
         return () => {
             if (spawnIntervalRef.current) {
@@ -538,6 +542,20 @@ export const BattleProvider = ({ children }) => {
         
         setIsWaitingForEnemy(true);
         setEnemySpawnProgress(0);
+        
+        // Start the actual timer
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 20; // 20% every second (5 seconds total)
+            setEnemySpawnProgress(progress);
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                setIsWaitingForEnemy(false);
+                setEnemySpawnProgress(0);
+                spawnNewEnemy();
+            }
+        }, 1000);
     };
 
     // Store enemies data and other callbacks from Battle.jsx
@@ -612,6 +630,10 @@ export const BattleProvider = ({ children }) => {
     };
 
     const spawnNewEnemy = () => {
+        // Reset waiting state
+        setIsWaitingForEnemy(false);
+        setEnemySpawnProgress(0);
+        
         // Check if we're in a dungeon
         if (dungeonRun && !dungeonRun.completed) {
             handleDungeonEnemyDefeated();
@@ -621,33 +643,30 @@ export const BattleProvider = ({ children }) => {
         // Location logic: spawn same enemy type
         if (!currentEnemy) return;
         
+        // Prepare all state updates at once to prevent flicker
         const nextEnemy = { ...currentEnemy };
-        setCurrentEnemy(nextEnemy);
+        const enemyMaxHealth = nextEnemy.maxHp || nextEnemy.HEALTH;
+        const battleState = {
+            player: {
+                ...getPlayerStats(),
+                currentHealth: playerHealth,
+                maxHealth: getPlayerStats().HEALTH
+            },
+            enemy: {
+                ...nextEnemy,
+                currentHealth: enemyMaxHealth,
+                maxHealth: enemyMaxHealth,
+                HEALTH: enemyMaxHealth
+            },
+            playerProgress: 0,
+            enemyProgress: 0,
+            battleLog: []
+        };
         
-        // Small delay before starting next battle
-        setTimeout(() => {
-            // Use the same health logic as startBattle
-            const enemyMaxHealth = nextEnemy.maxHp || nextEnemy.HEALTH;
-            const battleState = {
-                player: {
-                    ...getPlayerStats(),
-                    currentHealth: playerHealth,
-                    maxHealth: getPlayerStats().HEALTH
-                },
-                enemy: {
-                    ...nextEnemy,
-                    currentHealth: enemyMaxHealth,
-                    maxHealth: enemyMaxHealth,
-                    HEALTH: enemyMaxHealth
-                },
-                playerProgress: 0,
-                enemyProgress: 0,
-                battleLog: []
-            };
-            
-            setCurrentBattle(battleState);
-            setIsBattleActive(true);
-        }, 500);
+        // Update all states synchronously to prevent flicker
+        setCurrentEnemy(nextEnemy);
+        setCurrentBattle(battleState);
+        setIsBattleActive(true);
     };
 
     const checkAutoPotion = (battle) => {
