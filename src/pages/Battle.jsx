@@ -40,7 +40,7 @@ import {
 import { awardBattleActionXP, getWeaponType, getAvailableAttackTypes, getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
 import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType, getEquippedItems } from "../utils/playerStats.js";
 import { getRandomEnemy } from "../utils/enemies.js";
-import { getGold, addGold, formatGold, subtractGold } from "../utils/gold.js";
+import { getGold, addGold, subtractGold } from "../utils/gold.js";
 import { 
     POTION_TYPES, 
     getPotions, 
@@ -1117,59 +1117,116 @@ function Battle({ player }) {
                 </>
             )}
             {/* Normal Battle UI */}
-            {battleMode === 'battle' && (
+            {(battleMode === 'battle' || (battleMode === 'dungeon' && dungeonRun)) && (
                 <>
-                    <div className={styles.battleHeader}>
-                        <Button 
-                            variant="outlined" 
-                            onClick={handleBackToSelection}
-                            className={styles.backButton}
-                        >
-                            {t('battle.backToSelection')}
-                        </Button>
-                        
-                        {/* TEMPORARY: Test death button */}
-                        <Button 
-                            variant="contained" 
-                            color="error"
-                            onClick={() => {
-                                setIsBattleActive(false);
-                                showDeathDialog();
-                            }}
-                            style={{ marginLeft: '8px' }}
-                        >
-                            🏴‍☠️ TEST: Die
-                        </Button>
-                        <Button 
-                            variant="contained" 
-                            color="success"
-                            onClick={handleKillEnemy}
-                            style={{ marginLeft: '8px' }}
-                        >
-                            ⚔️ TEST: Kill
-                        </Button>
-                        {dungeonRun && !dungeonRun.completed && (
+                    {/* Header Section - Different for Battle vs Dungeon */}
+                    {battleMode === 'battle' ? (
+                        <div className={styles.battleHeader}>
+                            <Button 
+                                variant="outlined" 
+                                onClick={handleBackToSelection}
+                                className={styles.backButton}
+                            >
+                                {t('battle.backToSelection')}
+                            </Button>
+                            
+                            {/* TEMPORARY: Test death button */}
                             <Button 
                                 variant="contained" 
-                                color="warning"
+                                color="error"
                                 onClick={() => {
-                                    // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
-                                    setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
                                     setIsBattleActive(false);
-                                    setCurrentBattle(null);
-                                    setCurrentEnemy(null);
-                                    
-                                    // Manually trigger the dungeon completion logic
-                                    setTimeout(() => {
-                                        spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
-                                    }, 100);
+                                    showDeathDialog();
                                 }}
                                 style={{ marginLeft: '8px' }}
                             >
-                                🏆 TEST: Complete Dungeon
+                                🏴‍☠️ TEST: Die
                             </Button>
-                        )}
-                    </div>
+                            <Button 
+                                variant="contained" 
+                                color="success"
+                                onClick={handleKillEnemy}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                ⚔️ TEST: Kill
+                            </Button>
+                            {dungeonRun && !dungeonRun.completed && (
+                                <Button 
+                                    variant="contained" 
+                                    color="warning"
+                                    onClick={() => {
+                                        // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
+                                        setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
+                                        setIsBattleActive(false);
+                                        setCurrentBattle(null);
+                                        setCurrentEnemy(null);
+                                        
+                                        // Manually trigger the dungeon completion logic
+                                        setTimeout(() => {
+                                            spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
+                                        }, 100);
+                                    }}
+                                    style={{ marginLeft: '8px' }}
+                                >
+                                    🏆 TEST: Complete Dungeon
+                                </Button>
+                            )}
+                        </div>
+                                         ) : (
+                         <div className={styles.dungeonHeader}>
+                             <Typography variant="h6">{dungeonRun.dungeon.name}</Typography>
+                             <Typography variant="subtitle1">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
+                             <Button 
+                                 variant="outlined" 
+                                 onClick={handleBackToSelection}
+                                 className={styles.backButton}
+                             >
+                                 {t('battle.backToSelection')}
+                             </Button>
+                             
+                             {/* TEMPORARY: Test death button */}
+                             <Button 
+                                 variant="contained" 
+                                 color="error"
+                                 onClick={() => {
+                                     setIsBattleActive(false);
+                                     showDeathDialog();
+                                 }}
+                                 style={{ marginLeft: '8px' }}
+                             >
+                                 🏴‍☠️ TEST: Die
+                             </Button>
+                             <Button 
+                                 variant="contained" 
+                                 color="success"
+                                 onClick={handleKillEnemy}
+                                 style={{ marginLeft: '8px' }}
+                             >
+                                 ⚔️ TEST: Kill
+                             </Button>
+                             <Button 
+                                 variant="contained" 
+                                 color="warning"
+                                 onClick={() => {
+                                     // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
+                                     setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
+                                     setIsBattleActive(false);
+                                     setCurrentBattle(null);
+                                     setCurrentEnemy(null);
+                                     
+                                     // Manually trigger the dungeon completion logic
+                                     setTimeout(() => {
+                                         spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
+                                     }, 100);
+                                 }}
+                                 style={{ marginLeft: '8px' }}
+                             >
+                                 🏆 TEST: Complete Dungeon
+                             </Button>
+                         </div>
+                     )}
+                    
+                    {/* Battle Content - Common for both modes */}
                     <div className={styles.battleContainer}>
                         {/* Fighters Row */}
                         <div className={styles.fighters}>
@@ -1758,693 +1815,7 @@ function Battle({ player }) {
                     </div>
                 </>
             )}
-            {battleMode === 'dungeon' && dungeonRun && (
-                <>
-                    <div className={styles.dungeonContainer}>
-                        <div className={styles.dungeonHeader}>
-                            <Typography variant="h6">{dungeonRun.dungeon.name}</Typography>
-                            <Typography variant="subtitle1">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
-                            <Button 
-                                variant="outlined" 
-                                onClick={handleBackToSelection}
-                                className={styles.backButton}
-                            >
-                                {t('battle.backToSelection')}
-                            </Button>
-                            
-                            {/* TEMPORARY: Test death button */}
-                            <Button 
-                                variant="contained" 
-                                color="error"
-                                onClick={() => {
-                                    setIsBattleActive(false);
-                                    showDeathDialog();
-                                }}
-                                style={{ marginLeft: '8px' }}
-                            >
-                                🏴‍☠️ TEST: Die
-                            </Button>
-                            <Button 
-                                variant="contained" 
-                                color="success"
-                                onClick={handleKillEnemy}
-                                style={{ marginLeft: '8px' }}
-                            >
-                                ⚔️ TEST: Kill
-                            </Button>
-                            <Button 
-                                variant="contained" 
-                                color="warning"
-                                onClick={() => {
-                                    // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
-                                    setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
-                                    setIsBattleActive(false);
-                                    setCurrentBattle(null);
-                                    setCurrentEnemy(null);
-                                    
-                                    // Manually trigger the dungeon completion logic
-                                    setTimeout(() => {
-                                        spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
-                                    }, 100);
-                                }}
-                                style={{ marginLeft: '8px' }}
-                            >
-                                🏆 TEST: Complete Dungeon
-                            </Button>
-                        </div>
-                        {/* Render the full battle UI below the dungeon header */}
-                        <div className={styles.battleContainer}>
-                            {/* Fighters Row */}
-                            <div className={styles.fighters}>
-                                {/* PLAYER */}
-                                <div className={styles.fighter}>
-                                    <Avatar src={getCharacterIcon(selectedCharacter)} className={styles.avatar} />
-                                    <Typography variant="h6">{getCharacterName(selectedCharacter)}</Typography>
-                                    {damageDisplay.player && (
-                                        <div 
-                                            className={`${styles.damageDisplay} ${
-                                                damageDisplay.player === 'MISS' ? styles.missDisplay : 
-                                                damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
-                                            }`}
-                                        >
-                                            {damageDisplay.player}
-                                        </div>
-                                    )}
-                                    <div className={styles.hpBarContainer}>
-                                        <Typography className={styles.hpText}>
-                                            HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || playerStats.HEALTH}
-                                        </Typography>
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : (playerHealth / playerStats.HEALTH) * 100}
-                                            className={`${styles.progress} ${styles.playerHpBar}`}
-                                        />
-                                    </div>
-                                    <div className={styles.attackBarContainer}>
-                                        <LinearProgress
-                                            variant="determinate"
-                                            value={currentBattle?.playerProgress || 0}
-                                            className={`${styles.progress} ${styles.attackBar}`}
-                                            sx={{ height: '15px', borderRadius: '8px' }}
-                                        />
-                                    </div>
-                                    {currentBattle && (
-                                        <div className={styles.attackTypeSmall}>
-                                            <Typography variant="caption" className={styles.attackTypeSmallTitle}>
-                                                🎯 {t('battle.selectAttackType')}
-                                            </Typography>
-                                            <div className={styles.attackTypeSmallGrid}>
-                                                {availableAttackTypes.map((attackType) => (
-                                                    <Tooltip
-                                                        key={attackType.type}
-                                                        title={attackType.description}
-                                                        arrow
-                                                        placement="top"
-                                                    >
-                                                        <Button
-                                                            variant="text"
-                                                            className={`${styles.attackTypeSmallButton} ${
-                                                                selectedAttackType === attackType.type ? styles.attackTypeSelected : ''
-                                                            }`}
-                                                            onClick={() => setSelectedAttackType(attackType.type)}
-                                                        >
-                                                            <span className={styles.attackTypeSmallIcon}>{attackType.icon}</span>
-                                                        </Button>
-                                                    </Tooltip>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                                {/* ENEMY */}
-                                <div className={styles.fighter}>
-                                    <Avatar 
-                                        src={getEnemyIcon(currentEnemy?.id)} 
-                                        className={styles.avatar}
-                                        onError={(e) => {
-                                            if (e.target && e.target.nextSibling) {
-                                                e.target.style.display = 'none';
-                                                e.target.nextSibling.style.display = 'flex';
-                                            }
-                                        }}
-                                    />
-                                    <div 
-                                        className={styles.avatarFallback}
-                                        style={{ display: 'none' }}
-                                    >
-                                        {getEnemyInitial(currentEnemy?.name)}
-                                    </div>
-                                    <Typography variant="h6">{currentEnemy?.name}</Typography>
-                                                                    {damageDisplay.enemy && (
-                                    <div 
-                                        className={`${styles.damageDisplay} ${
-                                            damageDisplay.enemy === 'MISS' ? styles.missDisplay :
-                                            damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
-                                        }`}
-                                    >
-                                        {damageDisplay.enemy}
-                                    </div>
-                                )}
-                                    {isWaitingForEnemy ? (
-                                        <div className={styles.enemySpawnContainer}>
-                                            <Typography className={styles.spawnText}>
-                                                Spawning Enemy...
-                                            </Typography>
-                                            <div className={styles.circularProgress}>
-                                                <div 
-                                                    className={styles.circularProgressBar}
-                                                    style={{ '--progress': `${enemySpawnProgress}%` }}
-                                                ></div>
-                                                <div className={styles.circularProgressText}>
-                                                    {Math.ceil((100 - enemySpawnProgress) / 20)}s
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className={styles.hpBarContainer}>
-                                                <Typography 
-                                                    className={`${styles.hpText} ${
-                                                        getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat
-                                                    }`}
-                                                >
-                                                    HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle?.enemy?.currentHealth || 0, currentBattle?.enemy?.maxHealth || currentBattle?.enemy?.maxHp || currentEnemy?.maxHp)}
-                                                </Typography>
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={currentBattle ? (getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp) === "" ? 100 : (currentBattle.enemy.currentHealth / (currentBattle.enemy.maxHealth || currentBattle.enemy.maxHp)) * 100) : 100}
-                                                    className={`${styles.progress} ${styles.enemyHpBar}`}
-                                                />
-                                            </div>
-                                            <div className={styles.attackBarContainer}>
-                                                <LinearProgress
-                                                    variant="determinate"
-                                                    value={currentBattle?.enemyProgress || 0}
-                                                    className={`${styles.progress} ${styles.attackBar}`}
-                                                    sx={{ height: '15px', borderRadius: '8px' }}
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                                {/* Battle Log - Toggleable Widget */}
-                                {battleLogVisible && (
-                                    <div className={styles.fighter}>
-                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                            <Typography variant="h6">{t('battle.battleLog')}</Typography>
-                                            <Tooltip title={t('battle.clearBattleLog')} arrow>
-                                                <IconButton
-                                                    onClick={() => setBattleLog([])}
-                                                    sx={{
-                                                        position: 'absolute',
-                                                        right: 8,
-                                                        top: 8,
-                                                        color: '#ffd700',
-                                                        background: 'rgba(0,0,0,0.18)',
-                                                        borderRadius: 2,
-                                                        '&:hover': { background: 'rgba(255,215,0,0.12)' }
-                                                    }}
-                                                    size="small"
-                                                >
-                                                    <div style={{ fontSize: '1rem' }}>🗑️</div>
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Box>
-                                        <div className={styles.battleLog}>
-                                            {battleLog.length === 0 ? (
-                                                <Typography variant="body2" sx={{ color: '#ffffff', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{t('battle.noBattleLog')}</Typography>
-                                            ) : (
-                                                                                        battleLog.map((entry, idx) => (
-                                            <div key={idx} className={styles[`${entry.type}Log`] || styles.battleLogEntry}>
-                                                {entry.message}
-                                            </div>
-                                        ))
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            {/* Potion System */}
-                            {currentBattle && (
-                                <div className={styles.potionSection}>
-                                    <div className={styles.potionHeader}>
-                                        <Typography variant="h6" className={styles.potionTitle}>
-                                            <LocalDrink /> {t('potions.healthPotions')}
-                                        </Typography>
-                                        <Chip 
-                                            label={autoPotionSettings.enabled ? t('potions.autoOn') : t('potions.autoOff')}
-                                            color={autoPotionSettings.enabled ? "success" : "default"}
-                                            size="small"
-                                            className={styles.autoPotionChip}
-                                        />
-                                    </div>
-                                    <div className={styles.potionGrid}>
-                                        {Object.entries(POTION_TYPES).map(([key, potion]) => {
-                                            const count = potions[potion.id] || 0;
-                                            const canUse = count > 0 && currentBattle.player.currentHealth < currentBattle.player.HEALTH;
-                                            return (
-                                                <Button
-                                                    key={potion.id}
-                                                    variant="contained"
-                                                    className={styles.potionButton}
-                                                    disabled={!canUse}
-                                                    onClick={() => handleUsePotionLocal(potion.id)}
-                                                    style={{
-                                                        backgroundColor: potion.color,
-                                                        border: lastPotionUsed?.type === potion.id ? '3px solid #ffd700' : 'none',
-                                                        boxShadow: lastPotionUsed?.type === potion.id ? '0 0 15px #ffd700' : 'none'
-                                                    }}
-                                                >
-                                                    <div className={styles.potionContent}>
-                                                        <Typography variant="caption" className={styles.potionName}>
-                                                            {t(`potions.${potion.id}HealthPotion`)}
-                                                        </Typography>
-                                                        <Typography variant="body2" className={styles.potionHeal}>
-                                                            +{potion.healAmount}
-                                                        </Typography>
-                                                        <Typography variant="caption" className={styles.potionCount}>
-                                                            {count}
-                                                        </Typography>
-                                                    </div>
-                                                </Button>
-                                            );
-                                        })}
-                                    </div>
-                                    {lastPotionUsed && (
-                                        <div className={styles.potionEffect}>
-                                            <Typography variant="h4" className={styles.healText}>
-                                                +{lastPotionUsed.healAmount} HP
-                                            </Typography>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                            {/* Widget Container - Player/Enemy Stats, Loot, etc. */}
-                            <div className={styles.widgetContainer}>
-                                {/* PLAYER STATS */}
-                                <div className={styles.section}>
-                                    <Typography variant="h6">{t('battle.playerStats')}</Typography>
-                                    <Divider />
-                                    {currentBattle ? (
-                                        <>
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const atkBonus = skillBuffs.ATK || 0;
-                                                const effectiveATK = currentBattle.player.ATK + atkBonus;
-                                                return (
-                                                    <Typography>
-                                                        ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
-                                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const defBonus = skillBuffs.DEF || 0;
-                                                const effectiveDEF = currentBattle.player.DEF + defBonus;
-                                                return (
-                                                    <Typography>
-                                                        🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
-                                                        {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const healthBonus = skillBuffs.HEALTH || 0;
-                                                const effectiveHealth = currentBattle.player.HEALTH + healthBonus;
-                                                return (
-                                                    <Typography>
-                                                        ❤️ {t('battle.health')}: {currentBattle.player.currentHealth}/{effectiveHealth.toFixed(0)}
-                                                        {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
-                                                const effectiveAttackSpeed = currentBattle.player.ATTACK_SPEED + attackSpeedBonus;
-                                                return (
-                                                    <Typography>
-                                                        ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
-                                                        {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
-                                                const effectiveCritChance = (currentBattle.player.CRIT_CHANCE || 5) + critChanceBonus;
-                                                return (
-                                                    <Typography>
-                                                        🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
-                                                        {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                                const effectiveCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
-                                                
 
-                                                
-                                                return (
-                                                    <Typography>
-                                                        💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
-                                                        {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            <Divider sx={{ my: 1 }} />
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0; // Stab skill gives accuracy
-                                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
-                                                const effectiveATK = currentBattle.player.ATK + atkBonus;
-                                                const hitChance = calculateHitChance(effectiveATK, currentBattle.enemy.DEF, accuracyBonus);
-                                                return (
-                                                    <Typography>
-                                                        🎲 {t('battle.hitChance')}: {hitChance}%
-                                                        {accuracyBonus > 0 && <span className={styles.skillBonus}> (+{accuracyBonus.toFixed(1)}%)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const damageRangeBonus = skillBuffs ? skillBuffs.MIN_DAMAGE.toFixed(1) + ' - ' + skillBuffs.MAX_DAMAGE.toFixed(1) : 0;
-                                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                                const atkBonus = skillBuffs.ATK || 0; // Magic skills give ATK
-                                                const effectiveATK = currentBattle.player.ATK + atkBonus;
-                                                const damageRange = calculateDamageRange(effectiveATK, currentBattle.enemy.DEF, damageRangeBonus);
-                                                const totalCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + critDamageBonus;
-                                                const critDamageRange = {
-                                                    min: Math.floor(damageRange.min * (totalCritDamage / 100)),
-                                                    max: Math.floor(damageRange.max * (totalCritDamage / 100))
-                                                };
-                                                return (
-                                                    <>
-                                                        <Typography>
-                                                            ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
-                                                            {damageRangeBonus && <span className={styles.skillBonus}> ({damageRangeBonus})</span>}
-                                                        </Typography>
-                                                        <Typography>💥 {t('battle.critDamage')}: {critDamageRange.min}-{critDamageRange.max}</Typography>
-                                                    </>
-                                                );
-                                            })()}
-                                        </>
-                                    ) : (
-                                        <>
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const atkBonus = skillBuffs.ATK || 0;
-                                                const effectiveATK = playerStats.ATK + atkBonus;
-                                                const { level, bonuses } = getSelectedSkillInfo();
-                                                
-                                                return (
-                                                    <Typography>
-                                                        ⚔️ {t('battle.attack')}: {effectiveATK.toFixed(1)}
-                                                        {getEquipmentBonuses().ATK && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATK})</span>}
-                                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)})</span>}
-                                                        {bonuses && level > 0 && (
-                                                            <span className={styles.skillBonus}> (+{bonuses.ATK} per level, Lv.{level})</span>
-                                                        )}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const defBonus = skillBuffs.DEF || 0;
-                                                const effectiveDEF = playerStats.DEF + defBonus;
-                                                return (
-                                                    <Typography>
-                                                        🛡️ {t('battle.defense')}: {effectiveDEF.toFixed(1)}
-                                                        {getEquipmentBonuses().DEF && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().DEF})</span>}
-                                                        {defBonus > 0 && <span className={styles.skillBonus}> (+{defBonus.toFixed(1)})</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const healthBonus = skillBuffs.HEALTH || 0;
-                                                const effectiveHealth = playerStats.HEALTH + healthBonus;
-                                                return (
-                                                    <Typography>
-                                                        ❤️ {t('battle.health')}: {playerHealth}/{effectiveHealth.toFixed(0)}
-                                                        {getEquipmentBonuses().HEALTH && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().HEALTH})</span>}
-                                                        {healthBonus > 0 && <span className={styles.skillBonus}> (+{healthBonus.toFixed(0)} max)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const attackSpeedBonus = skillBuffs.ATTACK_SPEED || 0;
-                                                const effectiveAttackSpeed = playerStats.ATTACK_SPEED + attackSpeedBonus;
-                                                return (
-                                                    <Typography>
-                                                        ⚡ {t('battle.attackSpeed')}: {effectiveAttackSpeed.toFixed(1)}
-                                                        {getEquipmentBonuses().ATTACK_SPEED && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().ATTACK_SPEED})</span>}
-                                                        {attackSpeedBonus > 0 && <span className={styles.skillBonus}> (+{attackSpeedBonus.toFixed(2)})</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const critChanceBonus = skillBuffs.CRIT_CHANCE || 0;
-                                                const effectiveCritChance = playerStats.CRIT_CHANCE + critChanceBonus;
-                                                
-                                                return (
-                                                    <Typography>
-                                                        🎯 {t('battle.criticalChance')}: {effectiveCritChance.toFixed(1)}%
-                                                        {getEquipmentBonuses().CRIT_CHANCE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_CHANCE}%)</span>}
-                                                        {critChanceBonus > 0 && <span className={styles.skillBonus}> (+{critChanceBonus.toFixed(1)}%)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const critDamageBonus = skillBuffs.CRIT_DAMAGE || 0;
-                                                const effectiveCritDamage = playerStats.CRIT_DAMAGE + critDamageBonus;
-                                                
-                                                return (
-                                                    <Typography>
-                                                        💥 {t('battle.criticalDamage')}: {effectiveCritDamage.toFixed(1)}%
-                                                        {getEquipmentBonuses().CRIT_DAMAGE && <span className={styles.equipmentBonus}>(+{getEquipmentBonuses().CRIT_DAMAGE}%)</span>}
-                                                        {critDamageBonus > 0 && <span className={styles.skillBonus}> (+{critDamageBonus.toFixed(1)}%)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            <Divider sx={{ my: 1 }} />
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const atkBonus = skillBuffs.ATK || 0;
-                                                const effectiveATK = playerStats.ATK + atkBonus;
-                                                const hitChance = calculateHitChance(effectiveATK, currentEnemy?.DEF || 0, 0);
-                                                return (
-                                                    <Typography>
-                                                        🎲 {t('battle.hitChance')}: {hitChance}%
-                                                        {atkBonus > 0 && <span className={styles.skillBonus}> (+{atkBonus.toFixed(1)} ATK)</span>}
-                                                    </Typography>
-                                                );
-                                            })()}
-                                            {(() => {
-                                                const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-                                                const atkBonus = skillBuffs.ATK || 0;
-                                                const effectiveATK = playerStats.ATK + atkBonus;
-                                                const damageRange = calculateDamageRange(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
-                                                const baseDamage = calculateDamage(effectiveATK, currentEnemy?.DEF || 0, 0, skillBuffs);
-                                                const totalCritDamage = playerStats.CRIT_DAMAGE;
-                                                const { level, bonuses } = getSelectedSkillInfo();
-                                                
-                                                return (
-                                                    <>
-                                                        <Typography>
-                                                            ⚔️ {t('battle.baseDamage')}: {damageRange.min}-{damageRange.max}
-                                                            {(skillBuffs.MIN_DAMAGE > 0 || skillBuffs.MAX_DAMAGE > 0) && (
-                                                                <span className={styles.skillBonus}> 
-                                                                    (+{skillBuffs.MIN_DAMAGE?.toFixed(1) || 0} min, +{skillBuffs.MAX_DAMAGE?.toFixed(1) || 0} max)
-                                                                </span>
-                                                            )}
-                                                            {bonuses && level > 0 && (
-                                                                <span className={styles.skillBonus}> 
-                                                                    (+{bonuses.MIN_DAMAGE} min, +{bonuses.MAX_DAMAGE} max per level, Lv.{level})
-                                                                </span>
-                                                            )}
-                                                        </Typography>
-                                                        <Typography>💥 {t('battle.critDamage')}: {Math.floor(baseDamage * (totalCritDamage / 100))}</Typography>
-                                                    </>
-                                                );
-                                            })()}
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* ENEMY STATS */}
-                                <div className={styles.section}>
-                                    <Typography variant="h6">{t('battle.enemyStats')}</Typography>
-                                    <Divider />
-                                    {currentBattle ? (
-                                        <>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ⚔️ Attack: {getStatDisplay(currentEnemy?.id, 'atk', currentBattle.enemy.ATK)}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🎯 Attack Type: {getStatDisplay(currentEnemy?.id, 'attack_type', currentBattle.enemy.ATTACK_TYPE) === "" ? "" : `${currentBattle.enemy.ATTACK_TYPE || "Melee"}`}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🛡️ Def: {getStatDisplay(currentEnemy?.id, 'def', currentBattle.enemy.DEF)}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🧙 Magic Def: {getStatDisplay(currentEnemy?.id, 'magic_def', currentBattle.enemy.MAGIC_DEF) === "" ? "" : `${currentBattle.enemy.MAGIC_DEF || 0}`}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentBattle.enemy.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ❤️ HP: {getEnemyHpDisplay(currentEnemy?.id, currentBattle.enemy.currentHealth, currentBattle.enemy.maxHp)}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🛡️ Energy Shield: {getStatDisplay(currentEnemy?.id, 'energy_shield', currentBattle.enemy.ENERGY_SHIELD) === "" ? "" : `${currentBattle.enemy.ENERGY_SHIELD || 0}`}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ⚔️ Base Damage: {getStatDisplay(currentEnemy?.id, 'base_damage', currentBattle.enemy.BASE_DAMAGE_MIN) === "" ? "" : `${currentBattle.enemy.BASE_DAMAGE_MIN || 0}-${currentBattle.enemy.BASE_DAMAGE_MAX || 0}`}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ⚡ {t('battle.attackSpeed')}: {getStatDisplay(currentEnemy?.id, 'attack_speed', currentBattle.enemy.ATTACK_SPEED) === "" ? "" : currentBattle.enemy.ATTACK_SPEED}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🎯 {t('battle.criticalChance')}: {getStatDisplay(currentEnemy?.id, 'crit_chance', currentBattle.enemy.CRIT_CHANCE || 3) === "" ? "" : `${currentBattle.enemy.CRIT_CHANCE || 3}%`}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                💥 {t('battle.criticalDamage')}: {getStatDisplay(currentEnemy?.id, 'crit_damage', currentBattle.enemy.CRIT_DAMAGE || 120) === "" ? "" : `${currentBattle.enemy.CRIT_DAMAGE || 120}%`}
-                                            </Typography>
-                                            <Divider sx={{ my: 1 }} />
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🎲 {t('battle.hitChance')}: {getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? "" : `${calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%`}
-                                            </Typography>
-                                            {(() => {
-                                                const damageRange = calculateDamageRange(currentBattle.enemy.ATK, currentBattle.player.DEF);
-                                                const critDamageRange = {
-                                                    min: Math.floor(damageRange.min * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100)),
-                                                    max: Math.floor(damageRange.max * ((currentBattle.enemy.CRIT_DAMAGE || 120) / 100))
-                                                };
-                                                return (
-                                                    <>
-                                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                            ⚔️ {t('battle.baseDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${damageRange.min}-${damageRange.max}`}
-                                                        </Typography>
-                                                        <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                            💥 {t('battle.critDamage')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? "" : `${critDamageRange.min}-${critDamageRange.max}`}
-                                                        </Typography>
-                                                    </>
-                                                );
-                                            })()}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ⚔️ {t('battle.attack')}: {getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK)}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🛡️ {t('battle.defense')}: {getStatDisplay(currentEnemy?.id, 'def', currentEnemy?.DEF)}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ❤️ {t('battle.health')}: {getStatDisplay(currentEnemy?.id, 'hp', currentEnemy?.maxHp) === "" ? "" : `${currentEnemy?.maxHp}/${currentEnemy?.maxHp}`}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ⚡ {t('battle.attackSpeed')}: {currentEnemy?.ATTACK_SPEED || 1.5}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🎯 {t('battle.criticalChance')}: 3%
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                💥 {t('battle.criticalDamage')}: 120%
-                                            </Typography>
-                                            <Divider sx={{ my: 1 }} />
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'hit_chance', 0) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                🎲 {t('battle.hitChance')}: {calculateHitChance(currentEnemy?.ATK || 0, playerStats.DEF)}%
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                ⚔️ {t('battle.baseDamage')}: {calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0)}
-                                            </Typography>
-                                            <Typography className={getStatDisplay(currentEnemy?.id, 'atk', currentEnemy?.ATK) === "" ? styles.hiddenStat : styles.revealedStat}>
-                                                💥 {t('battle.critDamage')}: {Math.floor(calculateDamage(currentEnemy?.ATK || 0, playerStats.DEF, 0) * 1.2)}
-                                            </Typography>
-                                        </>
-                                    )}
-                                </div>
-
-                                {/* LOOT TABLE */}
-                                <div className={styles.section}>
-                                    <Typography variant="h6">{t('battle.possibleLoot')}</Typography>
-                                    <Divider />
-                                    {currentEnemy?.drops?.map((drop) => (
-                                        <Typography key={drop.name} className={drop.type === 'gold' ? styles.goldLoot : styles.equipmentLoot}>
-                                            {drop.name} - {(drop.chance * 100).toFixed(0)}%
-                                            {drop.type === 'gold' && (
-                                                <span className={styles.goldValue}> (💰 {drop.value} Gold)</span>
-                                            )}
-                                        </Typography>
-                                    )) || (
-                                        <Typography>{t('battle.noDropsAvailable')}</Typography>
-                                    )}
-                                </div>
-
-                                {/* LOOT GAINED */}
-                                <LootBag
-                                    lootBag={lootBag}
-                                    onTakeItem={handleTakeItem}
-                                    onSellItem={handleSellItem}
-                                    onTakeAll={handleTakeAll}
-                                    onSellAll={handleSellAll}
-                                    onOpenChest={handleChestClick}
-                                    calculateItemSellValue={calculateItemSellValue}
-                                />
-                                                        </div>
-                        </div>
-                    </div>
-                </>
-            )}
-            {/* Death Dialog */}
-            <Dialog open={deathDialog.open} disableEscapeKeyDown>
-                <DialogTitle className={styles.deathDialogTitle}>
-                    ☠️ {t('battle.youDied')}
-                </DialogTitle>
-                <DialogContent className={styles.deathDialogContent}>
-                    <Typography variant="body1" sx={{ mb: 2 }}>
-                        {t('battle.deathMessage')}
-                    </Typography>
-                    
-                    {/* Death Penalties */}
-                    {(deathDialog.goldLost > 0 || deathDialog.equipmentLost.length > 0) && (
-                        <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(244, 67, 54, 0.1)', borderRadius: 1 }}>
-                            <Typography variant="h6" sx={{ mb: 1, color: '#f44336' }}>
-                                💀 {t('battle.deathPenalties')}
-                            </Typography>
-                            
-                            {deathDialog.goldLost > 0 && (
-                                <Typography variant="body2" sx={{ mb: 1 }}>
-                                    💰 {t('battle.goldLost', { amount: formatGold(deathDialog.goldLost) })}
-                                </Typography>
-                            )}
-                            
-                            {deathDialog.equipmentLost.length > 0 && (
-                                <Box>
-                                    <Typography variant="body2" sx={{ mb: 1 }}>
-                                        ⚔️ {t('battle.equipmentLost')}:
-                                    </Typography>
-                                    {deathDialog.equipmentLost.map((lost, index) => (
-                                        <Typography key={index} variant="body2" sx={{ ml: 2, color: '#f44336' }}>
-                                            • {lost.item} ({lost.slot})
-                                        </Typography>
-                                    ))}
-                                </Box>
-                            )}
-                        </Box>
-                    )}
-                    
-                    <Typography variant="body2" sx={{ textAlign: 'center', fontWeight: 'bold' }}>
-                        {t('battle.respawnIn', { seconds: deathDialog.countdown })}
-                    </Typography>
-                </DialogContent>
-            </Dialog>
 
             {/* Chest Preview Modal */}
             {chestPreviewModal.open && (

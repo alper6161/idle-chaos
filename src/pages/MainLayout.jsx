@@ -8,7 +8,7 @@ import { getActiveBuffsInfo } from "../utils/buffUtils.js";
 import { useTranslate } from "../hooks/useTranslate";
 import MainMenu from "../components/MainMenu";
 import { saveCurrentGame } from "../utils/saveManager.js";
-import { Alert } from "@mui/material";
+import { Alert, Dialog, DialogTitle, DialogContent, Typography, Box } from "@mui/material";
 import { useRef } from "react";
 import { useNotificationContext } from "../contexts/NotificationContext";
 import NotificationOverlay from "../components/NotificationOverlay";
@@ -20,7 +20,7 @@ function MainLayout() {
     const [showAutoSaveSuccess, setShowAutoSaveSuccess] = useState(false);
     const { t } = useTranslate();
     const { notifications, settings: notificationSettings } = useNotificationContext();
-    const { playerGold } = useBattleContext();
+    const { playerGold, deathDialog, respawnPlayer } = useBattleContext();
     const [musicVolume, setMusicVolume] = useState(() => {
         const saved = localStorage.getItem('musicVolume');
         return saved !== null ? parseFloat(saved) : 0.5;
@@ -161,6 +161,75 @@ function MainLayout() {
                 notifications={notifications} 
                 settings={notificationSettings} 
             />
+            
+            {/* Global Death Dialog */}
+            <Dialog open={deathDialog.open} disableEscapeKeyDown>
+                <DialogTitle sx={{ 
+                    color: '#ff6b6b !important',
+                    textShadow: '2px 2px 0px #000',
+                    fontSize: '1.5rem !important',
+                    letterSpacing: '1px',
+                    background: 'linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%) !important',
+                    borderBottom: '2px solid #ff6b6b !important',
+                    textAlign: 'center !important'
+                }}>
+                    ☠️ {t('battle.youDied')}
+                </DialogTitle>
+                <DialogContent sx={{ 
+                    background: 'linear-gradient(145deg, #2a2a4a 0%, #1a1a3a 100%) !important',
+                    padding: '2rem !important',
+                    color: '#ffffff'
+                }}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: '1.5rem',
+                        textAlign: 'center'
+                    }}>
+                        <Typography variant="body1" sx={{ mb: 2, textAlign: 'center' }}>
+                            {t('battle.deathMessage')}
+                        </Typography>
+                        
+                        {/* Death Penalties */}
+                        {(deathDialog.goldLost > 0 || deathDialog.equipmentLost.length > 0) && (
+                            <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(244, 67, 54, 0.1)', borderRadius: 1 }}>
+                                <Typography variant="h6" sx={{ mb: 1, color: '#ff6b6b', textAlign: 'center' }}>
+                                    💀 {t('battle.deathPenalties')}
+                                </Typography>
+                                
+                                {deathDialog.goldLost > 0 && (
+                                    <Typography variant="body2" sx={{ mb: 1, textAlign: 'center' }}>
+                                        💰 {t('battle.goldLost', { amount: formatGold(deathDialog.goldLost) })}
+                                    </Typography>
+                                )}
+                                
+                                {deathDialog.equipmentLost.length > 0 && (
+                                    <Box>
+                                        <Typography variant="body2" sx={{ mb: 1, textAlign: 'center' }}>
+                                            ⚔️ {t('battle.equipmentLost')}:
+                                        </Typography>
+                                        {deathDialog.equipmentLost.map((lost, index) => (
+                                            <Typography key={index} variant="body2" sx={{ ml: 2, color: '#ff6b6b', textAlign: 'center' }}>
+                                                • {lost.item} ({lost.slot})
+                                            </Typography>
+                                        ))}
+                                    </Box>
+                                )}
+                            </Box>
+                        )}
+                        
+                        <Typography variant="body2" sx={{ 
+                            textAlign: 'center', 
+                            fontWeight: 'bold',
+                            color: '#ffd700',
+                            fontSize: '1.2rem'
+                        }}>
+                            {t('battle.respawnIn', { seconds: deathDialog.countdown })}
+                        </Typography>
+                    </Box>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
