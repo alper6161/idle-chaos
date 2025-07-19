@@ -11,7 +11,7 @@ import {
     DialogActions,
 } from "@mui/material";
 
-import enemies, { DUNGEONS } from "../utils/enemies.js";
+import enemies, { DUNGEONS, LOCATIONS } from "../utils/enemies.js";
 
 import { 
     getSelectedSkillInfo,
@@ -482,6 +482,24 @@ function Battle() {
         }
     };
 
+    const handleTestDie = () => {
+        setIsBattleActive(false);
+        showDeathDialog();
+    };
+
+    const handleCompleteDungeon = () => {
+        // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
+        setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
+        setIsBattleActive(false);
+        setCurrentBattle(null);
+        setCurrentEnemy(null);
+        
+        // Manually trigger the dungeon completion logic
+        setTimeout(() => {
+            spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
+        }, 100);
+    };
+
     // Add a useEffect to handle the countdown and auto-restart:
     useEffect(() => {
         if (dungeonCompleteDialog.open && dungeonCompleteDialog.countdown > 0) {
@@ -524,109 +542,65 @@ function Battle() {
         <div className={styles.root}>
             {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
                 <>
-                    {!dungeonRun ? (
-                        <div className={styles.battleHeader}>
-                            <Button 
-                                variant="outlined" 
-                                onClick={handleBackToSelection}
-                                className={styles.backButton}
-                            >
-                                {t('battle.backToSelection')}
-                            </Button>
-                            
+                    <div className={dungeonRun ? styles.dungeonHeader : styles.battleHeader}>
+                        {/* Header Title */}
+                        {dungeonRun ? (
+                            <>
+                                <Typography variant="h6">{dungeonRun.dungeon.name}</Typography>
+                                <Typography variant="subtitle1">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
+                            </>
+                        ) : (
+                            <Typography variant="h6">
+                                {(() => {
+                                    // Find location based on current enemy
+                                    if (currentEnemy) {
+                                        const location = LOCATIONS.find(loc => 
+                                            loc.enemies.includes(currentEnemy.id)
+                                        );
+                                        return location ? location.name : t('battle.location');
+                                    }
+                                    return t('battle.location');
+                                })()}
+                            </Typography>
+                        )}
+                        
+                        {/* Back Button */}
+                        <Button 
+                            variant="outlined" 
+                            onClick={handleBackToSelection}
+                            className={styles.backButton}
+                        >
+                            {t('battle.backToSelection')}
+                        </Button>
+                        
+                        {/* Test Buttons */}
+                        <Button 
+                            variant="contained" 
+                            color="error"
+                            onClick={handleTestDie}
+                            style={{ marginLeft: '8px' }}
+                        >
+                            🏴‍☠️ TEST: Die
+                        </Button>
+                        <Button 
+                            variant="contained" 
+                            color="success"
+                            onClick={handleKillEnemy}
+                            style={{ marginLeft: '8px' }}
+                        >
+                            ⚔️ TEST: Kill
+                        </Button>
+                        {dungeonRun && !dungeonRun.completed && (
                             <Button 
                                 variant="contained" 
-                                color="error"
-                                onClick={() => {
-                                    setIsBattleActive(false);
-                                    showDeathDialog();
-                                }}
+                                color="warning"
+                                onClick={handleCompleteDungeon}
                                 style={{ marginLeft: '8px' }}
                             >
-                                🏴‍☠️ TEST: Die
+                                🏆 TEST: Complete Dungeon
                             </Button>
-                            <Button 
-                                variant="contained" 
-                                color="success"
-                                onClick={handleKillEnemy}
-                                style={{ marginLeft: '8px' }}
-                            >
-                                ⚔️ TEST: Kill
-                            </Button>
-                            {dungeonRun && !dungeonRun.completed && (
-                                <Button 
-                                    variant="contained" 
-                                    color="warning"
-                                    onClick={() => {
-                                        // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
-                                        setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
-                                        setIsBattleActive(false);
-                                        setCurrentBattle(null);
-                                        setCurrentEnemy(null);
-                                        
-                                        // Manually trigger the dungeon completion logic
-                                        setTimeout(() => {
-                                            spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
-                                        }, 100);
-                                    }}
-                                    style={{ marginLeft: '8px' }}
-                                >
-                                    🏆 TEST: Complete Dungeon
-                                </Button>
-                            )}
-                        </div>
-                                         ) : (
-                         <div className={styles.dungeonHeader}>
-                             <Typography variant="h6">{dungeonRun.dungeon.name}</Typography>
-                             <Typography variant="subtitle1">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
-                             <Button 
-                                 variant="outlined" 
-                                 onClick={handleBackToSelection}
-                                 className={styles.backButton}
-                             >
-                                 {t('battle.backToSelection')}
-                             </Button>
-                             
-                             <Button 
-                                 variant="contained" 
-                                 color="error"
-                                 onClick={() => {
-                                     setIsBattleActive(false);
-                                     showDeathDialog();
-                                 }}
-                                 style={{ marginLeft: '8px' }}
-                             >
-                                 🏴‍☠️ TEST: Die
-                             </Button>
-                             <Button 
-                                 variant="contained" 
-                                 color="success"
-                                 onClick={handleKillEnemy}
-                                 style={{ marginLeft: '8px' }}
-                             >
-                                 ⚔️ TEST: Kill
-                             </Button>
-                             <Button 
-                                 variant="contained" 
-                                 color="warning"
-                                 onClick={() => {
-                                     // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
-                                     setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
-                                     setIsBattleActive(false);
-                                     setCurrentBattle(null);
-                                     setCurrentEnemy(null);
-                                     
-                                     // Manually trigger the dungeon completion logic
-                                     setTimeout(() => {
-                                         spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
-                                     }, 100);
-                                 }}
-                                 style={{ marginLeft: '8px' }}
-                             >
-                                 🏆 TEST: Complete Dungeon
-                             </Button>
-                         </div>
-                     )}
+                        )}
+                    </div>
                     
                     <div className={styles.battleContainer}>
                         <div className={styles.fighters}>
