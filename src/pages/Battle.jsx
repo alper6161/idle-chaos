@@ -73,6 +73,9 @@ import PotionSystem from "../components/PotionSystem";
 import PlayerWidget from "../components/PlayerWidget";
 import EnemyWidget from "../components/EnemyWidget";
 import BattleLog from "../components/BattleLog";
+import ChestPreviewModal from "../components/ChestPreviewModal";
+import ChestDropDialog from "../components/ChestDropDialog";
+import DungeonCompleteDialog from "../components/DungeonCompleteDialog";
 
 
 
@@ -702,52 +705,46 @@ function Battle({ player }) {
     // Battle Screen
     return (
         <div className={styles.root}>
-            {dungeonCompleteDialog.open && (
-                <Dialog open={dungeonCompleteDialog.open} onClose={() => setDungeonCompleteDialog({ open: false, countdown: 5 })} className={styles.dungeonCompleteDialog} sx={{ top: 0, position: 'absolute' }}>
-                    <DialogTitle>{t('battle.dungeonComplete')}</DialogTitle>
-                    <DialogContent>
-                        <Typography>{t('battle.dungeonCompleteDescription')}</Typography>
-                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
-                            <Button variant="outlined" color="secondary" onClick={() => {
-                                setDungeonCompleteDialog({ open: false, countdown: 5 });
-                                setBattleMode('selection');
-                                setBattleResult(null);
-                                
-                                // Use BattleContext functions
-                                setCurrentEnemy(null);
-                                setCurrentBattle(null);
-                                setIsBattleActive(false);
-                                setDungeonRun(null);
-                                stopBattle();
-                            }}>{t('battle.leave')}</Button>
-                            <Button variant="contained" color="primary" onClick={() => {
-                                setDungeonCompleteDialog({ open: false, countdown: 5 });
-                                
-                                // Properly restart the dungeon
-                                const currentDungeon = dungeonRun?.dungeon;
-                                if (currentDungeon) {
-                                    setDungeonRun({
-                                        dungeon: currentDungeon,
-                                        currentStage: 0,
-                                        completed: false,
-                                        chestAwarded: false,
-                                        stages: currentDungeon.enemies || []
-                                    });
-                                    
-                                    // Start the first enemy battle
-                                    const firstEnemyId = currentDungeon.enemies[0];
-                                    const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
-                                    if (firstEnemy) {
-                                        startBattle(firstEnemy, selectedAttackType);
-                                    }
-                                }
-                            }}>
-                                {t('battle.restart')} ({dungeonCompleteDialog.countdown})
-                            </Button>
-                        </Box>
-                    </DialogContent>
-                </Dialog>
-            )}
+            <DungeonCompleteDialog 
+                dungeonCompleteDialog={dungeonCompleteDialog}
+                onClose={() => setDungeonCompleteDialog({ open: false, countdown: 5 })}
+                onLeave={() => {
+                    setDungeonCompleteDialog({ open: false, countdown: 5 });
+                    setBattleMode('selection');
+                    setBattleResult(null);
+                    
+                    // Use BattleContext functions
+                    setCurrentEnemy(null);
+                    setCurrentBattle(null);
+                    setIsBattleActive(false);
+                    setDungeonRun(null);
+                    stopBattle();
+                }}
+                onRestart={() => {
+                    setDungeonCompleteDialog({ open: false, countdown: 5 });
+                    
+                    // Properly restart the dungeon
+                    const currentDungeon = dungeonRun?.dungeon;
+                    if (currentDungeon) {
+                        setDungeonRun({
+                            dungeon: currentDungeon,
+                            currentStage: 0,
+                            completed: false,
+                            chestAwarded: false,
+                            stages: currentDungeon.enemies || []
+                        });
+                        
+                        // Start the first enemy battle
+                        const firstEnemyId = currentDungeon.enemies[0];
+                        const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
+                        if (firstEnemy) {
+                            startBattle(firstEnemy, selectedAttackType);
+                        }
+                    }
+                }}
+                dungeonRun={dungeonRun}
+                enemies={enemies}
+            />
 
             {/* Battle UI - show during battle, dungeon, or waiting for enemy */}
             {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
@@ -859,11 +856,8 @@ function Battle({ player }) {
                          </div>
                      )}
                     
-                    {/* Battle Content - Common for both modes */}
                     <div className={styles.battleContainer}>
-                        {/* Fighters Row */}
                         <div className={styles.fighters}>
-                            {/* PLAYER */}
                             <PlayerWidget 
                                 selectedCharacter={selectedCharacter}
                                 currentBattle={currentBattle}
@@ -939,144 +933,11 @@ function Battle({ player }) {
 
 
             {/* Chest Preview Modal */}
-            {chestPreviewModal.open && (
-                <Dialog 
-                    open={chestPreviewModal.open} 
-                    onClose={() => setChestPreviewModal({ open: false, dungeon: null, chestItem: null })}
-                    maxWidth="md"
-                    sx={{
-                        '& .MuiDialog-paper': {
-                            background: 'linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%)',
-                            border: '3px solid #ffd700',
-                            borderRadius: 0,
-                            color: '#ffffff',
-                            fontFamily: 'Press Start 2P'
-                        }
-                    }}
-                >
-                    <DialogTitle sx={{ 
-                        textAlign: 'center', 
-                        color: '#ffd700', 
-                        fontFamily: 'Press Start 2P',
-                        fontSize: '1rem',
-                        borderBottom: '2px solid #ffd700',
-                        mb: 2
-                    }}>
-                        🎁 {t('battle.chestPreview', { dungeon: chestPreviewModal.dungeon?.name || '' })}
-                    </DialogTitle>
-                    <DialogContent sx={{ py: 3 }}>
-                        <Typography variant="body2" sx={{ 
-                            mb: 3, 
-                            textAlign: 'center',
-                            color: '#e0e0e0',
-                            fontFamily: 'Press Start 2P',
-                            fontSize: '0.7rem'
-                        }}>
-                            {t('battle.chestContents')}
-                        </Typography>
-                        
-                        {chestPreviewModal.dungeon?.chest && (
-                            <Grid container spacing={2}>
-                                {chestPreviewModal.dungeon.chest.map((item, index) => {
-                                    // Calculate percentage
-                                    const totalChance = chestPreviewModal.dungeon.chest.reduce((sum, chestItem) => sum + chestItem.chance, 0);
-                                    const percentage = ((item.chance / totalChance) * 100).toFixed(1);
-                                    
-                                    return (
-                                        <Grid item xs={12} sm={6} md={4} key={index}>
-                                            <Tooltip
-                                                title={
-                                                    <Box sx={{ p: 1 }}>
-                                                        <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 1 }}>
-                                                            {item.name}
-                                                        </Typography>
-                                                        <Typography variant="caption" sx={{ display: 'block', mb: 1 }}>
-                                                            {t('battle.dropChance')}: {percentage}%
-                                                        </Typography>
-                                                        <Typography variant="caption" sx={{ fontStyle: 'italic' }}>
-                                                            {t('battle.chestItemTooltip')}
-                                                        </Typography>
-                                                    </Box>
-                                                }
-                                                placement="top"
-                                                arrow
-                                            >
-                                                <Card sx={{ 
-                                                    background: 'rgba(255, 215, 0, 0.1)',
-                                                    border: '1px solid #ffd700',
-                                                    borderRadius: 0,
-                                                    cursor: 'help',
-                                                    transition: 'all 0.3s ease',
-                                                    '&:hover': {
-                                                        background: 'rgba(255, 215, 0, 0.2)',
-                                                        transform: 'scale(1.05)'
-                                                    }
-                                                }}>
-                                                    <CardContent sx={{ p: 2, textAlign: 'center' }}>
-                                                        <Typography variant="body2" sx={{ 
-                                                            fontFamily: 'Press Start 2P',
-                                                            fontSize: '0.6rem',
-                                                            color: '#ffffff',
-                                                            mb: 1
-                                                        }}>
-                                                            {item.name}
-                                                        </Typography>
-                                                        <Typography variant="caption" sx={{ 
-                                                            color: '#4ade80',
-                                                            fontFamily: 'Press Start 2P',
-                                                            fontSize: '0.5rem'
-                                                        }}>
-                                                            {percentage}%
-                                                        </Typography>
-                                                    </CardContent>
-                                                </Card>
-                                            </Tooltip>
-                                        </Grid>
-                                    );
-                                })}
-                            </Grid>
-                        )}
-                    </DialogContent>
-                    <DialogActions sx={{ justifyContent: 'center', gap: 2, pb: 3 }}>
-                        <Button 
-                            onClick={() => setChestPreviewModal({ open: false, dungeon: null, chestItem: null })}
-                            sx={{
-                                fontFamily: 'Press Start 2P',
-                                fontSize: '0.7rem',
-                                px: 3,
-                                py: 1,
-                                background: 'linear-gradient(145deg, #6b7280 0%, #4b5563 100%)',
-                                color: '#ffffff',
-                                border: '2px solid #000000',
-                                borderRadius: 0,
-                                '&:hover': {
-                                    background: 'linear-gradient(145deg, #4b5563 0%, #374151 100%)',
-                                }
-                            }}
-                        >
-                            {t('common.cancel')}
-                        </Button>
-                        <Button 
-                            onClick={handleOpenChest}
-                            sx={{
-                                fontFamily: 'Press Start 2P',
-                                fontSize: '0.7rem',
-                                px: 3,
-                                py: 1,
-                                background: 'linear-gradient(145deg, #ffd700 0%, #f59e0b 100%)',
-                                color: '#000000',
-                                border: '2px solid #000000',
-                                borderRadius: 0,
-                                '&:hover': {
-                                    background: 'linear-gradient(145deg, #f59e0b 0%, #d97706 100%)',
-                                }
-                            }}
-                        >
-                            {t('battle.openChest')} 🎁
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            )}
+            <ChestPreviewModal 
+                chestPreviewModal={chestPreviewModal}
+                onClose={() => setChestPreviewModal({ open: false, dungeon: null, chestItem: null })}
+                onOpenChest={handleOpenChest}
+            />
 
             <Dialog open={exitWarningOpen} onClose={() => setExitWarningOpen(false)}>
                 <DialogTitle>{t('battle.dungeonExitWarningTitle')}</DialogTitle>
@@ -1088,107 +949,10 @@ function Battle({ player }) {
             </Dialog>
 
             {/* Chest Drop Dialog */}
-            {chestDropDialog.open && (
-                <Dialog 
-                    open={chestDropDialog.open} 
-                    onClose={() => setChestDropDialog({ open: false, item: null, dungeon: null })}
-                    maxWidth="sm"
-                    sx={{
-                        '& .MuiDialog-paper': {
-                            background: 'linear-gradient(145deg, #3a3a5a 0%, #2a2a4a 100%)',
-                            border: '3px solid #ffd700',
-                            borderRadius: 0,
-                            color: '#ffffff',
-                            fontFamily: 'Press Start 2P'
-                        }
-                    }}
-                >
-                    <DialogTitle sx={{ 
-                        textAlign: 'center', 
-                        color: '#ffd700', 
-                        fontFamily: 'Press Start 2P',
-                        fontSize: '1rem',
-                        borderBottom: '2px solid #ffd700',
-                        mb: 2
-                    }}>
-                        🎁 Chest Opened! 🎁
-                    </DialogTitle>
-                    <DialogContent sx={{ textAlign: 'center', py: 3 }}>
-                        {chestDropDialog.item && (
-                            <Box sx={{ 
-                                p: 3, 
-                                border: `2px solid ${chestDropDialog.item.rarity === 'legendary' ? '#ffd700' : 
-                                    chestDropDialog.item.rarity === 'epic' ? '#a855f7' :
-                                    chestDropDialog.item.rarity === 'rare' ? '#3b82f6' : '#6b7280'}`,
-                                background: `rgba(${chestDropDialog.item.rarity === 'legendary' ? '255, 215, 0' : 
-                                    chestDropDialog.item.rarity === 'epic' ? '168, 85, 247' :
-                                    chestDropDialog.item.rarity === 'rare' ? '59, 130, 246' : '107, 114, 128'}, 0.1)`,
-                                borderRadius: 0
-                            }}>
-                                <Typography variant="h5" sx={{ 
-                                    mb: 2, 
-                                    color: chestDropDialog.item.rarity === 'legendary' ? '#ffd700' : 
-                                        chestDropDialog.item.rarity === 'epic' ? '#a855f7' :
-                                        chestDropDialog.item.rarity === 'rare' ? '#3b82f6' : '#ffffff',
-                                    fontFamily: 'Press Start 2P',
-                                    fontSize: '1.2rem'
-                                }}>
-                                    {chestDropDialog.item.name}
-                                </Typography>
-                                <Typography variant="body1" sx={{ 
-                                    mb: 2, 
-                                    color: '#e0e0e0',
-                                    fontFamily: 'Press Start 2P',
-                                    fontSize: '0.8rem'
-                                }}>
-                                    Level {chestDropDialog.item.level} • {chestDropDialog.item.rarity.charAt(0).toUpperCase() + chestDropDialog.item.rarity.slice(1)}
-                                </Typography>
-                                {chestDropDialog.item.stats && (
-                                    <Box sx={{ mt: 2 }}>
-                                        <Typography variant="body2" sx={{ mb: 1, color: '#4ade80', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>
-                                            Stats:
-                                        </Typography>
-                                        {Object.entries(chestDropDialog.item.stats).map(([stat, value]) => (
-                                            <Typography key={stat} variant="body2" sx={{ color: '#ffffff', fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
-                                                {stat}: +{value}
-                                            </Typography>
-                                        ))}
-                                    </Box>
-                                )}
-                                <Typography variant="body2" sx={{ 
-                                    mt: 2, 
-                                    color: '#4ade80',
-                                    fontFamily: 'Press Start 2P',
-                                    fontSize: '0.7rem',
-                                    fontStyle: 'italic'
-                                }}>
-                                    Added to inventory!
-                                </Typography>
-                            </Box>
-                        )}
-                    </DialogContent>
-                    <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
-                        <Button 
-                            onClick={() => setChestDropDialog({ open: false, item: null, dungeon: null })}
-                            sx={{
-                                fontFamily: 'Press Start 2P',
-                                fontSize: '0.7rem',
-                                px: 3,
-                                py: 1,
-                                background: 'linear-gradient(145deg, #4ade80 0%, #22c55e 100%)',
-                                color: '#000000',
-                                border: '2px solid #000000',
-                                borderRadius: 0,
-                                '&:hover': {
-                                    background: 'linear-gradient(145deg, #22c55e 0%, #16a34a 100%)',
-                                }
-                            }}
-                        >
-                            Awesome!
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            )}
+            <ChestDropDialog 
+                chestDropDialog={chestDropDialog}
+                onClose={() => setChestDropDialog({ open: false, item: null, dungeon: null })}
+            />
         </div>
     );
 }
