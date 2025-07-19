@@ -437,44 +437,49 @@ export const BattleProvider = ({ children }) => {
         // Record achievement for enemy kill
         const achievementResult = recordKill(currentEnemy.id);
         
-        // Get loot drops
-        const lootResult = getLootDrop(currentEnemy.drops);
+        // Check if we're in a dungeon - if so, don't drop loot from individual enemies
+        const isInDungeon = dungeonRun && !dungeonRun.completed;
         
-        // Handle gold drops
-        if (lootResult.goldItems && lootResult.goldItems.length > 0) {
-            const newGold = addGold(lootResult.gold);
-            setPlayerGold(newGold);
-            if (lootResult.gold > 0) {
-                notifyGoldGain(lootResult.gold, `${currentEnemy.name} drops`);
+        if (!isInDungeon) {
+            // Get loot drops (only for location battles, not dungeon)
+            const lootResult = getLootDrop(currentEnemy.drops);
+            
+            // Handle gold drops
+            if (lootResult.goldItems && lootResult.goldItems.length > 0) {
+                const newGold = addGold(lootResult.gold);
+                setPlayerGold(newGold);
+                if (lootResult.gold > 0) {
+                    notifyGoldGain(lootResult.gold, `${currentEnemy.name} drops`);
+                }
+            }
+            
+            // Handle item drops to loot bag
+            if (lootResult.items.length > 0) {
+                const availableSpace = LOOT_BAG_LIMIT - lootBag.length;
+                const itemsToAdd = lootResult.items.slice(0, availableSpace);
+                
+                setLootBag(prev => [...prev, ...itemsToAdd]);
+                
+                // Notify for each item drop
+                itemsToAdd.forEach(itemName => {
+                    notifyItemDrop(itemName, '📦');
+                });
+            }
+
+            // Handle pet drops (only for location battles)
+            const pet = checkPetDrop(currentEnemy.id);
+            if (pet) {
+                const currentSlot = getCurrentSlot();
+                const petKey = getSlotKey('idle-chaos-pets', currentSlot);
+                const ownedPets = JSON.parse(localStorage.getItem(petKey) || '[]');
+                if (!ownedPets.includes(pet.id)) {
+                    ownedPets.push(pet.id);
+                    localStorage.setItem(petKey, JSON.stringify(ownedPets));
+                }
             }
         }
-        
-        // Handle item drops to loot bag
-        if (lootResult.items.length > 0) {
-            const availableSpace = LOOT_BAG_LIMIT - lootBag.length;
-            const itemsToAdd = lootResult.items.slice(0, availableSpace);
-            
-            setLootBag(prev => [...prev, ...itemsToAdd]);
-            
-            // Notify for each item drop
-            itemsToAdd.forEach(itemName => {
-                notifyItemDrop(itemName, '📦');
-            });
-        }
 
-        // Handle pet drops
-        const pet = checkPetDrop(currentEnemy.id);
-        if (pet) {
-            const currentSlot = getCurrentSlot();
-            const petKey = getSlotKey('idle-chaos-pets', currentSlot);
-            const ownedPets = JSON.parse(localStorage.getItem(petKey) || '[]');
-            if (!ownedPets.includes(pet.id)) {
-                ownedPets.push(pet.id);
-                localStorage.setItem(petKey, JSON.stringify(ownedPets));
-            }
-        }
-
-        // Handle achievements
+        // Handle achievements (always awarded regardless of dungeon/location)
         if (achievementResult.newAchievements.length > 0) {
             achievementResult.newAchievements.forEach(achievement => {
                 notifyAchievement(achievement.description);
@@ -496,8 +501,17 @@ export const BattleProvider = ({ children }) => {
             saveCurrentGame();
         }, 1000);
 
-        // Start enemy spawn timer
-        startEnemySpawnTimer();
+        // Start enemy spawn timer (for both location and dungeon battles)
+        // But for final dungeon stage, go immediately to completion
+        const isFinalDungeonStage = dungeonRun && !dungeonRun.completed && dungeonRun.currentStage >= 6;
+        if (isFinalDungeonStage) {
+            // Final stage - complete immediately without timer
+            setTimeout(() => {
+                spawnNewEnemy();
+            }, 500);
+        } else {
+            startEnemySpawnTimer();
+        }
     };
 
     const handlePlayerDefeat = () => {
@@ -552,22 +566,49 @@ export const BattleProvider = ({ children }) => {
                     }
                 }, 100);
             }
-                 } else {
-             setDungeonRun(prev => ({ ...prev, completed: true }));
-             setIsBattleActive(false);
-             
-             // Add dungeon chest to loot bag
-             if (!dungeonRun.chestAwarded) {
-                 const chestItem = `🎁 ${dungeonRun.dungeon.name} Chest`;
-                 setLootBag(prev => [...prev, chestItem]);
-                 setDungeonRun(prev => ({ ...prev, chestAwarded: true }));
-             }
-             
-             // Trigger dungeon complete callback
-             if (dungeonCompleteCallback) {
-                 dungeonCompleteCallback();
-             }
-         }
+                         } else {
+            setDungeonRun(prev => ({ ...prev, completed: true }));
+            setIsBattleActive(false);
+            
+            // Add dungeon chest loot to loot bag
+            if (!dungeonRun.chestAwarded && dungeonRun.dungeon && dungeonRun.dungeon.chest) {
+                const chestLoot = [];
+                
+                // Process chest items based on their chance
+                dungeonRun.dungeon.chest.forEach(chestItem => {
+                    const roll = Math.random() * 100;
+                    if (roll <= chestItem.chance) {
+                        chestLoot.push(chestItem.name);
+                    }
+                });
+                
+                // Add chest loot to loot bag if there's space
+                if (chestLoot.length > 0) {
+                    const availableSpace = LOOT_BAG_LIMIT - lootBag.length;
+                    const itemsToAdd = chestLoot.slice(0, availableSpace);
+                    
+                    setLootBag(prev => [...prev, ...itemsToAdd]);
+                    
+                    // Notify for each chest item
+                    itemsToAdd.forEach(itemName => {
+                        notifyItemDrop(itemName, '🎁');
+                    });
+                    
+                    // Add a general chest notification
+                    setBattleLog(prev => [...prev, {
+                        type: 'chest_opened',
+                        message: `🎁 ${dungeonRun.dungeon.name} chest opened! Found ${itemsToAdd.length} items.`
+                    }]);
+                }
+                
+                setDungeonRun(prev => ({ ...prev, chestAwarded: true }));
+            }
+            
+            // Trigger dungeon complete callback
+            if (dungeonCompleteCallback) {
+                dungeonCompleteCallback();
+            }
+        }
     };
 
     const spawnNewEnemy = () => {

@@ -58,6 +58,7 @@ import { getEnemyById } from "../utils/enemies.js";
 import { LOOT_BAG_LIMIT } from "../utils/constants.js";
 import { useNotificationContext } from "../contexts/NotificationContext";
 import { useBattleContext } from "../contexts/BattleContext";
+import LootBag from "../components/LootBag";
 
 // Helper function to get slot-specific key
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;
@@ -153,13 +154,15 @@ function Battle({ player }) {
         
         if (isBattleActive && currentBattle && currentEnemy) {
             setBattleMode('battle');
-        } else if (!isBattleActive && battleMode === 'dungeon') {
-            // If no battle is active and we were in dungeon mode, go to selection
+        } else if (!isBattleActive && battleMode === 'dungeon' && (!dungeonRun || !dungeonRun.completed || !dungeonCompleteDialog.open)) {
+            // Only switch to selection if:
+            // - No dungeon is running, OR
+            // - Dungeon is completed AND dialog is not open
             setBattleMode('selection');
         }
         // Note: Don't auto-switch from battle to selection for location battles
         // This allows respawn to work correctly in location battles
-    }, [isBattleActive, currentBattle, currentEnemy, battleMode, dungeonRun]);
+    }, [isBattleActive, currentBattle, currentEnemy, battleMode, dungeonRun, dungeonCompleteDialog.open]);
 
     // Set enemies data and callbacks for BattleContext
     useEffect(() => {
@@ -754,14 +757,18 @@ function Battle({ player }) {
         stopBattle();
     };
 
-    const handleChestClick = (chestItem) => {
-        // Extract dungeon name from chest item
+    const handleChestClick = (chestItem, index) => {
+        // Extract dungeon name from chest item (backwards compatibility)
         const dungeonName = chestItem.replace('🎁 ', '').replace(' Chest', '');
         const dungeon = DUNGEONS.find(d => d.name === dungeonName);
         
-        if (!dungeon || !dungeon.chest) return;
+        if (!dungeon || !dungeon.chest) {
+            // If it's not an old-style chest, treat it as a regular item
+            handleTakeItem(chestItem, index);
+            return;
+        }
         
-        // Show preview modal instead of immediately opening
+        // For old-style chest items, show preview modal
         setChestPreviewModal({
             open: true,
             dungeon: dungeon,
@@ -837,7 +844,26 @@ function Battle({ player }) {
                     if (prev.countdown <= 1) {
                         // Auto-restart
                         setDungeonCompleteDialog({ open: false, countdown: 5 });
-                        setDungeonRun(prevRun => prevRun ? { ...prevRun, currentStage: 0, completed: false, chestAwarded: false } : prevRun);
+                        
+                        // Properly restart the dungeon
+                        const currentDungeon = dungeonRun?.dungeon;
+                        if (currentDungeon) {
+                            setDungeonRun({
+                                dungeon: currentDungeon,
+                                currentStage: 0,
+                                completed: false,
+                                chestAwarded: false,
+                                stages: currentDungeon.enemies || []
+                            });
+                            
+                            // Start the first enemy battle
+                            const firstEnemyId = currentDungeon.enemies[0];
+                            const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
+                            if (firstEnemy) {
+                                startBattle(firstEnemy, selectedAttackType);
+                            }
+                        }
+                        
                         return { open: false, countdown: 5 };
                     }
                     return { ...prev, countdown: prev.countdown - 1 };
@@ -870,7 +896,25 @@ function Battle({ player }) {
                             }}>{t('battle.leave')}</Button>
                             <Button variant="contained" color="primary" onClick={() => {
                                 setDungeonCompleteDialog({ open: false, countdown: 5 });
-                                setDungeonRun(prev => ({ ...prev, currentStage: 0, completed: false, chestAwarded: false }));
+                                
+                                // Properly restart the dungeon
+                                const currentDungeon = dungeonRun?.dungeon;
+                                if (currentDungeon) {
+                                    setDungeonRun({
+                                        dungeon: currentDungeon,
+                                        currentStage: 0,
+                                        completed: false,
+                                        chestAwarded: false,
+                                        stages: currentDungeon.enemies || []
+                                    });
+                                    
+                                    // Start the first enemy battle
+                                    const firstEnemyId = currentDungeon.enemies[0];
+                                    const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
+                                    if (firstEnemy) {
+                                        startBattle(firstEnemy, selectedAttackType);
+                                    }
+                                }
                             }}>
                                 {t('battle.restart')} ({dungeonCompleteDialog.countdown})
                             </Button>
@@ -891,8 +935,9 @@ function Battle({ player }) {
                             minHeight: 48,
                             '& .MuiTab-root': {
                                 color: '#e0e0e0',
+                                fontFamily: 'Press Start 2P',
                                 fontWeight: 600,
-                                fontSize: '1.1rem',
+                                fontSize: '0.8rem',
                                 minHeight: 48,
                                 transition: 'color 0.2s',
                             },
@@ -916,13 +961,13 @@ function Battle({ player }) {
                             {Array.isArray(LOCATIONS) && LOCATIONS.map((loc, idx) => (
                                 <div key={loc.id} style={{ marginBottom: 24, border: '1px solid #444', borderRadius: 8, padding: 12, background: 'rgba(0,0,0,0.08)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => handleToggleLocation(idx)}>
-                                        <Typography variant="h6" style={{ color: '#ffd700', marginBottom: 8 }}>{loc.name}</Typography>
+                                        <Typography variant="h6" style={{ color: '#ffd700', marginBottom: 8, fontFamily: 'Press Start 2P', fontSize: '0.9rem' }}>{loc.name}</Typography>
                                         <IconButton size="small" aria-label={openLocations[idx] ? t('common.collapse') : t('common.expand')} sx={{ color: '#ffd700' }}>
                                             {openLocations[idx] ? <ExpandLess /> : <ExpandMore />}
                                         </IconButton>
                                     </div>
                                     {openLocations[idx] && <>
-                                        <Typography variant="body2" style={{ color: '#bada55', marginBottom: 8 }}>{loc.description}</Typography>
+                                        <Typography variant="body2" style={{ color: '#bada55', marginBottom: 8, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{loc.description}</Typography>
                                         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
                                             {Array.isArray(loc.enemies) && loc.enemies.map((enemyId) => {
                                                 const enemy = Object.values(enemies).find(e => e.id === enemyId);
@@ -930,8 +975,8 @@ function Battle({ player }) {
                                                 return (
                                                     <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, marginBottom: 8, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
                                                         <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 4 }} />
-                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500 }}>{enemy.name}</Typography>
-                                                        <Button size="small" variant="contained" color="primary" style={{ marginTop: 4 }} onClick={() => handleEnemySelect(enemy)}>
+                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{enemy.name}</Typography>
+                                                        <Button size="small" variant="contained" color="primary" style={{ marginTop: 4, fontFamily: 'Press Start 2P', fontSize: '0.5rem' }} onClick={() => handleEnemySelect(enemy)}>
                                                             {t('battle.fight')}
                                                         </Button>
                                                     </div>
@@ -988,13 +1033,13 @@ function Battle({ player }) {
                             {Array.isArray(DUNGEONS) && DUNGEONS.map((dungeon, idx) => (
                                 <div key={dungeon.id} style={{ marginBottom: 24, border: '2px solid #b45af2', borderRadius: 10, padding: 16, background: 'rgba(30,0,60,0.13)' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => handleToggleDungeon(idx)}>
-                                        <Typography variant="h6" style={{ color: '#b45af2', marginBottom: 8 }}>{dungeon.name}</Typography>
+                                        <Typography variant="h6" style={{ color: '#ffd700', marginBottom: 8, fontFamily: 'Press Start 2P', fontSize: '0.9rem' }}>{dungeon.name}</Typography>
                                         <IconButton size="small" aria-label={openDungeons[idx] ? t('common.collapse') : t('common.expand')} sx={{ color: '#ffd700' }}>
                                             {openDungeons[idx] ? <ExpandLess /> : <ExpandMore />}
                                         </IconButton>
                                     </div>
                                     {openDungeons[idx] && <>
-                                        <Typography variant="body2" style={{ color: '#fff', marginBottom: 6 }}>{dungeon.description}</Typography>
+                                        <Typography variant="body2" style={{ color: '#fff', marginBottom: 6, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{dungeon.description}</Typography>
                                         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 8 }}>
                                             {dungeon.enemies.map((enemyId) => {
                                                 const enemy = Object.values(enemies).find(e => e.id === enemyId);
@@ -1002,26 +1047,26 @@ function Battle({ player }) {
                                                 return (
                                                     <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
                                                         <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 2 }} />
-                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500 }}>{enemy.name}</Typography>
+                                                        <Typography variant="body2" style={{ color: '#fff', fontWeight: 500, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{enemy.name}</Typography>
                                                     </div>
                                                 );
                                             })}
                                         </div>
                                         <div style={{ marginBottom: 8 }}>
-                                            <Typography variant="subtitle2" style={{ color: '#ffb300' }}>{t('battle.boss')}</Typography>
+                                            <Typography variant="subtitle2" style={{ color: '#ffd700', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{t('battle.boss')}</Typography>
                                             {(() => {
                                                 const boss = Object.values(enemies).find(e => e.id === dungeon.boss);
                                                 if (!boss) return null;
                                                 return (
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
                                                         <img src={getEnemyIcon(boss.id)} alt={boss.name} style={{ width: 48, height: 48 }} />
-                                                        <Typography variant="body1" style={{ color: '#ff5252', fontWeight: 600 }}>{boss.name}</Typography>
+                                                        <Typography variant="body1" style={{ color: '#ff5252', fontWeight: 600, fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{boss.name}</Typography>
                                                     </div>
                                                 );
                                             })()}
                                         </div>
                                         <div style={{ marginTop: 8, background: 'rgba(0,0,0,0.18)', borderRadius: 6, padding: 8 }}>
-                                            <Typography variant="subtitle2" style={{ color: '#ffd700', marginBottom: 4 }}>
+                                            <Typography variant="subtitle2" style={{ color: '#ffd700', marginBottom: 4, fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>
                                                 {t('battle.dungeonChestRewards')}
                                             </Typography>
                                             {dungeon.chest.map(reward => (
@@ -1061,7 +1106,7 @@ function Battle({ player }) {
                                                 </Tooltip>
                                             ))}
                                         </div>
-                                        <Button size="medium" variant="contained" color="secondary" style={{ marginTop: 12 }} onClick={() => startDungeonRun(dungeon)}>
+                                        <Button size="medium" variant="contained" color="secondary" style={{ marginTop: 12, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }} onClick={() => startDungeonRun(dungeon)}>
                                             {t('battle.enterDungeon')}
                                         </Button>
                                     </>}
@@ -1103,6 +1148,27 @@ function Battle({ player }) {
                         >
                             ⚔️ TEST: Kill
                         </Button>
+                        {dungeonRun && !dungeonRun.completed && (
+                            <Button 
+                                variant="contained" 
+                                color="warning"
+                                onClick={() => {
+                                    // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
+                                    setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
+                                    setIsBattleActive(false);
+                                    setCurrentBattle(null);
+                                    setCurrentEnemy(null);
+                                    
+                                    // Manually trigger the dungeon completion logic
+                                    setTimeout(() => {
+                                        spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
+                                    }, 100);
+                                }}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                🏆 TEST: Complete Dungeon
+                            </Button>
+                        )}
                     </div>
                     <div className={styles.battleContainer}>
                         {/* Fighters Row */}
@@ -1679,181 +1745,15 @@ function Battle({ player }) {
                             </div>
 
                             {/* LOOT GAINED */}
-                            <div className={styles.section}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                    <Typography variant="h6">{t('battle.lootGained')}</Typography>
-                                    <Typography variant="caption" sx={{ color: '#999' }}>
-                                        {lootBag.length}/{LOOT_BAG_LIMIT} {t('battle.items')}
-                                    </Typography>
-                                </Box>
-                                <Divider />
-                                
-                                {lootBag.length === 0 ? (
-                                    <Typography>{t('battle.noLootYet')}</Typography>
-                                ) : (
-                                    <>
-                                        {/* Bulk Action Buttons */}
-                                        <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-                                            <Button
-                                                variant="contained"
-                                                size="small"
-                                                onClick={handleTakeAll}
-                                                sx={{
-                                                    fontFamily: 'Press Start 2P',
-                                                    fontSize: '0.6rem',
-                                                    px: 2,
-                                                    py: 0.5,
-                                                    background: 'linear-gradient(145deg, #4ade80 0%, #22c55e 100%)',
-                                                    color: '#000000',
-                                                    '&:hover': {
-                                                        background: 'linear-gradient(145deg, #22c55e 0%, #16a34a 100%)',
-                                                    }
-                                                }}
-                                            >
-                                                {t('battle.takeAll')}
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                size="small"
-                                                onClick={handleSellAll}
-                                                sx={{
-                                                    fontFamily: 'Press Start 2P',
-                                                    fontSize: '0.6rem',
-                                                    px: 2,
-                                                    py: 0.5,
-                                                    background: 'linear-gradient(145deg, #ffd700 0%, #f59e0b 100%)',
-                                                    color: '#000000',
-                                                    '&:hover': {
-                                                        background: 'linear-gradient(145deg, #f59e0b 0%, #d97706 100%)',
-                                                    }
-                                                }}
-                                            >
-                                                {t('battle.sellAll')}
-                                            </Button>
-                                        </Box>
-                                        
-                                        {/* Individual Items */}
-                                        <div className={styles.lootListContainer}>
-                                            {lootBag.map((item, idx) => {
-                                                const isChest = item.includes('🎁') && item.includes('Chest');
-                                                const sellValue = isChest ? 0 : calculateItemSellValue(item);
-                                                
-                                                if (isChest) {
-                                                    // Render chest with existing logic
-                                                    const dungeonName = item.replace('🎁 ', '').replace(' Chest', '');
-                                                    const dungeon = DUNGEONS.find(d => d.name === dungeonName);
-                                                    
-                                                    let tooltipContent = item;
-                                                    if (dungeon && dungeon.chest) {
-                                                        tooltipContent = (
-                                                            <Box sx={{ p: 1 }}>
-                                                                <Typography variant="h6" sx={{ mb: 1, color: '#ffd700' }}>
-                                                                    {dungeonName} Chest
-                                                                </Typography>
-                                                                <Typography variant="body2" sx={{ mb: 1, color: '#e0e0e0' }}>
-                                                                    {t('battle.possibleDrops')}:
-                                                                </Typography>
-                                                                {dungeon.chest.map((chestItem, chestIdx) => (
-                                                                    <Typography key={chestIdx} variant="body2" sx={{ mb: 0.5, color: '#ffffff' }}>
-                                                                        {chestItem.name} - {chestItem.chance}%
-                                                                    </Typography>
-                                                                ))}
-                                                                <Typography variant="body2" sx={{ mt: 1, color: '#4ade80', fontStyle: 'italic' }}>
-                                                                    Click to open!
-                                                                </Typography>
-                                                            </Box>
-                                                        );
-                                                    }
-                                                    
-                                                    return (
-                                                        <Tooltip 
-                                                            key={`loot-${idx}-${item}`} 
-                                                            title={tooltipContent}
-                                                            arrow
-                                                            placement="top"
-                                                        >
-                                                            <div 
-                                                                className={`${styles.lootSymbol} ${styles.chestSymbol}`}
-                                                                onClick={() => handleChestClick(item)}
-                                                                style={{ cursor: 'pointer' }}
-                                                            >
-                                                                🎁
-                                                            </div>
-                                                        </Tooltip>
-                                                    );
-                                                }
-                                                
-                                                return (
-                                                    <Box 
-                                                        key={`loot-${idx}-${item}`}
-                                                        sx={{ 
-                                                            display: 'flex', 
-                                                            alignItems: 'center', 
-                                                            gap: 1, 
-                                                            p: 1, 
-                                                            mb: 1,
-                                                            background: 'rgba(255, 255, 255, 0.05)',
-                                                            borderRadius: 1,
-                                                            border: '1px solid rgba(255, 255, 255, 0.1)'
-                                                        }}
-                                                    >
-                                                        <Box sx={{ flex: 1 }}>
-                                                            <Typography variant="body2" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
-                                                                📦 {item}
-                                                            </Typography>
-                                                            <Typography variant="caption" sx={{ color: '#ffd700', fontFamily: 'Press Start 2P', fontSize: '0.5rem' }}>
-                                                                {t('battle.sellValue')}: {formatGold(sellValue)}
-                                                            </Typography>
-                                                        </Box>
-                                                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                                onClick={() => handleTakeItem(item, idx)}
-                                                                sx={{
-                                                                    fontFamily: 'Press Start 2P',
-                                                                    fontSize: '0.5rem',
-                                                                    minWidth: 'auto',
-                                                                    px: 1,
-                                                                    py: 0.5,
-                                                                    borderColor: '#4ade80',
-                                                                    color: '#4ade80',
-                                                                    '&:hover': {
-                                                                        borderColor: '#22c55e',
-                                                                        backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {t('battle.take')}
-                                                            </Button>
-                                                            <Button
-                                                                variant="outlined"
-                                                                size="small"
-                                                                onClick={() => handleSellItem(item, idx)}
-                                                                sx={{
-                                                                    fontFamily: 'Press Start 2P',
-                                                                    fontSize: '0.5rem',
-                                                                    minWidth: 'auto',
-                                                                    px: 1,
-                                                                    py: 0.5,
-                                                                    borderColor: '#ffd700',
-                                                                    color: '#ffd700',
-                                                                    '&:hover': {
-                                                                        borderColor: '#f59e0b',
-                                                                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                                                                    }
-                                                                }}
-                                                            >
-                                                                {t('battle.sell')}
-                                                            </Button>
-                                                        </Box>
-                                                    </Box>
-                                                );
-                                            })}
-                                        </div>
-                                    </>
-                                )}
-                            </div>
+                            <LootBag
+                                lootBag={lootBag}
+                                onTakeItem={handleTakeItem}
+                                onSellItem={handleSellItem}
+                                onTakeAll={handleTakeAll}
+                                onSellAll={handleSellAll}
+                                onOpenChest={handleChestClick}
+                                calculateItemSellValue={calculateItemSellValue}
+                            />
                         </div>
                     </div>
                 </>
@@ -1891,6 +1791,25 @@ function Battle({ player }) {
                                 style={{ marginLeft: '8px' }}
                             >
                                 ⚔️ TEST: Kill
+                            </Button>
+                            <Button 
+                                variant="contained" 
+                                color="warning"
+                                onClick={() => {
+                                    // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
+                                    setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
+                                    setIsBattleActive(false);
+                                    setCurrentBattle(null);
+                                    setCurrentEnemy(null);
+                                    
+                                    // Manually trigger the dungeon completion logic
+                                    setTimeout(() => {
+                                        spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
+                                    }, 100);
+                                }}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                🏆 TEST: Complete Dungeon
                             </Button>
                         </div>
                         {/* Render the full battle UI below the dungeon header */}
@@ -2469,85 +2388,16 @@ function Battle({ player }) {
                                 </div>
 
                                 {/* LOOT GAINED */}
-                                <div className={styles.section}>
-                                    <Typography variant="h6">{t('battle.lootGained')}</Typography>
-                                    <Divider />
-                                    {lootBag.length === 0 ? (
-                                        <Typography>{t('battle.noLootYet')}</Typography>
-                                    ) : (
-                                        <div className={styles.lootSymbolsContainer}>
-                                            {lootBag.map((item, idx) => {
-                                                const isGold = item.includes('💰');
-                                                const isEquipment = item.includes('⚔️') || item.includes('🛡️') || item.includes('💍') || item.includes('👑');
-                                                const isChest = item.includes('🎁') && item.includes('Chest');
-                                                
-                                                let symbol = '📦';
-                                                let tooltipContent = item;
-                                                let clickHandler = null;
-                                                
-                                                if (isChest) {
-                                                    symbol = '🎁';
-                                                    const dungeonName = item.replace('🎁 ', '').replace(' Chest', '');
-                                                    const dungeon = DUNGEONS.find(d => d.name === dungeonName);
-                                                    
-                                                    if (dungeon && dungeon.chest) {
-                                                        tooltipContent = (
-                                                            <Box sx={{ p: 1 }}>
-                                                                <Typography variant="h6" sx={{ mb: 1, color: '#ffd700' }}>
-                                                                    {dungeonName} Chest
-                                                                </Typography>
-                                                                <Typography variant="body2" sx={{ mb: 1, color: '#e0e0e0' }}>
-                                                                    {t('battle.possibleDrops')}:
-                                                                </Typography>
-                                                                {dungeon.chest.map((chestItem, chestIdx) => (
-                                                                    <Typography key={chestIdx} variant="body2" sx={{ mb: 0.5, color: '#ffffff' }}>
-                                                                        {chestItem.name} - {chestItem.chance}%
-                                                                    </Typography>
-                                                                ))}
-                                                                <Typography variant="body2" sx={{ mt: 1, color: '#4ade80', fontStyle: 'italic' }}>
-                                                                    Click to open!
-                                                                </Typography>
-                                                            </Box>
-                                                        );
-                                                    }
-                                                    clickHandler = () => handleChestClick(item);
-                                                } else if (isGold) {
-                                                    symbol = '💰';
-                                                    tooltipContent = `Gold: ${item.replace('💰', '').trim()}`;
-                                                } else if (isEquipment) {
-                                                    if (item.includes('⚔️')) symbol = '⚔️';
-                                                    else if (item.includes('🛡️')) symbol = '🛡️';
-                                                    else if (item.includes('💍')) symbol = '💍';
-                                                    else if (item.includes('👑')) symbol = '👑';
-                                                    else symbol = '⚔️';
-                                                    tooltipContent = `Equipment: ${item.replace(/[⚔️🛡️💍👑]/g, '').trim()}`;
-                                                }
-                                                
-                                                return (
-                                                    <Tooltip 
-                                                        key={`loot-${idx}-${item}`} 
-                                                        title={tooltipContent}
-                                                        arrow
-                                                        placement="top"
-                                                    >
-                                                        <div 
-                                                            className={`${styles.lootSymbol} ${
-                                                                isChest ? styles.chestSymbol : 
-                                                                isGold ? styles.goldSymbol : 
-                                                                styles.equipmentSymbol
-                                                            }`}
-                                                            onClick={clickHandler}
-                                                            style={{ cursor: isChest ? 'pointer' : 'default' }}
-                                                        >
-                                                            {symbol}
+                                <LootBag
+                                    lootBag={lootBag}
+                                    onTakeItem={handleTakeItem}
+                                    onSellItem={handleSellItem}
+                                    onTakeAll={handleTakeAll}
+                                    onSellAll={handleSellAll}
+                                    onOpenChest={handleChestClick}
+                                    calculateItemSellValue={calculateItemSellValue}
+                                />
                                                         </div>
-                                                    </Tooltip>
-                                                );
-                                            })}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </>
