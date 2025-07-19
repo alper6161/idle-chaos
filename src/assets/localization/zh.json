@@ -146,7 +146,9 @@
     "battleStarted": "战斗开始",
     "take": "拿取",
     "sell": "出售",
-    "sellValue": "出售价值"
+    "sellValue": "出售价值",
+    "open": "打开",
+    "clickToOpen": "点击打开"
   },
   "equipment": {
     "equip": "装备",

@@ -152,7 +152,9 @@
     "battleStarted": "Battle started",
     "take": "Take",
     "sell": "Sell",
-    "sellValue": "Sell Value"
+    "sellValue": "Sell Value",
+    "open": "Open",
+    "clickToOpen": "Click to open"
   },
   "equipment": {
     "equip": "Equip",

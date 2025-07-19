@@ -152,7 +152,9 @@
     "battleStarted": "Savaş başladı",
     "take": "Al",
     "sell": "Sat",
-    "sellValue": "Satış Değeri"
+    "sellValue": "Satış Değeri",
+    "open": "Aç",
+    "clickToOpen": "Açmak için tıkla"
   },
   "equipment": {
     "equip": "Tak",
