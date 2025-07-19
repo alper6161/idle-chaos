@@ -1,6 +1,8 @@
 import { applyDamageMultiplier } from './buffUtils.js';
 import { awardBattleActionXP, getAttackTypeFromWeapon, getEquippedWeapon } from './skillExperience.js';
 import { calculateSkillBuffs, calculateSkillBuffsForAttackType } from './playerStats.js';
+import { Box, Typography } from '@mui/material';
+import { SKILL_LEVEL_BONUSES } from './constants.js';
 
 export const calculateHitChance = (attackerATK, defenderDEF, accuracyBonus = 0) => {
     // Ensure we have valid numbers
@@ -436,4 +438,189 @@ export const getCurrentSlot = () => {
         console.error('Error getting current slot:', error);
         return 1;
     }
+}; 
+
+// Pure functions moved from Battle.jsx
+
+/**
+ * Get stat display with achievement check
+ * @param {string} enemyId - Enemy ID
+ * @param {string} statType - Stat type (hp, atk, def, etc.)
+ * @param {number} value - Stat value
+ * @param {Function} isAchievementUnlocked - Achievement check function
+ * @returns {string} Formatted stat display
+ */
+export const getStatDisplayWithAchievement = (enemyId, statType, value, isAchievementUnlocked) => {
+    return getStatDisplay(enemyId, statType, value, isAchievementUnlocked);
+};
+
+/**
+ * Get enemy HP display with achievement check
+ * @param {string} enemyId - Enemy ID
+ * @param {number} current - Current HP
+ * @param {number} max - Max HP
+ * @param {Function} isAchievementUnlocked - Achievement check function
+ * @returns {string} Formatted HP display
+ */
+export const getEnemyHpDisplayWithAchievement = (enemyId, current, max, isAchievementUnlocked) => {
+    return getEnemyHpDisplay(enemyId, current, max, isAchievementUnlocked);
+};
+
+/**
+ * Get selected skill level and bonuses
+ * @param {string} selectedAttackType - Selected attack type
+ * @param {Function} getSkillData - Function to get skill data
+ * @returns {Object} Skill level and bonuses
+ */
+export const getSelectedSkillInfo = (selectedAttackType, getSkillData) => {
+    if (!selectedAttackType) return { level: 0, bonuses: null };
+    
+    const skillData = getSkillData();
+    let skillLevel = 0;
+    
+    // Find the skill level in all categories
+    Object.values(skillData).forEach(category => {
+        if (category[selectedAttackType]) {
+            skillLevel = category[selectedAttackType].level || 0;
+        }
+    });
+    
+    const bonuses = SKILL_LEVEL_BONUSES[selectedAttackType];
+    
+    return { level: skillLevel, bonuses };
+};
+
+/**
+ * Render loot tooltip content
+ * @param {Object} enemy - Enemy object
+ * @param {Function} t - Translation function
+ * @returns {JSX.Element} Tooltip content
+ */
+export const renderLootTooltip = (enemy, t) => {
+    return (
+        <Box sx={{ p: 1 }}>
+            <Typography variant="h6" sx={{ mb: 1 }}>
+                {t('battle.possibleDrops')}
+            </Typography>
+            {enemy.drops.map((drop, index) => (
+                <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
+                    {drop.name} - {(drop.chance * 100).toFixed(0)}%
+                    {drop.type === 'gold' && (
+                        <span style={{ color: '#ffd700' }}> (💰 {drop.value} Gold)</span>
+                    )}
+                </Typography>
+            ))}
+        </Box>
+    );
+};
+
+/**
+ * Handle chest click logic
+ * @param {string} chestItem - Chest item name
+ * @param {number} index - Item index
+ * @param {Array} DUNGEONS - Dungeons array
+ * @param {Function} handleTakeItem - Function to handle taking item
+ * @param {Function} setChestPreviewModal - Function to set chest preview modal
+ * @returns {Object|null} Dungeon object if found, null otherwise
+ */
+export const handleChestClickLogic = (chestItem, index, DUNGEONS, handleTakeItem, setChestPreviewModal) => {
+    // Extract dungeon name from chest item (backwards compatibility)
+    const dungeonName = chestItem.replace('🎁 ', '').replace(' Chest', '');
+    const dungeon = DUNGEONS.find(d => d.name === dungeonName);
+    
+    if (!dungeon || !dungeon.chest) {
+        // If it's not an old-style chest, treat it as a regular item
+        handleTakeItem(chestItem, index);
+        return null;
+    }
+    
+    // For old-style chest items, show preview modal
+    setChestPreviewModal({
+        open: true,
+        dungeon: dungeon,
+        chestItem: chestItem
+    });
+    
+    return dungeon;
+};
+
+/**
+ * Handle opening chest logic
+ * @param {Object} chestPreviewModal - Chest preview modal state
+ * @param {Function} convertLootBagToEquipment - Function to convert loot to equipment
+ * @param {Function} addToInventory - Function to add item to inventory
+ * @param {Function} setChestDropDialog - Function to set chest drop dialog
+ * @param {Function} setChestPreviewModal - Function to set chest preview modal
+ * @param {Function} addNotification - Function to add notification
+ * @returns {Object|null} Selected item if successful, null otherwise
+ */
+export const handleOpenChestLogic = (
+    chestPreviewModal, 
+    convertLootBagToEquipment, 
+    addToInventory, 
+    setChestDropDialog, 
+    setChestPreviewModal, 
+    addNotification
+) => {
+    const { dungeon, chestItem } = chestPreviewModal;
+    
+    if (!dungeon || !dungeon.chest) return null;
+    
+    // Random selection based on chances
+    const totalChance = dungeon.chest.reduce((sum, item) => sum + item.chance, 0);
+    const random = Math.random() * totalChance;
+    let currentChance = 0;
+    let selectedItem = null;
+    
+    for (const item of dungeon.chest) {
+        currentChance += item.chance;
+        if (random <= currentChance) {
+            selectedItem = item;
+            break;
+        }
+    }
+    
+    if (!selectedItem) selectedItem = dungeon.chest[0]; // Fallback
+    
+    // Generate equipment from the selected item
+    const equipment = convertLootBagToEquipment([selectedItem.name]);
+    
+    if (equipment.length > 0) {
+        // Add to inventory
+        try {
+            addToInventory(equipment[0]);
+            
+            // Show drop dialog
+            setChestDropDialog({
+                open: true,
+                item: equipment[0],
+                dungeon: dungeon
+            });
+            
+            // Close preview modal
+            setChestPreviewModal({ open: false, dungeon: null, chestItem: null });
+            
+            // Remove chest from loot bag
+            // Note: This would need to be handled by the calling component
+            
+            addNotification({
+                type: 'success',
+                title: 'Chest Opened!',
+                message: `You found ${equipment[0].name}!`,
+                duration: 3000
+            });
+            
+            return selectedItem;
+        } catch (error) {
+            console.error('Error adding equipment to inventory:', error);
+            addNotification({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to add item to inventory',
+                duration: 3000
+            });
+        }
+    }
+    
+    return null;
 }; 

@@ -1,68 +1,40 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../assets/styles/Battle.module.scss";
 import {
     Typography,
-    LinearProgress,
-    Avatar,
-    Divider,
     Button,
     Box,
     Dialog,
     DialogTitle,
     DialogContent,
     DialogActions,
-    Card,
-    CardContent,
-    CardActionArea,
-    Tooltip,
-    Grid,
-    IconButton,
-    Chip,
 } from "@mui/material";
-import { LocalDrink } from "@mui/icons-material";
-import { getLootDrop, saveLoot } from "../utils/combat.js";
-import enemies from "../utils/enemies.js";
-import { getEnemyIcon, getSkillIcon, getCharacterIcon, getEnemyInitial, getCharacterName } from "../utils/common.js";
-import { SKILL_LEVEL_BONUSES } from "../utils/constants.js";
+
+import enemies, { DUNGEONS } from "../utils/enemies.js";
+
 import { 
-    calculateHitChance, 
-    calculateDamage, 
-    calculateDamageRange,
-    updateBattleState, 
-    processPlayerAttack, 
-    processEnemyAttack, 
-    checkBattleResult, 
-    createSpawnTimer,
-    getDifficultyColor,
-    getDifficultyText,
-    getThresholdForStat,
-    getStatDisplay,
-    getEnemyHpDisplay,
+    getSelectedSkillInfo,
+    handleChestClickLogic,
+    handleOpenChestLogic,
     calculateItemSellValue,
     getSlotKey,
     getCurrentSlot
 } from "../utils/battleUtils.js";
-import { awardBattleActionXP, getWeaponType, getAvailableAttackTypes, getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
-import { getPlayerStats, getEquipmentBonuses, calculateSkillBuffs, calculateSkillBuffsForAttackType, getEquippedItems } from "../utils/playerStats.js";
-import { getRandomEnemy } from "../utils/enemies.js";
-import { getGold, addGold, subtractGold } from "../utils/gold.js";
+import { getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
+import { getPlayerStats } from "../utils/playerStats.js";
+
 import { 
-    POTION_TYPES, 
-    getPotions, 
-    usePotion, 
-    shouldUseAutoPotion,
     getAutoPotionSettings,
     saveAutoPotionSettings
 } from "../utils/potions.js";
 import { recordKill } from "../utils/achievements.js";
-import { isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
-import { checkPetDrop, getPetByEnemy } from "../utils/pets.js";
+import { getLootDrop } from "../utils/combat.js";
+import { checkPetDrop } from "../utils/pets.js";
 import { saveCurrentGame } from "../utils/saveManager.js";
-import { getEnemyById } from "../utils/enemies.js";
-import { LOOT_BAG_LIMIT } from "../utils/constants.js";
+
 import { useNotificationContext } from "../contexts/NotificationContext";
 import { useBattleContext } from "../contexts/BattleContext";
 import LootBag from "../components/LootBag";
@@ -79,7 +51,7 @@ import DungeonCompleteDialog from "../components/DungeonCompleteDialog";
 
 
 
-function Battle({ player }) {
+function Battle() {
     const navigate = useNavigate();
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
@@ -135,22 +107,15 @@ function Battle({ player }) {
         setEnemiesData,
         setDungeonCompleteCallback
     } = useBattleContext();
-
-    // Local UI state only
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
-    const [lastPotionUsed, setLastPotionUsed] = useState(null);
-    const [battleResult, setBattleResult] = useState(null);
-    // Death dialog is now managed in BattleContext
+
+
     const [battleLogVisible, setBattleLogVisible] = useState(true);
     const [exitWarningOpen, setExitWarningOpen] = useState(false);
     const [dungeonCompleteDialog, setDungeonCompleteDialog] = useState({ open: false, countdown: 5 });
     const [chestDropDialog, setChestDropDialog] = useState({ open: false, item: null, dungeon: null });
     const [chestPreviewModal, setChestPreviewModal] = useState({ open: false, dungeon: null, chestItem: null });
 
-    // Battle page is now dedicated to actual battle only
-    // Selection is handled in separate BattleSelection page
-
-    // Set enemies data and callbacks for BattleContext
     useEffect(() => {
         setEnemiesData(enemies);
         setDungeonCompleteCallback(() => () => {
@@ -160,7 +125,6 @@ function Battle({ player }) {
 
 
 
-    // Take item from loot bag to inventory
     const handleTakeItem = (itemName, index) => {
         try {
             // Remove from loot bag
@@ -267,7 +231,6 @@ function Battle({ player }) {
                 setIsBattleActive(false);
             }
             
-            setBattleResult(battleResult);
             setPlayerHealth(battleResult.playerFinalHealth);
             
             // Process victory rewards
@@ -368,48 +331,12 @@ function Battle({ player }) {
     const handleUsePotionLocal = (potionType) => {
         const result = handleUsePotion(potionType);
         if (result.success) {
-            // Show potion used effect
-            setLastPotionUsed({
-                type: potionType,
-                healAmount: result.healAmount,
-                timestamp: Date.now()
-            });
-            
-            // Clear effect after 2 seconds
-            setTimeout(() => {
-                setLastPotionUsed(null);
-            }, 2000);
-            
             // Auto save after potion use
             setTimeout(() => {
                 saveCurrentGame();
             }, 500);
         }
     };
-
-    // Auto potion check (now handled in BattleContext)
-    const checkAutoPotion = () => {
-        // This is now handled automatically in BattleContext
-        // Keeping this function for backward compatibility but it's not needed
-    };
-
-    // showDeathDialog is now managed in BattleContext
-
-    // applyDeathPenalties is now managed in BattleContext
-
-    // respawnPlayer is now managed in BattleContext but we need local function for battle mode
-    const handleRespawn = () => {
-        // If in dungeon, go to selection. If in location battle, stay in battle mode
-        if (dungeonRun && !dungeonRun.completed) {
-            setBattleMode('selection');
-        } else {
-            setBattleMode('battle');
-        }
-        setBattleResult(null);
-        // Actual respawn logic is handled in BattleContext
-    };
-
-    // startEnemySpawnTimer and spawnNewEnemy are now handled by global BattleContext
 
     const handleBackToSelection = () => {
         if (dungeonRun && !dungeonRun.completed) {
@@ -419,82 +346,21 @@ function Battle({ player }) {
         // Navigate back to battle selection page
         navigate('/battle-selection');
         stopBattle();
-        setBattleResult(null);
         setDungeonRun(null);
     };
 
-    // startRealTimeBattle is no longer needed - using startBattle from BattleContext
 
 
 
-    // Helper function to call getStatDisplay with isAchievementUnlocked
-    const getStatDisplayWithAchievement = (enemyId, statType, value) => {
-        return getStatDisplay(enemyId, statType, value, isAchievementUnlocked);
-    };
 
-    // Helper function to call getEnemyHpDisplay with isAchievementUnlocked
-    const getEnemyHpDisplayWithAchievement = (enemyId, current, max) => {
-        return getEnemyHpDisplay(enemyId, current, max, isAchievementUnlocked);
-    };
 
-    // Memoize spawn timer UI to prevent unnecessary re-renders
-    const spawnTimerUI = useMemo(() => {
-        if (!isWaitingForEnemy) return null;
-        
-        return (
-            <div className={styles.enemySpawnContainer}>
-                <Typography className={styles.spawnText}>
-                    {t('battle.searchingForEnemy')}
-                </Typography>
-                <div className={styles.circularProgress}>
-                    <div 
-                        className={styles.circularProgressBar}
-                        style={{ '--progress': `${enemySpawnProgress}%` }}
-                    ></div>
-                    <div className={styles.circularProgressText}>
-                        {Math.ceil((100 - enemySpawnProgress) / 20)}s
-                    </div>
-                </div>
-            </div>
-        );
-    }, [isWaitingForEnemy, enemySpawnProgress, t]);
 
     // Get selected skill level and bonuses
-    const getSelectedSkillInfo = () => {
-        if (!selectedAttackType) return { level: 0, bonuses: null };
-        
-        const skillData = getSkillData();
-        let skillLevel = 0;
-        
-        // Find the skill level in all categories
-        Object.values(skillData).forEach(category => {
-            if (category[selectedAttackType]) {
-                skillLevel = category[selectedAttackType].level || 0;
-            }
-        });
-        
-        const bonuses = SKILL_LEVEL_BONUSES[selectedAttackType];
-        
-
-        
-        return { level: skillLevel, bonuses };
+    const getSelectedSkillInfoLocal = () => {
+        return getSelectedSkillInfo(selectedAttackType, getSkillData);
     };
 
-    const renderLootTooltip = (enemy) => (
-        <Box sx={{ p: 1 }}>
-            <Typography variant="h6" sx={{ mb: 1 }}>
-                {t('battle.possibleDrops')}
-            </Typography>
-            {enemy.drops.map((drop, index) => (
-                <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
-                    {drop.name} - {(drop.chance * 100).toFixed(0)}%
-                    {drop.type === 'gold' && (
-                        <span style={{ color: '#ffd700' }}> (💰 {drop.value} Gold)</span>
-                    )}
-                </Typography>
-            ))}
-        </Box>
-    );
+
 
     useEffect(() => {
         const currentSlot = getCurrentSlot();
@@ -544,12 +410,10 @@ function Battle({ player }) {
             const autoPotionBuff = activeBuffs['auto_potion'];
             
             if (autoPotionBuff && autoPotionBuff.expiresAt > Date.now()) {
-                // Auto potion buff is active
                 const newSettings = { ...autoPotionSettings, enabled: true };
                 setAutoPotionSettings(newSettings);
                 saveAutoPotionSettings(newSettings);
             } else if (autoPotionSettings.enabled) {
-                // Auto potion buff expired, disable auto potion
                 const newSettings = { ...autoPotionSettings, enabled: false };
                 setAutoPotionSettings(newSettings);
                 saveAutoPotionSettings(newSettings);
@@ -561,20 +425,13 @@ function Battle({ player }) {
         
         return () => clearInterval(interval);
     }, [autoPotionSettings.enabled]);
-
-    // Initialize skill data for the current slot when the component mounts
     useEffect(() => {
         initializeSkillDataForCurrentSlot();
     }, []);
 
 
-    // Selection functions moved to BattleSelection.jsx
-    // handleDungeonEnemyDefeated is now handled in BattleContext
-
     const confirmExitDungeon = () => {
         setExitWarningOpen(false);
-        setBattleMode('selection');
-        setBattleResult(null);
         
         // Use BattleContext functions to clear state
         setCurrentEnemy(null);
@@ -587,82 +444,42 @@ function Battle({ player }) {
     };
 
     const handleChestClick = (chestItem, index) => {
-        // Extract dungeon name from chest item (backwards compatibility)
-        const dungeonName = chestItem.replace('🎁 ', '').replace(' Chest', '');
-        const dungeon = DUNGEONS.find(d => d.name === dungeonName);
-        
-        if (!dungeon || !dungeon.chest) {
-            // If it's not an old-style chest, treat it as a regular item
-            handleTakeItem(chestItem, index);
-            return;
-        }
-        
-        // For old-style chest items, show preview modal
-        setChestPreviewModal({
-            open: true,
-            dungeon: dungeon,
-            chestItem: chestItem
-        });
+        handleChestClickLogic(chestItem, index, DUNGEONS, handleTakeItem, setChestPreviewModal);
     };
 
     const handleOpenChest = () => {
-        const { dungeon, chestItem } = chestPreviewModal;
-        
-        if (!dungeon || !dungeon.chest) return;
-        
-        // Random selection based on chances
-        const totalChance = dungeon.chest.reduce((sum, item) => sum + item.chance, 0);
-        const random = Math.random() * totalChance;
-        let currentChance = 0;
-        let selectedItem = null;
-        
-        for (const item of dungeon.chest) {
-            currentChance += item.chance;
-            if (random <= currentChance) {
-                selectedItem = item;
-                break;
+        const result = handleOpenChestLogic(
+            chestPreviewModal,
+            convertLootBagToEquipment,
+            (equipment) => {
+                try {
+                    const currentSlot = getCurrentSlot();
+                    const inventorySlotKey = getSlotKey('idle-chaos-inventory', currentSlot);
+                    const currentInventory = JSON.parse(localStorage.getItem(inventorySlotKey) || '[]');
+                    const updatedInventory = [...currentInventory, equipment];
+                    localStorage.setItem(inventorySlotKey, JSON.stringify(updatedInventory));
+                } catch (err) {
+                    console.error('Error adding chest item to inventory:', err);
+                    throw err;
+                }
+            },
+            setChestDropDialog,
+            setChestPreviewModal,
+            (notification) => {
+                notifyChestOpened(notification.message, chestPreviewModal.dungeon?.name);
             }
-        }
+        );
         
-        if (!selectedItem) selectedItem = dungeon.chest[0]; // Fallback
-        
-        // Generate equipment from the selected item
-        const equipment = convertLootBagToEquipment([selectedItem.name]);
-        
-        if (equipment.length > 0) {
-            // Add to inventory
-            try {
+        if (result) {
+            // Remove chest from loot bag
+            setLootBag(prev => {
+                const updated = prev.filter(item => item !== chestPreviewModal.chestItem);
                 const currentSlot = getCurrentSlot();
-                const inventorySlotKey = getSlotKey('idle-chaos-inventory', currentSlot);
-                const currentInventory = JSON.parse(localStorage.getItem(inventorySlotKey) || '[]');
-                const updatedInventory = [...currentInventory, ...equipment];
-                localStorage.setItem(inventorySlotKey, JSON.stringify(updatedInventory));
-            } catch (err) {
-                console.error('Error adding chest item to inventory:', err);
-            }
-            
-            // Close preview modal
-            setChestPreviewModal({ open: false, dungeon: null, chestItem: null });
-            
-            // Notify for chest opened
-            notifyChestOpened(equipment[0].name || selectedItem.name, dungeon.name);
-            
-            // Show drop dialog with result
-            setChestDropDialog({ 
-                open: true, 
-                item: equipment[0], 
-                dungeon: dungeon
+                const slotKey = getSlotKey("lootBag", currentSlot);
+                localStorage.setItem(slotKey, JSON.stringify(updated));
+                return updated;
             });
         }
-        
-        // Remove chest from loot bag
-        setLootBag(prev => {
-            const updated = prev.filter(item => item !== chestItem);
-            const currentSlot = getCurrentSlot();
-            const slotKey = getSlotKey("lootBag", currentSlot);
-            localStorage.setItem(slotKey, JSON.stringify(updated));
-            return updated;
-        });
     };
 
     // Add a useEffect to handle the countdown and auto-restart:
@@ -705,51 +522,8 @@ function Battle({ player }) {
     // Battle Screen
     return (
         <div className={styles.root}>
-            <DungeonCompleteDialog 
-                dungeonCompleteDialog={dungeonCompleteDialog}
-                onClose={() => setDungeonCompleteDialog({ open: false, countdown: 5 })}
-                onLeave={() => {
-                    setDungeonCompleteDialog({ open: false, countdown: 5 });
-                    setBattleMode('selection');
-                    setBattleResult(null);
-                    
-                    // Use BattleContext functions
-                    setCurrentEnemy(null);
-                    setCurrentBattle(null);
-                    setIsBattleActive(false);
-                    setDungeonRun(null);
-                    stopBattle();
-                }}
-                onRestart={() => {
-                    setDungeonCompleteDialog({ open: false, countdown: 5 });
-                    
-                    // Properly restart the dungeon
-                    const currentDungeon = dungeonRun?.dungeon;
-                    if (currentDungeon) {
-                        setDungeonRun({
-                            dungeon: currentDungeon,
-                            currentStage: 0,
-                            completed: false,
-                            chestAwarded: false,
-                            stages: currentDungeon.enemies || []
-                        });
-                        
-                        // Start the first enemy battle
-                        const firstEnemyId = currentDungeon.enemies[0];
-                        const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
-                        if (firstEnemy) {
-                            startBattle(firstEnemy, selectedAttackType);
-                        }
-                    }
-                }}
-                dungeonRun={dungeonRun}
-                enemies={enemies}
-            />
-
-            {/* Battle UI - show during battle, dungeon, or waiting for enemy */}
             {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
                 <>
-                    {/* Header Section - Different for Battle vs Dungeon */}
                     {!dungeonRun ? (
                         <div className={styles.battleHeader}>
                             <Button 
@@ -760,7 +534,6 @@ function Battle({ player }) {
                                 {t('battle.backToSelection')}
                             </Button>
                             
-                            {/* TEMPORARY: Test death button */}
                             <Button 
                                 variant="contained" 
                                 color="error"
@@ -814,7 +587,6 @@ function Battle({ player }) {
                                  {t('battle.backToSelection')}
                              </Button>
                              
-                             {/* TEMPORARY: Test death button */}
                              <Button 
                                  variant="contained" 
                                  color="error"
@@ -868,55 +640,41 @@ function Battle({ player }) {
                                 selectedAttackType={selectedAttackType}
                                 onAttackTypeSelect={setSelectedAttackType}
                             />
-                            {/* ENEMY */}
                             <EnemyWidget 
                                 currentEnemy={currentEnemy}
                                 currentBattle={currentBattle}
                                 damageDisplay={damageDisplay}
-                                spawnTimerUI={spawnTimerUI}
-                                getStatDisplayWithAchievement={getStatDisplayWithAchievement}
-                                getEnemyHpDisplayWithAchievement={getEnemyHpDisplayWithAchievement}
                             />
-                            {/* Battle Log - Toggleable Widget */}
                             <BattleLog 
                                 battleLogVisible={battleLogVisible}
                                 battleLog={battleLog}
                                 onClearBattleLog={() => setBattleLog([])}
                             />
                         </div>
-                        {/* Potion System */}
                         <PotionSystem 
                             currentBattle={currentBattle}
                             potions={potions}
                             autoPotionSettings={autoPotionSettings}
-                            lastPotionUsed={lastPotionUsed}
                             onUsePotion={handleUsePotionLocal}
                         />
-                        {/* Widget Container - Player/Enemy Stats, Loot, etc. */}
                         <div className={styles.widgetContainer}>
-                            {/* PLAYER STATS */}
                             <PlayerStats 
                                 currentBattle={currentBattle}
                                 currentEnemy={currentEnemy}
                                 playerStats={playerStats}
                                 playerHealth={playerHealth}
                                 selectedAttackType={selectedAttackType}
-                                getSelectedSkillInfo={getSelectedSkillInfo}
+                                getSelectedSkillInfo={getSelectedSkillInfoLocal}
                             />
 
-                            {/* ENEMY STATS */}
                             <EnemyStats 
                                 currentEnemy={currentEnemy}
                                 currentBattle={currentBattle}
                                 playerStats={playerStats}
-                                getStatDisplayWithAchievement={getStatDisplayWithAchievement}
-                                getEnemyHpDisplayWithAchievement={getEnemyHpDisplayWithAchievement}
                             />
 
-                            {/* LOOT TABLE */}
                             <LootTable currentEnemy={currentEnemy} />
 
-                            {/* LOOT GAINED */}
                             <LootBag
                                 lootBag={lootBag}
                                 onTakeItem={handleTakeItem}
@@ -932,7 +690,6 @@ function Battle({ player }) {
             )}
 
 
-            {/* Chest Preview Modal */}
             <ChestPreviewModal 
                 chestPreviewModal={chestPreviewModal}
                 onClose={() => setChestPreviewModal({ open: false, dungeon: null, chestItem: null })}
@@ -948,10 +705,48 @@ function Battle({ player }) {
                 </DialogActions>
             </Dialog>
 
-            {/* Chest Drop Dialog */}
             <ChestDropDialog 
                 chestDropDialog={chestDropDialog}
                 onClose={() => setChestDropDialog({ open: false, item: null, dungeon: null })}
+            />
+
+            <DungeonCompleteDialog 
+                dungeonCompleteDialog={dungeonCompleteDialog}
+                onClose={() => setDungeonCompleteDialog({ open: false, countdown: 5 })}
+                onLeave={() => {
+                    setDungeonCompleteDialog({ open: false, countdown: 5 });
+                    
+                    // Use BattleContext functions
+                    setCurrentEnemy(null);
+                    setCurrentBattle(null);
+                    setIsBattleActive(false);
+                    setDungeonRun(null);
+                    stopBattle();
+                }}
+                onRestart={() => {
+                    setDungeonCompleteDialog({ open: false, countdown: 5 });
+                    
+                    // Properly restart the dungeon
+                    const currentDungeon = dungeonRun?.dungeon;
+                    if (currentDungeon) {
+                        setDungeonRun({
+                            dungeon: currentDungeon,
+                            currentStage: 0,
+                            completed: false,
+                            chestAwarded: false,
+                            stages: currentDungeon.enemies || []
+                        });
+                        
+                        // Start the first enemy battle
+                        const firstEnemyId = currentDungeon.enemies[0];
+                        const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
+                        if (firstEnemy) {
+                            startBattle(firstEnemy, selectedAttackType);
+                        }
+                    }
+                }}
+                dungeonRun={dungeonRun}
+                enemies={enemies}
             />
         </div>
     );
