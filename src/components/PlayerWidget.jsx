@@ -25,7 +25,7 @@ const PlayerWidget = ({
                     className={`${styles.damageDisplay} ${
                         damageDisplay.player === 'MISS' ? styles.missDisplay : 
                         damageDisplay.playerType === 'crit' ? styles.enemyCritDamage :
-                        damageDisplay.player.type === 'heal' ? styles.healDisplay : styles.enemyDamage
+                        damageDisplay.playerType === 'heal' ? styles.healDisplay : styles.enemyDamage
                     }`}
                 >
                     {damageDisplay.player.amount || damageDisplay.player}

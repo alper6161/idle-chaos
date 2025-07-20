@@ -673,23 +673,36 @@ export const BattleProvider = ({ children }) => {
         const autoPotionSettings = getAutoPotionSettings();
         if (!autoPotionSettings.enabled) return;
         
+        // Use current battle state instead of passed parameter
+        const currentBattleState = currentBattle || battle;
+        if (!currentBattleState) return;
+        
+        // Get the most up-to-date health value
+        const currentHealth = currentBattleState.player.currentHealth;
+        const maxHealth = currentBattleState.player.HEALTH;
+        
         const potionToUse = shouldUseAutoPotion(
-            battle.player.currentHealth,
-            battle.player.HEALTH
+            currentHealth,
+            maxHealth
         );
         
         if (potionToUse) {
-            const result = usePotion(potionToUse);
+                    const result = usePotion(potionToUse);
             if (result.success) {
                 // Update potions state
                 setPotions(result.remainingPotions);
                 
-                // Update battle health
+                // Calculate actual heal amount
+                const oldHealth = currentBattleState.player.currentHealth;
                 const newHealth = Math.min(
-                    battle.player.currentHealth + result.healAmount,
-                    battle.player.HEALTH
+                    oldHealth + result.healAmount,
+                    currentBattleState.player.HEALTH
                 );
+                const actualHealAmount = newHealth - oldHealth;
                 
+
+                
+                // Update battle health
                 setCurrentBattle(prev => ({
                     ...prev,
                     player: { 
@@ -700,6 +713,30 @@ export const BattleProvider = ({ children }) => {
 
                 // Update global player health
                 setPlayerHealth(newHealth);
+                
+                // Show heal display for auto potion
+                if (actualHealAmount > 0) {
+                    setDamageDisplay(prev => ({
+                        ...prev,
+                        player: { amount: `+${actualHealAmount}`, type: 'heal' },
+                        playerType: 'heal'
+                    }));
+                    
+                    // Clear heal display after 2 seconds
+                    setTimeout(() => {
+                        setDamageDisplay(prev => ({
+                            ...prev,
+                            player: null,
+                            playerType: null
+                        }));
+                    }, 2000);
+                    
+                    // Add to battle log
+                    setBattleLog(prev => [...prev, {
+                        type: 'heal',
+                        message: `🧪 Auto potion: +${actualHealAmount} HP`
+                    }]);
+                }
             }
         }
     };
@@ -741,14 +778,16 @@ export const BattleProvider = ({ children }) => {
             if (actualHealAmount > 0) {
                 setDamageDisplay(prev => ({
                     ...prev,
-                    player: { amount: `+${actualHealAmount}`, type: 'heal' }
+                    player: { amount: `+${actualHealAmount}`, type: 'heal' },
+                    playerType: 'heal'
                 }));
                 
                 // Clear heal display after 2 seconds
                 setTimeout(() => {
                     setDamageDisplay(prev => ({
                         ...prev,
-                        player: null
+                        player: null,
+                        playerType: null
                     }));
                 }, 2000);
                 
@@ -946,7 +985,8 @@ export const BattleProvider = ({ children }) => {
         saveBattleState,
         loadBattleState,
         loadGlobalGameState,
-        saveGlobalGameState
+        saveGlobalGameState,
+        checkAutoPotion
     };
 
     return (

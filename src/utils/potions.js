@@ -120,15 +120,15 @@ export const getAutoPotionSettings = () => {
         const stored = localStorage.getItem(slotKey);
         return stored ? JSON.parse(stored) : {
             enabled: false,
-            threshold: 40,
-            priority: ['major', 'superior', 'greater', 'lesser', 'minor']
+            threshold: 60,
+            priority: ['minor', 'lesser', 'greater', 'superior', 'major']
         };
     } catch (error) {
         console.error('Error loading auto potion settings:', error);
         return {
             enabled: false,
-            threshold: 40,
-            priority: ['major', 'superior', 'greater', 'lesser', 'minor']
+            threshold: 60,
+            priority: ['minor', 'lesser', 'greater', 'superior', 'major']
         };
     }
 };
@@ -151,6 +151,23 @@ export const shouldUseAutoPotion = (currentHP, maxHP) => {
     if (hpPercentage <= settings.threshold) {
         const potions = getPotions();
         
+        // En değersiz pottan başlayarak can dolana kadar potion kullan
+        for (const potionType of settings.priority) {
+            if (potions[potionType] > 0) {
+                const potion = POTION_TYPES[potionType.toUpperCase()];
+                const potentialHeal = Math.min(potion.healAmount, maxHP - currentHP);
+                
+                // Eğer bu potion kullanıldığında HP threshold'un üstüne çıkacaksa kullan
+                const newHP = currentHP + potentialHeal;
+                const newHPPercentage = (newHP / maxHP) * 100;
+                
+                if (newHPPercentage > settings.threshold) {
+                    return potionType;
+                }
+            }
+        }
+        
+        // Eğer hiçbir potion threshold'un üstüne çıkaramıyorsa, en değersiz olanı kullan
         for (const potionType of settings.priority) {
             if (potions[potionType] > 0) {
                 return potionType;

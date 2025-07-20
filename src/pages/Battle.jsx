@@ -110,7 +110,8 @@ function Battle() {
         setDungeonRun,
         setEnemiesData,
         setDungeonCompleteCallback,
-        refreshPotions
+        refreshPotions,
+        checkAutoPotion
     } = useBattleContext();
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
 
@@ -497,22 +498,38 @@ function Battle() {
             const activeBuffs = JSON.parse(localStorage.getItem(slotKey) || '{}');
             const autoPotionBuff = activeBuffs['auto_potion'];
             
+            // Only check if there's an active buff, don't override manual settings
             if (autoPotionBuff && autoPotionBuff.expiresAt > Date.now()) {
-                const newSettings = { ...autoPotionSettings, enabled: true };
-                setAutoPotionSettings(newSettings);
-                saveAutoPotionSettings(newSettings);
-            } else if (autoPotionSettings.enabled) {
-                const newSettings = { ...autoPotionSettings, enabled: false };
-                setAutoPotionSettings(newSettings);
-                saveAutoPotionSettings(newSettings);
+                // Only enable if it's not already enabled by user
+                if (!autoPotionSettings.enabled) {
+                    const newSettings = { ...autoPotionSettings, enabled: true };
+                    setAutoPotionSettings(newSettings);
+                    saveAutoPotionSettings(newSettings);
+                }
             }
+            // Don't automatically disable - let user control it
         };
 
         const interval = setInterval(checkAutoPotionBuff, 5000);
         checkAutoPotionBuff(); // Check immediately
         
         return () => clearInterval(interval);
-    }, [autoPotionSettings.enabled]);
+    }, []); // Remove autoPotionSettings.enabled dependency
+
+    // Auto potion usage check
+    useEffect(() => {
+        const checkAutoPotionUsage = () => {
+            if (autoPotionSettings.enabled && currentBattle && isBattleActive) {
+                // Call the auto potion check from BattleContext
+                checkAutoPotion(currentBattle);
+            }
+        };
+
+        const interval = setInterval(checkAutoPotionUsage, 1000); // Check every second
+        checkAutoPotionUsage(); // Check immediately
+        
+        return () => clearInterval(interval);
+    }, [autoPotionSettings.enabled, currentBattle, isBattleActive]);
     useEffect(() => {
         initializeSkillDataForCurrentSlot();
     }, []);
@@ -723,6 +740,10 @@ function Battle() {
                                 potions={potions}
                                 autoPotionSettings={autoPotionSettings}
                                 onUsePotion={handleUsePotionLocal}
+                                onAutoPotionSettingsChange={(newSettings) => {
+                                    setAutoPotionSettings(newSettings);
+                                    saveAutoPotionSettings(newSettings);
+                                }}
                             />
                             <EnemyWidget 
                                 currentEnemy={currentEnemy}
