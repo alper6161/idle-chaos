@@ -710,12 +710,18 @@ export const BattleProvider = ({ children }) => {
         if (result.success) {
             setPotions(result.remainingPotions);
             
+            // Calculate actual heal amount (might be less if at max HP)
+            let actualHealAmount = result.healAmount;
+            let newHealth;
+            
             // Heal the player
             if (currentBattle) {
-                const newHealth = Math.min(
-                    currentBattle.player.currentHealth + result.healAmount,
+                const oldHealth = currentBattle.player.currentHealth;
+                newHealth = Math.min(
+                    oldHealth + result.healAmount,
                     currentBattle.player.HEALTH
                 );
+                actualHealAmount = newHealth - oldHealth;
                 
                 setCurrentBattle(prev => ({
                     ...prev,
@@ -725,13 +731,41 @@ export const BattleProvider = ({ children }) => {
                 setPlayerHealth(newHealth);
             } else {
                 // Heal even when not in battle
-                const newHealth = Math.min(playerHealth + result.healAmount, getPlayerStats().HEALTH);
+                const oldHealth = playerHealth;
+                newHealth = Math.min(playerHealth + result.healAmount, getPlayerStats().HEALTH);
+                actualHealAmount = newHealth - oldHealth;
                 setPlayerHealth(newHealth);
             }
             
-            return { success: true, healAmount: result.healAmount };
+            // Show heal display
+            if (actualHealAmount > 0) {
+                setDamageDisplay(prev => ({
+                    ...prev,
+                    player: { amount: `+${actualHealAmount}`, type: 'heal' }
+                }));
+                
+                // Clear heal display after 2 seconds
+                setTimeout(() => {
+                    setDamageDisplay(prev => ({
+                        ...prev,
+                        player: null
+                    }));
+                }, 2000);
+                
+                // Add to battle log
+                setBattleLog(prev => [...prev, {
+                    type: 'heal',
+                    message: `🧪 Healed ${actualHealAmount} HP`
+                }]);
+            }
+            
+            return { success: true, healAmount: actualHealAmount };
         }
         return { success: false };
+    };
+
+    const refreshPotions = () => {
+        setPotions(getPotions());
     };
 
     const addToLootBag = (items) => {
@@ -894,6 +928,7 @@ export const BattleProvider = ({ children }) => {
         
         // Global State Actions
         handleUsePotion,
+        refreshPotions,
         addToLootBag,
         removeFromLootBag,
         clearLootBag,

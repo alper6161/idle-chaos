@@ -141,13 +141,13 @@ function Home() {
 
     const handleStoryClose = () => {
         setShowStoryModal(false);
-        navigate("/battle");
+        navigate("/battle-selection");
     };
 
     const handleContinue = (slotNumber) => {
         const success = loadFromSlot(slotNumber);
         if (success) {
-            navigate("/battle");
+            navigate("/battle-selection");
         } else {
             alert(t('common.loadError'));
         }

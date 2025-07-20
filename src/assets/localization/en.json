@@ -316,7 +316,8 @@
         "owned": "Owned: {{count}}",
         "buy1": "Buy 1",
         "buy5": "Buy 5",
-        "healthPotions": "Health Potions",
+        "healthPotions": "Potions",
+        "potions": "Potions",
         "autoOn": "Auto: ON",
         "autoOff": "Auto: OFF"
     },

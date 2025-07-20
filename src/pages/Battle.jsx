@@ -36,6 +36,8 @@ import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 import { getLootDrop } from "../utils/combat.js";
 import { checkPetDrop } from "../utils/pets.js";
 import { saveCurrentGame } from "../utils/saveManager.js";
+import { getRandomPotionDrop, getRandomTestPotion } from "../utils/potionUtils.js";
+import { addPotions } from "../utils/potions.js";
 
 import { useNotificationContext } from "../contexts/NotificationContext";
 import { useBattleContext } from "../contexts/BattleContext";
@@ -107,7 +109,8 @@ function Battle() {
         dungeonRun,
         setDungeonRun,
         setEnemiesData,
-        setDungeonCompleteCallback
+        setDungeonCompleteCallback,
+        refreshPotions
     } = useBattleContext();
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
 
@@ -210,6 +213,61 @@ function Battle() {
         }
     };
 
+    // Test function to drop random potion
+    const handleTestDropPotion = () => {
+        const potionDrop = getRandomTestPotion();
+        
+        // Add potion using the proper function
+        addPotions(potionDrop.id, 1);
+        
+        // Notify for potion drop
+        notifyItemDrop(`${potionDrop.name} (+${potionDrop.healAmount} HP)`, '🧪');
+        
+        // Force refresh potions in battle context
+        setTimeout(() => {
+            refreshPotions();
+        }, 100);
+    };
+
+    // Test function to hurt self
+    const handleTestHurtSelf = () => {
+        const damage = 20;
+        
+        if (currentBattle) {
+            // In battle - update battle state
+            const newHealth = Math.max(0, currentBattle.player.currentHealth - damage);
+            setCurrentBattle(prev => ({
+                ...prev,
+                player: { ...prev.player, currentHealth: newHealth }
+            }));
+            setPlayerHealth(newHealth);
+        } else {
+            // Not in battle - just update player health
+            const newHealth = Math.max(0, playerHealth - damage);
+            setPlayerHealth(newHealth);
+        }
+        
+        // Show damage display
+        setDamageDisplay(prev => ({
+            ...prev,
+            player: { amount: `-${damage}`, type: 'damage' }
+        }));
+        
+        // Clear damage display after 2 seconds
+        setTimeout(() => {
+            setDamageDisplay(prev => ({
+                ...prev,
+                player: null
+            }));
+        }, 2000);
+        
+        // Add to battle log
+        setBattleLog(prev => [...prev, {
+            type: 'damage',
+            message: `💔 Self damage: -${damage} HP`
+        }]);
+    };
+
     // Test function to kill enemy instantly
     const handleKillEnemy = () => {
         if (currentBattle && currentEnemy) {
@@ -263,6 +321,23 @@ function Battle() {
                 itemsToAdd.forEach(itemName => {
                     notifyItemDrop(itemName, '📦');
                 });
+                
+                // Check for potion drop
+                if (currentEnemy) {
+                    const potionDrop = getRandomPotionDrop(currentEnemy.id);
+                    if (potionDrop) {
+                        // Add potion using the proper function
+                        addPotions(potionDrop.id, 1);
+                        
+                        // Notify for potion drop
+                        notifyItemDrop(`${potionDrop.name} (+${potionDrop.healAmount} HP)`, '🧪');
+                        
+                        // Refresh potions in battle context
+                        setTimeout(() => {
+                            refreshPotions();
+                        }, 100);
+                    }
+                }
             }
 
             // --- PET DROP LOGIC (only in normal battles, not dungeons) ---
@@ -338,6 +413,7 @@ function Battle() {
                 saveCurrentGame();
             }, 500);
         }
+        return result;
     };
 
     const handleBackToSelection = () => {
@@ -602,6 +678,22 @@ function Battle() {
                         >
                             ⚔️ TEST: Kill
                         </Button>
+                        <Button 
+                            variant="contained" 
+                            color="info"
+                            onClick={handleTestDropPotion}
+                            style={{ marginLeft: '8px' }}
+                        >
+                            🧪 TEST: Drop Potion
+                        </Button>
+                        <Button 
+                            variant="contained" 
+                            color="warning"
+                            onClick={handleTestHurtSelf}
+                            style={{ marginLeft: '8px' }}
+                        >
+                            💔 TEST: Hurt Self
+                        </Button>
                         {dungeonRun && !dungeonRun.completed && (
                             <Button 
                                 variant="contained" 
@@ -626,6 +718,12 @@ function Battle() {
                                 selectedAttackType={selectedAttackType}
                                 onAttackTypeSelect={setSelectedAttackType}
                             />
+                            <PotionSystem 
+                                currentBattle={currentBattle}
+                                potions={potions}
+                                autoPotionSettings={autoPotionSettings}
+                                onUsePotion={handleUsePotionLocal}
+                            />
                             <EnemyWidget 
                                 currentEnemy={currentEnemy}
                                 currentBattle={currentBattle}
@@ -639,12 +737,6 @@ function Battle() {
                                 onClearBattleLog={() => setBattleLog([])}
                             />
                         </div>
-                        <PotionSystem 
-                            currentBattle={currentBattle}
-                            potions={potions}
-                            autoPotionSettings={autoPotionSettings}
-                            onUsePotion={handleUsePotionLocal}
-                        />
                         <div className={styles.widgetContainer}>
                             <PlayerStats 
                                 currentBattle={currentBattle}

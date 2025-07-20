@@ -24,10 +24,11 @@ const PlayerWidget = ({
                 <div 
                     className={`${styles.damageDisplay} ${
                         damageDisplay.player === 'MISS' ? styles.missDisplay : 
-                        damageDisplay.playerType === 'crit' ? styles.enemyCritDamage : styles.enemyDamage
+                        damageDisplay.playerType === 'crit' ? styles.enemyCritDamage :
+                        damageDisplay.player.type === 'heal' ? styles.healDisplay : styles.enemyDamage
                     }`}
                 >
-                    {damageDisplay.player}
+                    {damageDisplay.player.amount || damageDisplay.player}
                 </div>
             )}
             <div className={styles.hpBarContainer}>
