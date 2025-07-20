@@ -19,8 +19,10 @@ import {
     handleOpenChestLogic,
     calculateItemSellValue,
     getSlotKey,
-    getCurrentSlot
-} from "../utils/battleUtils.js";
+    getCurrentSlot,
+    getStatDisplayWithAchievement,
+    getEnemyHpDisplayWithAchievement
+} from "../utils/battleUtils.jsx";
 import { getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
 import { getPlayerStats } from "../utils/playerStats.js";
 
@@ -28,7 +30,7 @@ import {
     getAutoPotionSettings,
     saveAutoPotionSettings
 } from "../utils/potions.js";
-import { recordKill } from "../utils/achievements.js";
+import { recordKill, isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
 import { getLootDrop } from "../utils/combat.js";
@@ -360,6 +362,16 @@ function Battle() {
         return getSelectedSkillInfo(selectedAttackType, getSkillData);
     };
 
+    // Helper function to call getStatDisplayWithAchievement with isAchievementUnlocked
+    const getStatDisplayWithAchievementLocal = (enemyId, statType, value) => {
+        return getStatDisplayWithAchievement(enemyId, statType, value, isAchievementUnlocked);
+    };
+
+    // Helper function to call getEnemyHpDisplayWithAchievement with isAchievementUnlocked
+    const getEnemyHpDisplayWithAchievementLocal = (enemyId, current, max) => {
+        return getEnemyHpDisplayWithAchievement(enemyId, current, max, isAchievementUnlocked);
+    };
+
 
 
     useEffect(() => {
@@ -618,6 +630,8 @@ function Battle() {
                                 currentEnemy={currentEnemy}
                                 currentBattle={currentBattle}
                                 damageDisplay={damageDisplay}
+                                getStatDisplayWithAchievement={getStatDisplayWithAchievementLocal}
+                                getEnemyHpDisplayWithAchievement={getEnemyHpDisplayWithAchievementLocal}
                             />
                             <BattleLog 
                                 battleLogVisible={battleLogVisible}

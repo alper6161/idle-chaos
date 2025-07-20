@@ -9,7 +9,7 @@ import {
     processPlayerAttack, 
     processEnemyAttack, 
     checkBattleResult 
-} from '../utils/battleUtils';
+} from '../utils/battleUtils.jsx';
 import { LOOT_BAG_LIMIT } from '../utils/constants';
 import { checkPetDrop } from '../utils/pets';
 import { saveCurrentGame } from '../utils/saveManager';

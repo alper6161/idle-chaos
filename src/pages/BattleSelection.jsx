@@ -19,7 +19,7 @@ import {
     getThresholdForStat, 
     getStatDisplay, 
     getEnemyHpDisplay 
-} from "../utils/battleUtils.js";
+} from "../utils/battleUtils.jsx";
 import { isAchievementUnlocked } from "../utils/achievements.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { useBattleContext } from "../contexts/BattleContext";

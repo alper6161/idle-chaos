@@ -257,9 +257,8 @@ function Home() {
                             <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontWeight: 'bold', color: '#ffd700' }}>
                                 Total Skill Level: {totalSkillLevel !== null ? totalSkillLevel : "—"}
                             </Typography>
-                            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5, fontWeight: 'bold', color: '#ffd700', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                <span>💰</span>
-                                <span>{slot?.data?.[`playerGold_slot_${slotNumber}`] ? new Intl.NumberFormat().format(slot.data[`playerGold_slot_${slotNumber}`]) : "0"}</span>
+                            <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5, fontWeight: 'bold', color: '#ffd700', textAlign: 'center' }}>
+                                💰 {slot?.data?.[`playerGold_slot_${slotNumber}`] ? new Intl.NumberFormat().format(slot.data[`playerGold_slot_${slotNumber}`]) : "0"}
                             </Typography>
                         </div>
                     ) : (
