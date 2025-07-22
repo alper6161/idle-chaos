@@ -100,39 +100,24 @@ function BattleSelection() {
             <Typography variant="h4" className={styles.title}>
                 {t('battle.selectBattle')}
             </Typography>
-            
-            <Tabs
-                value={battleTab}
-                onChange={(e, v) => setBattleTab(v)}
-                centered
-                sx={{
-                    marginBottom: 2,
-                    background: '#3a3a5a',
-                    borderRadius: 2,
-                    minHeight: 48,
-                    '& .MuiTab-root': {
-                        color: '#e0e0e0',
-                        fontFamily: 'Press Start 2P',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        minHeight: 48,
-                        transition: 'color 0.2s',
-                    },
-                    '& .Mui-selected': {
-                        color: '#ffd700',
-                        background: 'rgba(60,60,90,0.7)',
-                        borderRadius: 8,
-                    },
-                    '& .MuiTabs-indicator': {
-                        backgroundColor: '#ffd700',
-                        height: 4,
-                        borderRadius: 2,
-                    },
-                }}
-            >
-                <Tab label={t('battle.locations')} value="locations" />
-                <Tab label={t('battle.dungeons')} value="dungeons" />
-            </Tabs>
+            <div className={styles.pixelTabsContainer}>
+                <div className={styles.pixelTabs}>
+                    <button
+                        className={styles.pixelTab + (battleTab === 'locations' ? ' ' + styles.selected : '')}
+                        onClick={() => setBattleTab('locations')}
+                        type="button"
+                    >
+                        {t('battle.locations')}
+                    </button>
+                    <button
+                        className={styles.pixelTab + (battleTab === 'dungeons' ? ' ' + styles.selected : '')}
+                        onClick={() => setBattleTab('dungeons')}
+                        type="button"
+                    >
+                        {t('battle.dungeons')}
+                    </button>
+                </div>
+            </div>
 
             {battleTab === 'locations' && (
                 <div>
@@ -152,9 +137,9 @@ function BattleSelection() {
                                         if (!enemy) return null;
                                         return (
                                             <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, marginBottom: 8, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
-                                                <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 4 }} />
+                                                <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 140, height: 140, marginBottom: 8 }} />
                                                 <Typography variant="body2" style={{ color: '#fff', fontWeight: 500, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{enemy.name}</Typography>
-                                                <Button size="small" variant="contained" color="primary" style={{ marginTop: 4, fontFamily: 'Press Start 2P', fontSize: '0.5rem' }} onClick={() => handleEnemySelect(enemy)}>
+                                                <Button size="large" variant="contained" color="primary" style={{ marginTop: 8, fontFamily: 'Press Start 2P', fontSize: '0.7rem', padding: '10px 24px' }} onClick={() => handleEnemySelect(enemy)}>
                                                     {t('battle.fight')}
                                                 </Button>
                                             </div>
@@ -224,7 +209,7 @@ function BattleSelection() {
                                         if (!enemy) return null;
                                         return (
                                             <div key={enemy.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 80, background: 'rgba(0,0,0,0.12)', borderRadius: 6, padding: 8 }}>
-                                                <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 80, height: 80, marginBottom: 2 }} />
+                                                <img src={getEnemyIcon(enemy.id)} alt={enemy.name} style={{ width: 140, height: 140, marginBottom: 4 }} />
                                                 <Typography variant="body2" style={{ color: '#fff', fontWeight: 500, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>{enemy.name}</Typography>
                                             </div>
                                         );
@@ -237,7 +222,7 @@ function BattleSelection() {
                                         if (!boss) return null;
                                         return (
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
-                                                <img src={getEnemyIcon(boss.id)} alt={boss.name} style={{ width: 48, height: 48 }} />
+                                                <img src={getEnemyIcon(boss.id)} alt={boss.name} style={{ width: 90, height: 90 }} />
                                                 <Typography variant="body1" style={{ color: '#ff5252', fontWeight: 600, fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>{boss.name}</Typography>
                                             </div>
                                         );
@@ -284,7 +269,7 @@ function BattleSelection() {
                                         </Tooltip>
                                     ))}
                                 </div>
-                                <Button size="medium" variant="contained" color="secondary" style={{ marginTop: 12, fontFamily: 'Press Start 2P', fontSize: '0.6rem' }} onClick={() => startDungeonRun(dungeon)}>
+                                <Button size="large" variant="contained" color="secondary" style={{ marginTop: 16, fontFamily: 'Press Start 2P', fontSize: '0.7rem', padding: '10px 24px' }} onClick={() => startDungeonRun(dungeon)}>
                                     {t('battle.enterDungeon')}
                                 </Button>
                             </>}
