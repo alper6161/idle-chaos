@@ -34,12 +34,16 @@ export const getRandomPotionDrop = (enemyId) => {
   for (const [potionId, chance] of Object.entries(dropChances)) {
     cumulativeChance += chance;
     if (random <= cumulativeChance) {
+      // Fix: POTION_TYPES uses uppercase keys, but potionId is lowercase
+      const potionTypeKey = potionId.toUpperCase();
+      const potionType = POTION_TYPES[potionTypeKey];
+      if (!potionType) return null;
       return {
         type: 'potion',
         id: potionId,
-        name: POTION_TYPES[potionId].name,
-        healAmount: POTION_TYPES[potionId].healAmount,
-        color: POTION_TYPES[potionId].color
+        name: potionType.name,
+        healAmount: potionType.healAmount,
+        color: potionType.color
       };
     }
   }

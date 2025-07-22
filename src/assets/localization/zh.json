@@ -149,7 +149,8 @@
     "sell": "出售",
     "sellValue": "出售价值",
     "open": "打开",
-    "clickToOpen": "点击打开"
+    "clickToOpen": "点击打开",
+    "enemyRespawn": "正在等待下一个敌人..."
   },
   "equipment": {
     "equip": "装备",

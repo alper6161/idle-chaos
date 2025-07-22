@@ -155,7 +155,8 @@
     "sell": "Sell",
     "sellValue": "Sell Value",
     "open": "Open",
-    "clickToOpen": "Click to open"
+    "clickToOpen": "Click to open",
+    "enemyRespawn": "Waiting for the next enemy..."
   },
   "equipment": {
     "equip": "Equip",

@@ -41,7 +41,6 @@ const GAME_STATE_KEYS = [
 const getTotalSkillLevel = (skillLevels) => {
     if (!skillLevels) return 0;
     let total = 0;
-    console.log(skillLevels);
     Object.values(skillLevels).forEach(category => {
         if (typeof category === 'object' && category !== null) {
             Object.values(category).forEach(skill => {
@@ -53,7 +52,6 @@ const getTotalSkillLevel = (skillLevels) => {
             });
         }
     });
-    console.log(total);
     return total;
 };
 

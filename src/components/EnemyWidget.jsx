@@ -13,35 +13,37 @@ const EnemyWidget = ({
 }) => {
     return (
         <div className={styles.fighter}>
-            <Avatar 
-                src={getEnemyIcon(currentEnemy?.id)} 
-                className={styles.avatar}
-                onError={(e) => {
-                    if (e.target && e.target.nextSibling) {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
-                    }
-                }}
-            />
-            <div 
-                className={styles.avatarFallback}
-                style={{ display: 'none' }}
-            >
-                {getEnemyInitial(currentEnemy?.name)}
-            </div>
-            <Typography variant="h6">{currentEnemy?.name}</Typography>
-            {damageDisplay.enemy && (
-                <div 
-                    className={`${styles.damageDisplay} ${
-                        damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
-                        damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
-                    }`}
-                >
-                    {damageDisplay.enemy}
-                </div>
-            )}
-            {spawnTimerUI || (
+            {spawnTimerUI ? (
+                spawnTimerUI
+            ) : (
                 <>
+                    <Avatar 
+                        src={getEnemyIcon(currentEnemy?.id)} 
+                        className={styles.avatar}
+                        onError={(e) => {
+                            if (e.target && e.target.nextSibling) {
+                                e.target.style.display = 'none';
+                                e.target.nextSibling.style.display = 'flex';
+                            }
+                        }}
+                    />
+                    <div 
+                        className={styles.avatarFallback}
+                        style={{ display: 'none' }}
+                    >
+                        {getEnemyInitial(currentEnemy?.name)}
+                    </div>
+                    <Typography variant="h6">{currentEnemy?.name}</Typography>
+                    {damageDisplay.enemy && (
+                        <div 
+                            className={`${styles.damageDisplay} ${
+                                damageDisplay.enemy === 'MISS' ? styles.missDisplay : 
+                                damageDisplay.enemyType === 'crit' ? styles.playerCritDamage : styles.playerDamage
+                            }`}
+                        >
+                            {damageDisplay.enemy}
+                        </div>
+                    )}
                     <div className={styles.hpBarContainer}>
                         <Typography 
                             className={`${styles.hpText} ${

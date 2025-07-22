@@ -647,80 +647,84 @@ function Battle() {
         <div className={styles.root}>
             {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
                 <>
-                    <div className={dungeonRun ? styles.dungeonHeader : styles.battleHeader}>
-                        {/* Header Title */}
-                        {dungeonRun ? (
-                            <>
-                                <Typography variant="h6">{dungeonRun.dungeon.name}</Typography>
-                                <Typography variant="subtitle1">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
-                            </>
-                        ) : (
-                            <Typography variant="h6">
-                                {(() => {
-                                    // Find location based on current enemy
-                                    if (currentEnemy) {
-                                        const location = LOCATIONS.find(loc => 
-                                            loc.enemies.includes(currentEnemy.id)
-                                        );
-                                        return location ? location.name : t('battle.location');
-                                    }
-                                    return t('battle.location');
-                                })()}
-                            </Typography>
-                        )}
-                        
-                        {/* Back Button */}
-                        <Button 
-                            variant="outlined" 
-                            onClick={handleBackToSelection}
-                            className={styles.backButton}
-                        >
-                            {t('battle.backToSelection')}
-                        </Button>
-                        
-                        {/* Test Buttons */}
-                        <Button 
-                            variant="contained" 
-                            color="error"
-                            onClick={handleTestDie}
-                            style={{ marginLeft: '8px' }}
-                        >
-                            🏴‍☠️ TEST: Die
-                        </Button>
-                        <Button 
-                            variant="contained" 
-                            color="success"
-                            onClick={handleKillEnemy}
-                            style={{ marginLeft: '8px' }}
-                        >
-                            ⚔️ TEST: Kill
-                        </Button>
-                        <Button 
-                            variant="contained" 
-                            color="info"
-                            onClick={handleTestDropPotion}
-                            style={{ marginLeft: '8px' }}
-                        >
-                            🧪 TEST: Drop Potion
-                        </Button>
-                        <Button 
-                            variant="contained" 
-                            color="warning"
-                            onClick={handleTestHurtSelf}
-                            style={{ marginLeft: '8px' }}
-                        >
-                            💔 TEST: Hurt Self
-                        </Button>
-                        {dungeonRun && !dungeonRun.completed && (
+                    <div className={dungeonRun ? styles.dungeonHeader : styles.battleHeader} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                        {/* Left: Back Button */}
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                            <Button 
+                                variant="outlined" 
+                                onClick={handleBackToSelection}
+                                className={styles.backButton}
+                                style={{ minWidth: 0 }}
+                            >
+                                {t('battle.backToSelection')}
+                            </Button>
+                        </div>
+                        {/* Center: Location or Dungeon Name */}
+                        <div style={{ flex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            {dungeonRun ? (
+                                <>
+                                    <Typography variant="h6" align="center">{dungeonRun.dungeon.name}</Typography>
+                                    <Typography variant="subtitle1" align="center">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
+                                </>
+                            ) : (
+                                <Typography variant="h6" align="center">
+                                    {(() => {
+                                        if (currentEnemy) {
+                                            const location = LOCATIONS.find(loc => 
+                                                loc.enemies.includes(currentEnemy.id)
+                                            );
+                                            return location ? location.name : t('battle.location');
+                                        }
+                                        return t('battle.location');
+                                    })()}
+                                </Typography>
+                            )}
+                        </div>
+                        {/* Right: Test Buttons */}
+                        <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                            <Button 
+                                variant="contained" 
+                                color="error"
+                                onClick={handleTestDie}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                🏴‍☠️ TEST: Die
+                            </Button>
+                            <Button 
+                                variant="contained" 
+                                color="success"
+                                onClick={handleKillEnemy}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                ⚔️ TEST: Kill
+                            </Button>
+                            <Button 
+                                variant="contained" 
+                                color="info"
+                                onClick={handleTestDropPotion}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                🧪 TEST: Drop Potion
+                            </Button>
                             <Button 
                                 variant="contained" 
                                 color="warning"
-                                onClick={handleCompleteDungeon}
+                                onClick={handleTestHurtSelf}
                                 style={{ marginLeft: '8px' }}
                             >
-                                🏆 TEST: Complete Dungeon
+                                💔 TEST: Hurt Self
                             </Button>
-                        )}
+                            {dungeonRun && !dungeonRun.completed && (
+                                <Button 
+                                    variant="contained" 
+                                    color="warning"
+                                    onClick={handleCompleteDungeon}
+                                    style={{ marginLeft: '8px' }}
+                                >
+                                    🏆 TEST: Complete Dungeon
+                                </Button>
+                            )}
+                        </div>
                     </div>
                     
                     <div className={styles.battleContainer}>
@@ -751,6 +755,16 @@ function Battle() {
                                 damageDisplay={damageDisplay}
                                 getStatDisplayWithAchievement={getStatDisplayWithAchievementLocal}
                                 getEnemyHpDisplayWithAchievement={getEnemyHpDisplayWithAchievementLocal}
+                                spawnTimerUI={isWaitingForEnemy ? (
+                                    <div className={styles.spawnTimerContainer}>
+                                        <span className={styles.spawnTimerLabel}>
+                                            {t('battle.enemyRespawn', 'Yeni düşman için geri sayım:')}
+                                        </span>
+                                        <span className={styles.spawnTimerCountdown}>
+                                            {`${Math.ceil(5 - (enemySpawnProgress / 20))} sn`}
+                                        </span>
+                                    </div>
+                                ) : null}
                             />
                             <BattleLog 
                                 battleLogVisible={battleLogVisible}
