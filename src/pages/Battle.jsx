@@ -788,7 +788,9 @@ function Battle() {
                                 playerStats={playerStats}
                             />
 
-                            <LootTable currentEnemy={currentEnemy} />
+                            {!(dungeonRun && !dungeonRun.completed) && (
+                                <LootTable currentEnemy={currentEnemy} />
+                            )}
 
                             <LootBag
                                 lootBag={lootBag}
