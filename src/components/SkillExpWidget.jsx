@@ -26,14 +26,12 @@ const SkillExpWidget = ({ selectedAttackType }) => {
     const masteryLevels = Object.keys(skillBuffs).map(Number).sort((a, b) => a - b);
     
     // Calculate progress percentage
-    console.log('Skill XP Debug:', { skillName: selectedAttackType, level, xp, xpToNext });
     
     // Simplest approach: treat xp as current level progress and xpToNext as remaining
     const totalXPForLevel = xp + xpToNext;
     const progressPercentage = totalXPForLevel > 0 ? 
         Math.min(100, Math.max(0, (xp / totalXPForLevel) * 100)) : 0;
     
-    console.log('Progress Debug:', { totalXPForLevel, progressPercentage });
 
     // Helper function to format bonus display
     const formatBonus = (bonus) => {
