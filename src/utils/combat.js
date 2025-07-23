@@ -10,19 +10,6 @@ export function getCombatStats(player, enemy) {
   const enemyATK = enemy?.ATK || 8;
   const enemyDEF = enemy?.DEF || 3;
 
-  const calculateHitChance = (attackerATK, defenderDEF) => {
-    const ratio = attackerATK / Math.max(defenderDEF, 1);
-    let baseChance = 60;
-    
-    if (ratio >= 2) baseChance += 25;
-    else if (ratio >= 1.5) baseChance += 15;
-    else if (ratio >= 1) baseChance += 5;
-    else if (ratio >= 0.5) baseChance -= 10;
-    else baseChance -= 25;
-    
-    return Math.max(5, Math.min(95, baseChance));
-  };
-
   const calculateDamage = (attackerATK, defenderDEF) => {
     let damage = attackerATK - (defenderDEF * 0.5);
     damage = Math.max(1, damage);
@@ -30,9 +17,9 @@ export function getCombatStats(player, enemy) {
   };
 
   return {
-    playerHitChance: calculateHitChance(playerATK, enemyDEF),
+    playerHitChance: calculateAccuracy(playerATK, enemyDEF),
     playerHit: calculateDamage(playerATK, enemyDEF),
-    enemyHitChance: calculateHitChance(enemyATK, playerDEF),
+    enemyHitChance: calculateAccuracy(enemyATK, playerDEF),
     enemyHit: calculateDamage(enemyATK, playerDEF),
     playerATK: playerATK,
     playerDEF: playerDEF,

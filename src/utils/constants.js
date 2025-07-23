@@ -52,6 +52,13 @@ export const ATTACK_TYPES = {
     RANGED: 'range',
 };
 
+export const CHARACTER_CATEGORIES = {
+    WARRIOR: 'warrior',
+    RANGER: 'ranger',
+    WIZARD: 'wizard',
+    CLERIC: 'cleric'
+};
+
 export const SKILL_LEVEL_BONUSES = {
     stab: {
         ATK: 0.5,
@@ -147,19 +154,4 @@ export const SKILL_LEVEL_BONUSES = {
         MIN_DAMAGE: 0.4,
         MAX_DAMAGE: 0.5
     },
-    critChance: {
-        ATK: 0.2,
-        MIN_DAMAGE: 0.1,
-        MAX_DAMAGE: 0.2
-    },
-    critDamage: {
-        ATK: 0.3,
-        MIN_DAMAGE: 0.2,
-        MAX_DAMAGE: 0.3
-    },
-    attackSpeed: {
-        ATK: 0.2,
-        MIN_DAMAGE: 0.1,
-        MAX_DAMAGE: 0.2
-    }
 };

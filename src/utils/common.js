@@ -1,3 +1,5 @@
+import { MAGIC_TYPES, MELEE_TYPES, RANGED_TYPES, CHARACTER_CATEGORIES } from './constants.js';
+
 export const getSkillIcon = (skill) => `/images/skills/${skill}.png`;
 
 export const getEnemyIcon = (enemyId) => {
@@ -62,6 +64,15 @@ export const getCharacterName = (character) => {
         cleric: 'CLERIC'
     };
     return names[character] || 'WARRIOR';
+};
+
+// Attack type to character category mapping using constants
+export const getCategoryByAttackType = (attackType) => {
+    if (MELEE_TYPES.includes(attackType)) return CHARACTER_CATEGORIES.WARRIOR;
+    if (RANGED_TYPES.includes(attackType)) return CHARACTER_CATEGORIES.RANGER;
+    if (MAGIC_TYPES.includes(attackType)) return CHARACTER_CATEGORIES.WIZARD;
+    
+    return CHARACTER_CATEGORIES.WARRIOR; // Default to warrior
 };
 
 export const SYSTEM_COLORS = {

@@ -4,27 +4,6 @@ import { calculateSkillBuffs, calculateSkillBuffsForAttackType } from './playerS
 import { Box, Typography } from '@mui/material';
 import { SKILL_LEVEL_BONUSES } from './constants.js';
 
-export const calculateHitChance = (attackerATK, defenderDEF, accuracyBonus = 0) => {
-    // Ensure we have valid numbers
-    const atk = Number(attackerATK) || 0;
-    const def = Number(defenderDEF) || 0;
-    const accuracy = Number(accuracyBonus) || 0;
-    
-    const ratio = atk / Math.max(def, 1);
-    let baseChance = 60;
-    
-    if (ratio >= 2) baseChance += 25;
-    else if (ratio >= 1.5) baseChance += 15;
-    else if (ratio >= 1.2) baseChance += 10;
-    else if (ratio < 0.8) baseChance -= 20;
-    else if (ratio < 0.5) baseChance -= 35;
-    
-    // Apply accuracy bonus from skills (like stab)
-    baseChance += accuracy;
-    
-    return Math.max(5, Math.min(95, baseChance));
-};
-
 export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}) => {
     // Ensure we have valid numbers
     const atk = Number(attackerATK) || 0;
@@ -100,7 +79,7 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
     // Apply ATK bonus from skill levels
     const effectiveATK = battle.player.ATK + atkBonus;
     
-    const hitChance = calculateHitChance(effectiveATK, battle.enemy.DEF, 0);
+    const hitChance = calculateAccuracy(battle.player.HIT_CHANCE, battle.enemy.DEF);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
@@ -174,7 +153,7 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
 };
 
 export const processEnemyAttack = (battle, setDamageDisplay) => {
-    const hitChance = calculateHitChance(battle.enemy.ATK, battle.player.DEF);
+    const hitChance = calculateAccuracy(battle.enemy.HIT_CHANCE, battle.player.DEF);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {

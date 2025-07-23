@@ -6,6 +6,7 @@ import { getSkillIcon } from "../utils/common.js";
 import { useTranslate } from "../hooks/useTranslate";
 import { getSkillData } from "../utils/skillExperience.js";
 import { Tooltip } from "@mui/material";
+import { useBattleContext } from '../contexts/BattleContext';
 
 // Helper to chunk an array into groups of n
 function chunkArray(array, size) {
@@ -19,6 +20,7 @@ function chunkArray(array, size) {
 function MainMenu() {
     const { t } = useTranslate();
     const [skills, setSkills] = useState(INITIAL_SKILLS);
+    const { selectedAttackType, setSelectedAttackType } = useBattleContext();
 
     useEffect(() => {
         const loadSkills = () => {
@@ -126,9 +128,22 @@ function MainMenu() {
                                             return <div key={i} style={{ flex: 1, minWidth: 0 }} />;
                                         }
                                         const [skill, skillObj] = skillPair;
+                                        const isSelected = selectedAttackType === skill;
                                         return (
                                             <Tooltip key={skill} title={t(`skills.${skill}`)} arrow placement="right">
-                                                <div className={styles.skillCategorySkill} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 0, cursor: 'pointer' }}>
+                                                <div
+                                                    className={styles.skillCategorySkill}
+                                                    style={{
+                                                        display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, minWidth: 0, cursor: 'pointer',
+                                                        border: isSelected ? `2px solid #fff` : '2px solid transparent',
+                                                        background: isSelected ? '#4a4a6a' : 'transparent',
+                                                        borderRadius: 6,
+                                                        boxShadow: isSelected ? '0 0 0 2px #fff' : 'none',
+                                                        padding: 2,
+                                                        transition: 'all 0.15s',
+                                                    }}
+                                                    onClick={() => setSelectedAttackType(skill)}
+                                                >
                                                     <img src={getSkillIcon(skill)} alt={skill} style={{ width: 28, height: 28, marginBottom: 8, filter: 'drop-shadow(1px 1px 0px #000)' }} />
                                                     <span className={styles.skillLevel} style={{ fontSize: '0.55rem', color: borderColor, fontWeight: 'bold', textShadow: '1px 1px 0px #000' }}>{skillObj.level}/99</span>
                                                 </div>

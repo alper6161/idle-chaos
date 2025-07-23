@@ -932,6 +932,21 @@ export const BattleProvider = ({ children }) => {
         setDeathDialog({ open: false, countdown: 15, goldLost: 0, equipmentLost: [] });
     };
 
+    // Custom setSelectedAttackType that resets attack bar
+    const setSelectedAttackTypeWithReset = (newAttackType) => {
+        if (newAttackType !== selectedAttackType) {
+            setSelectedAttackType(newAttackType);
+            
+            // Reset attack bar when attack type changes
+            if (currentBattle) {
+                setCurrentBattle(prev => ({
+                    ...prev,
+                    playerProgress: 0
+                }));
+            }
+        }
+    };
+
     const value = {
         // Battle State
         isBattleActive,
@@ -956,7 +971,7 @@ export const BattleProvider = ({ children }) => {
         // Battle Actions
         startBattle,
         stopBattle,
-        setSelectedAttackType,
+        setSelectedAttackType: setSelectedAttackTypeWithReset,
         startEnemySpawnTimer,
         spawnNewEnemy,
         setDamageDisplay,

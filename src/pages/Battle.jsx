@@ -52,6 +52,7 @@ import BattleLog from "../components/BattleLog";
 import ChestPreviewModal from "../components/ChestPreviewModal";
 import ChestDropDialog from "../components/ChestDropDialog";
 import DungeonCompleteDialog from "../components/DungeonCompleteDialog";
+import SkillExpWidget from "../components/SkillExpWidget";
 
 import {
     handleTestDropPotion,
@@ -601,6 +602,11 @@ function Battle() {
                                 battleLog={battleLog}
                                 onClearBattleLog={() => setBattleLog([])}
                             />
+                        </div>
+                        
+                        {/* Skill Experience Widget */}
+                        <div style={{ display: 'flex', width: '100%', marginTop: '8px' }}>
+                            <SkillExpWidget selectedAttackType={selectedAttackType} />
                         </div>
                         <div className={styles.widgetContainer}>
                             <PlayerStats 

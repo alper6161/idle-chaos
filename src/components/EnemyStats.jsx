@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { Typography, Divider, Box } from '@mui/material';
 import { useTranslate } from '../hooks/useTranslate';
-import { calculateHitChance, calculateDamageRange } from '../utils/battleUtils.jsx';
+import { calculateDamageRange } from '../utils/battleUtils.jsx';
 import { getDifficultyColor, getDifficultyText } from '../utils/battleUtils.jsx';
+import { calculateAccuracy } from '../utils/battleUtils.jsx';
 import styles from '../assets/styles/Battle.module.scss';
 
 const EnemyStats = ({
@@ -55,7 +56,8 @@ const EnemyStats = ({
     // Calculate hit chance against player
     const hitChance = useMemo(() => {
         if (!enemyStats || !playerStats) return null;
-        return calculateHitChance(enemyStats.ATK, playerStats.DEF);
+        // Yeni: calculateAccuracy fonksiyonu ile hesapla
+        return calculateAccuracy(enemyStats.ATK, playerStats.DEF);
     }, [enemyStats, playerStats]);
 
     if (!currentEnemy || !enemyStats) {

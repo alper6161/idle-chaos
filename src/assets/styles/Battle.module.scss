@@ -2009,3 +2009,31 @@
   color: #232346;
   box-shadow: none !important;
 }
+
+.skillExpWidget {
+  width: 100%;
+  flex: 1;
+  
+  // Pixel art styling
+  .MuiBox-root {
+    position: relative;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #4a4a6a, #5a5a7a, #6a6a8a, #7a7a9a);
+      z-index: -1;
+      border-radius: 0;
+    }
+  }
+  
+  // Hover effect
+  &:hover .MuiBox-root {
+    transform: translateY(-1px);
+    transition: all 0.2s ease;
+  }
+}

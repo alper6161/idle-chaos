@@ -344,32 +344,18 @@ export const getWeaponType = (equippedWeapon) => {
 };
 
 export const getAvailableAttackTypes = (weaponType) => {
-    switch (weaponType) {
-        case 'melee':
-            return [
-                { type: 'stab', name: 'Stab', icon: '🗡️', description: '🗡️ Stab: +XP to Stab skill (Accuracy/Crit Chance)' },
-                { type: 'slash', name: 'Slash', icon: '⚔️', description: '⚔️ Slash: +XP to Slash skill (Max Damage Bonus)' },
-                { type: 'crush', name: 'Crush', icon: '🔨', description: '🔨 Crush: +XP to Crush skill (Crit Damage)' }
-            ];
-        case 'ranged':
-            return [
-                { type: 'archery', name: 'Archery', icon: '🏹', description: '🏹 Archery: +XP to Archery skill (Crit Chance)' },
-                { type: 'throwing', name: 'Throwing', icon: '🎯', description: '🎯 Throwing: +XP to Throwing skill (Attack Speed)' },
-                { type: 'poison', name: 'Poison', icon: '☠️', description: '☠️ Poison: +XP to Poison skill (Damage over Time)' }
-            ];
-        case 'magic':
-            return [
-                { type: 'lightning', name: 'Lightning', icon: '⚡', description: '⚡ Lightning: +XP to Lightning skill (+Attack Power)' },
-                { type: 'fire', name: 'Fire', icon: '🔥', description: '🔥 Fire: +XP to Fire skill (+Attack Power)' },
-                { type: 'ice', name: 'Ice', icon: '❄️', description: '❄️ Ice: +XP to Ice skill (+Attack Power)' }
-            ];
-        default:
-            return [
-                { type: 'stab', name: 'Stab', icon: '🗡️', description: '🗡️ Stab: +XP to Stab skill (Accuracy/Crit Chance)' },
-                { type: 'slash', name: 'Slash', icon: '⚔️', description: '⚔️ Slash: +XP to Slash skill (Max Damage Bonus)' },
-                { type: 'crush', name: 'Crush', icon: '🔨', description: '🔨 Crush: +XP to Crush skill (Crit Damage)' }
-            ];
-    }
+    // Return all attack types regardless of weapon type
+    return [
+        { type: 'stab', name: 'Stab', icon: '🗡️', description: '🗡️ Stab: +XP to Stab skill (Accuracy/Crit Chance)' },
+        { type: 'slash', name: 'Slash', icon: '⚔️', description: '⚔️ Slash: +XP to Slash skill (Max Damage Bonus)' },
+        { type: 'crush', name: 'Crush', icon: '🔨', description: '🔨 Crush: +XP to Crush skill (Crit Damage)' },
+        { type: 'archery', name: 'Archery', icon: '🏹', description: '🏹 Archery: +XP to Archery skill (Crit Chance)' },
+        { type: 'throwing', name: 'Throwing', icon: '🎯', description: '🎯 Throwing: +XP to Throwing skill (Attack Speed)' },
+        { type: 'poison', name: 'Poison', icon: '☠️', description: '☠️ Poison: +XP to Poison skill (Damage over Time)' },
+        { type: 'lightning', name: 'Lightning', icon: '⚡', description: '⚡ Lightning: +XP to Lightning skill (+Attack Power)' },
+        { type: 'fire', name: 'Fire', icon: '🔥', description: '🔥 Fire: +XP to Fire skill (+Attack Power)' },
+        { type: 'ice', name: 'Ice', icon: '❄️', description: '❄️ Ice: +XP to Ice skill (+Attack Power)' }
+    ];
 };
 
  

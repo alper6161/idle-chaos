@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Typography, Divider, Box } from '@mui/material';
 import { useTranslate } from '../hooks/useTranslate';
-import { calculateHitChance, calculateDamageRange } from '../utils/battleUtils.jsx';
+import { calculateDamageRange } from '../utils/battleUtils.jsx';
 import { calculateSkillBuffsForAttackType, getEquipmentBonuses } from '../utils/playerStats.js';
 import { calculateAccuracy } from '../utils/battleUtils.jsx';
 import styles from '../assets/styles/Battle.module.scss';

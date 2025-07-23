@@ -33,11 +33,11 @@ const PlayerWidget = ({
             )}
             <div className={styles.hpBarContainer}>
                 <Typography className={styles.hpText}>
-                    HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || playerStats.HEALTH}
+                    HP: {currentBattle?.player?.currentHealth || playerHealth}/{currentBattle?.player?.HEALTH || playerStats?.HEALTH}
                 </Typography>
                 <LinearProgress
                     variant="determinate"
-                    value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : (playerHealth / playerStats.HEALTH) * 100}
+                    value={currentBattle ? (currentBattle.player.currentHealth / currentBattle.player.HEALTH) * 100 : (playerHealth / playerStats?.HEALTH) * 100}
                     className={`${styles.progress} ${styles.playerHpBar}`}
                 />
             </div>
