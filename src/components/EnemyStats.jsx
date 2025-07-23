@@ -84,32 +84,33 @@ const EnemyStats = ({
 
                 {/* Attack */}
                 <Typography>
-                    ⚔️ {t('battle.attack')}: {enemyStats.ATK.toFixed(1)}
+                    ⚔️ {t('battle.attack')}: {enemyStats.ATK !== undefined && enemyStats.ATK !== null ? enemyStats.ATK.toFixed(1) : '-'}
                 </Typography>
 
                 {/* Defense */}
                 <Typography>
-                    🛡️ {t('battle.defense')}: {enemyStats.DEF.toFixed(1)}
+                    🛡️ {t('battle.defense')}: {enemyStats.DEF !== undefined && enemyStats.DEF !== null ? enemyStats.DEF.toFixed(1) : '-'}
                 </Typography>
 
                 {/* Health */}
                 <Typography>
-                    ❤️ {t('battle.health')}: {enemyStats.currentHealth}/{enemyStats.HEALTH.toFixed(0)}
+                    ❤️ {t('battle.health')}: {enemyStats.currentHealth !== undefined && enemyStats.currentHealth !== null ? enemyStats.currentHealth : '-'}
+                    /{enemyStats.HEALTH !== undefined && enemyStats.HEALTH !== null ? enemyStats.HEALTH.toFixed(0) : '-'}
                 </Typography>
 
                 {/* Attack Speed */}
                 <Typography>
-                    ⚡ {t('battle.attackSpeed')}: {enemyStats.ATTACK_SPEED.toFixed(1)}
+                    ⚡ {t('battle.attackSpeed')}: {enemyStats.ATTACK_SPEED !== undefined && enemyStats.ATTACK_SPEED !== null ? enemyStats.ATTACK_SPEED.toFixed(1) : '-'}
                 </Typography>
 
                 {/* Critical Chance */}
                 <Typography>
-                    🎯 {t('battle.criticalChance')}: {enemyStats.CRIT_CHANCE.toFixed(1)}%
+                    🎯 {t('battle.criticalChance')}: {enemyStats.CRIT_CHANCE !== undefined && enemyStats.CRIT_CHANCE !== null ? enemyStats.CRIT_CHANCE.toFixed(1) : '-'}%
                 </Typography>
 
                 {/* Critical Damage */}
                 <Typography>
-                    💥 {t('battle.criticalDamage')}: {enemyStats.CRIT_DAMAGE.toFixed(1)}%
+                    💥 {t('battle.criticalDamage')}: {enemyStats.CRIT_DAMAGE !== undefined && enemyStats.CRIT_DAMAGE !== null ? enemyStats.CRIT_DAMAGE.toFixed(1) : '-'}%
                 </Typography>
 
                 {/* Battle-specific stats */}

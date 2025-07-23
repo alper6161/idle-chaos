@@ -111,7 +111,8 @@ function Battle() {
         setEnemiesData,
         setDungeonCompleteCallback,
         refreshPotions,
-        checkAutoPotion
+        checkAutoPotion,
+        handleDungeonEnemyDefeated // <-- add this
     } = useBattleContext();
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
 
@@ -399,9 +400,8 @@ function Battle() {
             }
             
             setBattleLog(prev => [...prev, ...battleLogMessages]);
-            
-            // Start enemy spawn timer for both dungeon and regular battles
-            startEnemySpawnTimer();
+            // INSTANTLY spawn next enemy for test kill (skip respawn timer)
+            spawnNewEnemy();
         }
     };
 
@@ -549,10 +549,22 @@ function Battle() {
     };
 
     const handleChestClick = (chestItem, index) => {
+        // If it's a dungeon chest, open the preview modal for that dungeon
+        if (chestItem && chestItem.includes('🎁') && chestItem.includes('Chest')) {
+            const dungeonName = chestItem.replace('🎁 ', '').replace(' Chest', '');
+            const dungeon = DUNGEONS.find(d => d.name === dungeonName);
+            setChestPreviewModal({ open: true, dungeon, chestItem: null });
+            return;
+        }
         handleChestClickLogic(chestItem, index, DUNGEONS, handleTakeItem, setChestPreviewModal);
     };
 
     const handleOpenChest = () => {
+        // Remove the chest from the loot bag after opening
+        if (chestPreviewModal.open && chestPreviewModal.dungeon) {
+            const chestName = `🎁 ${chestPreviewModal.dungeon.name} Chest`;
+            setLootBag(prev => prev.filter(item => item !== chestName));
+        }
         const result = handleOpenChestLogic(
             chestPreviewModal,
             convertLootBagToEquipment,
@@ -592,17 +604,25 @@ function Battle() {
         showDeathDialog();
     };
 
-    const handleCompleteDungeon = () => {
-        // Force complete the dungeon by setting it to final stage and then calling spawnNewEnemy
-        setDungeonRun(prev => ({ ...prev, currentStage: 6 }));
+    // Helper to force-complete the dungeon for testing
+    const completeDungeonRun = () => {
+        if (!dungeonRun || dungeonRun.completed) return;
+        // Set currentStage to last stage
+        setDungeonRun(prev => ({ ...prev, currentStage: 6, completed: true }));
         setIsBattleActive(false);
         setCurrentBattle(null);
         setCurrentEnemy(null);
-        
-        // Manually trigger the dungeon completion logic
-        setTimeout(() => {
-            spawnNewEnemy(); // This will call handleDungeonEnemyDefeated
-        }, 100);
+        // Add chest to loot bag if not already present
+        const chestName = `🎁 ${dungeonRun.dungeon.name} Chest`;
+        if (!lootBag.includes(chestName)) {
+            setLootBag([...lootBag, chestName]);
+        }
+        // Open dungeon complete dialog
+        setDungeonCompleteDialog({ open: true, countdown: 5 });
+    };
+
+    const handleCompleteDungeon = () => {
+        completeDungeonRun();
     };
 
     // Add a useEffect to handle the countdown and auto-restart:
@@ -613,7 +633,7 @@ function Battle() {
                     if (prev.countdown <= 1) {
                         // Auto-restart
                         setDungeonCompleteDialog({ open: false, countdown: 5 });
-                        
+
                         // Properly restart the dungeon
                         const currentDungeon = dungeonRun?.dungeon;
                         if (currentDungeon) {
@@ -624,7 +644,7 @@ function Battle() {
                                 chestAwarded: false,
                                 stages: currentDungeon.enemies || []
                             });
-                            
+
                             // Start the first enemy battle
                             const firstEnemyId = currentDungeon.enemies[0];
                             const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
@@ -632,17 +652,33 @@ function Battle() {
                                 startBattle(firstEnemy, selectedAttackType);
                             }
                         }
-                        
+
                         return { open: false, countdown: 5 };
+                    }
+                    // --- ADD CHEST TO LOOT BAG WHEN DUNGEON COMPLETES ---
+                    if (prev.countdown === 1 && dungeonRun && dungeonRun.dungeon && !dungeonRun.chestAwarded) {
+                        // Add chest to loot bag
+                        const chestName = `🎁 ${dungeonRun.dungeon.name} Chest`;
+                        if (!lootBag.includes(chestName)) {
+                            setLootBag([...lootBag, chestName]);
+                        }
+                        setDungeonRun({ ...dungeonRun, chestAwarded: true });
                     }
                     return { ...prev, countdown: prev.countdown - 1 };
                 });
             }, 1000);
             return () => clearTimeout(timer);
         }
-    }, [dungeonCompleteDialog]);
+    }, [dungeonCompleteDialog, dungeonRun, lootBag]);
 
     // Battle Screen
+    useEffect(() => {
+        // If there is no active battle, dungeon run, or waiting for enemy, redirect to battle-selection
+        if (!isBattleActive && !dungeonRun && !isWaitingForEnemy) {
+            navigate('/battle-selection');
+        }
+    }, [isBattleActive, dungeonRun, isWaitingForEnemy, navigate]);
+
     return (
         <div className={styles.root}>
             {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
@@ -662,10 +698,10 @@ function Battle() {
                         {/* Center: Location or Dungeon Name */}
                         <div style={{ flex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             {dungeonRun ? (
-                                <>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                     <Typography variant="h6" align="center">{dungeonRun.dungeon.name}</Typography>
                                     <Typography variant="subtitle1" align="center">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
-                                </>
+                                </div>
                             ) : (
                                 <Typography variant="h6" align="center">
                                     {(() => {

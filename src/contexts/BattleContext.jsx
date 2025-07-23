@@ -980,6 +980,7 @@ export const BattleProvider = ({ children }) => {
         setDeathDialog,
         setEnemiesData,
         setDungeonCompleteCallback,
+        handleDungeonEnemyDefeated,
         
         // Utilities
         saveBattleState,
