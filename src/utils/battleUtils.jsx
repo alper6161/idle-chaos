@@ -624,3 +624,14 @@ export const handleOpenChestLogic = (
     
     return null;
 }; 
+
+export function calculateAccuracy(skill, defense) {
+    if (Math.round(skill) === Math.round(defense)) return 25;
+    if (skill > defense) {
+        const diff = skill - defense;
+        return Math.min(100, 25 + Math.floor(Math.log2(diff + 1) * 10));
+    } else {
+        const diff = defense - skill;
+        return Math.max(5, 25 - Math.floor(Math.log2(diff + 1) * 10));
+    }
+} 

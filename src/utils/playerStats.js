@@ -5,12 +5,11 @@ import { getSkillData } from './skillExperience.js';
 import { SKILL_LEVEL_BONUSES } from './constants.js';
 
 export const BASE_PLAYER_STATS = {
-    ATK: 6,
-    DEF: 3,
-    HEALTH: 60,
+    ATK: 1,
+    DEF: 1,
+    MAGIC_RES: 1,
+    HEALTH: 10,
     ATTACK_SPEED: 2.0,
-    CRIT_CHANCE: 3,
-    CRIT_DAMAGE: 120
 };
 
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;

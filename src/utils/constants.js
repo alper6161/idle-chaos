@@ -42,6 +42,16 @@ export const INITIAL_SKILLS = {
     }
 };
 
+export const MAGIC_TYPES = ['fire', 'ice', 'lightning'];
+export const MELEE_TYPES = ['slash', 'stab', 'crush'];
+export const RANGED_TYPES = ['archery', 'throwing', 'poison'];
+
+export const ATTACK_TYPES = {
+    MAGIC: 'magic',
+    MELEE: 'melee',
+    RANGED: 'range',
+};
+
 export const SKILL_LEVEL_BONUSES = {
     stab: {
         ATK: 0.5,

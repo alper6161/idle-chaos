@@ -3,6 +3,7 @@ import { Typography, Divider, Box } from '@mui/material';
 import { useTranslate } from '../hooks/useTranslate';
 import { calculateHitChance, calculateDamageRange } from '../utils/battleUtils.jsx';
 import { calculateSkillBuffsForAttackType, getEquipmentBonuses } from '../utils/playerStats.js';
+import { calculateAccuracy } from '../utils/battleUtils.jsx';
 import styles from '../assets/styles/Battle.module.scss';
 
 const PlayerStats = ({
@@ -68,10 +69,10 @@ const PlayerStats = ({
         if (!currentBattle || !currentEnemy) return null;
         
         const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
-        const accuracyBonus = skillBuffs.ACCURACY_BONUS || 0;
         const atkBonus = skillBuffs.ATK || 0;
         const effectiveATK = currentBattle.player.ATK + atkBonus;
-        return calculateHitChance(effectiveATK, currentBattle.enemy.DEF, accuracyBonus);
+        // Yeni: calculateAccuracy fonksiyonu ile hesapla
+        return calculateAccuracy(effectiveATK, currentBattle.enemy.DEF);
     }, [currentBattle, currentEnemy, selectedAttackType]);
 
     return (

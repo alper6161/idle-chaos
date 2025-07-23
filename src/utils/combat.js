@@ -1,6 +1,8 @@
 // Combat System
 
 import { applyGoldMultiplier, applyDamageMultiplier } from './buffUtils.js';
+import { MAGIC_TYPES, MELEE_TYPES, RANGED_TYPES, ATTACK_TYPES } from './constants.js';
+import { calculateAccuracy } from './battleUtils.jsx';
 
 export function getCombatStats(player, enemy) {
   const playerATK = player?.ATK || 10;
@@ -90,18 +92,15 @@ export function battle(player, enemy) {
     HEALTH: player.HEALTH || 100,
     maxHealth: player.HEALTH || 100,
     ATTACK_SPEED: player.ATTACK_SPEED || 2.0,
-    CRIT_CHANCE: player.CRIT_CHANCE || 5,
-    CRIT_DAMAGE: player.CRIT_DAMAGE || 150
+    ATTACK_TYPE: player.ATTACK_TYPE || 'melee',
   };
-  
   const enemyFighter = {
     ATK: enemy.ATK || 8,
     DEF: enemy.DEF || 3,
     HEALTH: enemy.HEALTH || 80,
     maxHealth: enemy.HEALTH || 80,
     ATTACK_SPEED: enemy.ATTACK_SPEED || 1.5,
-    CRIT_CHANCE: enemy.CRIT_CHANCE || 3,
-    CRIT_DAMAGE: enemy.CRIT_DAMAGE || 120
+    ATTACK_TYPE: enemy.ATTACK_TYPE || 'melee',
   };
 
   const battleLog = [];
@@ -109,41 +108,72 @@ export function battle(player, enemy) {
   let enemyProgress = 0;
   let time = 0;
 
+  function getAccuracy(attacker, defender) {
+    if (MAGIC_TYPES.includes(attacker.ATTACK_TYPE)) return 100;
+    const skill = attacker.ATK;
+    const defense = defender.DEF;
+    return calculateAccuracy(skill, defense);
+  }
+
+  function calculateDamage(attacker, defender) {
+    // Determine attack type
+    const type = attacker.ATTACK_TYPE;
+    // For magic, use skill level for the specific type
+    if (MAGIC_TYPES.includes(type)) {
+      // Example: attacker[type + '_LEVEL'] or attacker[type] or attacker.ATK
+      // For now, fallback to ATK as skill level
+      const skill = attacker[type?.toUpperCase() + '_LEVEL'] || attacker.ATK;
+      const magicRes = defender.MAGIC_RES || 0;
+      // Category-specific base ranges
+      let min = 1, max = 5;
+      if (type === 'lightning') { min = 1; max = 10; }
+      if (type === 'fire') { min = 3; max = 4; }
+      if (type === 'ice') { min = 2; max = 6; }
+      if (skill === magicRes) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      } else if (skill > magicRes) {
+        // Skill üstünse max artır
+        const bonus = Math.min(10, (skill - magicRes) * 2);
+        return Math.floor(Math.random() * ((max + bonus) - min + 1)) + min;
+      } else {
+        // Magic res üstünse min azalt
+        const penalty = Math.min(min - 1, (magicRes - skill));
+        const newMin = Math.max(1, min - penalty);
+        return Math.floor(Math.random() * (max - newMin + 1)) + newMin;
+      }
+    }
+    // Melee/Range: skill vs DEF
+    const skill = attacker.ATK;
+    const defense = defender.DEF;
+    let min = 1, max = 5;
+    if (skill === defense) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    } else if (skill > defense) {
+      const bonus = Math.min(10, (skill - defense) * 2);
+      return Math.floor(Math.random() * ((max + bonus) - min + 1)) + min;
+    } else {
+      const penalty = Math.min(min - 1, (defense - skill));
+      const newMin = Math.max(1, min - penalty);
+      return Math.floor(Math.random() * (max - newMin + 1)) + newMin;
+    }
+  }
+
   while (playerFighter.HEALTH > 0 && enemyFighter.HEALTH > 0) {
     playerProgress += (playerFighter.ATTACK_SPEED * 2);
     enemyProgress += (enemyFighter.ATTACK_SPEED * 2);
-    
+
     if (playerProgress >= 100) {
-      const playerHitChance = calculateHitChance(playerFighter.ATK, enemyFighter.DEF);
+      const playerAccuracy = getAccuracy(playerFighter, enemyFighter);
       const playerHitRoll = Math.random() * 100;
-      
-      if (playerHitRoll <= playerHitChance) {
-        const critRoll = Math.random() * 100;
-        const isCrit = critRoll <= playerFighter.CRIT_CHANCE;
-        
-        let damage = calculateDamage(playerFighter.ATK, enemyFighter.DEF);
-        
-        damage = applyDamageMultiplier(damage);
-        
-        if (isCrit) {
-          damage = Math.floor(damage * (playerFighter.CRIT_DAMAGE / 100));
-          battleLog.push({
-            type: 'player_crit',
-            damage: damage,
-            enemyHealth: enemyFighter.HEALTH,
-            enemyMaxHealth: enemyFighter.maxHealth,
-            message: `Player CRITICAL HIT for ${damage} damage!`
-          });
-        } else {
-          battleLog.push({
-            type: 'player_attack',
-            damage: damage,
-            enemyHealth: enemyFighter.HEALTH,
-            enemyMaxHealth: enemyFighter.maxHealth,
-            message: `Player hits for ${damage} damage!`
-          });
-        }
-        
+      if (playerHitRoll <= playerAccuracy) {
+        let damage = calculateDamage(playerFighter, enemyFighter);
+        battleLog.push({
+          type: 'player_attack',
+          damage: damage,
+          enemyHealth: enemyFighter.HEALTH,
+          enemyMaxHealth: enemyFighter.maxHealth,
+          message: `Player hits for ${damage} damage!`
+        });
         enemyFighter.HEALTH = Math.max(0, enemyFighter.HEALTH - damage);
       } else {
         battleLog.push({
@@ -160,40 +190,23 @@ export function battle(player, enemy) {
     if (enemyFighter.HEALTH <= 0) {
       battleLog.push({
         type: 'enemy_defeated',
-        message: "Enemy defeated! Player wins!"
+        message: 'Enemy defeated! Player wins!'
       });
       break;
     }
 
     if (enemyProgress >= 100) {
-      const enemyHitChance = calculateHitChance(enemyFighter.ATK, playerFighter.DEF);
+      const enemyAccuracy = getAccuracy(enemyFighter, playerFighter);
       const enemyHitRoll = Math.random() * 100;
-      
-      if (enemyHitRoll <= enemyHitChance) {
-        const critRoll = Math.random() * 100;
-        const isCrit = critRoll <= enemyFighter.CRIT_CHANCE;
-        
-        let damage = calculateDamage(enemyFighter.ATK, playerFighter.DEF);
-        
-        if (isCrit) {
-          damage = Math.floor(damage * (enemyFighter.CRIT_DAMAGE / 100));
-          battleLog.push({
-            type: 'enemy_crit',
-            damage: damage,
-            playerHealth: playerFighter.HEALTH,
-            playerMaxHealth: playerFighter.maxHealth,
-            message: `Enemy CRITICAL HIT for ${damage} damage!`
-          });
-        } else {
-          battleLog.push({
-            type: 'enemy_attack',
-            damage: damage,
-            playerHealth: playerFighter.HEALTH,
-            playerMaxHealth: playerFighter.maxHealth,
-            message: `Enemy hits for ${damage} damage!`
-          });
-        }
-        
+      if (enemyHitRoll <= enemyAccuracy) {
+        let damage = calculateDamage(enemyFighter, playerFighter);
+        battleLog.push({
+          type: 'enemy_attack',
+          damage: damage,
+          playerHealth: playerFighter.HEALTH,
+          playerMaxHealth: playerFighter.maxHealth,
+          message: `Enemy hits for ${damage} damage!`
+        });
         playerFighter.HEALTH = Math.max(0, playerFighter.HEALTH - damage);
       } else {
         battleLog.push({
@@ -210,12 +223,11 @@ export function battle(player, enemy) {
     if (playerFighter.HEALTH <= 0) {
       battleLog.push({
         type: 'player_defeated',
-        message: "Player defeated! Enemy wins!"
+        message: 'Player defeated! Enemy wins!'
       });
       break;
     }
-
-    time += 0.1;
+    time++;
   }
 
   return {
@@ -225,33 +237,4 @@ export function battle(player, enemy) {
     battleTime: time,
     battleLog: battleLog
   };
-}
-
-function calculateHitChance(attackerATK, defenderDEF) {
-  const ratio = attackerATK / Math.max(defenderDEF, 1);
-  let baseChance = 60;
-  
-  if (ratio >= 2) {
-    baseChance += 25;
-  } else if (ratio >= 1.5) {
-    baseChance += 15;
-  } else if (ratio >= 1) {
-    baseChance += 5;
-  } else if (ratio >= 0.5) {
-    baseChance -= 10;
-  } else {
-    baseChance -= 25;
-  }
-  
-  return Math.max(5, Math.min(95, baseChance));
-}
-
-function calculateDamage(attackerATK, defenderDEF) {
-  let damage = attackerATK - (defenderDEF * 0.5);
-  damage = Math.max(1, damage);
-  
-  const variation = damage * 0.1;
-  damage += (Math.random() - 0.5) * variation;
-  
-  return Math.floor(damage);
 }
