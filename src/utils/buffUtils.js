@@ -1,5 +1,3 @@
-// Buff Utility Functions
-
 import { getAutoPotionSettings, saveAutoPotionSettings } from './potions.js';
 
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;

@@ -1,7 +1,5 @@
-// Skills Page Styles - Based on Equipment Page
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
-// Advanced Color Palette - Matched to Main Layout
 :root {
   --primary-dark: #2a2a4a;
   --primary-bg: #3a3a5a;
@@ -37,13 +35,6 @@
   padding: 20px;
   box-sizing: border-box;
   
-  // Ensure no white backgrounds leak through
-  * {
-    box-sizing: border-box;
-    font-family: 'Press Start 2P', monospace;
-  }
-  
-  // Override any Material-UI white backgrounds
   .MuiPaper-root {
     background: transparent !important;
   }
@@ -53,7 +44,6 @@
   }
 }
 
-// Header Section
 .header {
   position: relative;
   z-index: 1;
@@ -122,7 +112,6 @@
   text-shadow: 0 0 10px rgba(160, 174, 192, 0.3);
 }
 
-// Main Content Layout
 .mainContent {
   position: relative;
   z-index: 1;
@@ -134,7 +123,6 @@
   align-items: stretch;
 }
 
-// Widget Styles
 .widget {
   background: linear-gradient(135deg, 
     rgba(26, 26, 46, 0.95) 0%, 
@@ -186,8 +174,7 @@
   padding: 20px 25px;
 }
 
-// Passive Buffs Styles
-.completionChip {
+.passiveBuffs {
   background: linear-gradient(135deg, var(--legendary) 0%, var(--epic) 100%) !important;
   color: white !important;
   font-family: 'Press Start 2P', monospace !important;
@@ -303,7 +290,6 @@
   }
 }
 
-// Skill Item Styles
 .skillItem {
   padding: 15px;
   margin-bottom: 15px;
@@ -380,7 +366,6 @@
   }
 }
 
-// Progress Bar Styles
 .skillProgress {
   display: flex;
   align-items: center;
@@ -409,20 +394,12 @@
   text-align: right;
 }
 
-// Skill Stats Styles
 .skillStats {
   display: flex;
   justify-content: space-between;
   gap: 20px;
 }
 
-.statLabel {
-  font-size: 0.5rem !important;
-  color: var(--text-muted) !important;
-  margin: 0 !important;
-}
-
-// Details Text Styles
 .detailsText {
   font-size: 0.6rem !important;
   color: var(--text-secondary) !important;
@@ -431,8 +408,7 @@
   padding: 20px;
 }
 
-// Skill Details Dialog Styles
-.skillDetailsHeader {
+.skillDetailsDialog {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -506,7 +482,6 @@
   flex: 1;
 }
 
-// Responsive Design
 @media (max-width: 1200px) {
   .mainContent {
     max-width: 100%;

@@ -1,5 +1,3 @@
-// Game Constants
-
 export const INITIAL_GOLD = 100;
 export const LOOT_BAG_LIMIT = 20;
 

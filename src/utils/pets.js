@@ -1,5 +1,3 @@
-// Pet System
-
 export const PETS = {
     goblin_pet: {
         id: 'goblin_pet',

@@ -383,7 +383,6 @@
     }
 } 
 
-// Store Tabs
 .storeTabs {
   .MuiTab-root {
     color: #e0e0e0 !important;
@@ -401,7 +400,6 @@
   }
 }
 
-// Buffs Section
 .buffsSection {
   .sectionTitle {
     color: #e0e0e0 !important;
@@ -489,7 +487,6 @@
   padding: 0.5rem 1rem !important;
 }
 
-// Potions Section
 .potionsSection {
   .sectionTitle {
     color: #e0e0e0 !important;
@@ -584,7 +581,6 @@
   gap: 0.5rem;
 }
 
-// Active Buffs Section
 .activeBuffsSection {
   margin-top: 2rem;
   
@@ -639,7 +635,6 @@
   }
 }
 
-// Message Alert
 .messageAlert {
   position: fixed;
   top: 20px;
@@ -649,7 +644,6 @@
   font-size: 0.7rem !important;
 }
 
-// Purchase Dialog
 .purchaseDialog {
   .MuiDialog-paper {
     background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%) !important;
@@ -689,7 +683,6 @@
   }
 }
 
-// Global dialog override to ensure dark theme
 .MuiDialog-root {
   .MuiDialog-paper {
     background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%) !important;
@@ -729,7 +722,6 @@
   }
 }
 
-// Force override for all dialogs
 div[role="dialog"] {
   background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%) !important;
   border: 2px solid #4a4a6a !important;
@@ -737,7 +729,6 @@ div[role="dialog"] {
   color: #e0e0e0 !important;
 }
 
-// Override MUI Paper component in dialogs
 .MuiPaper-root[role="dialog"] {
   background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%) !important;
   border: 2px solid #4a4a6a !important;

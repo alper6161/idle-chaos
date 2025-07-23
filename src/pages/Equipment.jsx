@@ -320,7 +320,6 @@ function Equipment() {
                 });
                 
                 if (validInventory.length !== currentInventory.length) {
-                    console.log('Cleaned inventory, removed', currentInventory.length - validInventory.length, 'invalid items');
                     localStorage.setItem(STORAGE_KEYS.INVENTORY, JSON.stringify(validInventory));
                     setInventory(validInventory);
                 }

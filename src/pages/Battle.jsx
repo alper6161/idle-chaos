@@ -78,7 +78,6 @@ function Battle() {
         notifyGoldGain
     } = useNotificationContext();
 
-    // Use global battle context instead of local state
     const {
         isBattleActive,
         currentBattle,
@@ -121,7 +120,7 @@ function Battle() {
         setDungeonCompleteCallback,
         refreshPotions,
         checkAutoPotion,
-        handleDungeonEnemyDefeated // <-- add this
+        handleDungeonEnemyDefeated
     } = useBattleContext();
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
 
@@ -143,10 +142,8 @@ function Battle() {
 
     const handleTakeItem = (itemName, index) => {
         try {
-            // Remove from loot bag
             removeFromLootBag(index);
 
-            // Convert item to equipment and add to inventory
             const equipment = convertLootBagToEquipment([itemName]);
             if (equipment.length > 0) {
                 const currentSlot = getCurrentSlot();
@@ -160,33 +157,24 @@ function Battle() {
         }
     };
 
-    // Sell item directly for gold
     const handleSellItem = (itemName, index) => {
         const sellValue = calculateItemSellValue(itemName);
         
         try {
-            // Remove from loot bag
             removeFromLootBag(index);
-
-            // Add gold
             updatePlayerGold(sellValue);
-            
-            // Notify for item sale
             notifyItemSale(itemName, sellValue, '💰');
         } catch (err) {
             console.error('Error selling item:', err);
         }
     };
 
-    // Take all items to inventory
     const handleTakeAll = () => {
         try {
             const itemsToConvert = [...lootBag];
             
-            // Clear loot bag
             clearLootBag();
 
-            // Convert all items to equipment and add to inventory
             const equipment = convertLootBagToEquipment(itemsToConvert);
             if (equipment.length > 0) {
                 const currentSlot = getCurrentSlot();
@@ -200,7 +188,6 @@ function Battle() {
         }
     };
 
-    // Sell all items for gold
     const handleSellAll = () => {
         try {
             let totalGold = 0;
@@ -209,13 +196,10 @@ function Battle() {
                 totalGold += calculateItemSellValue(itemName);
             });
             
-            // Clear loot bag
             clearLootBag();
 
-            // Add total gold
             updatePlayerGold(totalGold);
             
-            // Notify for bulk sale
             if (itemCount > 0 && totalGold > 0) {
                 notifyBulkSale(itemCount, totalGold);
             }
@@ -224,11 +208,9 @@ function Battle() {
         }
     };
 
-    // Potion usage function
     const handleUsePotionLocal = (potionType) => {
         const result = handleUsePotion(potionType);
         if (result.success) {
-            // Auto save after potion use
             setTimeout(() => {
                 saveCurrentGame();
             }, 500);
@@ -241,7 +223,6 @@ function Battle() {
             setExitWarningOpen(true);
             return;
         }
-        // Navigate back to battle selection page
         navigate('/battle-selection');
         stopBattle();
         setDungeonRun(null);
@@ -253,17 +234,14 @@ function Battle() {
 
 
 
-    // Get selected skill level and bonuses
     const getSelectedSkillInfoLocal = () => {
         return getSelectedSkillInfo(selectedAttackType, getSkillData);
     };
 
-    // Helper function to call getStatDisplayWithAchievement with isAchievementUnlocked
     const getStatDisplayWithAchievementLocal = (enemyId, statType, value) => {
         return getStatDisplayWithAchievement(enemyId, statType, value, isAchievementUnlocked);
     };
 
-    // Helper function to call getEnemyHpDisplayWithAchievement with isAchievementUnlocked
     const getEnemyHpDisplayWithAchievementLocal = (enemyId, current, max) => {
         return getEnemyHpDisplayWithAchievement(enemyId, current, max, isAchievementUnlocked);
     };
@@ -281,7 +259,6 @@ function Battle() {
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
         
-        // Her zaman güncel max HP'yi kullan
         setPlayerHealth(currentPlayerStats.HEALTH);
         const healthCurrentSlot = getCurrentSlot();
         const healthSlotKey = getSlotKey("playerHealth", healthCurrentSlot);
@@ -317,35 +294,30 @@ function Battle() {
             const activeBuffs = JSON.parse(localStorage.getItem(slotKey) || '{}');
             const autoPotionBuff = activeBuffs['auto_potion'];
             
-            // Only check if there's an active buff, don't override manual settings
             if (autoPotionBuff && autoPotionBuff.expiresAt > Date.now()) {
-                // Only enable if it's not already enabled by user
                 if (!autoPotionSettings.enabled) {
                     const newSettings = { ...autoPotionSettings, enabled: true };
                     setAutoPotionSettings(newSettings);
                     saveAutoPotionSettings(newSettings);
                 }
             }
-            // Don't automatically disable - let user control it
         };
 
         const interval = setInterval(checkAutoPotionBuff, 5000);
-        checkAutoPotionBuff(); // Check immediately
+        checkAutoPotionBuff();
         
         return () => clearInterval(interval);
-    }, []); // Remove autoPotionSettings.enabled dependency
+    }, []);
 
-    // Auto potion usage check
     useEffect(() => {
         const checkAutoPotionUsage = () => {
             if (autoPotionSettings.enabled && currentBattle && isBattleActive) {
-                // Call the auto potion check from BattleContext
                 checkAutoPotion(currentBattle);
             }
         };
 
-        const interval = setInterval(checkAutoPotionUsage, 1000); // Check every second
-        checkAutoPotionUsage(); // Check immediately
+        const interval = setInterval(checkAutoPotionUsage, 1000);
+        checkAutoPotionUsage();
         
         return () => clearInterval(interval);
     }, [autoPotionSettings.enabled, currentBattle, isBattleActive]);
@@ -357,18 +329,14 @@ function Battle() {
     const confirmExitDungeon = () => {
         setExitWarningOpen(false);
         
-        // Use BattleContext functions to clear state
         setCurrentEnemy(null);
         setCurrentBattle(null);
         setIsBattleActive(false);
-        setDungeonRun(null);
-        
-        // Clear any ongoing battle
+        setDungeonRun(null);     
         stopBattle();
     };
 
     const handleChestClick = (chestItem, index) => {
-        // If it's a dungeon chest, open the preview modal for that dungeon
         if (chestItem && chestItem.includes('🎁') && chestItem.includes('Chest')) {
             const dungeonName = chestItem.replace('🎁 ', '').replace(' Chest', '');
             const dungeon = DUNGEONS.find(d => d.name === dungeonName);
@@ -379,7 +347,6 @@ function Battle() {
     };
 
     const handleOpenChest = () => {
-        // Remove the chest from the loot bag after opening
         if (chestPreviewModal.open && chestPreviewModal.dungeon) {
             const chestName = `🎁 ${chestPreviewModal.dungeon.name} Chest`;
             setLootBag(prev => prev.filter(item => item !== chestName));
@@ -407,7 +374,6 @@ function Battle() {
         );
         
         if (result) {
-            // Remove chest from loot bag
             setLootBag(prev => {
                 const updated = prev.filter(item => item !== chestPreviewModal.chestItem);
                 const currentSlot = getCurrentSlot();
@@ -418,16 +384,13 @@ function Battle() {
         }
     };
 
-    // Add a useEffect to handle the countdown and auto-restart:
     useEffect(() => {
         if (dungeonCompleteDialog.open && dungeonCompleteDialog.countdown > 0) {
             const timer = setTimeout(() => {
                 setDungeonCompleteDialog(prev => {
                     if (prev.countdown <= 1) {
-                        // Auto-restart
                         setDungeonCompleteDialog({ open: false, countdown: 5 });
 
-                        // Properly restart the dungeon
                         const currentDungeon = dungeonRun?.dungeon;
                         if (currentDungeon) {
                             setDungeonRun({
@@ -438,7 +401,6 @@ function Battle() {
                                 stages: currentDungeon.enemies || []
                             });
 
-                            // Start the first enemy battle
                             const firstEnemyId = currentDungeon.enemies[0];
                             const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);
                             if (firstEnemy) {
@@ -448,9 +410,7 @@ function Battle() {
 
                         return { open: false, countdown: 5 };
                     }
-                    // --- ADD CHEST TO LOOT BAG WHEN DUNGEON COMPLETES ---
                     if (prev.countdown === 1 && dungeonRun && dungeonRun.dungeon && !dungeonRun.chestAwarded) {
-                        // Add chest to loot bag
                         const chestName = `🎁 ${dungeonRun.dungeon.name} Chest`;
                         if (!lootBag.includes(chestName)) {
                             setLootBag([...lootBag, chestName]);
@@ -464,9 +424,7 @@ function Battle() {
         }
     }, [dungeonCompleteDialog, dungeonRun, lootBag]);
 
-    // Battle Screen
     useEffect(() => {
-        // If there is no active battle, dungeon run, or waiting for enemy, redirect to battle-selection
         if (!isBattleActive && !dungeonRun && !isWaitingForEnemy) {
             navigate('/battle-selection');
         }
@@ -477,7 +435,6 @@ function Battle() {
             {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
                 <>
                     <div className={dungeonRun ? styles.dungeonHeader : styles.battleHeader} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                        {/* Left: Back Button */}
                         <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
                             <Button 
                                 variant="outlined" 
@@ -488,7 +445,6 @@ function Battle() {
                                 {t('battle.backToSelection')}
                             </Button>
                         </div>
-                        {/* Center: Location or Dungeon Name */}
                         <div style={{ flex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                             {dungeonRun ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -509,7 +465,6 @@ function Battle() {
                                 </Typography>
                             )}
                         </div>
-                        {/* Right: Test Buttons */}
                         <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
                             <Button 
                                 variant="contained" 
@@ -604,7 +559,6 @@ function Battle() {
                             />
                         </div>
                         
-                        {/* Skill Experience Widget */}
                         <div style={{ display: 'flex', width: '100%', marginTop: '8px' }}>
                             <SkillExpWidget selectedAttackType={selectedAttackType} />
                         </div>

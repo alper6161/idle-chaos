@@ -1,6 +1,4 @@
-// Skill buffs data - what buffs each skill provides at different levels
 export const SKILL_BUFFS = {
-    // Melee skills
     stab: {
         10: "Critical hit chance +5%",
         25: "Critical hit chance +10%, Critical damage +15%",
@@ -22,7 +20,6 @@ export const SKILL_BUFFS = {
         75: "Stun chance +20%, Attack damage +35%, Armor penetration +30%, Critical chance +10%",
         99: "🔨 WARHAMMER LORD: Stun chance +25%, Attack damage +45%, Armor penetration +40%, Critical chance +15%, Life steal +20%, EARTHQUAKE AOE (stuns all enemies)"
     },
-    // Ranged skills
     throwing: {
         10: "Attack range +1",
         25: "Attack range +2, Attack speed +10%",
@@ -37,7 +34,6 @@ export const SKILL_BUFFS = {
         75: "Critical chance +25%, Attack speed +20%, Attack range +3, Dodge +15%",
         99: "🏹 ARCHER LEGEND: Critical chance +30%, Attack speed +25%, Attack range +4, Dodge +20%, Life steal +10%, RAIN OF ARROWS (hits all enemies)"
     },
-    // Magic skills
     lightning: {
         10: "Lightning damage +15%",
         25: "Lightning damage +25%, Stun chance +10%",
@@ -59,7 +55,6 @@ export const SKILL_BUFFS = {
         75: "Ice damage +45%, Freeze chance +20%, Attack speed +15%, Critical chance +10%",
         99: "❄️ FROST KING: Ice damage +60%, Freeze chance +25%, Attack speed +20%, Critical chance +15%, Life steal +5%, BLIZZARD (freezes all enemies for 5 seconds)"
     },
-    // Prayer skills
     heal: {
         10: "Healing +20%",
         25: "Healing +35%, Mana regeneration +10%",
@@ -88,7 +83,6 @@ export const SKILL_BUFFS = {
         75: "Shadow damage +45%, Fear chance +20%, Attack speed +15%, Critical chance +10%",
         99: "🌑 SHADOW LORD: Shadow damage +60%, Fear chance +25%, Attack speed +20%, Critical chance +15%, Life steal +10%, VOID BLAST (sends enemies to shadow realm)"
     },
-    // Defense skills
     dodge: {
         10: "Dodge chance +5%",
         25: "Dodge chance +10%, Attack speed +5%",
@@ -110,7 +104,6 @@ export const SKILL_BUFFS = {
         75: "Defense +45%, Health +30%, Damage reduction +20%, Block chance +10%",
         99: "⚔️ TITAN ARMOR: Defense +60%, Health +40%, Damage reduction +30%, Block chance +15%, Life regeneration +10%, ADAMANTINE SKIN (reflects 50% damage back)"
     },
-    // Holy skills
     hp: {
         10: "Maximum health +20%",
         25: "Maximum health +35%, Health regeneration +10%",
@@ -125,7 +118,6 @@ export const SKILL_BUFFS = {
         75: "Maximum energy +65%, Energy regeneration +35%, Auto-energy +30%, Skill cooldown -10%",
         99: "⚡ INFINITE POWER: Maximum energy +80%, Energy regeneration +50%, Auto-energy +40%, Skill cooldown -20%, Infinite energy +5%, TIME STOP (freezes enemy for 3 seconds)"
     },
-    // Advanced skills
     lifeSteal: {
         10: "Life steal +5%",
         25: "Life steal +10%, Critical chance +5%",

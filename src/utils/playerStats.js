@@ -1,5 +1,3 @@
-// Player Stats System
-
 import { getBuffedPlayerStats } from './buffUtils.js';
 import { getSkillData } from './skillExperience.js';
 import { SKILL_LEVEL_BONUSES } from './constants.js';

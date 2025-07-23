@@ -1,5 +1,3 @@
-// Gold System
-
 import { INITIAL_GOLD } from './constants.js';
 
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;

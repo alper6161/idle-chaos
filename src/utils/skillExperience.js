@@ -1,5 +1,3 @@
-// Skill Experience System
-
 import { INITIAL_SKILLS } from './constants.js';
 import { applyExperienceMultiplier } from './buffUtils.js';
 
@@ -344,7 +342,6 @@ export const getWeaponType = (equippedWeapon) => {
 };
 
 export const getAvailableAttackTypes = (weaponType) => {
-    // Return all attack types regardless of weapon type
     return [
         { type: 'stab', name: 'Stab', icon: '🗡️', description: '🗡️ Stab: +XP to Stab skill (Accuracy/Crit Chance)' },
         { type: 'slash', name: 'Slash', icon: '⚔️', description: '⚔️ Slash: +XP to Slash skill (Max Damage Bonus)' },
@@ -366,7 +363,6 @@ export const initializeSkillDataForCurrentSlot = () => {
         const slotNumber = currentSlot ? parseInt(currentSlot) : 1;
         const slotKey = `skillData_slot_${slotNumber}`;
         
-        // Check if skill data already exists
         const existing = localStorage.getItem(slotKey);
         if (!existing) {
             localStorage.setItem(slotKey, JSON.stringify(INITIAL_SKILLS));

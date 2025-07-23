@@ -1,7 +1,5 @@
-// Common Styles for Idle Chaos Game
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-// Global Variables
 :root {
   --primary-bg: #2a2a4a;
   --secondary-bg: #3a3a5a;
@@ -16,7 +14,6 @@
   --shadow-light: #2a2a4a;
 }
 
-// Global Reset and Base Styles
 * {
   box-sizing: border-box;
 }
@@ -44,7 +41,6 @@ body {
   min-height: 100vh;
 }
 
-// Custom Scrollbar Styles - Pixel Art Theme
 ::-webkit-scrollbar {
   width: 16px;
   height: 16px;
@@ -88,13 +84,11 @@ body {
   border-radius: 0;
 }
 
-// Firefox Scrollbar Styles
 * {
   scrollbar-width: auto;
   scrollbar-color: var(--border-color) var(--primary-bg);
 }
 
-// Global Typography - Enhanced Pixel Art Style
 h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
   text-shadow: 
@@ -122,8 +116,7 @@ p {
   text-rendering: optimizeSpeed;
 }
 
-// Enhanced Typography for all text elements
-span, div, label, strong, em, b, i {
+p, span, div, label {
   font-family: 'Press Start 2P', monospace;
   font-smooth: never;
   -webkit-font-smoothing: none;
@@ -132,7 +125,6 @@ span, div, label, strong, em, b, i {
   text-rendering: optimizeSpeed;
 }
 
-// Material-UI Typography override for pixel art
 .MuiTypography-root {
   font-family: 'Press Start 2P', monospace !important;
   font-smooth: never !important;
@@ -143,7 +135,6 @@ span, div, label, strong, em, b, i {
   text-shadow: 1px 1px 0px var(--shadow-dark) !important;
 }
 
-// Material-UI Button text override
 .MuiButton-root {
   font-family: 'Press Start 2P', monospace !important;
   font-smooth: never !important;
@@ -153,10 +144,7 @@ span, div, label, strong, em, b, i {
   text-rendering: optimizeSpeed !important;
 }
 
-// Material-UI Dialog text override
-.MuiDialogTitle-root,
-.MuiDialogContent-root,
-.MuiDialogActions-root {
+.MuiDialog-root {
   font-family: 'Press Start 2P', monospace !important;
   font-smooth: never !important;
   -webkit-font-smoothing: none !important;
@@ -165,9 +153,7 @@ span, div, label, strong, em, b, i {
   text-rendering: optimizeSpeed !important;
 }
 
-// Material-UI Card text override
-.MuiCard-root,
-.MuiCardContent-root {
+.MuiCard-root {
   font-family: 'Press Start 2P', monospace !important;
   font-smooth: never !important;
   -webkit-font-smoothing: none !important;
@@ -176,8 +162,7 @@ span, div, label, strong, em, b, i {
   text-rendering: optimizeSpeed !important;
 }
 
-// Material-UI Tooltip text override
-.MuiTooltip-tooltip {
+.MuiTooltip-root {
   font-family: 'Press Start 2P', monospace !important;
   font-smooth: never !important;
   -webkit-font-smoothing: none !important;
@@ -187,7 +172,6 @@ span, div, label, strong, em, b, i {
   text-shadow: 1px 1px 0px var(--shadow-dark) !important;
 }
 
-// Global Button Styles - Enhanced Pixel Art
 button {
   font-family: 'Press Start 2P', monospace;
   text-transform: uppercase;
@@ -216,7 +200,6 @@ button {
   }
 }
 
-// Global Link Styles - Enhanced Pixel Art
 a {
   color: var(--accent-color);
   text-decoration: none;
@@ -235,7 +218,6 @@ a {
   }
 }
 
-// Global Input Styles - Enhanced Pixel Art
 input, textarea, select {
   font-family: 'Press Start 2P', monospace;
   background: var(--primary-bg);
@@ -263,8 +245,7 @@ input, textarea, select {
   }
 }
 
-// Global Paper/Container Styles
-.paper-container {
+.MuiPaper-root {
   background: linear-gradient(145deg, var(--secondary-bg) 0%, var(--primary-bg) 100%);
   border: 2px solid var(--border-color);
   border-radius: 0;
@@ -273,27 +254,11 @@ input, textarea, select {
     0 2px 0 0 var(--shadow-light);
 }
 
-// Global Animation Classes
-.pixel-bounce {
-  animation: pixelBounce 0.3s ease;
-}
-
-@keyframes pixelBounce {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
-  100% { transform: translateY(0px); }
-}
-
-.pixel-glow {
-  animation: pixelGlow 2s ease-in-out infinite alternate;
-}
-
 @keyframes pixelGlow {
   0% { box-shadow: 0 0 5px var(--accent-color); }
   100% { box-shadow: 0 0 20px var(--accent-color), 0 0 30px var(--accent-color); }
 }
 
-// Global Utility Classes
 .text-center { text-align: center; }
 .text-left { text-align: left; }
 .text-right { text-align: right; }
@@ -313,8 +278,7 @@ input, textarea, select {
 .p-3 { padding: 1.5rem; }
 .p-4 { padding: 2rem; }
 
-// Global Loading Spinner
-.pixel-spinner {
+.loading-spinner {
   width: 32px;
   height: 32px;
   border: 4px solid var(--border-color);
@@ -328,13 +292,11 @@ input, textarea, select {
   100% { transform: rotate(360deg); }
 }
 
-// Global Focus Styles
 *:focus {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
 
-// Global Selection Styles
 ::selection {
   background: var(--accent-color);
   color: var(--shadow-dark);
@@ -345,32 +307,23 @@ input, textarea, select {
   color: var(--shadow-dark);
 }
 
-// Global Disabled Styles
-.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-  filter: grayscale(100%);
-}
+*:disabled {
 
-// Global Error Styles
 .error {
   color: var(--danger-color);
   text-shadow: 1px 1px 0px var(--shadow-dark);
 }
 
-// Global Success Styles
 .success {
   color: var(--success-color);
   text-shadow: 1px 1px 0px var(--shadow-dark);
 }
 
-// Global Warning Styles
 .warning {
   color: var(--gold-color);
   text-shadow: 1px 1px 0px var(--shadow-dark);
 }
 
-// Pixel Art Text Utility Classes
 .pixel-text {
   font-family: 'Press Start 2P', monospace !important;
   font-smooth: never !important;
@@ -407,4 +360,4 @@ input, textarea, select {
   text-shadow: 
     1px 1px 0px var(--shadow-dark),
     0 0 5px var(--gold-color) !important;
-} 
+} }

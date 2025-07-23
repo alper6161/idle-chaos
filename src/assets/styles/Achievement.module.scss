@@ -1,7 +1,5 @@
-// Professional Achievement Page Styles - AAA Game Quality
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
-// Advanced Color Palette - Matched to Main Layout
 :root {
   --primary-dark: #2a2a4a;
   --primary-bg: #3a3a5a;
@@ -37,12 +35,10 @@
   padding: 20px;
   box-sizing: border-box;
   
-  // Ensure no white backgrounds leak through
   * {
     box-sizing: border-box;
   }
   
-  // Override any Material-UI white backgrounds
   .MuiPaper-root {
     background: transparent !important;
   }
@@ -51,7 +47,6 @@
     background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%) !important;
   }
   
-  // Override Material-UI Card components
   .MuiCard-root {
     background: transparent !important;
   }
@@ -60,7 +55,6 @@
     background: transparent !important;
   }
   
-  // Override any other Material-UI components that might have white backgrounds
   .MuiChip-root {
     background: linear-gradient(135deg, 
       rgba(26, 26, 46, 0.9) 0%, 
@@ -78,7 +72,6 @@
   }
 }
 
-// Animated Background
 .backgroundAnimation {
   position: absolute;
   top: 0;
@@ -90,7 +83,6 @@
   overflow: hidden;
   background: transparent;
   
-  // Add subtle overlay pattern that doesn't interfere with main layout
   &::before {
     content: '';
     position: absolute;
@@ -127,7 +119,6 @@
   50% { transform: translateY(-20px) rotate(180deg); opacity: 0.7; }
 }
 
-// Header Section
 .header {
   position: relative;
   z-index: 1;
@@ -262,7 +253,6 @@
   letter-spacing: 1px;
 }
 
-// Main Content Layout
 .mainContent {
   position: relative;
   z-index: 1;
@@ -274,7 +264,6 @@
   align-items: stretch;
 }
 
-// Character Section
 .characterSection {
   display: flex;
   flex-direction: column;
@@ -410,7 +399,6 @@
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-// Achievements Section
 .achievementsSection {
   display: flex;
   flex-direction: column;
@@ -438,7 +426,6 @@
   overflow-y: auto;
   padding-right: 10px;
   
-  // Custom scrollbar
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -463,7 +450,6 @@
   height: 100%;
   min-height: 100%;
   
-  // Override any Material-UI Card within grid items
   .MuiCard-root {
     background: linear-gradient(135deg, 
       rgba(26, 26, 46, 0.9) 0%, 
@@ -504,7 +490,6 @@
   flex-direction: column;
   flex: 1;
   
-  // Override Material-UI Card background
   &.MuiCard-root {
     background: linear-gradient(135deg, 
       rgba(26, 26, 46, 0.9) 0%, 
@@ -513,7 +498,6 @@
     ) !important;
   }
   
-  // Override any Material-UI Card styles
   &[class*="MuiCard"] {
     background: linear-gradient(135deg, 
       rgba(26, 26, 46, 0.9) 0%, 
@@ -643,7 +627,6 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
   
-  // Hidden stat styling
   &.hiddenStat {
     background: rgba(255, 255, 255, 0.02);
     border-color: rgba(255, 255, 255, 0.05);
@@ -667,7 +650,6 @@
     }
   }
   
-  // Revealed stat styling
   &.revealedStat {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 215, 0, 0.3);
@@ -741,7 +723,6 @@
   font-weight: 400 !important;
 }
 
-// Dialog Styles
 .achievementDialog {
   .MuiDialog-paper {
     background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%) !important;
@@ -916,37 +897,5 @@
     .achievementCardContent {
       padding: 20px;
     }
-  }
-}
-
-// Global Material-UI Overrides for Achievement Page
-.achievementContainer {
-  // Force dark backgrounds on all Material-UI components
-  .MuiCard-root,
-  .MuiPaper-root,
-  .MuiChip-root,
-  .MuiAvatar-root,
-  .MuiDialog-paper {
-    background: linear-gradient(135deg, 
-      rgba(26, 26, 46, 0.9) 0%, 
-      rgba(22, 33, 62, 0.8) 50%, 
-      rgba(15, 52, 96, 0.7) 100%
-    ) !important;
-  }
-  
-  // Ensure CardContent is transparent
-  .MuiCardContent-root {
-    background: transparent !important;
-  }
-  
-  // Override any white text colors
-  .MuiTypography-root {
-    color: var(--text-primary) !important;
-  }
-  
-  // Override any white borders
-  .MuiCard-root,
-  .MuiPaper-root {
-    border-color: var(--border-primary) !important;
   }
 } 
