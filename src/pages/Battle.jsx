@@ -53,6 +53,14 @@ import ChestPreviewModal from "../components/ChestPreviewModal";
 import ChestDropDialog from "../components/ChestDropDialog";
 import DungeonCompleteDialog from "../components/DungeonCompleteDialog";
 
+import {
+    handleTestDropPotion,
+    handleTestHurtSelf,
+    handleKillEnemy,
+    handleTestDie,
+    handleCompleteDungeon,
+    completeDungeonRun
+} from '../utils/BattleTestUtils';
 
 
 function Battle() {
@@ -212,196 +220,6 @@ function Battle() {
             }
         } catch (err) {
             console.error('Error selling all items:', err);
-        }
-    };
-
-    // Test function to drop random potion
-    const handleTestDropPotion = () => {
-        const potionDrop = getRandomTestPotion();
-        
-        // Add potion using the proper function
-        addPotions(potionDrop.id, 1);
-        
-        // Notify for potion drop
-        notifyItemDrop(`${potionDrop.name} (+${potionDrop.healAmount} HP)`, '🧪');
-        
-        // Force refresh potions in battle context
-        setTimeout(() => {
-            refreshPotions();
-        }, 100);
-    };
-
-    // Test function to hurt self
-    const handleTestHurtSelf = () => {
-        const damage = 20;
-        
-        if (currentBattle) {
-            // In battle - update battle state
-            const newHealth = Math.max(0, currentBattle.player.currentHealth - damage);
-            setCurrentBattle(prev => ({
-                ...prev,
-                player: { ...prev.player, currentHealth: newHealth }
-            }));
-            setPlayerHealth(newHealth);
-        } else {
-            // Not in battle - just update player health
-            const newHealth = Math.max(0, playerHealth - damage);
-            setPlayerHealth(newHealth);
-        }
-        
-        // Show damage display
-        setDamageDisplay(prev => ({
-            ...prev,
-            player: { amount: `-${damage}`, type: 'damage' }
-        }));
-        
-        // Clear damage display after 2 seconds
-        setTimeout(() => {
-            setDamageDisplay(prev => ({
-                ...prev,
-                player: null
-            }));
-        }, 2000);
-        
-        // Add to battle log
-        setBattleLog(prev => [...prev, {
-            type: 'damage',
-            message: `💔 Self damage: -${damage} HP`
-        }]);
-    };
-
-    // Test function to kill enemy instantly
-    const handleKillEnemy = () => {
-        if (currentBattle && currentEnemy) {
-            // Set enemy health to 0 to trigger victory
-            const updatedBattle = {
-                ...currentBattle,
-                enemy: { ...currentBattle.enemy, currentHealth: 0 }
-            };
-            
-            setCurrentBattle(updatedBattle);
-            
-            // Force battle result check immediately
-            const battleResult = {
-                winner: 'player',
-                playerFinalHealth: currentBattle.player.currentHealth,
-                enemyFinalHealth: 0
-            };
-            
-            // Only stop battle if not in dungeon
-            if (!dungeonRun || dungeonRun.completed) {
-                setIsBattleActive(false);
-            }
-            
-            setPlayerHealth(battleResult.playerFinalHealth);
-            
-            // Process victory rewards
-            const achievementResult = currentEnemy ? recordKill(currentEnemy.id) : { achievements: {}, newAchievements: [] };
-            
-            // Only process loot if NOT in dungeon (dungeons only drop chest at the end)
-            let newLoot = [];
-            if (!dungeonRun || dungeonRun.completed) {
-                const lootResult = currentEnemy ? getLootDrop(currentEnemy.drops) : { items: [], gold: 0, goldItems: [] };
-                
-                // Only add equipment items to loot bag, not gold items
-                newLoot = [...lootResult.items];
-                
-                // Auto-convert gold items directly without showing in loot bag
-                if (lootResult.goldItems && lootResult.goldItems.length > 0) {
-                    updatePlayerGold(lootResult.gold);
-                    
-                    // Notify for gold gains
-                    if (lootResult.gold > 0) {
-                        notifyGoldGain(lootResult.gold, `${currentEnemy?.name || 'Enemy'} drops`);
-                    }
-                }
-                
-                // Add to loot bag with limit enforcement
-                const itemsToAdd = addToLootBag(newLoot);
-                
-                // Notify for each item drop
-                itemsToAdd.forEach(itemName => {
-                    notifyItemDrop(itemName, '📦');
-                });
-                
-                // Check for potion drop
-                if (currentEnemy) {
-                    const potionDrop = getRandomPotionDrop(currentEnemy.id);
-                    if (potionDrop) {
-                        // Add potion using the proper function
-                        addPotions(potionDrop.id, 1);
-                        
-                        // Notify for potion drop
-                        notifyItemDrop(`${potionDrop.name} (+${potionDrop.healAmount} HP)`, '🧪');
-                        
-                        // Refresh potions in battle context
-                        setTimeout(() => {
-                            refreshPotions();
-                        }, 100);
-                    }
-                }
-            }
-
-            // --- PET DROP LOGIC (only in normal battles, not dungeons) ---
-            let petDropMessage = null;
-            if (currentEnemy && (!dungeonRun || dungeonRun.completed)) {
-                const pet = checkPetDrop(currentEnemy.id);
-                if (pet) {
-                    const currentSlot = getCurrentSlot();
-                    const slotKey = getSlotKey('idle-chaos-pets', currentSlot);
-                    const ownedPets = JSON.parse(localStorage.getItem(slotKey) || '[]');
-                    if (!ownedPets.includes(pet.id)) {
-                        ownedPets.push(pet.id);
-                        localStorage.setItem(slotKey, JSON.stringify(ownedPets));
-                        petDropMessage = `✨ PET FOUND: ${pet.icon} <b>${pet.name}</b>! (${pet.description})`;
-                    } else {
-                        petDropMessage = `✨ PET FOUND (duplicate): ${pet.icon} <b>${pet.name}</b>! (Already owned)`;
-                    }
-                }
-            }
-
-            // Add battle log messages
-            const battleLogMessages = [
-                {
-                    type: 'victory',
-                    message: dungeonRun && !dungeonRun.completed 
-                        ? `🎉 ${currentEnemy?.name || 'Enemy'} defeated! Stage ${dungeonRun.currentStage + 1}/7 complete.`
-                        : `🎉 ${t('battle.playerWins')}! Enemy defeated!`
-                }
-            ];
-            
-            // Add achievement messages if any new achievements unlocked
-            if (achievementResult.newAchievements.length > 0) {
-                achievementResult.newAchievements.forEach(achievement => {
-                    battleLogMessages.push({
-                        type: 'achievement',
-                        message: `🏆 Achievement Unlocked: ${achievement.description}!`
-                    });
-                    
-                    // Notify for achievement unlock
-                    notifyAchievement(achievement.description);
-                });
-            }
-            
-            // Add loot messages (only for non-dungeon battles)
-            if (!dungeonRun || dungeonRun.completed) {
-                battleLogMessages.push(...newLoot.map(item => ({
-                    type: 'loot',
-                    message: `📦 Loot: ${item}`
-                })));
-                
-                // Add pet message if found
-                if (petDropMessage) {
-                    battleLogMessages.push({
-                        type: 'pet',
-                        message: petDropMessage
-                    });
-                }
-            }
-            
-            setBattleLog(prev => [...prev, ...battleLogMessages]);
-            // INSTANTLY spawn next enemy for test kill (skip respawn timer)
-            spawnNewEnemy();
         }
     };
 
@@ -599,32 +417,6 @@ function Battle() {
         }
     };
 
-    const handleTestDie = () => {
-        setIsBattleActive(false);
-        showDeathDialog();
-    };
-
-    // Helper to force-complete the dungeon for testing
-    const completeDungeonRun = () => {
-        if (!dungeonRun || dungeonRun.completed) return;
-        // Set currentStage to last stage
-        setDungeonRun(prev => ({ ...prev, currentStage: 6, completed: true }));
-        setIsBattleActive(false);
-        setCurrentBattle(null);
-        setCurrentEnemy(null);
-        // Add chest to loot bag if not already present
-        const chestName = `🎁 ${dungeonRun.dungeon.name} Chest`;
-        if (!lootBag.includes(chestName)) {
-            setLootBag([...lootBag, chestName]);
-        }
-        // Open dungeon complete dialog
-        setDungeonCompleteDialog({ open: true, countdown: 5 });
-    };
-
-    const handleCompleteDungeon = () => {
-        completeDungeonRun();
-    };
-
     // Add a useEffect to handle the countdown and auto-restart:
     useEffect(() => {
         if (dungeonCompleteDialog.open && dungeonCompleteDialog.countdown > 0) {
@@ -721,7 +513,7 @@ function Battle() {
                             <Button 
                                 variant="contained" 
                                 color="error"
-                                onClick={handleTestDie}
+                                onClick={() => handleTestDie({ setIsBattleActive, showDeathDialog })}
                                 style={{ marginLeft: '8px' }}
                             >
                                 🏴‍☠️ TEST: Die
@@ -729,7 +521,9 @@ function Battle() {
                             <Button 
                                 variant="contained" 
                                 color="success"
-                                onClick={handleKillEnemy}
+                                onClick={() => handleKillEnemy({
+                                    currentBattle, currentEnemy, setCurrentBattle, setIsBattleActive, setPlayerHealth, recordKill, dungeonRun, getLootDrop, updatePlayerGold, notifyGoldGain, addToLootBag, notifyItemDrop, getRandomPotionDrop, addPotions, refreshPotions, checkPetDrop, getCurrentSlot, getSlotKey, setBattleLog, notifyAchievement, t, spawnNewEnemy
+                                })}
                                 style={{ marginLeft: '8px' }}
                             >
                                 ⚔️ TEST: Kill
@@ -737,7 +531,7 @@ function Battle() {
                             <Button 
                                 variant="contained" 
                                 color="info"
-                                onClick={handleTestDropPotion}
+                                onClick={() => handleTestDropPotion({ getRandomTestPotion, addPotions, notifyItemDrop, refreshPotions })}
                                 style={{ marginLeft: '8px' }}
                             >
                                 🧪 TEST: Drop Potion
@@ -745,7 +539,7 @@ function Battle() {
                             <Button 
                                 variant="contained" 
                                 color="warning"
-                                onClick={handleTestHurtSelf}
+                                onClick={() => handleTestHurtSelf({ currentBattle, setCurrentBattle, setPlayerHealth, playerHealth, setDamageDisplay, setBattleLog })}
                                 style={{ marginLeft: '8px' }}
                             >
                                 💔 TEST: Hurt Self
@@ -754,7 +548,7 @@ function Battle() {
                                 <Button 
                                     variant="contained" 
                                     color="warning"
-                                    onClick={handleCompleteDungeon}
+                                    onClick={() => handleCompleteDungeon({ dungeonRun, setDungeonRun, setIsBattleActive, setCurrentBattle, setCurrentEnemy, lootBag, setLootBag, setDungeonCompleteDialog })}
                                     style={{ marginLeft: '8px' }}
                                 >
                                     🏆 TEST: Complete Dungeon
