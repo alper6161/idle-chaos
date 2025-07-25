@@ -5,10 +5,10 @@ import { Box, Typography } from '@mui/material';
 import { SKILL_LEVEL_BONUSES, MAGIC_TYPES } from './constants.js';
 import { PETS } from './pets.js';
 
-export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}, attackType = null) => {
+export const calculateDamageRange = (minDMG, maxDMG, defenderDEF, damageRangeBonus = 0, skillBuffs = {}, attackType = null) => {
     // Ensure we have valid numbers
-    const atk = Number(attackerATK) || 0;
-    const def = Number(defenderDEF) || 0;
+    const minDamage = Number(minDMG) || 0;
+    const maxDamage = Number(maxDMG) || 0;
     const bonus = Number(damageRangeBonus) || 0;
     
     // 3 Aşamalı MIN_DAMAGE ve MAX_DAMAGE Bonus hesaplaması
@@ -75,38 +75,20 @@ export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus 
         }
     });
     
-    // Base damage calculation using original ATK
-    let baseDamage = atk - (def * 0.5);
-    baseDamage = Math.max(1, baseDamage);
-    
-    // Calculate damage range (min and max)
-    const variation = baseDamage * 0.15; // 15% variation
-    let minDamage = Math.floor(baseDamage - variation);
-    let maxDamage = Math.floor(baseDamage + variation);
-    
-    // Apply skill level bonuses to damage range
-    const minDamageBonus = skillBuffs.MIN_DAMAGE || 0;
-    const maxDamageBonus = skillBuffs.MAX_DAMAGE || 0;
-    
-    minDamage += minDamageBonus + totalMinDamageBonus;
-    maxDamage += maxDamageBonus + totalMaxDamageBonus;
-    
-    // Apply slash skill bonus to max damage
-    maxDamage += bonus;
-    
     return {
-        min: Math.max(1, minDamage),
-        max: Math.max(1, maxDamage)
+        min: Math.max(1, totalMinDamageBonus),
+        max: Math.max(1, totalMaxDamageBonus)
     };
 };
 
-export const calculateDamage = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}, attackType = null) => {
+export const calculateDamage = (minDMG, maxDMG, defenderDEF, damageRangeBonus = 0, skillBuffs = {}, attackType = null) => {
     // Ensure we have valid numbers
-    const atk = Number(attackerATK) || 0;
+    const minDamage = Number(minDMG) || 0;
+    const maxDamage = Number(maxDMG) || 0;
     const def = Number(defenderDEF) || 0;
     const bonus = Number(damageRangeBonus) || 0;
     
-    const damageRange = calculateDamageRange(atk, def, bonus, skillBuffs, attackType);
+    const damageRange = calculateDamageRange(minDamage, maxDamage, def, bonus, skillBuffs, attackType);
     
     // Random damage within the range
     const damage = Math.floor(
@@ -140,12 +122,7 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
     console.log('skillBuffs', skillBuffs);
     console.log('battle', battle);
     console.log('attackType', attackType);
-    const atkBonus = skillBuffs.ATK || 0;
 
-    //Calculate item buffs
-    
-    const effectiveATK = battle.player.ATK + atkBonus;
-    
     const hitChance = calculateAccuracy(battle.player.ATK, battle.enemy.DEF, attackType);
     console.log('hit Chance', hitChance);
     const hitRoll = Math.random() * 100;
@@ -155,9 +132,9 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
         const effectiveCritChance = (battle.player.CRIT_CHANCE || 5);
         const isCrit = critRoll <= effectiveCritChance;
         
-        let damage = calculateDamage(effectiveATK, battle.enemy.DEF, 0, skillBuffs, attackType);
-        
-        // Apply damage buff
+        let damage = calculateDamage(battle.player.MIN_DAMAGE || 0, battle.player.MAX_DAMAGE || 0, battle.enemy.DEF, 0, skillBuffs, attackType);
+        console.log('Damage', damage);
+
         damage = applyDamageMultiplier(damage);
         
         // Award skill experience for the attack
@@ -224,7 +201,7 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= (battle.enemy.CRIT_CHANCE || 3);
         
-        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF, 0, {}, null); // Enemies don't get skill bonuses
+        let damage = calculateDamage(battle.enemy.BASE_DAMAGE_MIN || 0, battle.enemy.BASE_DAMAGE_MAX || 0, battle.player.DEF, 0, {}, null); // Enemies don't get skill bonuses
         
         // Award defense skill experience for taking damage
         const defenseXP = awardBattleActionXP('damage_taken', damage, isCrit, true);

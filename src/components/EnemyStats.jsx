@@ -46,7 +46,7 @@ const EnemyStats = ({
     const damageRanges = useMemo(() => {
         if (!enemyStats || !playerStats) return null;
         
-        const damageRange = calculateDamageRange(enemyStats.ATK, playerStats.DEF, 0, {}, null);
+        const damageRange = calculateDamageRange(enemyStats.BASE_DAMAGE_MIN || 0, enemyStats.BASE_DAMAGE_MAX || 0, playerStats.DEF, 0, {}, null);
         const critDamageRange = {
             min: Math.floor(damageRange.min * (enemyStats.CRIT_DAMAGE / 100)),
             max: Math.floor(damageRange.max * (enemyStats.CRIT_DAMAGE / 100))

@@ -54,7 +54,7 @@ const PlayerStats = ({
         const atkBonus = skillBuffs.ATK || 0;
         const effectiveATK = currentBattle.player.ATK + atkBonus;
         const damageRangeBonus = skillBuffs ? skillBuffs.MIN_DAMAGE.toFixed(1) + ' - ' + skillBuffs.MAX_DAMAGE.toFixed(1) : 0;
-        const damageRange = calculateDamageRange(effectiveATK, currentBattle.enemy.DEF, damageRangeBonus, skillBuffs, selectedAttackType);
+        const damageRange = calculateDamageRange(currentBattle.player.MIN_DAMAGE || 0, currentBattle.player.MAX_DAMAGE || 0, currentBattle.enemy.DEF, damageRangeBonus, skillBuffs, selectedAttackType);
         const totalCritDamage = (currentBattle.player.CRIT_DAMAGE || 150) + (skillBuffs.CRIT_DAMAGE || 0);
         const critDamageRange = {
             min: Math.floor(damageRange.min * (totalCritDamage / 100)),
