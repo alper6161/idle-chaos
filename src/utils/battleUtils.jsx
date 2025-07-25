@@ -5,16 +5,77 @@ import { Box, Typography } from '@mui/material';
 import { SKILL_LEVEL_BONUSES, MAGIC_TYPES } from './constants.js';
 import { PETS } from './pets.js';
 
-export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}) => {
+export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}, attackType = null) => {
     // Ensure we have valid numbers
     const atk = Number(attackerATK) || 0;
     const def = Number(defenderDEF) || 0;
     const bonus = Number(damageRangeBonus) || 0;
     
-    // Apply skill level bonuses
-    const minDamageBonus = skillBuffs.MIN_DAMAGE || 0;
-    const maxDamageBonus = skillBuffs.MAX_DAMAGE || 0;
+    // 3 Aşamalı MIN_DAMAGE ve MAX_DAMAGE Bonus hesaplaması
+    let totalMinDamageBonus = 0;
+    let totalMaxDamageBonus = 0;
     
+    // Aşama 1: Skill Level Bonus - MIN_DAMAGE ve MAX_DAMAGE olarak
+    if (attackType && SKILL_LEVEL_BONUSES[attackType]) {
+        const skillData = getSkillData();
+        const skillCategory = getSkillCategory(attackType);
+        const skillLevel = skillData[skillCategory]?.[attackType]?.level || 0;
+        const skillMinDamageBonus = SKILL_LEVEL_BONUSES[attackType].MIN_DAMAGE || 0;
+        const skillMaxDamageBonus = SKILL_LEVEL_BONUSES[attackType].MAX_DAMAGE || 0;
+        const skillMinBonus = skillLevel * skillMinDamageBonus;
+        const skillMaxBonus = skillLevel * skillMaxDamageBonus;
+        console.log('skillMinBonus', skillMinBonus, 'skillMaxBonus', skillMaxBonus);
+        totalMinDamageBonus += skillMinBonus;
+        totalMaxDamageBonus += skillMaxBonus;
+    }
+
+    // Aşama 2: Pet ve Mastery Bonusları - MIN_DAMAGE ve MAX_DAMAGE olarak
+    const petBonuses = getPetBonuses();
+    if (petBonuses && petBonuses.minDamage) {
+        totalMinDamageBonus += petBonuses.minDamage;
+    }
+    if (petBonuses && petBonuses.maxDamage) {
+        totalMaxDamageBonus += petBonuses.maxDamage;
+    }
+    
+    // Mastery bonusları (eğer varsa)
+    const masteryBonuses = getMasteryBonuses();
+    if (masteryBonuses && masteryBonuses.MIN_DAMAGE) {
+        totalMinDamageBonus += masteryBonuses.MIN_DAMAGE;
+    }
+    if (masteryBonuses && masteryBonuses.MAX_DAMAGE) {
+        totalMaxDamageBonus += masteryBonuses.MAX_DAMAGE;
+    }
+    
+    // Aşama 3: Item Bonusları - MIN_DAMAGE ve MAX_DAMAGE olarak
+    const equippedItems = getEquippedItems();
+    
+    Object.values(equippedItems).forEach(item => {
+        if (item && item.stats) {
+            console.log(item);
+            // MIN_DAMAGE bonusu
+            if (item.stats.MIN_DAMAGE) {
+                totalMinDamageBonus += item.stats.MIN_DAMAGE;
+            }
+            
+            // MAX_DAMAGE bonusu
+            if (item.stats.MAX_DAMAGE) {
+                totalMaxDamageBonus += item.stats.MAX_DAMAGE;
+            }
+            
+            // Attack type'a özel MIN_DAMAGE bonusu (eğer varsa)
+            if (attackType && item.stats[`${attackType.toUpperCase()}_MIN_DAMAGE`]) {
+                totalMinDamageBonus += item.stats[`${attackType.toUpperCase()}_MIN_DAMAGE`];
+            }
+            
+            // Attack type'a özel MAX_DAMAGE bonusu (eğer varsa)
+            if (attackType && item.stats[`${attackType.toUpperCase()}_MAX_DAMAGE`]) {
+                totalMaxDamageBonus += item.stats[`${attackType.toUpperCase()}_MAX_DAMAGE`];
+            }
+        }
+    });
+    
+    // Base damage calculation using original ATK
     let baseDamage = atk - (def * 0.5);
     baseDamage = Math.max(1, baseDamage);
     
@@ -24,8 +85,11 @@ export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus 
     let maxDamage = Math.floor(baseDamage + variation);
     
     // Apply skill level bonuses to damage range
-    minDamage += minDamageBonus;
-    maxDamage += maxDamageBonus;
+    const minDamageBonus = skillBuffs.MIN_DAMAGE || 0;
+    const maxDamageBonus = skillBuffs.MAX_DAMAGE || 0;
+    
+    minDamage += minDamageBonus + totalMinDamageBonus;
+    maxDamage += maxDamageBonus + totalMaxDamageBonus;
     
     // Apply slash skill bonus to max damage
     maxDamage += bonus;
@@ -36,13 +100,13 @@ export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus 
     };
 };
 
-export const calculateDamage = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}) => {
+export const calculateDamage = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}, attackType = null) => {
     // Ensure we have valid numbers
     const atk = Number(attackerATK) || 0;
     const def = Number(defenderDEF) || 0;
     const bonus = Number(damageRangeBonus) || 0;
     
-    const damageRange = calculateDamageRange(atk, def, bonus, skillBuffs);
+    const damageRange = calculateDamageRange(atk, def, bonus, skillBuffs, attackType);
     
     // Random damage within the range
     const damage = Math.floor(
@@ -91,7 +155,7 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
         const effectiveCritChance = (battle.player.CRIT_CHANCE || 5);
         const isCrit = critRoll <= effectiveCritChance;
         
-        let damage = calculateDamage(effectiveATK, battle.enemy.DEF, 0, skillBuffs);
+        let damage = calculateDamage(effectiveATK, battle.enemy.DEF, 0, skillBuffs, attackType);
         
         // Apply damage buff
         damage = applyDamageMultiplier(damage);
@@ -160,7 +224,7 @@ export const processEnemyAttack = (battle, setDamageDisplay) => {
         const critRoll = Math.random() * 100;
         const isCrit = critRoll <= (battle.enemy.CRIT_CHANCE || 3);
         
-        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF, 0, {}); // Enemies don't get skill bonuses
+        let damage = calculateDamage(battle.enemy.ATK, battle.player.DEF, 0, {}, null); // Enemies don't get skill bonuses
         
         // Award defense skill experience for taking damage
         const defenseXP = awardBattleActionXP('damage_taken', damage, isCrit, true);
@@ -659,7 +723,6 @@ function getCoreAccuracyFormula(diff) {
 
 
 export function getPetBonuses() {
-    // Pet bonuslarını hesapla
     const currentSlot = getCurrentSlot();
     const petKey = getSlotKey('idle-chaos-pets', currentSlot);
     const equippedPets = JSON.parse(localStorage.getItem(petKey) || '[]');
@@ -740,7 +803,6 @@ export function getSkillCategory(attackType) {
 }
 
 export function getMasteryBonuses() {
-    // Mastery bonuslarını hesapla (şimdilik boş)
     return {
         ATK: 0,
         DEF: 0,
