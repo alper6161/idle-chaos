@@ -206,6 +206,11 @@ function Battle() {
         stopBattle();
         setDungeonRun(null);
     };
+    
+    const handleStopAndGoToSelection = () => {
+        stopBattle();
+        navigate('/battle-selection');
+    };
 
 
     const getSelectedSkillInfoLocal = () => {
@@ -527,6 +532,14 @@ function Battle() {
                                     🏆 TEST: Complete Dungeon
                                 </Button>
                             )}
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={handleStopAndGoToSelection}
+                                style={{marginLeft: '8px'}}
+                            >
+                                ⏹️ Stop Battle
+                            </Button>
                         </div>
                     </div>
 

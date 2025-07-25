@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, LinearProgress, IconButton, Collapse } from '@mui/material';
+import { Box, Typography, LinearProgress, IconButton, Collapse, Button } from '@mui/material';
 import { Close, ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useBattleContext } from '../contexts/BattleContext';
 import { useTranslate } from '../hooks/useTranslate';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styles from '../assets/styles/MiniBattleWindow.module.scss';
 
 const MiniBattleWindow = () => {
     const { t } = useTranslate();
     const location = useLocation();
+    const navigate = useNavigate();
     const { 
         isBattleActive, 
         currentBattle, 
@@ -21,7 +22,6 @@ const MiniBattleWindow = () => {
     } = useBattleContext();
     
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isVisible, setIsVisible] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     
     // Settings'den mini battle window ayarlarını al
@@ -50,49 +50,37 @@ const MiniBattleWindow = () => {
     
     const settings = getMiniBattleSettings();
     
-    // Savaş aktif olduğunda veya enemy spawn beklerken pencereyi göster
+    // Auto hide ayarı için timer (artık sadece expanded state için kullanılıyor)
     useEffect(() => {
-        if ((isBattleActive || isWaitingForEnemy) && (currentBattle || currentEnemy) && settings.enabled) {
-            setIsVisible(true);
+        if (settings.autoHide && isExpanded) {
+            const timer = setTimeout(() => {
+                setIsExpanded(false);
+            }, settings.autoHideDelay);
             
-            // Auto hide ayarı aktifse, belirli süre sonra gizle
-            if (settings.autoHide) {
-                const timer = setTimeout(() => {
-                    setIsVisible(false);
-                }, settings.autoHideDelay);
-                
-                return () => clearTimeout(timer);
-            }
-        } else {
-            setIsVisible(false);
+            return () => clearTimeout(timer);
         }
-    }, [isBattleActive, isWaitingForEnemy, currentBattle, currentEnemy, settings]);
+    }, [isExpanded, settings.autoHide, settings.autoHideDelay]);
     
     // Mouse hover olduğunda auto hide'ı iptal et
     const handleMouseEnter = () => {
-        if (settings.autoHide) {
-            // Auto hide'ı iptal et
-        }
+        // Auto hide timer'ı iptal et (useEffect'te zaten yapılıyor)
     };
     
     const handleMouseLeave = () => {
-        if (settings.autoHide && isExpanded) {
-            // Belirli süre sonra gizle
-            setTimeout(() => {
-                setIsVisible(false);
-            }, settings.autoHideDelay);
-        }
+        // Auto hide timer'ı başlat (useEffect'te zaten yapılıyor)
     };
     
     const handleClose = () => {
-        setIsVisible(false);
         setIsExpanded(false);
     };
     
     const handleStopBattle = () => {
         stopBattle();
-        setIsVisible(false);
         setIsExpanded(false);
+    };
+    
+    const handleGoToBattle = () => {
+        navigate('/battle');
     };
     
     // Battle sayfasında mini window'u gösterme
@@ -100,7 +88,7 @@ const MiniBattleWindow = () => {
         return null;
     }
     
-    if (!isVisible || (!isBattleActive && !isWaitingForEnemy) || (!currentBattle && !currentEnemy)) {
+    if ((!isBattleActive && !isWaitingForEnemy) || (!currentBattle && !currentEnemy)) {
         return null;
     }
     
@@ -191,6 +179,19 @@ const MiniBattleWindow = () => {
                             </Typography>
                         </Box>
                     )}
+                    
+                    {/* Go to Battle Button */}
+                    <Box className={styles.actions}>
+                        <Button 
+                            variant="contained" 
+                            size="small" 
+                            onClick={handleGoToBattle}
+                            className={styles.goToBattleButton}
+                            fullWidth
+                        >
+                            ⚔️ Go to Battle
+                        </Button>
+                    </Box>
                 </Box>
             </Collapse>
             
@@ -256,6 +257,16 @@ const MiniBattleWindow = () => {
                     
                     {/* Actions */}
                     <Box className={styles.actions}>
+                        <Button 
+                            variant="contained" 
+                            size="small" 
+                            onClick={handleGoToBattle}
+                            className={styles.goToBattleButton}
+                            fullWidth
+                            sx={{ mb: 1 }}
+                        >
+                            ⚔️ Go to Battle
+                        </Button>
                         <button 
                             onClick={handleStopBattle}
                             className={styles.stopButton}
