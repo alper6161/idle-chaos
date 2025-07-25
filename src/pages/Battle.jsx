@@ -576,6 +576,8 @@ function Battle() {
                                 currentEnemy={currentEnemy}
                                 currentBattle={currentBattle}
                                 playerStats={playerStats}
+                                getStatDisplayWithAchievement={getStatDisplayWithAchievementLocal}
+                                getEnemyHpDisplayWithAchievement={getEnemyHpDisplayWithAchievementLocal}
                             />
 
                             {!(dungeonRun && !dungeonRun.completed) && (

@@ -9,7 +9,9 @@ import styles from '../assets/styles/Battle.module.scss';
 const EnemyStats = ({
     currentEnemy,
     currentBattle,
-    playerStats
+    playerStats,
+    getStatDisplayWithAchievement,
+    getEnemyHpDisplayWithAchievement
 }) => {
     const { t } = useTranslate();
 
@@ -86,33 +88,44 @@ const EnemyStats = ({
 
                 {/* Attack */}
                 <Typography>
-                    ⚔️ {t('battle.attack')}: {enemyStats.ATK !== undefined && enemyStats.ATK !== null ? enemyStats.ATK.toFixed(1) : '-'}
+                    ⚔️ {t('battle.attack')}: {getStatDisplayWithAchievement ? 
+                        (getStatDisplayWithAchievement(currentEnemy.id, 'atk', enemyStats.ATK) || '???') : 
+                        (enemyStats.ATK !== undefined && enemyStats.ATK !== null ? enemyStats.ATK.toFixed(1) : '-')}
                 </Typography>
 
                 {/* Defense */}
                 <Typography>
-                    🛡️ {t('battle.defense')}: {enemyStats.DEF !== undefined && enemyStats.DEF !== null ? enemyStats.DEF.toFixed(1) : '-'}
+                    🛡️ {t('battle.defense')}: {getStatDisplayWithAchievement ? 
+                        (getStatDisplayWithAchievement(currentEnemy.id, 'def', enemyStats.DEF) || '???') : 
+                        (enemyStats.DEF !== undefined && enemyStats.DEF !== null ? enemyStats.DEF.toFixed(1) : '-')}
                 </Typography>
 
                 {/* Health */}
                 <Typography>
-                    ❤️ {t('battle.health')}: {enemyStats.currentHealth !== undefined && enemyStats.currentHealth !== null ? enemyStats.currentHealth : '-'}
-                    /{enemyStats.HEALTH !== undefined && enemyStats.HEALTH !== null ? enemyStats.HEALTH.toFixed(0) : '-'}
+                    ❤️ {t('battle.health')}: {getEnemyHpDisplayWithAchievement ? 
+                        getEnemyHpDisplayWithAchievement(currentEnemy.id, enemyStats.currentHealth, enemyStats.HEALTH) : 
+                        `${enemyStats.currentHealth !== undefined && enemyStats.currentHealth !== null ? enemyStats.currentHealth : '-'}/${enemyStats.HEALTH !== undefined && enemyStats.HEALTH !== null ? enemyStats.HEALTH.toFixed(0) : '-'}`}
                 </Typography>
 
                 {/* Attack Speed */}
                 <Typography>
-                    ⚡ {t('battle.attackSpeed')}: {enemyStats.ATTACK_SPEED !== undefined && enemyStats.ATTACK_SPEED !== null ? enemyStats.ATTACK_SPEED.toFixed(1) : '-'}
+                    ⚡ {t('battle.attackSpeed')}: {getStatDisplayWithAchievement ? 
+                        (getStatDisplayWithAchievement(currentEnemy.id, 'attack_speed', enemyStats.ATTACK_SPEED) || '???') : 
+                        (enemyStats.ATTACK_SPEED !== undefined && enemyStats.ATTACK_SPEED !== null ? enemyStats.ATTACK_SPEED.toFixed(1) : '-')}
                 </Typography>
 
                 {/* Critical Chance */}
                 <Typography>
-                    🎯 {t('battle.criticalChance')}: {enemyStats.CRIT_CHANCE !== undefined && enemyStats.CRIT_CHANCE !== null ? enemyStats.CRIT_CHANCE.toFixed(1) : '-'}%
+                    🎯 {t('battle.criticalChance')}: {getStatDisplayWithAchievement ? 
+                        (getStatDisplayWithAchievement(currentEnemy.id, 'crit_chance', enemyStats.CRIT_CHANCE) || '???') : 
+                        (enemyStats.CRIT_CHANCE !== undefined && enemyStats.CRIT_CHANCE !== null ? enemyStats.CRIT_CHANCE.toFixed(1) : '-')}%
                 </Typography>
 
                 {/* Critical Damage */}
                 <Typography>
-                    💥 {t('battle.criticalDamage')}: {enemyStats.CRIT_DAMAGE !== undefined && enemyStats.CRIT_DAMAGE !== null ? enemyStats.CRIT_DAMAGE.toFixed(1) : '-'}%
+                    💥 {t('battle.criticalDamage')}: {getStatDisplayWithAchievement ? 
+                        (getStatDisplayWithAchievement(currentEnemy.id, 'crit_damage', enemyStats.CRIT_DAMAGE) || '???') : 
+                        (enemyStats.CRIT_DAMAGE !== undefined && enemyStats.CRIT_DAMAGE !== null ? enemyStats.CRIT_DAMAGE.toFixed(1) : '-')}%
                 </Typography>
 
                 {/* Battle-specific stats */}
