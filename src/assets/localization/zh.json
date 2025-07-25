@@ -64,7 +64,8 @@
     "unmute": "取消静音",
     "music": "音乐",
     "collapse": "收起",
-    "expand": "展开"
+    "expand": "展开",
+    "exitKey": "退出"
   },
   "story": {
     "welcome": "欢迎，战士！",

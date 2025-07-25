@@ -64,7 +64,8 @@
     "music": "Müzik",
     "loadError": "Oyun yüklenirken bir hata oluştu!",
     "collapse": "Kapat",
-    "expand": "Aç"
+    "expand": "Aç",
+    "exitKey": "Çık"
   },
   "story": {
     "welcome": "Hoş geldin, savaşçı!",

@@ -608,7 +608,7 @@ function Battle() {
                 <DialogContent>{t('battle.dungeonExitWarning')}</DialogContent>
                 <DialogActions>
                     <Button onClick={() => setExitWarningOpen(false)}>{t('common.cancel')}</Button>
-                    <Button onClick={confirmExitDungeon} color="error">{t('common.exit')}</Button>
+                    <Button onClick={confirmExitDungeon} color="error">{t('common.exitKey')}</Button>
                 </DialogActions>
             </Dialog>
 

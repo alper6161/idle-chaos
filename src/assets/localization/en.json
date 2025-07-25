@@ -31,7 +31,6 @@
     "battle": "Battle",
     "skills": "Skills",
     "equipment": "Equipment",
-    "settings": "Settings",
     "store": "Store",
     "level": "Lv.",
     "gameLogo": "Game Logo",
@@ -65,7 +64,8 @@
     "music": "Music",
     "loadError": "Error loading game!",
     "collapse": "Collapse",
-    "expand": "Expand"
+    "expand": "Expand",
+    "exitKey": "Exit"
   },
   "story": {
     "welcome": "Welcome, warrior!",
@@ -137,9 +137,6 @@
     "dungeonCompleteDescription": "You have cleared the dungeon. Claim your chest reward!",
     "nextEnemy": "Next Enemy",
     "nextBoss": "Boss Coming Soon",
-    "noDropsAvailable": "No drops available.",
-    "noLootYet": "No loot yet.",
-    "lootGained": "Loot Gained",
     "battle.dungeonRestartIn": "Dungeon will restart after {{seconds}} seconds.",
     "leave": "Leave",
     "restart": "Restart",
