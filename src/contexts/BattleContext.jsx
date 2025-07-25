@@ -392,6 +392,12 @@ export const BattleProvider = ({ children }) => {
 
     const startBattle = (enemy, attackType = 'stab') => {
         if (!enemy) return;
+        
+        // Eğer zaten bir savaş aktifse, yeni savaş başlatma
+        if (isBattleActive) {
+            console.log('Battle already active, ignoring new battle start');
+            return;
+        }
 
         const currentPlayerStats = getPlayerStats();
         // Health'i doğru şekilde ayarla - playerHealth state'ini kullan
@@ -618,7 +624,7 @@ export const BattleProvider = ({ children }) => {
                 
                 // Start next battle
                 setTimeout(() => {
-                    if (nextEnemy) {
+                    if (nextEnemy && !isBattleActive) {
                         startBattle(nextEnemy, selectedAttackType);
                     }
                 }, 100);
@@ -669,6 +675,12 @@ export const BattleProvider = ({ children }) => {
     };
 
     const spawnNewEnemy = () => {
+        // Eğer zaten bir savaş aktifse, yeni enemy spawn etme
+        if (isBattleActive) {
+            console.log('Battle already active, ignoring enemy spawn');
+            return;
+        }
+        
         // Reset waiting state
         setIsWaitingForEnemy(false);
         setEnemySpawnProgress(0);
@@ -706,6 +718,12 @@ export const BattleProvider = ({ children }) => {
         setCurrentEnemy(nextEnemy);
         setCurrentBattle(battleState);
         setIsBattleActive(true);
+        
+        // Add battle log entry
+        setBattleLog(prev => [...prev, {
+            type: 'battle_start',
+            message: `${t('battle.battleStarted')}: ${nextEnemy.name}`
+        }]);
     };
 
     const checkAutoPotion = (battle) => {
@@ -992,7 +1010,10 @@ export const BattleProvider = ({ children }) => {
                 
                 // Restart battle with same enemy after a short delay
                 setTimeout(() => {
-                    startBattle(currentEnemy, selectedAttackType);
+                    // Savaş hala aktif değilse başlat
+                    if (!isBattleActive) {
+                        startBattle(currentEnemy, selectedAttackType);
+                    }
                 }, 1000);
             } else {
                 // No enemy to continue with, clear everything

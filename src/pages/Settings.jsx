@@ -60,6 +60,60 @@ function Settings({ open, onClose }) {
         const saved = localStorage.getItem('musicMuted');
         return saved === 'true';
     });
+    
+    // Mini Battle Window Settings
+    const [miniBattleWindowEnabled, setMiniBattleWindowEnabled] = useState(() => {
+        try {
+            const settings = localStorage.getItem('idle-chaos-settings');
+            if (settings) {
+                const parsed = JSON.parse(settings);
+                return parsed.miniBattleWindow?.enabled ?? true;
+            }
+        } catch (error) {
+            console.error('Error loading mini battle window settings:', error);
+        }
+        return true;
+    });
+    
+    const [miniBattleWindowPosition, setMiniBattleWindowPosition] = useState(() => {
+        try {
+            const settings = localStorage.getItem('idle-chaos-settings');
+            if (settings) {
+                const parsed = JSON.parse(settings);
+                return parsed.miniBattleWindow?.position ?? 'bottom-right';
+            }
+        } catch (error) {
+            console.error('Error loading mini battle window settings:', error);
+        }
+        return 'bottom-right';
+    });
+    
+    const [miniBattleWindowAutoHide, setMiniBattleWindowAutoHide] = useState(() => {
+        try {
+            const settings = localStorage.getItem('idle-chaos-settings');
+            if (settings) {
+                const parsed = JSON.parse(settings);
+                return parsed.miniBattleWindow?.autoHide ?? false;
+            }
+        } catch (error) {
+            console.error('Error loading mini battle window settings:', error);
+        }
+        return false;
+    });
+    
+    const [miniBattleWindowAutoHideDelay, setMiniBattleWindowAutoHideDelay] = useState(() => {
+        try {
+            const settings = localStorage.getItem('idle-chaos-settings');
+            if (settings) {
+                const parsed = JSON.parse(settings);
+                return parsed.miniBattleWindow?.autoHideDelay ?? 5000;
+            }
+        } catch (error) {
+            console.error('Error loading mini battle window settings:', error);
+        }
+        return 5000;
+    });
+    
     const { t, changeLanguage, getCurrentLanguage, getAvailableLanguages } = useTranslate();
     const { settings: notificationSettings, updateSettings: updateNotificationSettings, notifyItemDrop } = useNotificationContext();
 
@@ -139,6 +193,58 @@ function Settings({ open, onClose }) {
 
     const handleTestNotification = () => {
         notifyItemDrop('Test Sword', '⚔️');
+    };
+    
+    // Mini Battle Window Settings Handlers
+    const handleMiniBattleWindowEnabledChange = (event) => {
+        const enabled = event.target.checked;
+        setMiniBattleWindowEnabled(enabled);
+        
+        try {
+            const settings = JSON.parse(localStorage.getItem('idle-chaos-settings') || '{}');
+            settings.miniBattleWindow = { ...settings.miniBattleWindow, enabled };
+            localStorage.setItem('idle-chaos-settings', JSON.stringify(settings));
+        } catch (error) {
+            console.error('Error saving mini battle window settings:', error);
+        }
+    };
+    
+    const handleMiniBattleWindowPositionChange = (event) => {
+        const position = event.target.value;
+        setMiniBattleWindowPosition(position);
+        
+        try {
+            const settings = JSON.parse(localStorage.getItem('idle-chaos-settings') || '{}');
+            settings.miniBattleWindow = { ...settings.miniBattleWindow, position };
+            localStorage.setItem('idle-chaos-settings', JSON.stringify(settings));
+        } catch (error) {
+            console.error('Error saving mini battle window settings:', error);
+        }
+    };
+    
+    const handleMiniBattleWindowAutoHideChange = (event) => {
+        const autoHide = event.target.checked;
+        setMiniBattleWindowAutoHide(autoHide);
+        
+        try {
+            const settings = JSON.parse(localStorage.getItem('idle-chaos-settings') || '{}');
+            settings.miniBattleWindow = { ...settings.miniBattleWindow, autoHide };
+            localStorage.setItem('idle-chaos-settings', JSON.stringify(settings));
+        } catch (error) {
+            console.error('Error saving mini battle window settings:', error);
+        }
+    };
+    
+    const handleMiniBattleWindowAutoHideDelayChange = (event, value) => {
+        setMiniBattleWindowAutoHideDelay(value);
+        
+        try {
+            const settings = JSON.parse(localStorage.getItem('idle-chaos-settings') || '{}');
+            settings.miniBattleWindow = { ...settings.miniBattleWindow, autoHideDelay: value };
+            localStorage.setItem('idle-chaos-settings', JSON.stringify(settings));
+        } catch (error) {
+            console.error('Error saving mini battle window settings:', error);
+        }
     };
 
     useEffect(() => {
@@ -478,6 +584,144 @@ function Settings({ open, onClose }) {
                             </Button>
                         </Box>
                         
+                        <Divider sx={{ my: 3, borderColor: '#4a4a6a' }} />
+
+                        {/* Mini Battle Window Settings */}
+                        <Typography variant="h6" gutterBottom sx={{ 
+                            color: '#4a90e2',
+                            fontSize: '0.9rem',
+                            textShadow: '1px 1px 0px #000',
+                            mb: 2
+                        }}>
+                            ⚔️ Mini Battle Window
+                        </Typography>
+                        
+                        {/* Enable/Disable Mini Battle Window */}
+                        <Box sx={{ mb: 2 }}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={miniBattleWindowEnabled}
+                                        onChange={handleMiniBattleWindowEnabledChange}
+                                        sx={{
+                                            '& .MuiSwitch-switchBase.Mui-checked': {
+                                                color: '#4a90e2'
+                                            },
+                                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                                backgroundColor: '#4a90e2'
+                                            }
+                                        }}
+                                    />
+                                }
+                                label="Enable Mini Battle Window"
+                                sx={{
+                                    '& .MuiFormControlLabel-label': {
+                                        fontFamily: 'Press Start 2P',
+                                        fontSize: '0.7rem',
+                                        color: '#e0e0e0'
+                                    }
+                                }}
+                            />
+                        </Box>
+
+                        {/* Mini Battle Window Position */}
+                        <Box sx={{ mb: 2 }}>
+                            <Typography sx={{ fontSize: '0.7rem', mb: 1, color: '#e0e0e0' }}>
+                                📍 Window Position
+                            </Typography>
+                            <FormControl fullWidth disabled={!miniBattleWindowEnabled}>
+                                <Select
+                                    value={miniBattleWindowPosition}
+                                    onChange={handleMiniBattleWindowPositionChange}
+                                    sx={{
+                                        fontFamily: 'Press Start 2P',
+                                        fontSize: '0.6rem',
+                                        color: '#e0e0e0',
+                                        '& .MuiOutlinedInput-notchedOutline': {
+                                            borderColor: '#4a4a6a'
+                                        },
+                                        '& .MuiSelect-icon': {
+                                            color: '#4a90e2'
+                                        }
+                                    }}
+                                >
+                                    <MenuItem value="bottom-right" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↘️ Bottom Right
+                                    </MenuItem>
+                                    <MenuItem value="bottom-left" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↙️ Bottom Left
+                                    </MenuItem>
+                                    <MenuItem value="top-right" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↗️ Top Right
+                                    </MenuItem>
+                                    <MenuItem value="top-left" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ↖️ Top Left
+                                    </MenuItem>
+                                    <MenuItem value="center-right" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ➡️ Center Right
+                                    </MenuItem>
+                                    <MenuItem value="center-left" sx={{ fontFamily: 'Press Start 2P', fontSize: '0.6rem' }}>
+                                        ⬅️ Center Left
+                                    </MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+
+                        {/* Auto Hide */}
+                        <Box sx={{ mb: 2 }}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={miniBattleWindowAutoHide}
+                                        onChange={handleMiniBattleWindowAutoHideChange}
+                                        disabled={!miniBattleWindowEnabled}
+                                        sx={{
+                                            '& .MuiSwitch-switchBase.Mui-checked': {
+                                                color: '#4a90e2'
+                                            },
+                                            '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                                                backgroundColor: '#4a90e2'
+                                            }
+                                        }}
+                                    />
+                                }
+                                label="Auto Hide Window"
+                                sx={{
+                                    '& .MuiFormControlLabel-label': {
+                                        fontFamily: 'Press Start 2P',
+                                        fontSize: '0.7rem',
+                                        color: '#e0e0e0'
+                                    }
+                                }}
+                            />
+                        </Box>
+
+                        {/* Auto Hide Delay */}
+                        {miniBattleWindowAutoHide && (
+                            <Box sx={{ mb: 2 }}>
+                                <Typography sx={{ fontSize: '0.7rem', mb: 1, color: '#e0e0e0' }}>
+                                    ⏱️ Auto Hide Delay: {miniBattleWindowAutoHideDelay}ms
+                                </Typography>
+                                <Slider
+                                    value={miniBattleWindowAutoHideDelay}
+                                    onChange={handleMiniBattleWindowAutoHideDelayChange}
+                                    min={1000}
+                                    max={10000}
+                                    step={500}
+                                    disabled={!miniBattleWindowEnabled || !miniBattleWindowAutoHide}
+                                    sx={{
+                                        color: '#4a90e2',
+                                        '& .MuiSlider-thumb': {
+                                            backgroundColor: '#4a90e2'
+                                        },
+                                        '& .MuiSlider-track': {
+                                            backgroundColor: '#4a90e2'
+                                        }
+                                    }}
+                                />
+                            </Box>
+                        )}
+
                         <Divider sx={{ my: 3, borderColor: '#4a4a6a' }} />
 
                         <Typography variant="h6" gutterBottom sx={{ 

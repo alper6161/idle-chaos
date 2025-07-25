@@ -1,0 +1,325 @@
+.miniBattleWindow {
+  position: fixed;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  border: 2px solid #4a90e2;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  min-width: 280px;
+  max-width: 320px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #5ba0f2;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
+  }
+  
+  // Position variants
+  &.bottom-right {
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  &.bottom-left {
+    bottom: 20px;
+    left: 20px;
+  }
+  
+  &.top-right {
+    top: 20px;
+    right: 20px;
+  }
+  
+  &.top-left {
+    top: 20px;
+    left: 20px;
+  }
+  
+  &.center-right {
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+  }
+  
+  &.center-left {
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #2c3e50, #34495e);
+  border-radius: 6px 6px 0 0;
+  border-bottom: 1px solid #4a90e2;
+}
+
+.title {
+  color: #ecf0f1;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spawnProgress {
+  color: #4a90e2;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: rgba(74, 144, 226, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(74, 144, 226, 0.4);
+}
+
+.headerActions {
+  display: flex;
+  gap: 4px;
+}
+
+.expandButton,
+.closeButton {
+  color: #bdc3c7 !important;
+  padding: 2px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  
+  &:hover {
+    color: #ecf0f1 !important;
+    background-color: rgba(74, 144, 226, 0.2) !important;
+  }
+}
+
+.collapsedContent {
+  padding: 12px;
+}
+
+.healthBars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.healthBar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.healthLabel {
+  color: #ecf0f1;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress {
+  height: 6px !important;
+  border-radius: 3px;
+  
+  &.playerHealth {
+    background-color: rgba(231, 76, 60, 0.3) !important;
+    
+    .MuiLinearProgress-bar {
+      background: linear-gradient(90deg, #e74c3c, #c0392b) !important;
+    }
+  }
+  
+  &.enemyHealth {
+    background-color: rgba(52, 73, 94, 0.3) !important;
+    
+    .MuiLinearProgress-bar {
+      background: linear-gradient(90deg, #34495e, #2c3e50) !important;
+    }
+  }
+}
+
+.respawnTimer {
+  margin-top: 8px;
+  padding: 8px;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(74, 144, 226, 0.3);
+}
+
+.respawnLabel {
+  color: #4a90e2 !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  display: block;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.respawnProgress {
+  background-color: rgba(74, 144, 226, 0.2) !important;
+  
+  .MuiLinearProgress-bar {
+    background: linear-gradient(90deg, #4a90e2, #357abd) !important;
+  }
+}
+
+.respawnPercent {
+  color: #4a90e2 !important;
+  font-size: 0.6rem !important;
+  font-weight: 600 !important;
+  text-align: center;
+  margin-top: 2px;
+  display: block;
+}
+
+.respawnTimerExpanded {
+  margin-top: 12px;
+  padding: 10px;
+  background: rgba(74, 144, 226, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(74, 144, 226, 0.3);
+}
+
+.respawnProgressContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.respawnTime {
+  color: #bdc3c7 !important;
+  font-size: 0.6rem !important;
+  text-align: center;
+  display: block;
+  margin-top: 4px;
+}
+
+.expandedContent {
+  padding: 12px;
+  border-top: 1px solid rgba(74, 144, 226, 0.3);
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  
+  .MuiTypography-caption {
+    color: #bdc3c7;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+}
+
+.progressBars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.progressBar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  
+  .MuiTypography-caption {
+    color: #ecf0f1;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+  
+  .progress {
+    background-color: rgba(74, 144, 226, 0.3) !important;
+    
+    .MuiLinearProgress-bar {
+      background: linear-gradient(90deg, #4a90e2, #357abd) !important;
+    }
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.stopButton {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Animation for appearing/disappearing
+.miniBattleWindow {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .miniBattleWindow {
+    min-width: 250px;
+    max-width: 280px;
+    
+    &.bottom-right,
+    &.bottom-left {
+      bottom: 10px;
+    }
+    
+    &.top-right,
+    &.top-left {
+      top: 10px;
+    }
+    
+    &.center-right,
+    &.center-left {
+      right: 10px;
+      left: 10px;
+      transform: none;
+      top: auto;
+      bottom: 10px;
+    }
+  }
+  
+  .header {
+    padding: 6px 10px;
+  }
+  
+  .collapsedContent,
+  .expandedContent {
+    padding: 10px;
+  }
+} 

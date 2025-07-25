@@ -13,6 +13,7 @@ import { useRef } from "react";
 import { useNotificationContext } from "../contexts/NotificationContext";
 import NotificationOverlay from "../components/NotificationOverlay";
 import { useBattleContext } from "../contexts/BattleContext";
+import MiniBattleWindow from "../components/MiniBattleWindow";
 
 function MainLayout() {
     const [settingsOpen, setSettingsOpen] = useState(false);
@@ -259,6 +260,9 @@ function MainLayout() {
                     </Box>
                 </DialogContent>
             </Dialog>
+            
+            {/* Mini Battle Window */}
+            <MiniBattleWindow />
         </div>
     );
 }
