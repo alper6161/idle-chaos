@@ -490,43 +490,7 @@ export function checkPetDrop(enemyName) {
     return null;
 }
 
-export function getPetBonuses(equippedPets) {
-    const bonuses = {
-        attack: 0,
-        defense: 0,
-        health: 0,
-        attackSpeed: 0,
-        criticalChance: 0,
-        criticalDamage: 0,
-        dodge: 0,
-        lifeSteal: 0,
-        fireResistance: 0,
-        iceResistance: 0,
-        lightningResistance: 0,
-        poisonResistance: 0,
-        shadowResistance: 0,
-        darkResistance: 0,
-        lightResistance: 0,
-        earthResistance: 0,
-        voidResistance: 0,
-        allResistance: 0
-    };
 
-    if (!equippedPets || !Array.isArray(equippedPets)) return bonuses;
-
-    equippedPets.forEach(petId => {
-        const pet = PETS[petId];
-        if (pet && pet.bonuses) {
-            Object.keys(pet.bonuses).forEach(stat => {
-                if (bonuses.hasOwnProperty(stat)) {
-                    bonuses[stat] += pet.bonuses[stat];
-                }
-            });
-        }
-    });
-
-    return bonuses;
-}
 
 export function getPetRarityColor(rarity) {
     switch (rarity) {

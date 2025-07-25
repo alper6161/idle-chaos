@@ -7,7 +7,7 @@ export const BASE_PLAYER_STATS = {
     DEF: 1,
     MAGIC_RES: 1,
     HEALTH: 10,
-    ATTACK_SPEED: 2.0,
+    ATTACK_SPEED: 19.0,
 };
 
 const getSlotKey = (key, slotNumber) => `${key}_slot_${slotNumber}`;

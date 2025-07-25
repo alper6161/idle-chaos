@@ -178,12 +178,4 @@ export const shouldUseAutoPotion = (currentHP, maxHP) => {
     return null;
 };
 
-export const getTotalPotions = () => {
-    const potions = getPotions();
-    return Object.values(potions).reduce((total, count) => total + count, 0);
-};
-
-export const getPotionCount = (potionType) => {
-    const potions = getPotions();
-    return potions[potionType] || 0;
-}; 
+ 

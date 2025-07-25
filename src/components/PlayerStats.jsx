@@ -71,8 +71,7 @@ const PlayerStats = ({
         const skillBuffs = calculateSkillBuffsForAttackType(selectedAttackType);
         const atkBonus = skillBuffs.ATK || 0;
         const effectiveATK = currentBattle.player.ATK + atkBonus;
-        // Yeni: calculateAccuracy fonksiyonu ile hesapla
-        return calculateAccuracy(effectiveATK, currentBattle.enemy.DEF);
+        return calculateAccuracy(effectiveATK, currentBattle.enemy.DEF, selectedAttackType);
     }, [currentBattle, currentEnemy, selectedAttackType]);
 
     return (

@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { FilterList, Person, TrendingUp, Shield, LocalFireDepartment } from "@mui/icons-material";
 import { useTranslate } from "../hooks/useTranslate";
-import { convertLootBagToEquipment, clearProcessedLootBag } from "../utils/equipmentGenerator";
+import { convertLootBagToEquipment } from "../utils/equipmentGenerator";
 import { useBattleContext } from "../contexts/BattleContext";
 
 // Helper function to get slot-specific key

@@ -1,8 +1,9 @@
 import { applyDamageMultiplier, applyGoldMultiplier } from './buffUtils.js';
-import { awardBattleActionXP, getAttackTypeFromWeapon, getEquippedWeapon } from './skillExperience.js';
-import { calculateSkillBuffs, calculateSkillBuffsForAttackType } from './playerStats.js';
+import { awardBattleActionXP, getAttackTypeFromWeapon, getEquippedWeapon, getSkillData } from './skillExperience.js';
+import { calculateSkillBuffs, calculateSkillBuffsForAttackType, getEquippedItems } from './playerStats.js';
 import { Box, Typography } from '@mui/material';
 import { SKILL_LEVEL_BONUSES, MAGIC_TYPES } from './constants.js';
+import { PETS } from './pets.js';
 
 export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}) => {
     // Ensure we have valid numbers
@@ -72,11 +73,17 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
     }
     
     const skillBuffs = calculateSkillBuffsForAttackType(attackType);
+    console.log('skillBuffs', skillBuffs);
+    console.log('battle', battle);
+    console.log('attackType', attackType);
     const atkBonus = skillBuffs.ATK || 0;
+
+    //Calculate item buffs
     
     const effectiveATK = battle.player.ATK + atkBonus;
     
     const hitChance = calculateAccuracy(battle.player.ATK, battle.enemy.DEF, attackType);
+    console.log('hit Chance', hitChance);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
@@ -146,7 +153,7 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
 };
 
 export const processEnemyAttack = (battle, setDamageDisplay) => {
-    const hitChance = calculateAccuracy(battle.enemy.ATK, battle.player.DEF);
+            const hitChance = calculateAccuracy(battle.enemy.ATK, battle.player.DEF);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
@@ -580,18 +587,166 @@ export function calculateAccuracy(skill, defense, attackType = null) {
         return 100;
     }
     
-    //skill + buffs + items
-    if (Math.round(skill) === Math.round(defense)) return 25;
-    if (skill > defense) {
-        const diff = skill - defense;
-        return Math.min(100, 25 + Math.floor(Math.log2(diff + 1) * 10));
+    // 3 Aşamalı ATK hesaplaması
+    let totalATK = 0;
+    
+    // Aşama 1: Skill Level Bonus
+    if (attackType && SKILL_LEVEL_BONUSES[attackType]) {
+        const skillData = getSkillData();
+        const skillCategory = getSkillCategory(attackType);
+        const skillLevel = skillData[skillCategory]?.[attackType]?.level || 0;
+        const skillBonus = SKILL_LEVEL_BONUSES[attackType].ATK || 0;
+        const skillATKBonus = skillLevel * skillBonus;
+        console.log('skillATKBonus', skillATKBonus);
+        totalATK += skillATKBonus;
+    }
+
+    // Aşama 2: Pet ve Mastery Bonusları
+    const petBonuses = getPetBonuses();
+    if (petBonuses && petBonuses.attack) {
+        totalATK += petBonuses.attack;
+    }
+    
+    // Mastery bonusları (eğer varsa)
+    const masteryBonuses = getMasteryBonuses();
+    if (masteryBonuses && masteryBonuses.ATK) {
+        totalATK += masteryBonuses.ATK;
+    }
+    
+    // Aşama 3: Item Bonusları
+    const equippedItems = getEquippedItems();
+    let itemATKBonus = 0;
+    
+    Object.values(equippedItems).forEach(item => {
+        if (item && item.stats) {
+            console.log(item);
+            // Genel ATK bonusu
+            if (item.stats.ATK) {
+                itemATKBonus += item.stats.ATK;
+            }
+            
+            // Attack type'a özel bonus (eğer varsa)
+            if (attackType && item.stats[`${attackType.toUpperCase()}_BONUS`]) {
+                itemATKBonus += item.stats[`${attackType.toUpperCase()}_BONUS`];
+            }
+        }
+    });
+    
+    totalATK += itemATKBonus;
+
+    // Final accuracy hesaplaması
+    if (Math.round(totalATK) === Math.round(defense)) return 25;
+    if (totalATK > defense) {
+        const diff = totalATK - defense;
+        console.log('+ diff', diff);
+        return Math.min(100, 25 + getCoreAccuracyFormula(diff));
     } else {
-        const diff = defense - skill;
-        return Math.max(5, 25 - Math.floor(Math.log2(diff + 1) * 10));
+        const diff = defense - totalATK;
+        console.log('- diff', diff);
+        return Math.max(5, 25 - getCoreAccuracyFormula(diff));
+    }
+}
+
+function getCoreAccuracyFormula(diff) {
+    const k = 40;
+    if (diff >= 0) {
+        return Math.floor(75 * (1 - Math.exp(-diff / k)));
+    } else {
+        return Math.floor(75 * Math.exp(diff / k));
     }
 }
 
 
+
+export function getPetBonuses() {
+    // Pet bonuslarını hesapla
+    const currentSlot = getCurrentSlot();
+    const petKey = getSlotKey('idle-chaos-pets', currentSlot);
+    const equippedPets = JSON.parse(localStorage.getItem(petKey) || '[]');
+    
+    const bonuses = {
+        attack: 0,
+        defense: 0,
+        health: 0,
+        attackSpeed: 0,
+        criticalChance: 0,
+        criticalDamage: 0,
+        dodge: 0,
+        lifeSteal: 0,
+        fireResistance: 0,
+        iceResistance: 0,
+        lightningResistance: 0,
+        poisonResistance: 0,
+        shadowResistance: 0,
+        darkResistance: 0,
+        lightResistance: 0,
+        earthResistance: 0,
+        voidResistance: 0,
+        allResistance: 0
+    };
+
+    if (!equippedPets || !Array.isArray(equippedPets)) return bonuses;
+
+    equippedPets.forEach(petId => {
+        const pet = PETS[petId];
+        if (pet && pet.bonuses) {
+            Object.keys(pet.bonuses).forEach(stat => {
+                if (bonuses.hasOwnProperty(stat)) {
+                    bonuses[stat] += pet.bonuses[stat];
+                }
+            });
+        }
+    });
+
+    return bonuses;
+}
+
+export function getSkillCategory(attackType) {
+    const skillCategories = {
+        // Melee skills
+        stab: 'melee',
+        slash: 'melee', 
+        crush: 'melee',
+        
+        // Ranged skills
+        archery: 'ranged',
+        throwing: 'ranged',
+        poison: 'ranged',
+        
+        // Magic skills
+        lightning: 'magic',
+        fire: 'magic',
+        ice: 'magic',
+        
+        // Defence skills
+        block: 'defence',
+        dodge: 'defence',
+        armor: 'defence',
+        
+        // Hitpool skills
+        hp: 'hitpool',
+        heal: 'hitpool',
+        buff: 'hitpool',
+        
+        // Holy skills
+        critChance: 'holy',
+        critDamage: 'holy',
+        lifeSteal: 'holy',
+        counterAttack: 'holy',
+        doubleAttack: 'holy'
+    };
+    
+    return skillCategories[attackType] || null;
+}
+
+export function getMasteryBonuses() {
+    // Mastery bonuslarını hesapla (şimdilik boş)
+    return {
+        ATK: 0,
+        DEF: 0,
+        HEALTH: 0
+    };
+}
 
 export function getLootDrop(drops) {
     const items = [];

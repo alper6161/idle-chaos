@@ -262,7 +262,10 @@ export const BattleProvider = ({ children }) => {
             
             // Update health if max health changed
             const newMaxHealth = currentPlayerStats.HEALTH;
-            setPlayerHealth(prev => Math.min(prev, newMaxHealth));
+            setPlayerHealth(prev => {
+                // Health 0'dan küçük olamaz ve max health'i geçemez
+                return Math.max(0, Math.min(prev, newMaxHealth));
+            });
             
             // Update current battle if active
             if (currentBattle) {
@@ -270,7 +273,7 @@ export const BattleProvider = ({ children }) => {
                     ...prev,
                     player: { 
                         ...currentPlayerStats, 
-                        currentHealth: Math.min(prev.player.currentHealth, newMaxHealth),
+                        currentHealth: Math.max(0, Math.min(prev.player.currentHealth, newMaxHealth)),
                         maxHealth: newMaxHealth
                     }
                 }));
@@ -335,7 +338,10 @@ export const BattleProvider = ({ children }) => {
             const savedHealth = localStorage.getItem(healthSlotKey);
             const playerStats = getPlayerStats();
             if (savedHealth) {
-                setPlayerHealth(Math.min(parseInt(savedHealth), playerStats.HEALTH));
+                const parsedHealth = parseInt(savedHealth);
+                // Health 0'dan küçük olamaz ve max health'i geçemez
+                const validHealth = Math.max(0, Math.min(parsedHealth, playerStats.HEALTH));
+                setPlayerHealth(validHealth);
             } else {
                 setPlayerHealth(playerStats.HEALTH);
             }
@@ -388,7 +394,8 @@ export const BattleProvider = ({ children }) => {
         if (!enemy) return;
 
         const currentPlayerStats = getPlayerStats();
-        const currentHealth = Math.min(playerHealth, currentPlayerStats.HEALTH);
+        // Health'i doğru şekilde ayarla - playerHealth state'ini kullan
+        const currentHealth = playerHealth;
 
         const battleState = {
             player: {
@@ -431,13 +438,14 @@ export const BattleProvider = ({ children }) => {
     const handleBattleEnd = (battleResult, battle) => {
         setIsBattleActive(false);
         
-        // Update player health
-        setPlayerHealth(battleResult.playerFinalHealth);
+        // Update player health - 0'dan küçük olmamalı
+        const finalHealth = Math.max(0, battleResult.playerFinalHealth);
+        setPlayerHealth(finalHealth);
         
         // Save player health to localStorage
         const currentSlot = getCurrentSlot();
         const healthSlotKey = getSlotKey("playerHealth", currentSlot);
-        localStorage.setItem(healthSlotKey, battleResult.playerFinalHealth.toString());
+        localStorage.setItem(healthSlotKey, finalHealth.toString());
 
         if (battleResult.winner === 'player') {
             handlePlayerVictory(battle);
@@ -958,7 +966,8 @@ export const BattleProvider = ({ children }) => {
                 ...prev,
                 player: {
                     ...prev.player,
-                    currentHealth: newHealth
+                    currentHealth: newHealth,
+                    maxHealth: currentPlayerStats.HEALTH
                 }
             }));
         }

@@ -59,7 +59,7 @@ const EnemyStats = ({
     const hitChance = useMemo(() => {
         if (!enemyStats || !playerStats) return null;
         // Yeni: calculateAccuracy fonksiyonu ile hesapla
-        return calculateAccuracy(enemyStats.ATK, playerStats.DEF);
+        return calculateAccuracy(enemyStats.ATK, playerStats.DEF, null);
     }, [enemyStats, playerStats]);
 
     if (!currentEnemy || !enemyStats) {

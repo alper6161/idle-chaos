@@ -304,8 +304,4 @@ const getCurrentSlot = () => {
     }
 };
 
-export const clearProcessedLootBag = () => {
-    const currentSlot = getCurrentSlot();
-    const slotKey = getSlotKey("lootBag", currentSlot);
-    localStorage.removeItem(slotKey);
-}; 
+ 
