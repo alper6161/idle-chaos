@@ -47,30 +47,53 @@ export const calculateDamageRange = (minDMG, maxDMG, defenderDEF, damageRangeBon
         totalMaxDamageBonus += masteryBonuses.MAX_DAMAGE;
     }
     
-    // Aşama 3: Item Bonusları - MIN_DAMAGE ve MAX_DAMAGE olarak
+    // Aşama 3: Item Bonusları - Yeni Bonus Sistemi
     const equippedItems = getEquippedItems();
     
     Object.values(equippedItems).forEach(item => {
         if (item && item.stats) {
             console.log(item);
-            // MIN_DAMAGE bonusu
-            if (item.stats.MIN_DAMAGE) {
-                totalMinDamageBonus += item.stats.MIN_DAMAGE;
+            
+            // ATK Bonuses
+            if (item.stats.ALL_ATK_BONUS) {
+                totalMinDamageBonus += item.stats.ALL_ATK_BONUS;
+                totalMaxDamageBonus += item.stats.ALL_ATK_BONUS;
             }
             
-            // MAX_DAMAGE bonusu
-            if (item.stats.MAX_DAMAGE) {
-                totalMaxDamageBonus += item.stats.MAX_DAMAGE;
+            // Category ATK Bonuses
+            if (attackType) {
+                const category = getSkillCategory(attackType);
+                if (item.stats[`${category.toUpperCase()}_ATK_BONUS`]) {
+                    totalMinDamageBonus += item.stats[`${category.toUpperCase()}_ATK_BONUS`];
+                    totalMaxDamageBonus += item.stats[`${category.toUpperCase()}_ATK_BONUS`];
+                }
             }
             
-            // Attack type'a özel MIN_DAMAGE bonusu (eğer varsa)
-            if (attackType && item.stats[`${attackType.toUpperCase()}_MIN_DAMAGE`]) {
-                totalMinDamageBonus += item.stats[`${attackType.toUpperCase()}_MIN_DAMAGE`];
+            // Specific ATK Bonuses
+            if (attackType && item.stats[`${attackType.toUpperCase()}_ATK_BONUS`]) {
+                totalMinDamageBonus += item.stats[`${attackType.toUpperCase()}_ATK_BONUS`];
+                totalMaxDamageBonus += item.stats[`${attackType.toUpperCase()}_ATK_BONUS`];
             }
             
-            // Attack type'a özel MAX_DAMAGE bonusu (eğer varsa)
-            if (attackType && item.stats[`${attackType.toUpperCase()}_MAX_DAMAGE`]) {
-                totalMaxDamageBonus += item.stats[`${attackType.toUpperCase()}_MAX_DAMAGE`];
+            // DMG Bonuses
+            if (item.stats.ALL_DMG_BONUS) {
+                totalMinDamageBonus += item.stats.ALL_DMG_BONUS;
+                totalMaxDamageBonus += item.stats.ALL_DMG_BONUS;
+            }
+            
+            // Category DMG Bonuses
+            if (attackType) {
+                const category = getSkillCategory(attackType);
+                if (item.stats[`${category.toUpperCase()}_DMG_BONUS`]) {
+                    totalMinDamageBonus += item.stats[`${category.toUpperCase()}_DMG_BONUS`];
+                    totalMaxDamageBonus += item.stats[`${category.toUpperCase()}_DMG_BONUS`];
+                }
+            }
+            
+            // Specific DMG Bonuses
+            if (attackType && item.stats[`${attackType.toUpperCase()}_DMG_BONUS`]) {
+                totalMinDamageBonus += item.stats[`${attackType.toUpperCase()}_DMG_BONUS`];
+                totalMaxDamageBonus += item.stats[`${attackType.toUpperCase()}_DMG_BONUS`];
             }
         }
     });
@@ -654,21 +677,30 @@ export function calculateAccuracy(skill, defense, attackType = null) {
         totalATK += masteryBonuses.ATK;
     }
     
-    // Aşama 3: Item Bonusları
+    // Aşama 3: Item Bonusları - Yeni Bonus Sistemi
     const equippedItems = getEquippedItems();
     let itemATKBonus = 0;
     
     Object.values(equippedItems).forEach(item => {
         if (item && item.stats) {
             console.log(item);
-            // Genel ATK bonusu
-            if (item.stats.ATK) {
-                itemATKBonus += item.stats.ATK;
+            
+            // ATK Bonuses
+            if (item.stats.ALL_ATK_BONUS) {
+                itemATKBonus += item.stats.ALL_ATK_BONUS;
             }
             
-            // Attack type'a özel bonus (eğer varsa)
-            if (attackType && item.stats[`${attackType.toUpperCase()}_BONUS`]) {
-                itemATKBonus += item.stats[`${attackType.toUpperCase()}_BONUS`];
+            // Category ATK Bonuses
+            if (attackType) {
+                const category = getSkillCategory(attackType);
+                if (item.stats[`${category.toUpperCase()}_ATK_BONUS`]) {
+                    itemATKBonus += item.stats[`${category.toUpperCase()}_ATK_BONUS`];
+                }
+            }
+            
+            // Specific ATK Bonuses
+            if (attackType && item.stats[`${attackType.toUpperCase()}_ATK_BONUS`]) {
+                itemATKBonus += item.stats[`${attackType.toUpperCase()}_ATK_BONUS`];
             }
         }
     });

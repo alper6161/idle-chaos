@@ -54,7 +54,7 @@ export function handleKillEnemy({
             playerFinalHealth: currentBattle.player.currentHealth,
             enemyFinalHealth: 0
         };
-        if (!dungeonRun || dungeonRun.completed) {
+        if (dungeonRun && dungeonRun.completed) {
             setIsBattleActive(false);
         }
         setPlayerHealth(battleResult.playerFinalHealth);

@@ -12,92 +12,92 @@ export const EQUIPMENT_TEMPLATES = {
     "Rusty Sword": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 3, CRIT_CHANCE: 2 }
+        baseStats: { CRIT_CHANCE: 2 }
     },
     "Rat Fang Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 2, CRIT_CHANCE: 5, ATTACK_SPEED: 0.2 }
+        baseStats: { CRIT_CHANCE: 5, ATTACK_SPEED: 0.2 }
     },
     "Bone Sword": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 5, CRIT_CHANCE: 3, CRIT_DAMAGE: 8 }
+        baseStats: { CRIT_CHANCE: 3, CRIT_DAMAGE: 8 }
     },
     "Orc Axe": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 8, CRIT_DAMAGE: 12 }
+        baseStats: { CRIT_DAMAGE: 12 }
     },
     "Spider Fang Blade": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 7, CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
+        baseStats: { CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
     },
     "Troll Club": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 10, CRIT_CHANCE: 6, CRIT_DAMAGE: 15 }
+        baseStats: { CRIT_CHANCE: 6, CRIT_DAMAGE: 15 }
     },
     "Dragon Flame Sword": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 22, CRIT_CHANCE: 15, CRIT_DAMAGE: 35, FIRE_DAMAGE: 12 }
+        baseStats: { CRIT_CHANCE: 15, CRIT_DAMAGE: 35, FIRE_DAMAGE: 12 }
     },
     "Wolf Fang Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 7, CRIT_CHANCE: 10, ATTACK_SPEED: 0.3 }
+        baseStats: { CRIT_CHANCE: 10, ATTACK_SPEED: 0.3 }
     },
     "Zombie Hand Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 6, CRIT_CHANCE: 8, POISON_DAMAGE: 5 }
+        baseStats: { CRIT_CHANCE: 8, POISON_DAMAGE: 5 }
     },
     "Bandit Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 9, CRIT_CHANCE: 15, ATTACK_SPEED: 0.4 }
+        baseStats: { CRIT_CHANCE: 15, ATTACK_SPEED: 0.4 }
     },
     "Lizardman Spear": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 11, CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
+        baseStats: { CRIT_CHANCE: 8, ATTACK_SPEED: 0.3 }
     },
     "Bee Stinger Dagger": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 5, CRIT_CHANCE: 12, POISON_DAMAGE: 8 }
+        baseStats: { CRIT_CHANCE: 12, POISON_DAMAGE: 8 }
     },
     "Cultist Staff": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 8, CRIT_CHANCE: 6, SHADOW_DAMAGE: 10 }
+        baseStats: { CRIT_CHANCE: 6, SHADOW_DAMAGE: 10 }
     },
     "Gargoyle Claw": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 14, CRIT_CHANCE: 10, CRIT_DAMAGE: 18 }
+        baseStats: { CRIT_CHANCE: 10, CRIT_DAMAGE: 18 }
     },
     "Harpy Talon": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 10, CRIT_CHANCE: 12, ATTACK_SPEED: 0.4 }
+        baseStats: { CRIT_CHANCE: 12, ATTACK_SPEED: 0.4 }
     },
     "Minotaur Axe": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 16, CRIT_CHANCE: 8, CRIT_DAMAGE: 25 }
+        baseStats: { CRIT_CHANCE: 8, CRIT_DAMAGE: 25 }
     },
     "Wraith Blade": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 13, CRIT_CHANCE: 10, SHADOW_DAMAGE: 15 }
+        baseStats: { CRIT_CHANCE: 10, SHADOW_DAMAGE: 15 }
     },
     "Werewolf Claw": {
         type: "weapon",
         weaponType: "melee",
-        baseStats: { ATK: 12, CRIT_CHANCE: 15, ATTACK_SPEED: 0.5 }
+        baseStats: { CRIT_CHANCE: 15, ATTACK_SPEED: 0.5 }
     },
     "Golem Fist": {
         type: "weapon",

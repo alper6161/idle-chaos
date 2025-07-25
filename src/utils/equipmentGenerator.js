@@ -36,7 +36,39 @@ const STAT_VARIATIONS = {
 
 const ADDITIONAL_STATS_POOL = {
     weapon: [
-        { stat: 'ATK', weight: 50 },
+        // ATK Bonuses
+        { stat: 'ALL_ATK_BONUS', weight: 30 },
+        { stat: 'MELEE_ATK_BONUS', weight: 25 },
+        { stat: 'RANGE_ATK_BONUS', weight: 25 },
+        { stat: 'MAGIC_ATK_BONUS', weight: 25 },
+        { stat: 'SLASH_ATK_BONUS', weight: 20 },
+        { stat: 'STAB_ATK_BONUS', weight: 20 },
+        { stat: 'CRUSH_ATK_BONUS', weight: 20 },
+        { stat: 'THROWING_ATK_BONUS', weight: 20 },
+        { stat: 'ARCHERY_ATK_BONUS', weight: 20 },
+        { stat: 'FIRE_ATK_BONUS', weight: 15 },
+        { stat: 'ICE_ATK_BONUS', weight: 15 },
+        { stat: 'LIGHTNING_ATK_BONUS', weight: 15 },
+        { stat: 'POISON_ATK_BONUS', weight: 15 },
+        { stat: 'SHADOW_ATK_BONUS', weight: 15 },
+        
+        // DMG Bonuses
+        { stat: 'ALL_DMG_BONUS', weight: 30 },
+        { stat: 'MELEE_DMG_BONUS', weight: 25 },
+        { stat: 'RANGE_DMG_BONUS', weight: 25 },
+        { stat: 'MAGIC_DMG_BONUS', weight: 25 },
+        { stat: 'SLASH_DMG_BONUS', weight: 20 },
+        { stat: 'STAB_DMG_BONUS', weight: 20 },
+        { stat: 'CRUSH_DMG_BONUS', weight: 20 },
+        { stat: 'THROWING_DMG_BONUS', weight: 20 },
+        { stat: 'ARCHERY_DMG_BONUS', weight: 20 },
+        { stat: 'FIRE_DMG_BONUS', weight: 15 },
+        { stat: 'ICE_DMG_BONUS', weight: 15 },
+        { stat: 'LIGHTNING_DMG_BONUS', weight: 15 },
+        { stat: 'POISON_DMG_BONUS', weight: 15 },
+        { stat: 'SHADOW_DMG_BONUS', weight: 15 },
+        
+        // Other stats
         { stat: 'CRIT_CHANCE', weight: 30 },
         { stat: 'CRIT_DAMAGE', weight: 25 },
         { stat: 'ATTACK_SPEED', weight: 20 },
@@ -180,7 +212,40 @@ const getRandomAdditionalStats = (equipmentType, rarity, level) => {
         const randomStat = statsPool[Math.floor(Math.random() * statsPool.length)];
         if (!additionalStats[randomStat.stat]) {
             const baseValue = {
-                ATK: 3, DEF: 2, HEALTH: 10, CRIT_CHANCE: 3, CRIT_DAMAGE: 8,
+                // ATK Bonuses (GENERAL < CATEGORY < SPECIFIC)
+                ALL_ATK_BONUS: 2,
+                MELEE_ATK_BONUS: 4,
+                RANGE_ATK_BONUS: 4,
+                MAGIC_ATK_BONUS: 4,
+                SLASH_ATK_BONUS: 6,
+                STAB_ATK_BONUS: 6,
+                CRUSH_ATK_BONUS: 6,
+                THROWING_ATK_BONUS: 6,
+                ARCHERY_ATK_BONUS: 6,
+                FIRE_ATK_BONUS: 6,
+                ICE_ATK_BONUS: 6,
+                LIGHTNING_ATK_BONUS: 6,
+                POISON_ATK_BONUS: 6,
+                SHADOW_ATK_BONUS: 6,
+                
+                // DMG Bonuses (GENERAL < CATEGORY < SPECIFIC)
+                ALL_DMG_BONUS: 2,
+                MELEE_DMG_BONUS: 4,
+                RANGE_DMG_BONUS: 4,
+                MAGIC_DMG_BONUS: 4,
+                SLASH_DMG_BONUS: 6,
+                STAB_DMG_BONUS: 6,
+                CRUSH_DMG_BONUS: 6,
+                THROWING_DMG_BONUS: 6,
+                ARCHERY_DMG_BONUS: 6,
+                FIRE_DMG_BONUS: 6,
+                ICE_DMG_BONUS: 6,
+                LIGHTNING_DMG_BONUS: 6,
+                POISON_DMG_BONUS: 6,
+                SHADOW_DMG_BONUS: 6,
+                
+                // Other stats
+                DEF: 2, HEALTH: 10, CRIT_CHANCE: 3, CRIT_DAMAGE: 8,
                 ATTACK_SPEED: 0.2, LIFE_STEAL: 5, BLOCK_CHANCE: 5, DODGE: 3, RESISTANCE: 2
             };
             
