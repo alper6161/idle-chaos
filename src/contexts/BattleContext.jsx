@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useTranslate } from '../hooks/useTranslate';
 import { useNotificationContext } from './NotificationContext';
 import { getPlayerStats, calculateSkillBuffsForAttackType, getEquippedItems } from '../utils/playerStats';
-import { getLootDrop } from '../utils/combat';
+import { getLootDrop } from '../utils/battleUtils.jsx';
 import { recordKill } from '../utils/achievements';
 import { 
     updateBattleState, 
@@ -13,7 +13,7 @@ import {
 import { LOOT_BAG_LIMIT } from '../utils/constants';
 import { checkPetDrop } from '../utils/pets';
 import { saveCurrentGame } from '../utils/saveManager';
-import { getRandomEnemy } from '../utils/enemies';
+
 import { 
     shouldUseAutoPotion,
     getAutoPotionSettings,

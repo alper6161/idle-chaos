@@ -763,33 +763,14 @@ export const EQUIPMENT_TEMPLATES = {
     }
 };
 
-export const getItemTemplate = (itemName) => {
-    return EQUIPMENT_TEMPLATES[itemName] || null;
-};
 
-export const getAllItemNames = () => {
-    return Object.keys(EQUIPMENT_TEMPLATES);
-};
-
-export const getItemsByType = (type) => {
-    return Object.entries(EQUIPMENT_TEMPLATES)
-        .filter(([name, template]) => template.type === type)
-        .map(([name, template]) => ({ name, ...template }));
-};
-
-export const generateRandomLevel = (rarity) => {
-    const range = ITEM_LEVEL_RANGES[rarity] || ITEM_LEVEL_RANGES.common;
-    return Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
-};
 
 export const addLevelToItem = (item) => {
     if (!item.level) {
         const rarity = item.rarity || 'common';
-        return { ...item, level: generateRandomLevel(rarity) };
+        const range = ITEM_LEVEL_RANGES[rarity] || ITEM_LEVEL_RANGES.common;
+        const level = Math.floor(Math.random() * (range.max - range.min + 1)) + range.min;
+        return { ...item, level: level };
     }
     return item;
-};
-
-export const addLevelsToItems = (items) => {
-    return items.map(addLevelToItem);
 }; 

@@ -798,11 +798,7 @@ const enemies = {
     }
 };
 
-export const getRandomEnemy = () => {
-    const enemyKeys = Object.keys(enemies);
-    const randomKey = enemyKeys[Math.floor(Math.random() * enemyKeys.length)];
-    return enemies[randomKey];
-};
+
 
 export const getEnemyById = (id) => Object.values(enemies).find(enemy => enemy.id === id);
 

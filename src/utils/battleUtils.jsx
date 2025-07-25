@@ -1,8 +1,8 @@
-import { applyDamageMultiplier } from './buffUtils.js';
+import { applyDamageMultiplier, applyGoldMultiplier } from './buffUtils.js';
 import { awardBattleActionXP, getAttackTypeFromWeapon, getEquippedWeapon } from './skillExperience.js';
 import { calculateSkillBuffs, calculateSkillBuffsForAttackType } from './playerStats.js';
 import { Box, Typography } from '@mui/material';
-import { SKILL_LEVEL_BONUSES } from './constants.js';
+import { SKILL_LEVEL_BONUSES, MAGIC_TYPES } from './constants.js';
 
 export const calculateDamageRange = (attackerATK, defenderDEF, damageRangeBonus = 0, skillBuffs = {}) => {
     // Ensure we have valid numbers
@@ -63,7 +63,6 @@ export const updateBattleState = (prevBattle, playerSpeed, enemySpeed) => {
 };
 
 export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType = null) => {
-    // Use selected attack type or determine from equipped weapon
     let attackType;
     if (selectedAttackType) {
         attackType = selectedAttackType;
@@ -72,14 +71,12 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
         attackType = getAttackTypeFromWeapon(equippedWeapon);
     }
     
-    // Calculate skill buffs based on selected attack type only
     const skillBuffs = calculateSkillBuffsForAttackType(attackType);
     const atkBonus = skillBuffs.ATK || 0;
     
-    // Apply ATK bonus from skill levels
     const effectiveATK = battle.player.ATK + atkBonus;
     
-    const hitChance = calculateAccuracy(battle.player.ATK, battle.enemy.DEF);
+    const hitChance = calculateAccuracy(battle.player.ATK, battle.enemy.DEF, attackType);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
@@ -134,7 +131,6 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
             };
         }
     } else {
-        // No XP for missed attacks
         setDamageDisplay(prev => ({ ...prev, enemy: 'MISS' }));
         setTimeout(() => setDamageDisplay(prev => ({ ...prev, enemy: null })), 1000);
         
@@ -239,30 +235,7 @@ export const checkBattleResult = (battle) => {
     return null;
 };
 
-export const createSpawnTimer = (setIsWaitingForEnemy, setEnemySpawnProgress, onComplete) => {
-    setIsWaitingForEnemy(true);
-    setEnemySpawnProgress(0);
-    
-    const duration = 5000;
-    const interval = 50;
-    const steps = duration / interval;
-    let currentStep = 0;
-    
-    const timer = setInterval(() => {
-        currentStep++;
-        const progress = (currentStep / steps) * 100;
-        setEnemySpawnProgress(progress);
-        
-        if (currentStep >= steps) {
-            clearInterval(timer);
-            setIsWaitingForEnemy(false);
-            setEnemySpawnProgress(0);
-            onComplete();
-        }
-    }, interval);
-    
-    return timer;
-}; 
+ 
 
 // Helper functions moved from Battle.jsx
 
@@ -601,7 +574,13 @@ export const handleOpenChestLogic = (
     return null;
 }; 
 
-export function calculateAccuracy(skill, defense) {
+export function calculateAccuracy(skill, defense, attackType = null) {
+    // Magic attacks always have 100% accuracy
+    if (attackType && MAGIC_TYPES.includes(attackType)) {
+        return 100;
+    }
+    
+    //skill + buffs + items
     if (Math.round(skill) === Math.round(defense)) return 25;
     if (skill > defense) {
         const diff = skill - defense;
@@ -610,4 +589,30 @@ export function calculateAccuracy(skill, defense) {
         const diff = defense - skill;
         return Math.max(5, 25 - Math.floor(Math.log2(diff + 1) * 10));
     }
+}
+
+
+
+export function getLootDrop(drops) {
+    const items = [];
+    const goldItems = [];
+    let totalGold = 0;
+    
+    drops.forEach(drop => {
+        if (Math.random() < drop.chance) {
+            if (drop.type === "equipment") {
+                items.push(drop.name);
+            } else if (drop.type === "gold") {
+                const buffedValue = applyGoldMultiplier(drop.value);
+                goldItems.push({ name: drop.name, value: buffedValue });
+                totalGold += buffedValue;
+            }
+        }
+    });
+    
+    return {
+        items: items,
+        goldItems: goldItems,
+        gold: totalGold
+    };
 } 

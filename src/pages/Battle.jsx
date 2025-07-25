@@ -1,46 +1,34 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
 import styles from "../assets/styles/Battle.module.scss";
+import {Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography,} from "@mui/material";
+
+import enemies, {DUNGEONS, LOCATIONS} from "../utils/enemies.js";
+
 import {
-    Typography,
-    Button,
-    Box,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-} from "@mui/material";
-
-import enemies, { DUNGEONS, LOCATIONS } from "../utils/enemies.js";
-
-import { 
-    getSelectedSkillInfo,
-    handleChestClickLogic,
-    handleOpenChestLogic,
     calculateItemSellValue,
-    getSlotKey,
     getCurrentSlot,
+    getEnemyHpDisplayWithAchievement,
+    getSelectedSkillInfo,
+    getSlotKey,
     getStatDisplayWithAchievement,
-    getEnemyHpDisplayWithAchievement
+    handleChestClickLogic,
+    handleOpenChestLogic
 } from "../utils/battleUtils.jsx";
-import { getSkillData, initializeSkillDataForCurrentSlot } from "../utils/skillExperience.js";
-import { getPlayerStats } from "../utils/playerStats.js";
+import {getSkillData, initializeSkillDataForCurrentSlot} from "../utils/skillExperience.js";
+import {getPlayerStats} from "../utils/playerStats.js";
 
-import { 
-    getAutoPotionSettings,
-    saveAutoPotionSettings
-} from "../utils/potions.js";
-import { recordKill, isAchievementUnlocked } from "../utils/achievements.js";
-import { useTranslate } from "../hooks/useTranslate";
-import { convertLootBagToEquipment } from "../utils/equipmentGenerator.js";
-import { getLootDrop } from "../utils/combat.js";
-import { checkPetDrop } from "../utils/pets.js";
-import { saveCurrentGame } from "../utils/saveManager.js";
-import { getRandomPotionDrop, getRandomTestPotion } from "../utils/potionUtils.js";
-import { addPotions } from "../utils/potions.js";
+import {addPotions, getAutoPotionSettings, saveAutoPotionSettings} from "../utils/potions.js";
+import {isAchievementUnlocked, recordKill} from "../utils/achievements.js";
+import {useTranslate} from "../hooks/useTranslate";
+import {convertLootBagToEquipment} from "../utils/equipmentGenerator.js";
+import {getLootDrop} from "../utils/battleUtils.jsx";
+import {checkPetDrop} from "../utils/pets.js";
+import {saveCurrentGame} from "../utils/saveManager.js";
+import {getRandomPotionDrop, getRandomTestPotion} from "../utils/potionUtils.js";
 
-import { useNotificationContext } from "../contexts/NotificationContext";
-import { useBattleContext } from "../contexts/BattleContext";
+import {useNotificationContext} from "../contexts/NotificationContext";
+import {useBattleContext} from "../contexts/BattleContext";
 import LootBag from "../components/LootBag";
 import EnemyStats from "../components/EnemyStats";
 import PlayerStats from "../components/PlayerStats";
@@ -55,12 +43,11 @@ import DungeonCompleteDialog from "../components/DungeonCompleteDialog";
 import SkillExpWidget from "../components/SkillExpWidget";
 
 import {
-    handleTestDropPotion,
-    handleTestHurtSelf,
+    handleCompleteDungeon,
     handleKillEnemy,
     handleTestDie,
-    handleCompleteDungeon,
-    completeDungeonRun
+    handleTestDropPotion,
+    handleTestHurtSelf
 } from '../utils/BattleTestUtils';
 
 
@@ -68,11 +55,11 @@ function Battle() {
     const navigate = useNavigate();
     const [selectedCharacter, setSelectedCharacter] = useState('warrior');
     const [playerStats, setPlayerStats] = useState(getPlayerStats());
-    const { t } = useTranslate();
-    const { 
-        notifyItemDrop, 
-        notifyItemSale, 
-        notifyBulkSale, 
+    const {t} = useTranslate();
+    const {
+        notifyItemDrop,
+        notifyItemSale,
+        notifyBulkSale,
         notifyChestOpened,
         notifyAchievement,
         notifyGoldGain
@@ -89,13 +76,11 @@ function Battle() {
         damageDisplay,
         availableAttackTypes,
         lootBag,
-        playerGold,
         potions,
         playerHealth,
         startBattle,
         stopBattle,
         setSelectedAttackType,
-        startEnemySpawnTimer,
         spawnNewEnemy,
         setDamageDisplay,
         setCurrentBattle,
@@ -108,36 +93,30 @@ function Battle() {
         clearLootBag,
         setLootBag,
         updatePlayerGold,
-        subtractPlayerGold,
         setPlayerHealth,
         showDeathDialog,
-        respawnPlayer,
-        setDeathDialog,
-        deathDialog,
         dungeonRun,
         setDungeonRun,
         setEnemiesData,
         setDungeonCompleteCallback,
         refreshPotions,
-        checkAutoPotion,
-        handleDungeonEnemyDefeated
+        checkAutoPotion
     } = useBattleContext();
     const [autoPotionSettings, setAutoPotionSettings] = useState(getAutoPotionSettings());
 
 
     const [battleLogVisible, setBattleLogVisible] = useState(true);
     const [exitWarningOpen, setExitWarningOpen] = useState(false);
-    const [dungeonCompleteDialog, setDungeonCompleteDialog] = useState({ open: false, countdown: 5 });
-    const [chestDropDialog, setChestDropDialog] = useState({ open: false, item: null, dungeon: null });
-    const [chestPreviewModal, setChestPreviewModal] = useState({ open: false, dungeon: null, chestItem: null });
+    const [dungeonCompleteDialog, setDungeonCompleteDialog] = useState({open: false, countdown: 5});
+    const [chestDropDialog, setChestDropDialog] = useState({open: false, item: null, dungeon: null});
+    const [chestPreviewModal, setChestPreviewModal] = useState({open: false, dungeon: null, chestItem: null});
 
     useEffect(() => {
         setEnemiesData(enemies);
         setDungeonCompleteCallback(() => () => {
-            setDungeonCompleteDialog({ open: true, countdown: 5 });
+            setDungeonCompleteDialog({open: true, countdown: 5});
         });
     }, [setEnemiesData, setDungeonCompleteCallback]);
-
 
 
     const handleTakeItem = (itemName, index) => {
@@ -159,7 +138,7 @@ function Battle() {
 
     const handleSellItem = (itemName, index) => {
         const sellValue = calculateItemSellValue(itemName);
-        
+
         try {
             removeFromLootBag(index);
             updatePlayerGold(sellValue);
@@ -172,7 +151,7 @@ function Battle() {
     const handleTakeAll = () => {
         try {
             const itemsToConvert = [...lootBag];
-            
+
             clearLootBag();
 
             const equipment = convertLootBagToEquipment(itemsToConvert);
@@ -195,11 +174,11 @@ function Battle() {
             lootBag.forEach(itemName => {
                 totalGold += calculateItemSellValue(itemName);
             });
-            
+
             clearLootBag();
 
             updatePlayerGold(totalGold);
-            
+
             if (itemCount > 0 && totalGold > 0) {
                 notifyBulkSale(itemCount, totalGold);
             }
@@ -229,11 +208,6 @@ function Battle() {
     };
 
 
-
-
-
-
-
     const getSelectedSkillInfoLocal = () => {
         return getSelectedSkillInfo(selectedAttackType, getSkillData);
     };
@@ -247,7 +221,6 @@ function Battle() {
     };
 
 
-
     useEffect(() => {
         const currentSlot = getCurrentSlot();
         const characterSlotKey = getSlotKey("selectedCharacter", currentSlot);
@@ -255,10 +228,10 @@ function Battle() {
         if (savedCharacter) {
             setSelectedCharacter(savedCharacter);
         }
-        
+
         const currentPlayerStats = getPlayerStats();
         setPlayerStats(currentPlayerStats);
-        
+
         setPlayerHealth(currentPlayerStats.HEALTH);
         const healthCurrentSlot = getCurrentSlot();
         const healthSlotKey = getSlotKey("playerHealth", healthCurrentSlot);
@@ -274,13 +247,13 @@ function Battle() {
         };
 
         const interval = setInterval(checkEquipmentChanges, 1000);
-        
+
         const handleFocus = () => {
             checkEquipmentChanges();
         };
-        
+
         window.addEventListener('focus', handleFocus);
-        
+
         return () => {
             clearInterval(interval);
             window.removeEventListener('focus', handleFocus);
@@ -293,10 +266,10 @@ function Battle() {
             const slotKey = getSlotKey('activeBuffs', currentSlot);
             const activeBuffs = JSON.parse(localStorage.getItem(slotKey) || '{}');
             const autoPotionBuff = activeBuffs['auto_potion'];
-            
+
             if (autoPotionBuff && autoPotionBuff.expiresAt > Date.now()) {
                 if (!autoPotionSettings.enabled) {
-                    const newSettings = { ...autoPotionSettings, enabled: true };
+                    const newSettings = {...autoPotionSettings, enabled: true};
                     setAutoPotionSettings(newSettings);
                     saveAutoPotionSettings(newSettings);
                 }
@@ -305,7 +278,7 @@ function Battle() {
 
         const interval = setInterval(checkAutoPotionBuff, 5000);
         checkAutoPotionBuff();
-        
+
         return () => clearInterval(interval);
     }, []);
 
@@ -318,7 +291,7 @@ function Battle() {
 
         const interval = setInterval(checkAutoPotionUsage, 1000);
         checkAutoPotionUsage();
-        
+
         return () => clearInterval(interval);
     }, [autoPotionSettings.enabled, currentBattle, isBattleActive]);
     useEffect(() => {
@@ -328,11 +301,11 @@ function Battle() {
 
     const confirmExitDungeon = () => {
         setExitWarningOpen(false);
-        
+
         setCurrentEnemy(null);
         setCurrentBattle(null);
         setIsBattleActive(false);
-        setDungeonRun(null);     
+        setDungeonRun(null);
         stopBattle();
     };
 
@@ -340,7 +313,7 @@ function Battle() {
         if (chestItem && chestItem.includes('🎁') && chestItem.includes('Chest')) {
             const dungeonName = chestItem.replace('🎁 ', '').replace(' Chest', '');
             const dungeon = DUNGEONS.find(d => d.name === dungeonName);
-            setChestPreviewModal({ open: true, dungeon, chestItem: null });
+            setChestPreviewModal({open: true, dungeon, chestItem: null});
             return;
         }
         handleChestClickLogic(chestItem, index, DUNGEONS, handleTakeItem, setChestPreviewModal);
@@ -372,7 +345,7 @@ function Battle() {
                 notifyChestOpened(notification.message, chestPreviewModal.dungeon?.name);
             }
         );
-        
+
         if (result) {
             setLootBag(prev => {
                 const updated = prev.filter(item => item !== chestPreviewModal.chestItem);
@@ -389,7 +362,7 @@ function Battle() {
             const timer = setTimeout(() => {
                 setDungeonCompleteDialog(prev => {
                     if (prev.countdown <= 1) {
-                        setDungeonCompleteDialog({ open: false, countdown: 5 });
+                        setDungeonCompleteDialog({open: false, countdown: 5});
 
                         const currentDungeon = dungeonRun?.dungeon;
                         if (currentDungeon) {
@@ -408,16 +381,16 @@ function Battle() {
                             }
                         }
 
-                        return { open: false, countdown: 5 };
+                        return {open: false, countdown: 5};
                     }
                     if (prev.countdown === 1 && dungeonRun && dungeonRun.dungeon && !dungeonRun.chestAwarded) {
                         const chestName = `🎁 ${dungeonRun.dungeon.name} Chest`;
                         if (!lootBag.includes(chestName)) {
                             setLootBag([...lootBag, chestName]);
                         }
-                        setDungeonRun({ ...dungeonRun, chestAwarded: true });
+                        setDungeonRun({...dungeonRun, chestAwarded: true});
                     }
-                    return { ...prev, countdown: prev.countdown - 1 };
+                    return {...prev, countdown: prev.countdown - 1};
                 });
             }, 1000);
             return () => clearTimeout(timer);
@@ -434,28 +407,30 @@ function Battle() {
         <div className={styles.root}>
             {(isBattleActive || dungeonRun || isWaitingForEnemy) && (
                 <>
-                    <div className={dungeonRun ? styles.dungeonHeader : styles.battleHeader} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                            <Button 
-                                variant="outlined" 
+                    <div className={dungeonRun ? styles.dungeonHeader : styles.battleHeader}
+                         style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16}}>
+                        <div style={{flex: 1, display: 'flex', alignItems: 'center'}}>
+                            <Button
+                                variant="outlined"
                                 onClick={handleBackToSelection}
                                 className={styles.backButton}
-                                style={{ minWidth: 0 }}
+                                style={{minWidth: 0}}
                             >
                                 {t('battle.backToSelection')}
                             </Button>
                         </div>
-                        <div style={{ flex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <div style={{flex: 2, display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
                             {dungeonRun ? (
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
                                     <Typography variant="h6" align="center">{dungeonRun.dungeon.name}</Typography>
-                                    <Typography variant="subtitle1" align="center">{t('battle.dungeonStage', { stage: dungeonRun.currentStage + 1 })}</Typography>
+                                    <Typography variant="subtitle1"
+                                                align="center">{t('battle.dungeonStage', {stage: dungeonRun.currentStage + 1})}</Typography>
                                 </div>
                             ) : (
                                 <Typography variant="h6" align="center">
                                     {(() => {
                                         if (currentEnemy) {
-                                            const location = LOCATIONS.find(loc => 
+                                            const location = LOCATIONS.find(loc =>
                                                 loc.enemies.includes(currentEnemy.id)
                                             );
                                             return location ? location.name : t('battle.location');
@@ -465,57 +440,99 @@ function Battle() {
                                 </Typography>
                             )}
                         </div>
-                        <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                            <Button 
-                                variant="contained" 
+                        <div style={{flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center'}}>
+                            <Button
+                                variant="contained"
                                 color="error"
-                                onClick={() => handleTestDie({ setIsBattleActive, showDeathDialog })}
-                                style={{ marginLeft: '8px' }}
+                                onClick={() => handleTestDie({setIsBattleActive, showDeathDialog})}
+                                style={{marginLeft: '8px'}}
                             >
                                 🏴‍☠️ TEST: Die
                             </Button>
-                            <Button 
-                                variant="contained" 
+                            <Button
+                                variant="contained"
                                 color="success"
                                 onClick={() => handleKillEnemy({
-                                    currentBattle, currentEnemy, setCurrentBattle, setIsBattleActive, setPlayerHealth, recordKill, dungeonRun, getLootDrop, updatePlayerGold, notifyGoldGain, addToLootBag, notifyItemDrop, getRandomPotionDrop, addPotions, refreshPotions, checkPetDrop, getCurrentSlot, getSlotKey, setBattleLog, notifyAchievement, t, spawnNewEnemy
+                                    currentBattle,
+                                    currentEnemy,
+                                    setCurrentBattle,
+                                    setIsBattleActive,
+                                    setPlayerHealth,
+                                    recordKill,
+                                    dungeonRun,
+                                    getLootDrop,
+                                    updatePlayerGold,
+                                    notifyGoldGain,
+                                    addToLootBag,
+                                    notifyItemDrop,
+                                    getRandomPotionDrop,
+                                    addPotions,
+                                    refreshPotions,
+                                    checkPetDrop,
+                                    getCurrentSlot,
+                                    getSlotKey,
+                                    setBattleLog,
+                                    notifyAchievement,
+                                    t,
+                                    spawnNewEnemy
                                 })}
-                                style={{ marginLeft: '8px' }}
+                                style={{marginLeft: '8px'}}
                             >
                                 ⚔️ TEST: Kill
                             </Button>
-                            <Button 
-                                variant="contained" 
+                            <Button
+                                variant="contained"
                                 color="info"
-                                onClick={() => handleTestDropPotion({ getRandomTestPotion, addPotions, notifyItemDrop, refreshPotions })}
-                                style={{ marginLeft: '8px' }}
+                                onClick={() => handleTestDropPotion({
+                                    getRandomTestPotion,
+                                    addPotions,
+                                    notifyItemDrop,
+                                    refreshPotions
+                                })}
+                                style={{marginLeft: '8px'}}
                             >
                                 🧪 TEST: Drop Potion
                             </Button>
-                            <Button 
-                                variant="contained" 
+                            <Button
+                                variant="contained"
                                 color="warning"
-                                onClick={() => handleTestHurtSelf({ currentBattle, setCurrentBattle, setPlayerHealth, playerHealth, setDamageDisplay, setBattleLog })}
-                                style={{ marginLeft: '8px' }}
+                                onClick={() => handleTestHurtSelf({
+                                    currentBattle,
+                                    setCurrentBattle,
+                                    setPlayerHealth,
+                                    playerHealth,
+                                    setDamageDisplay,
+                                    setBattleLog
+                                })}
+                                style={{marginLeft: '8px'}}
                             >
                                 💔 TEST: Hurt Self
                             </Button>
                             {dungeonRun && !dungeonRun.completed && (
-                                <Button 
-                                    variant="contained" 
+                                <Button
+                                    variant="contained"
                                     color="warning"
-                                    onClick={() => handleCompleteDungeon({ dungeonRun, setDungeonRun, setIsBattleActive, setCurrentBattle, setCurrentEnemy, lootBag, setLootBag, setDungeonCompleteDialog })}
-                                    style={{ marginLeft: '8px' }}
+                                    onClick={() => handleCompleteDungeon({
+                                        dungeonRun,
+                                        setDungeonRun,
+                                        setIsBattleActive,
+                                        setCurrentBattle,
+                                        setCurrentEnemy,
+                                        lootBag,
+                                        setLootBag,
+                                        setDungeonCompleteDialog
+                                    })}
+                                    style={{marginLeft: '8px'}}
                                 >
                                     🏆 TEST: Complete Dungeon
                                 </Button>
                             )}
                         </div>
                     </div>
-                    
+
                     <div className={styles.battleContainer}>
                         <div className={styles.fighters}>
-                            <PlayerWidget 
+                            <PlayerWidget
                                 selectedCharacter={selectedCharacter}
                                 currentBattle={currentBattle}
                                 playerHealth={playerHealth}
@@ -525,7 +542,7 @@ function Battle() {
                                 selectedAttackType={selectedAttackType}
                                 onAttackTypeSelect={setSelectedAttackType}
                             />
-                            <PotionSystem 
+                            <PotionSystem
                                 currentBattle={currentBattle}
                                 potions={potions}
                                 autoPotionSettings={autoPotionSettings}
@@ -535,7 +552,7 @@ function Battle() {
                                     saveAutoPotionSettings(newSettings);
                                 }}
                             />
-                            <EnemyWidget 
+                            <EnemyWidget
                                 currentEnemy={currentEnemy}
                                 currentBattle={currentBattle}
                                 damageDisplay={damageDisplay}
@@ -552,18 +569,18 @@ function Battle() {
                                     </div>
                                 ) : null}
                             />
-                            <BattleLog 
+                            <BattleLog
                                 battleLogVisible={battleLogVisible}
                                 battleLog={battleLog}
                                 onClearBattleLog={() => setBattleLog([])}
                             />
                         </div>
-                        
-                        <div style={{ display: 'flex', width: '100%', marginTop: '8px' }}>
-                            <SkillExpWidget selectedAttackType={selectedAttackType} />
+
+                        <div style={{display: 'flex', width: '100%', marginTop: '8px'}}>
+                            <SkillExpWidget selectedAttackType={selectedAttackType}/>
                         </div>
                         <div className={styles.widgetContainer}>
-                            <PlayerStats 
+                            <PlayerStats
                                 currentBattle={currentBattle}
                                 currentEnemy={currentEnemy}
                                 playerStats={playerStats}
@@ -572,7 +589,7 @@ function Battle() {
                                 getSelectedSkillInfo={getSelectedSkillInfoLocal}
                             />
 
-                            <EnemyStats 
+                            <EnemyStats
                                 currentEnemy={currentEnemy}
                                 currentBattle={currentBattle}
                                 playerStats={playerStats}
@@ -581,7 +598,7 @@ function Battle() {
                             />
 
                             {!(dungeonRun && !dungeonRun.completed) && (
-                                <LootTable currentEnemy={currentEnemy} />
+                                <LootTable currentEnemy={currentEnemy}/>
                             )}
 
                             <LootBag
@@ -599,9 +616,9 @@ function Battle() {
             )}
 
 
-            <ChestPreviewModal 
+            <ChestPreviewModal
                 chestPreviewModal={chestPreviewModal}
-                onClose={() => setChestPreviewModal({ open: false, dungeon: null, chestItem: null })}
+                onClose={() => setChestPreviewModal({open: false, dungeon: null, chestItem: null})}
                 onOpenChest={handleOpenChest}
             />
 
@@ -614,17 +631,17 @@ function Battle() {
                 </DialogActions>
             </Dialog>
 
-            <ChestDropDialog 
+            <ChestDropDialog
                 chestDropDialog={chestDropDialog}
-                onClose={() => setChestDropDialog({ open: false, item: null, dungeon: null })}
+                onClose={() => setChestDropDialog({open: false, item: null, dungeon: null})}
             />
 
-            <DungeonCompleteDialog 
+            <DungeonCompleteDialog
                 dungeonCompleteDialog={dungeonCompleteDialog}
-                onClose={() => setDungeonCompleteDialog({ open: false, countdown: 5 })}
+                onClose={() => setDungeonCompleteDialog({open: false, countdown: 5})}
                 onLeave={() => {
-                    setDungeonCompleteDialog({ open: false, countdown: 5 });
-                    
+                    setDungeonCompleteDialog({open: false, countdown: 5});
+
                     // Use BattleContext functions
                     setCurrentEnemy(null);
                     setCurrentBattle(null);
@@ -633,8 +650,8 @@ function Battle() {
                     stopBattle();
                 }}
                 onRestart={() => {
-                    setDungeonCompleteDialog({ open: false, countdown: 5 });
-                    
+                    setDungeonCompleteDialog({open: false, countdown: 5});
+
                     // Properly restart the dungeon
                     const currentDungeon = dungeonRun?.dungeon;
                     if (currentDungeon) {
@@ -645,7 +662,7 @@ function Battle() {
                             chestAwarded: false,
                             stages: currentDungeon.enemies || []
                         });
-                        
+
                         // Start the first enemy battle
                         const firstEnemyId = currentDungeon.enemies[0];
                         const firstEnemy = Object.values(enemies).find(e => e.id === firstEnemyId);

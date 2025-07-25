@@ -1,28 +1,14 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-    Typography,
-    Button,
-    IconButton,
-    Tooltip,
-    Tabs,
-    Tab,
-} from "@mui/material";
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {Button, IconButton, Tooltip, Typography,} from "@mui/material";
+import {ExpandLess, ExpandMore} from "@mui/icons-material";
 import styles from "../assets/styles/Battle.module.scss";
-import { LOCATIONS, DUNGEONS } from "../utils/enemies.js";
-import enemies from "../utils/enemies.js";
-import { getEnemyIcon } from "../utils/common.js";
-import { 
-    getDifficultyColor, 
-    getDifficultyText, 
-    getThresholdForStat, 
-    getStatDisplay, 
-    getEnemyHpDisplay 
-} from "../utils/battleUtils.jsx";
-import { isAchievementUnlocked } from "../utils/achievements.js";
-import { useTranslate } from "../hooks/useTranslate";
-import { useBattleContext } from "../contexts/BattleContext";
+import enemies, {DUNGEONS, LOCATIONS} from "../utils/enemies.js";
+import {getEnemyIcon} from "../utils/common.js";
+import {getEnemyHpDisplay, getStatDisplay} from "../utils/battleUtils.jsx";
+import {isAchievementUnlocked} from "../utils/achievements.js";
+import {useTranslate} from "../hooks/useTranslate";
+import {useBattleContext} from "../contexts/BattleContext";
 
 function BattleSelection() {
     const { t } = useTranslate();
