@@ -587,20 +587,7 @@ export const BattleProvider = ({ children }) => {
         
         setIsWaitingForEnemy(true);
         setEnemySpawnProgress(0);
-        
-        // Start the actual timer
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 20; // 20% every second (5 seconds total)
-            setEnemySpawnProgress(progress);
-            
-            if (progress >= 100) {
-                clearInterval(interval);
-                setIsWaitingForEnemy(false);
-                setEnemySpawnProgress(0);
-                spawnNewEnemy();
-            }
-        }, 1000);
+        setIsBattleActive(false);
     };
 
     // Store enemies data and other callbacks from Battle.jsx
