@@ -79,7 +79,7 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
     // Apply ATK bonus from skill levels
     const effectiveATK = battle.player.ATK + atkBonus;
     
-    const hitChance = calculateAccuracy(battle.player.HIT_CHANCE, battle.enemy.DEF);
+    const hitChance = calculateAccuracy(battle.player.ATK, battle.enemy.DEF);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
@@ -134,9 +134,7 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
             };
         }
     } else {
-        // Award small XP for attempting attack (even if missed)
-        const xpResult = awardBattleActionXP(attackType, 0, false, false);
-        
+        // No XP for missed attacks
         setDamageDisplay(prev => ({ ...prev, enemy: 'MISS' }));
         setTimeout(() => setDamageDisplay(prev => ({ ...prev, enemy: null })), 1000);
         
@@ -145,15 +143,14 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
             playerProgress: 0,
             battleLog: [...battle.battleLog, {
                 type: 'player_miss',
-                message: `Player misses!`,
-                skillXP: xpResult
+                message: `Player misses!`
             }]
         };
     }
 };
 
 export const processEnemyAttack = (battle, setDamageDisplay) => {
-    const hitChance = calculateAccuracy(battle.enemy.HIT_CHANCE, battle.player.DEF);
+    const hitChance = calculateAccuracy(battle.enemy.ATK, battle.player.DEF);
     const hitRoll = Math.random() * 100;
     
     if (hitRoll <= hitChance) {
