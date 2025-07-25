@@ -191,6 +191,35 @@ function MainLayout() {
                             {t('battle.deathMessage')}
                         </Typography>
                         
+                        {/* Death Information */}
+                        {deathDialog.deathInfo && (
+                            <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(255, 107, 107, 0.1)', borderRadius: 1, border: '1px solid #ff6b6b' }}>
+                                <Typography variant="h6" sx={{ mb: 1, color: '#ff6b6b', textAlign: 'center' }}>
+                                    ⚔️ {t('battle.deathDetails')}
+                                </Typography>
+                                
+                                <Typography variant="body2" sx={{ mb: 1, textAlign: 'center' }}>
+                                    💀 {t('battle.killedBy', { enemy: deathDialog.deathInfo.killer })}
+                                </Typography>
+                                
+                                {deathDialog.deathInfo.damage > 0 && (
+                                    <Typography variant="body2" sx={{ mb: 1, textAlign: 'center' }}>
+                                        ⚡ {t('battle.finalDamage', { damage: deathDialog.deathInfo.damage })}
+                                    </Typography>
+                                )}
+                                
+                                <Typography variant="body2" sx={{ mb: 1, textAlign: 'center' }}>
+                                    ❤️ {t('battle.healthAtDeath', { health: deathDialog.deathInfo.playerHealth })}
+                                </Typography>
+                                
+                                {deathDialog.deathInfo.lastAttackType !== 'Unknown' && (
+                                    <Typography variant="body2" sx={{ textAlign: 'center' }}>
+                                        🎯 {t('battle.lastAttackType', { type: deathDialog.deathInfo.lastAttackType })}
+                                    </Typography>
+                                )}
+                            </Box>
+                        )}
+                        
                         {/* Death Penalties */}
                         {(deathDialog.goldLost > 0 || deathDialog.equipmentLost.length > 0) && (
                             <Box sx={{ mb: 2, p: 2, backgroundColor: 'rgba(244, 67, 54, 0.1)', borderRadius: 1 }}>

@@ -93,7 +93,13 @@ export const BattleProvider = ({ children }) => {
         open: false,
         countdown: 15,
         goldLost: 0,
-        equipmentLost: []
+        equipmentLost: [],
+        deathInfo: {
+            killer: '',
+            damage: 0,
+            lastAttackType: '',
+            playerHealth: 0
+        }
     });
     
     // Dungeon State
@@ -427,6 +433,11 @@ export const BattleProvider = ({ children }) => {
         
         // Update player health
         setPlayerHealth(battleResult.playerFinalHealth);
+        
+        // Save player health to localStorage
+        const currentSlot = getCurrentSlot();
+        const healthSlotKey = getSlotKey("playerHealth", currentSlot);
+        localStorage.setItem(healthSlotKey, battleResult.playerFinalHealth.toString());
 
         if (battleResult.winner === 'player') {
             handlePlayerVictory(battle);
@@ -519,6 +530,26 @@ export const BattleProvider = ({ children }) => {
     };
 
     const handlePlayerDefeat = () => {
+        // Get death information from current battle
+        let deathInfo = {
+            killer: currentEnemy?.name || 'Unknown Enemy',
+            damage: 0,
+            lastAttackType: 'Unknown',
+            playerHealth: playerHealth
+        };
+
+        // Try to get the last enemy attack from battle log
+        if (battleLog.length > 0) {
+            const lastEnemyAttack = [...battleLog].reverse().find(log => 
+                log.type === 'enemy_attack' || log.type === 'enemy_crit'
+            );
+            
+            if (lastEnemyAttack) {
+                deathInfo.damage = lastEnemyAttack.damage || 0;
+                deathInfo.lastAttackType = lastEnemyAttack.attackType || 'Unknown';
+            }
+        }
+
         setBattleLog(prev => [...prev, {
             type: 'defeat',
             message: `💀 ${t('battle.playerDefeated')}`
@@ -530,8 +561,8 @@ export const BattleProvider = ({ children }) => {
         setIsWaitingForEnemy(false);
         setEnemySpawnProgress(0);
         
-        // Show death dialog
-        showDeathDialog();
+        // Show death dialog with death info
+        showDeathDialog(deathInfo);
     };
 
     const startEnemySpawnTimer = () => {
@@ -869,7 +900,7 @@ export const BattleProvider = ({ children }) => {
         return penalties;
     };
 
-    const showDeathDialog = () => {
+    const showDeathDialog = (deathInfo = null) => {
         // Apply death penalties
         const penalties = applyDeathPenalties();
         
@@ -877,7 +908,13 @@ export const BattleProvider = ({ children }) => {
             open: true,
             countdown: 15,
             goldLost: penalties.goldLost,
-            equipmentLost: penalties.equipmentLost
+            equipmentLost: penalties.equipmentLost,
+            deathInfo: deathInfo || {
+                killer: 'Unknown Enemy',
+                damage: 0,
+                lastAttackType: 'Unknown',
+                playerHealth: 0
+            }
         });
         
         const countdownInterval = setInterval(() => {
@@ -885,7 +922,18 @@ export const BattleProvider = ({ children }) => {
                 if (prev.countdown <= 1) {
                     clearInterval(countdownInterval);
                     respawnPlayer();
-                    return { open: false, countdown: 15, goldLost: 0, equipmentLost: [] };
+                    return { 
+                        open: false, 
+                        countdown: 15, 
+                        goldLost: 0, 
+                        equipmentLost: [],
+                        deathInfo: {
+                            killer: '',
+                            damage: 0,
+                            lastAttackType: '',
+                            playerHealth: 0
+                        }
+                    };
                 }
                 return { ...prev, countdown: prev.countdown - 1 };
             });
@@ -894,7 +942,26 @@ export const BattleProvider = ({ children }) => {
 
     const respawnPlayer = () => {
         const currentPlayerStats = getPlayerStats();
-        setPlayerHealth(currentPlayerStats.HEALTH);
+        const newHealth = currentPlayerStats.HEALTH;
+        
+        // Update player health in state
+        setPlayerHealth(newHealth);
+        
+        // Save to localStorage
+        const currentSlot = getCurrentSlot();
+        const healthSlotKey = getSlotKey("playerHealth", currentSlot);
+        localStorage.setItem(healthSlotKey, newHealth.toString());
+        
+        // Update battle state if it exists
+        if (currentBattle) {
+            setCurrentBattle(prev => ({
+                ...prev,
+                player: {
+                    ...prev.player,
+                    currentHealth: newHealth
+                }
+            }));
+        }
         
         // If was in dungeon, exit dungeon on death
         if (dungeonRun && !dungeonRun.completed) {
@@ -929,7 +996,18 @@ export const BattleProvider = ({ children }) => {
         }
         
         // Close death dialog
-        setDeathDialog({ open: false, countdown: 15, goldLost: 0, equipmentLost: [] });
+        setDeathDialog({ 
+            open: false, 
+            countdown: 15, 
+            goldLost: 0, 
+            equipmentLost: [],
+            deathInfo: {
+                killer: '',
+                damage: 0,
+                lastAttackType: '',
+                playerHealth: 0
+            }
+        });
     };
 
     // Custom setSelectedAttackType that resets attack bar
