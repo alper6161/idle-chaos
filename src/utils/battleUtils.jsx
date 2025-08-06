@@ -146,7 +146,9 @@ export const processPlayerAttack = (battle, setDamageDisplay, selectedAttackType
     console.log('battle', battle);
     console.log('attackType', attackType);
 
-    const hitChance = calculateAccuracy(battle.player.ATK, battle.enemy.DEF, attackType);
+    // Skill buffs dahil effective ATK hesapla
+    const effectiveATK = battle.player.ATK + (skillBuffs.ATK || 0);
+    const hitChance = calculateAccuracy(effectiveATK, battle.enemy.DEF, attackType);
     console.log('hit Chance', hitChance);
     const hitRoll = Math.random() * 100;
     
@@ -652,7 +654,7 @@ export function calculateAccuracy(skill, defense, attackType = null) {
     }
     
     // 3 Aşamalı ATK hesaplaması
-    let totalATK = 0;
+    let totalATK = skill; // Base attack'i dahil et
     
     // Aşama 1: Skill Level Bonus
     if (attackType && SKILL_LEVEL_BONUSES[attackType]) {
